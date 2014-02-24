@@ -14,7 +14,8 @@ import os, sys, re, collections, operator
 def parse_args():
 
 	parser = ArgumentParser(description="create a table of features for the is mapping pipeline")
-	parser.add_argument('--genbank', type=str, required=False, help='genbank file to look for features in')
+	parser.add_argument('--genbank', type=str, required=True, help='genbank file to look for features in')
+	parser.add_argument('--output', type=str, required=True, help='file to store table in')
 	return parser.parse_args()
 
 def extractFeatures(genbank, feature_name):
@@ -129,11 +130,14 @@ def main():
 
 	count = 1	
 
-	print "\t".join(["region", "orientation", "start", "end", "contig"])
+	output = open(args.output, "w")	
+
+	output.write("\t".join(["region", "orientation", "start", "end", "contig", "\n"]))
 	for i in lines_list:
-		print "\t".join(["region_" + str(count), i[4], str(i[1]), str(i[2]), str(i[3])])
+		output.write("\t".join(["region_" + str(count), i[4], str(i[1]), str(i[2]), str(i[3]) + "\n"]))
 		count = count + 1
 
+	output.close()
 
 if __name__ == "__main__":
 	main()
