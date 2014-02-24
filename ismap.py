@@ -17,7 +17,7 @@ def parse_args():
 	parser.add_argument('--reference', type = str, required=True, help='Fasta file for reference gene (eg: insertion sequence) that will be mapped to')
 	parser.add_argument('--assemblies', nargs='+', type=str, required=False, help='Contig assemblies, one for each read set')
 	parser.add_argument('--type', type=str, required=False, default='fasta', help='Indicator for contig assembly type, genbank or fasta (default fasta)')
-	parser.add_argument('--extension', type=str, required=False, default='_contigs' help='Identifier for assemblies (default _contigs')
+	parser.add_argument('--extension', type=str, required=False, default='_contigs', help='Identifier for assemblies (default _contigs')
 	parser.add_argument('--typingRef', type=str, required=False, help='Reference genome for typing against')
 	parser.add_argument('--coverage', type=float, required=False, default=90.0, help='Minimum coverage for hit to be annotated (default 90.0)')
 	parser.add_argument('--percentid', type=float, required=False, default=90.0, help='Minimum percent ID for hit to be annotated (default 90.0')
@@ -208,7 +208,7 @@ def main():
 
 	args = parse_args()
 
-	# set up logfile
+	#set up logfile
 	if args.log is True:
 		logfile = args.output + ".log"
 	else:
@@ -241,25 +241,32 @@ def main():
 		five_assembly = sample + "_5_contigs.fasta"
 		three_assembly = sample + "_3_contigs.fasta"
 
-		# map to IS reference
+		#map to IS reference
 		print ' '.join(['bwa mem', args.reference, forward_read, reverse_read, '>', output_sam])
 
-		# get five prime end
+		#get five prime end
 		print ' '.join(['samtools view -Sb -f 36', output_sam, '>', five_bam])
 
-		# get three prime end
+		#get three prime end
 		print ' '.join(['samtools view -Sb -f 4 -F 40', output_sam, '>', three_bam])
 
-		# assemble five prime end with VO
+		#assemble five prime end with VO
 		print ' '.join(['./velvetshell.sh', VOdir_five, str(sKmer), str(eKmer), five_bam, output_dir, five_assembly])
 
-		# assemble three prime end with VO
+		#assemble three prime end with VO
 		print ' '.join(['./velvetshell.sh', VOdir_three, str(sKmer), str(eKmer), three_bam, output_dir, three_assembly])
 
-		# create database for assemblies if one doesn't already exist
-		check_blast_database(args.assemblies)
+		#create database for assemblies if one doesn't already exist
+		#check_blast_database(args.assemblies)
 
-		# 
+		#blast assemblies against contigs
+		blastn_cline = NcbiblastnCommandline(query="test_regions.fasta", db=args.assemblies, outfmt="'6 qseqid qlen sacc pident length slen sstart send evalue bitscore'", out="test_regions.txt")
+		#stdout, stderr = blastn_cline()
+		print blastn_cline()
+
+		#annotate hits to genbank
+
+		#create output table
 
 
 
