@@ -326,11 +326,15 @@ def main():
 	print "\t".join(header)
 	for key in table_keys:
 		try:
+			#if the sequence between has good ID and coverage to the IS in question, report it as known
 			if float(table[key][6]) >= 80 and float(table[key][7]) >= 60:
 				print key + "\t", "\t".join(table[key]) + "\tKnown insertion site"
-			#if the hit is a good percentage and good coverage, count it as known
-			elif float(table[key][6]) >= 90 and float(table[key][7]) >= 90:
-				print key + "\t", "\t".join(table[key]) + "\tKnown insertion site"
+
+			#if the hits are right next to each other and there is little or no sequence in between, report it as novel	
+			elif float(table[key][6]) == 0:
+				print key + "\t", "\t".join(table[key]) + "\tNovel insertion site"
+			
+			#Otherwise report as unknown
 			else:
 				print key + "\t", "\t".join(table[key]) + "\tUnknown"
 
