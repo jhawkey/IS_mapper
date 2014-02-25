@@ -120,7 +120,7 @@ def pairHits(first_ranges, second_ranges):
 
 	correct_indexes = []
 
-	if len(first_ranges) > len(second_ranges):
+	if len(first_ranges) >= len(second_ranges):
 		longest_ranges = first_ranges
 		shorter_ranges = second_ranges
 	else:
@@ -300,44 +300,52 @@ def main():
 	five_rangesNew = collapseRanges(five_ranges, 300)
 	three_rangesNew = collapseRanges(three_ranges, 300)
 
+	print five_rangesNew
+	print three_rangesNew
+
 	#create the prefix of the file which will contain sequences for blast and then the blast output
 	region_blast_fasta = os.path.split(args.genbank)[1].split('.gbk')[0]
 
 	#work out which hits pair together and return the correct indexes and the group that have the most number of hits (both even if all paired)
 	indexes, longest_ranges = pairHits(five_rangesNew, three_rangesNew)
+	print indexes
+	print longest_ranges
 
 	#return a dictionary with all the information for each region and a list that gives you the keys used in that dictionary
 	table, table_keys = createTableLines(five_rangesNew, three_rangesNew, indexes, args.genbank, args.insertion, region_blast_fasta + ".fasta")
 
-	print table
-	print table_keys
-
 	#perform BLAST
-	blastn_cline = NcbiblastnCommandline(query=region_blast_fasta + ".fasta", db=args.insertion, outfmt="'6 qseqid qlen sacc pident length slen sstart send evalue bitscore'", out=region_blast_fasta + ".txt")
+	blastn_cline = NcbiblastnCommandline(query=region_blast_fasta + ".fasta", db=args.insertion, outfmt="'6 qseqid qlen sacc pident length slen sstart send evalue bitscore qcovs'", out=region_blast_fasta + ".txt")
 	stdout, stderr = blastn_cline()
 
 	#parse the BLAST output 
-	dictionary = (parseBLAST(region_blast_fasta + ".txt"))
+	blast_results = (parseBLAST(region_blast_fasta + ".txt"))
+
+	#print blast_results
 
 	#find the length of the insertion sequence
 	insertionSeqLength = insertionLength(args.insertion)
 
+	print insertionSeqLength
+
 	#add the percent ID and query coverage for the blast hits to the table
-	for i in dictionary:
-		percentID = float(dictionary[i][2])
-		queryCoverage = (float(dictionary[i][6])/float(dictionary[i][5])) * 100
-		hitLength = dictionary[i][5]
+	for i in blast_results:
+		percentID = float(blast_results[i][2])
+		queryCoverage = (float(blast_results[i][6])/float(blast_results[i][5])) * 100
+		hitLength = blast_results[i][5]
 		if i in table or i[:-4] in table:
 			table[i].append(str(percentID))
-			table[i].append(str(queryCoverage))
+			table[i].append(str("%.2f" % queryCoverage))
+
+	print table
 
 	#go through the keys and find these in table so it's printed in order
 	header = ["region", "orientation", "hit start", "IS start", "IS end", "hit end", "length of IS region", "percent ID to IS", "coverage of region to IS", "call"]
 	print "\t".join(header)
 	for key in table_keys:
 		try:
-			if float(table[key][5]) <= 100 and insertionSeqLength >= 100:
-				print key + "\t", "\t".join(table[key]) + "\tNovel insertion site"
+			if float(table[key][6]) >= 80 and float(table[key][7]) >= 60:
+				print key + "\t", "\t".join(table[key]) + "\tKnown insertion site"
 			#if the hit is a good percentage and good coverage, count it as known
 			elif float(table[key][6]) >= 90 and float(table[key][7]) >= 90:
 				print key + "\t", "\t".join(table[key]) + "\tKnown insertion site"
