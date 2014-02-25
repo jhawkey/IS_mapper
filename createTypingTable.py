@@ -303,8 +303,6 @@ def main():
 	#parse the BLAST output 
 	blast_results = (parseBLAST(region_blast_fasta + ".txt"))
 
-	#print blast_results
-
 	#find the length of the insertion sequence
 	insertionSeqLength = insertionLength(args.insertion)
 
@@ -312,12 +310,25 @@ def main():
 
 	#add the percent ID and query coverage for the blast hits to the table
 	for i in blast_results:
+
+		#caclulate percent ID and coverage
 		percentID = float(blast_results[i][2])
 		queryCoverage = (float(blast_results[i][6])/float(blast_results[i][5])) * 100
 		hitLength = blast_results[i][5]
+		#this is for all the between hits
 		if i in table or i[:-4] in table:
 			table[i].append(str(percentID))
 			table[i].append(str("%.2f" % queryCoverage))
+		#this is for the unpaired hits where the before or after sequence has been taken
+		if "before" or "after" in i:
+			region_no = i.split('_')[1]
+			table["region_" + region_no].append(str(percentID))
+			table["region_" + region_no].append(str("%.2f" % queryCoverage))
+			if i.split('_')[2] == "before":
+				table["region_" + region_no].append("before")
+			else:
+				table["region_" + region_no].append("after")
+
 
 	print table
 
@@ -325,28 +336,18 @@ def main():
 	header = ["region", "orientation", "hit start", "IS start", "IS end", "hit end", "length of IS region", "percent ID to IS", "coverage of region to IS", "call"]
 	print "\t".join(header)
 	for key in table_keys:
-		try:
-			#if the sequence between has good ID and coverage to the IS in question, report it as known
-			if float(table[key][6]) >= 80 and float(table[key][7]) >= 60:
-				print key + "\t", "\t".join(table[key]) + "\tKnown insertion site"
-
-			#if the hits are right next to each other and there is little or no sequence in between, report it as novel	
-			elif float(table[key][6]) == 0:
-				print key + "\t", "\t".join(table[key]) + "\tNovel insertion site"
-			
-			#Otherwise report as unknown
-			else:
-				print key + "\t", "\t".join(table[key]) + "\tUnknown"
-
-		#this is for all the unpaired hits
-		except IndexError:
-			print key + "\t", "\t".join(table[key]) + "\t \t \tUnknown"
-
+		#if the hits are right next to each other and there is little or no sequence in between, report it as novel	
+		if float(table[key][5]) == 0:
+			print key + "\t", "\t".join(table[key]) + "\t \t \tNovel insertion site"
+		
+		#if the sequence between has good ID and coverage to the IS in question, report it as known
+		elif float(table[key][6]) >= 80 and float(table[key][7]) >= 60:
+			print key + "\t", "\t".join(table[key]) + "\tKnown insertion site"
+			print(table[key][6])
+		
+		#Otherwise report as unknown
+		else:
+			print key + "\t", "\t".join(table[key]) + "\tUnknown"
 
 if __name__ == "__main__":
 	main()
-
-	
-
-
-
