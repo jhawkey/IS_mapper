@@ -300,20 +300,26 @@ def main():
 	five_rangesNew = collapseRanges(five_ranges, 300)
 	three_rangesNew = collapseRanges(three_ranges, 300)
 
+	#create the prefix of the file which will contain sequences for blast and then the blast output
 	region_blast_fasta = os.path.split(args.genbank)[1].split('.gbk')[0]
 
-	fasta_region = open(region_blast_fasta + ".fasta", "w")
-
+	#work out which hits pair together and return the correct indexes and the group that have the most number of hits (both even if all paired)
 	indexes, longest_ranges = pairHits(five_rangesNew, three_rangesNew)
 
+	#return a dictionary with all the information for each region and a list that gives you the keys used in that dictionary
 	table, table_keys = createTableLines(five_rangesNew, three_rangesNew, indexes, args.genbank, args.insertion, region_blast_fasta + ".fasta")
+
+	print table
+	print table_keys
 
 	#perform BLAST
 	blastn_cline = NcbiblastnCommandline(query=region_blast_fasta + ".fasta", db=args.insertion, outfmt="'6 qseqid qlen sacc pident length slen sstart send evalue bitscore'", out=region_blast_fasta + ".txt")
 	stdout, stderr = blastn_cline()
 
+	#parse the BLAST output 
 	dictionary = (parseBLAST(region_blast_fasta + ".txt"))
 
+	#find the length of the insertion sequence
 	insertionSeqLength = insertionLength(args.insertion)
 
 	#add the percent ID and query coverage for the blast hits to the table
