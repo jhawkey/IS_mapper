@@ -309,6 +309,7 @@ def main():
 	print insertionSeqLength
 
 	#add the percent ID and query coverage for the blast hits to the table
+	print blast_results
 	for i in blast_results:
 
 		#caclulate percent ID and coverage
@@ -320,7 +321,8 @@ def main():
 			table[i].append(str(percentID))
 			table[i].append(str("%.2f" % queryCoverage))
 		#this is for the unpaired hits where the before or after sequence has been taken
-		if "before" or "after" in i:
+		if "before" in i or "after" in i:
+			print i
 			region_no = i.split('_')[1]
 			table["region_" + region_no].append(str(percentID))
 			table["region_" + region_no].append(str("%.2f" % queryCoverage))
@@ -336,18 +338,27 @@ def main():
 	header = ["region", "orientation", "hit start", "IS start", "IS end", "hit end", "length of IS region", "percent ID to IS", "coverage of region to IS", "call"]
 	print "\t".join(header)
 	for key in table_keys:
-		#if the hits are right next to each other and there is little or no sequence in between, report it as novel	
-		if float(table[key][5]) == 0:
-			print key + "\t", "\t".join(table[key]) + "\t \t \tNovel insertion site"
-		
-		#if the sequence between has good ID and coverage to the IS in question, report it as known
-		elif float(table[key][6]) >= 80 and float(table[key][7]) >= 60:
-			print key + "\t", "\t".join(table[key]) + "\tKnown insertion site"
-			print(table[key][6])
-		
-		#Otherwise report as unknown
-		else:
-			print key + "\t", "\t".join(table[key]) + "\tUnknown"
+		if "before" not in table[key] and "after" not in table[key]:
+			try:
+				#if the hits are right next to each other and there is little or no sequence in between, report it as novel	
+				if float(table[key][5]) == 0:
+					print key + "\t", "\t".join(table[key]) + "\t \t \tNovel insertion site"
+				
+				#if the sequence between has good ID and coverage to the IS in question, report it as known
+				elif float(table[key][6]) >= 80 and float(table[key][7]) >= 60:
+					print key + "\t", "\t".join(table[key]) + "\tKnown insertion site"
+					print(table[key][6])
+				
+				#Otherwise report as unknown
+				else:
+					print key + "\t", "\t".join(table[key]) + "\tUnknown"
+			except KeyError:
+				print key + "\t", "\t".join(table[key]) + "\t \t \tUnknown Key Error"
+		if "after" in table[key] or "before" in table[key]:
+			if float(table[key][6]) >= 80 and float(table[key][7]) >= 60:
+				print key + "\t", "\t".join(table[key][:-1]) + "\tKnown insertion site " + table[key][8]
+			else:
+				print key + "\t", "\t".join(table[key][:-1]) + "\tUnknown: positioned " + table[key][8]
 
 if __name__ == "__main__":
 	main()
