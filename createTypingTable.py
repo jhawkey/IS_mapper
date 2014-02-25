@@ -300,17 +300,19 @@ def main():
 	five_rangesNew = collapseRanges(five_ranges, 300)
 	three_rangesNew = collapseRanges(three_ranges, 300)
 
-	fasta_region = open("test_regions.fasta", "w")
+	region_blast_fasta = os.path.split(args.genbank)[1].split('.gbk')[0]
+
+	fasta_region = open(region_blast_fasta + ".fasta", "w")
 
 	indexes, longest_ranges = pairHits(five_rangesNew, three_rangesNew)
 
-	table, table_keys = createTableLines(five_rangesNew, three_rangesNew, indexes, args.genbank, args.insertion, "test_regions.fasta")
+	table, table_keys = createTableLines(five_rangesNew, three_rangesNew, indexes, args.genbank, args.insertion, region_blast_fasta + ".fasta")
 
 	#perform BLAST
-	blastn_cline = NcbiblastnCommandline(query="test_regions.fasta", db=args.insertion, outfmt="'6 qseqid qlen sacc pident length slen sstart send evalue bitscore'", out="test_regions.txt")
+	blastn_cline = NcbiblastnCommandline(query=region_blast_fasta + ".fasta", db=args.insertion, outfmt="'6 qseqid qlen sacc pident length slen sstart send evalue bitscore'", out=region_blast_fasta + ".txt")
 	stdout, stderr = blastn_cline()
 
-	dictionary = (parseBLAST("test_regions.txt"))
+	dictionary = (parseBLAST(region_blast_fasta + ".txt"))
 
 	insertionSeqLength = insertionLength(args.insertion)
 
