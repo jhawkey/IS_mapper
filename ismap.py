@@ -49,7 +49,7 @@ def run_command(command, **kwargs):
 def bwa_index(fasta_files):
 	'Build a bwa index from the given input fasta'
 	
-	check_command_version('bwa')
+	#check_command_version('bwa')
 
 	for fasta in fasta_files:
 		built_index = fasta + '.bwt'
