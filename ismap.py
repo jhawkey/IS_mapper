@@ -53,6 +53,7 @@ def bwa_index(fasta_files):
 
 	for fasta in fasta_files:
 		built_index = fasta + '.bwt'
+		print built_index
 		if os.path.exists(built_index):
 			logging.info('Index for {} is already built...'.format(fasta))
 		else:
