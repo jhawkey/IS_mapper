@@ -25,7 +25,7 @@ def parse_args():
 	parser.add_argument('--log', action="store_true", required=False, help='Switch on logging to file (otherwise log to stdout')
 
 	# Do I need this?
-	parser.add_argument('--output', type=str, required=False, help='Location to store output files')
+	parser.add_argument('--output', type=str, required=True, help='Path to location for output files')
 
 	return parser.parse_args()
 
@@ -225,12 +225,17 @@ def main():
 	fileSets = read_file_sets(args)
 	print fileSets
 
+	if args.output[:-1] != "/":
+		output_path = args.output + "/"
+	else:
+		output_path = args.output
+
 	bwa_index(args.reference)
 
 	for sample in fileSets:
 		forward_read = fileSets[sample][0]
 		reverse_read = fileSets[sample][1]
-		output_sam = sample + '.sam'
+		output_sam = output_path + sample + '.sam'
 		five_bam = sample + '_5.bam'
 		three_bam = sample + '_3.bam'
 
