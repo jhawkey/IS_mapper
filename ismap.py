@@ -242,7 +242,7 @@ def main():
 		three_assembly = sample + "_3_contigs.fasta"
 
 		#map to IS reference
-		run_command('bwa mem', args.reference, forward_read, reverse_read, '>', output_sam)
+		run_command(['bwa mem', args.reference, forward_read, reverse_read, '>', output_sam])
 
 		'''
 		print ' '.join(['bwa mem', args.reference, forward_read, reverse_read, '>', output_sam])
