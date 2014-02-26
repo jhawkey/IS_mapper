@@ -46,19 +46,17 @@ def run_command(command, **kwargs):
 		message = "Command '{}' failed with non-zero exit status: {}".format(command_str, exit_status)
 		raise CommandError({"message": message})
 
-def bwa_index(fasta_files):
+def bwa_index(fasta):
 	'Build a bwa index from the given input fasta'
 	
 	#check_command_version('bwa')
-
-	for fasta in fasta_files:
-		built_index = fasta + '.bwt'
-		print built_index
-		if os.path.exists(built_index):
-			logging.info('Index for {} is already built...'.format(fasta))
-		else:
-			logging.info('Building bwa index for {}...'.format(fasta))
-			run_command(['bwa index', fasta])
+	built_index = fasta + '.bwt'
+	print built_index
+	if os.path.exists(built_index):
+		logging.info('Index for {} is already built...'.format(fasta))
+	else:
+		logging.info('Building bwa index for {}...'.format(fasta))
+		run_command(['bwa index', fasta])
 
 
 
