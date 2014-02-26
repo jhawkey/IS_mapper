@@ -225,7 +225,7 @@ def main():
 	fileSets = read_file_sets(args)
 	print fileSets
 
-	if args.output[:-1] != "/":
+	if args.output[-1] != "/":
 		output_path = args.output + "/"
 	else:
 		output_path = args.output
