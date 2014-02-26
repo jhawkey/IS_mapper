@@ -1,6 +1,7 @@
 import logging
 import sys, re, os
 from argparse import (ArgumentParser, FileType)
+from subprocess import call, check_output, CalledProcessError, STDOUT
 from Bio.Blast.Applications import NcbiblastnCommandline
 
 def parse_args():
@@ -45,10 +46,10 @@ def run_command(command, **kwargs):
 		message = "Command '{}' failed with non-zero exit status: {}".format(command_str, exit_status)
 		raise CommandError({"message": message})
 
-
-# Change this so it uses BWA
 def bwa_index(fasta_files):
 	'Build a bwa index from the given input fasta'
+	
+	check_command_version('bwa')
 
 	for fasta in fasta_files:
 		built_index = fasta + '.bwt'
@@ -82,7 +83,7 @@ def check_command_version(command_list, version_identifier, command_name, requir
 
 	if version_identifier not in command_stdout:
 		logging.error("Incorrect version of {} installed.".format(command_name))
-		logging.error("{} version {} is required by SRST2.".format(command_name, required_version))
+		logging.error("{} version {} is required by ISmapper.".format(command_name, required_version))
 		exit(-1)
 
 def get_readFile_components(full_file_path):
@@ -242,6 +243,10 @@ def main():
 		three_assembly = sample + "_3_contigs.fasta"
 
 		#map to IS reference
+		bwa_index(args.reference)
+		run_command('bwa mem', args.reference, forward_read, reverse_read, '>', output_sam)
+
+		'''
 		print ' '.join(['bwa mem', args.reference, forward_read, reverse_read, '>', output_sam])
 
 		#get five prime end
@@ -267,7 +272,7 @@ def main():
 		#annotate hits to genbank
 
 		#create output table
-
+		'''
 
 
 	#run_command(['bwa mem', args.reference, read1, read2, '>', output_sam])
