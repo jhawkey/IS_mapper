@@ -25,7 +25,7 @@ def parse_args():
 	parser.add_argument('--log', action="store_true", required=False, help='Switch on logging to file (otherwise log to stdout')
 
 	# Do I need this?
-	parser.add_argument('--output', type=str, required=True, help='Location to store output files')
+	parser.add_argument('--output', type=str, required=False, help='Location to store output files')
 
 	return parser.parse_args()
 
