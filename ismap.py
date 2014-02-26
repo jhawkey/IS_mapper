@@ -226,7 +226,7 @@ def main():
 	fileSets = read_file_sets(args)
 	print fileSets
 
-	output_dir = args.output
+	bwa_index(args.reference)
 
 	for sample in fileSets:
 		forward_read = fileSets[sample][0]
@@ -243,7 +243,6 @@ def main():
 		three_assembly = sample + "_3_contigs.fasta"
 
 		#map to IS reference
-		bwa_index(args.reference)
 		run_command('bwa mem', args.reference, forward_read, reverse_read, '>', output_sam)
 
 		'''
