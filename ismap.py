@@ -201,7 +201,7 @@ def check_blast_database(fasta):
 	else:
 		logging.info('Building blast index for {}...'.format(fasta))
 		print ' '.join(['makeblast db -in', fasta, '-dbtype nucl'])
-		#run_command(['makeblast db -in', fasta, '-dbtype nucl'])
+		run_command(['makeblast db -in', fasta, '-dbtype nucl'])
 
 
 def main():
@@ -251,6 +251,10 @@ def main():
 		VO_fiveout = VOdir_five + "/out/"
 		VO_threeout = VOdir_three + "/out/"
 
+		five_contigHits = output_path + sample + "_5_contigHits.txt"
+		three_contigHits = output_path + sample + "_3_contigHits.txt"
+
+
 		#map to IS reference
 		run_command(['bwa mem', args.reference, forward_read, reverse_read, '>', output_sam])
 
@@ -262,38 +266,17 @@ def main():
 		run_command(['./velvetshell.sh', VOdir_five, str(sKmer), str(eKmer), five_bam, VO_fiveout, five_assembly])
 		run_command(['./velvetshell.sh', VOdir_three, str(sKmer), str(eKmer), three_bam, VO_threeout, three_assembly])
 
+		#check database for assemblies and create one if it doesn't already exist
+		check_blast_database(args.assemblies)
 
-
-		'''
-		print ' '.join(['bwa mem', args.reference, forward_read, reverse_read, '>', output_sam])
-
-		#get five prime end
-		print ' '.join(['samtools view -Sb -f 36', output_sam, '>', five_bam])
-
-		#get three prime end
-		print ' '.join(['samtools view -Sb -f 4 -F 40', output_sam, '>', three_bam])
-
-		#assemble five prime end with VO
-		print ' '.join(['./velvetshell.sh', VOdir_five, str(sKmer), str(eKmer), five_bam, output_dir, five_assembly])
-
-		#assemble three prime end with VO
-		print ' '.join(['./velvetshell.sh', VOdir_three, str(sKmer), str(eKmer), three_bam, output_dir, three_assembly])
-
-		#create database for assemblies if one doesn't already exist
-		#check_blast_database(args.assemblies)
-
-		#blast assemblies against contigs
-		blastn_cline = NcbiblastnCommandline(query="test_regions.fasta", db=args.assemblies, outfmt="'6 qseqid qlen sacc pident length slen sstart send evalue bitscore'", out="test_regions.txt")
-		#stdout, stderr = blastn_cline()
-		print blastn_cline()
+		#blast ends against assemblies
+		run_command(['blastn -db', args.assemblies, '-query', five_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", five_contigHits])
+		run_command(['blastn -db', args.assemblies, '-query', five_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", three_contigHits])
 
 		#annotate hits to genbank
 
 		#create output table
-		'''
 
-
-	#run_command(['bwa mem', args.reference, read1, read2, '>', output_sam])
 
 if __name__ == '__main__':
 	main()
