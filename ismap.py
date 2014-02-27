@@ -236,18 +236,31 @@ def main():
 		forward_read = fileSets[sample][0]
 		reverse_read = fileSets[sample][1]
 		output_sam = output_path + sample + '.sam'
-		five_bam = sample + '_5.bam'
-		three_bam = sample + '_3.bam'
+		five_bam = output_path + sample + '_5.bam'
+		three_bam = output_path + sample + '_3.bam'
 
 		sKmer, eKmer = get_kmer_size(forward_read)
 
-		VOdir_five = sample + "_VO_5"
-		VOdir_three = sample + "_VO_3"
-		five_assembly = sample + "_5_contigs.fasta"
-		three_assembly = sample + "_3_contigs.fasta"
+		VOdir_five = output_path + sample + "_VO_5"
+		VOdir_three = output_path + sample + "_VO_3"
+		five_assembly = output_path + sample + "_5_contigs.fasta"
+		three_assembly = output_path + sample + "_3_contigs.fasta"
+
+		VO_fiveout = VOdir_five + "/out/"
+		VO_threeout = VOdir_three + "/out/"
 
 		#map to IS reference
 		run_command(['bwa mem', args.reference, forward_read, reverse_read, '>', output_sam])
+
+		#pull unmapped reads flanking IS
+		run_command(['samtools view -Sb -f 36', output_sam, '>', five_bam])
+		run_command(['samtools view -Sb -f 4 -F 40', output_sam, '>', three_bam])
+
+		#assemble ends
+		run_command(['./velvetshell.sh', VOdir_five, str(sKmer), str(eKmer), five_bam, VO_fiveout, five_assembly])
+		run_command(['./velvetshell.sh', VOdir_three, str(sKmer), str(eKmer), three_bam, VO_threeout, three_assembly])
+
+
 
 		'''
 		print ' '.join(['bwa mem', args.reference, forward_read, reverse_read, '>', output_sam])
