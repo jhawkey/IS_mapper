@@ -208,9 +208,16 @@ def main():
 
 	args = parse_args()
 
+	#check output path has a final slash
+	if args.output[-1] != "/":
+		output_path = args.output + "/"
+	else:
+		output_path = args.output
+	
+
 	#set up logfile
 	if args.log is True:
-		logfile = args.output + ".log"
+		logfile = output_path + "log.log"
 	else:
 		logfile = None
 	logging.basicConfig(
@@ -224,11 +231,6 @@ def main():
 
 	fileSets = read_file_sets(args)
 	print fileSets
-
-	if args.output[-1] != "/":
-		output_path = args.output + "/"
-	else:
-		output_path = args.output
 
 	bwa_index(args.reference)
 
