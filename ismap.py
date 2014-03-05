@@ -229,7 +229,7 @@ def check_blast_database(fasta):
         logging.info('Index for {} is already built...'.format(fasta))
     else:
         logging.info('Building blast index for {}...'.format(fasta))
-        os.system(' '.join(['makeblast db -in', fasta, '-dbtype nucl']))
+        os.system(' '.join(['makeblastdb -in', fasta, '-dbtype nucl']))
         #run_command(['makeblast db -in', fasta, '-dbtype nucl'])
 
 def main():
@@ -327,7 +327,7 @@ def main():
 
             #create output table
             #run_command(['python', 'createTableImprovement.py', '--genbank', final_genbank, '>', table_output])
-            os.system(' '.join(['python', 'createTableImprovement.py', '--genbank', final_genbank, '>', table_output]))
+            os.system(' '.join(['python', 'createTableImprovement.py', '--genbank', final_genbank, '--output', table_output]))
 
         if args.runtype == "typing":
             pass
