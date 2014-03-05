@@ -258,7 +258,7 @@ def main():
     fileSets = read_file_sets(args)
     print fileSets
 
-    #bwa_index(args.reference)
+    bwa_index(args.reference)
 
     for sample in fileSets:
         forward_read = fileSets[sample][0]
@@ -286,25 +286,25 @@ def main():
         three_contigHits = output_path + sample + "_3_contigHits.txt"
 
         #map to IS reference
-        #run_command(['bwa', 'mem', args.reference, forward_read, reverse_read, '>', output_sam])
-        print(' '.join(['bwa', 'mem', args.reference, forward_read, reverse_read, '>', output_sam]))
+        run_command(['bwa', 'mem', args.reference, forward_read, reverse_read, '>', output_sam])
+        #print(' '.join(['bwa', 'mem', args.reference, forward_read, reverse_read, '>', output_sam]))
 
         #pull unmapped reads flanking IS
-        #run_command(['samtools', 'view -Sb -f 36', output_sam, '>', five_bam])
-        print(' '.join(['samtools', 'view -Sb -f 36', output_sam, '>', five_bam]))
-        #run_command(['samtools', 'view -Sb -f 4 -F 40', output_sam, '>', three_bam])
-        print(' '.join(['samtools', 'view -Sb -f 4 -F 40', output_sam, '>', three_bam]))
+        run_command(['samtools', 'view -Sb -f 36', output_sam, '>', five_bam])
+        #print(' '.join(['samtools', 'view -Sb -f 36', output_sam, '>', five_bam]))
+        run_command(['samtools', 'view -Sb -f 4 -F 40', output_sam, '>', three_bam])
+        #print(' '.join(['samtools', 'view -Sb -f 4 -F 40', output_sam, '>', three_bam]))
 
         #assemble ends
-        #run_command(['./velvetshell.sh', VOdir_five, str(sKmer), str(eKmer), five_bam, VO_fiveout, five_assembly])
-        print(' '.join(['./velvetshell.sh', VOdir_five, str(sKmer), str(eKmer), five_bam, VO_fiveout, five_assembly]))
-        #run_command(['./velvetshell.sh', VOdir_three, str(sKmer), str(eKmer), three_bam, VO_threeout, three_assembly])
-        print(' '.join(['./velvetshell.sh', VOdir_three, str(sKmer), str(eKmer), three_bam, VO_threeout, three_assembly]))
+        run_command(['./velvetshell.sh', VOdir_five, str(sKmer), str(eKmer), five_bam, VO_fiveout, five_assembly])
+        #print(' '.join(['./velvetshell.sh', VOdir_five, str(sKmer), str(eKmer), five_bam, VO_fiveout, five_assembly]))
+        run_command(['./velvetshell.sh', VOdir_three, str(sKmer), str(eKmer), three_bam, VO_threeout, three_assembly])
+        #print(' '.join(['./velvetshell.sh', VOdir_three, str(sKmer), str(eKmer), three_bam, VO_threeout, three_assembly]))
 
         if args.runtype == "improvement":
 
             #check database for assemblies and create one if it doesn't already exist
-            #check_blast_database(assembly)
+            check_blast_database(assembly)
 
             #get prefix for output filenames
             genbank_output = sample + "_annotated.gbk"
@@ -312,20 +312,20 @@ def main():
             table_output = sample + "_table.txt"
 
             #blast ends against assemblies
-            #run_command(['blastn', '-db', args.assemblies, '-query', five_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", five_contigHits])
-            print(' '.join(['blastn', '-db', assembly, '-query', five_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", five_contigHits]))
-            #run_command(['blastn', '-db', args.assemblies, '-query', five_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", three_contigHits])
-            print(' '.join(['blastn', '-db', assembly, '-query', five_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", three_contigHits]))
+            run_command(['blastn', '-db', args.assemblies, '-query', five_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", five_contigHits])
+            #print(' '.join(['blastn', '-db', assembly, '-query', five_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", five_contigHits]))
+            run_command(['blastn', '-db', args.assemblies, '-query', five_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", three_contigHits])
+            #print(' '.join(['blastn', '-db', assembly, '-query', five_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", three_contigHits]))
 
             #annotate hits to genbank
-            #run_command(['python', 'annotateMultiGenbank.py', '-s', five_contigHits, '-f', args.aseemblies, '-p', '80', '-c', '80', '-i', sample, '-n', genbank_output ])
-            print(' '.join(['python', 'annotateMultiGenbank.py', '-s', five_contigHits, '-f', assembly, '-p', '80', '-c', '80', '-i', sample, '-n', genbank_output ]))
-            #run_command(['python', 'annotateMultiGenbank.py', '-s', three_contigHits, '-g', genbank_output, '-n', final_genbank, '-p', '80', '-c', '80'])
-            print(' '.join(['python', 'annotateMultiGenbank.py', '-s', three_contigHits, '-g', genbank_output, '-n', final_genbank, '-p', '80', '-c', '80']))
+            run_command(['python', 'annotateMultiGenbank.py', '-s', five_contigHits, '-f', args.aseemblies, '-p', '80', '-c', '80', '-i', sample, '-n', genbank_output ])
+            #print(' '.join(['python', 'annotateMultiGenbank.py', '-s', five_contigHits, '-f', assembly, '-p', '80', '-c', '80', '-i', sample, '-n', genbank_output ]))
+            run_command(['python', 'annotateMultiGenbank.py', '-s', three_contigHits, '-g', genbank_output, '-n', final_genbank, '-p', '80', '-c', '80'])
+            #print(' '.join(['python', 'annotateMultiGenbank.py', '-s', three_contigHits, '-g', genbank_output, '-n', final_genbank, '-p', '80', '-c', '80']))
 
             #create output table
-            #run_command(['python', 'createTableImprovement.py', '--genbank', final_genbank, '>', table_output])
-            print(' '.join(['python', 'createTableImprovement.py', '--genbank', final_genbank, '>', table_output]))
+            run_command(['python', 'createTableImprovement.py', '--genbank', final_genbank, '>', table_output])
+            #print(' '.join(['python', 'createTableImprovement.py', '--genbank', final_genbank, '>', table_output]))
 
         if args.runtype == "typing":
             pass
