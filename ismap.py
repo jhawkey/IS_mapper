@@ -290,9 +290,9 @@ def main():
         #print(' '.join(['bwa', 'mem', args.reference, forward_read, reverse_read, '>', output_sam]))
 
         #pull unmapped reads flanking IS
-        run_command(['samtools view', '-Sb -f 36', output_sam, '>', five_bam])
+        run_command(['samtools view', '-Sb', '-f 36', output_sam, '>', five_bam])
         #print(' '.join(['samtools', 'view -Sb -f 36', output_sam, '>', five_bam]))
-        run_command(['samtools view', '-Sb -f 4 -F 40', output_sam, '>', three_bam])
+        run_command(['samtools view', '-Sb', '-f 4', '-F 40', output_sam, '>', three_bam])
         #print(' '.join(['samtools', 'view -Sb -f 4 -F 40', output_sam, '>', three_bam]))
 
         #assemble ends
