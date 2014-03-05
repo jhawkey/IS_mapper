@@ -1,6 +1,7 @@
 import logging
 import sys, re, os
 from argparse import (ArgumentParser, FileType)
+import subprocess
 from subprocess import call, check_output, CalledProcessError, STDOUT
 from Bio.Blast.Applications import NcbiblastnCommandline
 
@@ -19,7 +20,7 @@ def parse_args():
     parser.add_argument('--reverse', type=str, required=False, default='_2', help='Identifier for reverse reads if not in MiSeq format (default _2)')
     parser.add_argument('--reference', type = str, required=True, help='Fasta file for reference gene (eg: insertion sequence) that will be mapped to')
     parser.add_argument('--assemblies', nargs='+', type=str, required=False, help='Contig assemblies, one for each read set')
-    parser.add_argument('--assemblyid', type=str, required=False, help='Identifier for assemblies eg: sampleName_contigs (specify _contigs) or sampleName_assembly (specify _assembly). If there is no extension leave blank. Do not specify the . extension, eg .fasta or .fa')
+    parser.add_argument('--assemblyid', type=str, required=False, help='Identifier for assemblies eg: sampleName_contigs (specify _contigs) or sampleName_assembly (specify _assembly). Do not specify extension.')
     parser.add_argument('--type', type=str, required=False, default='fasta', help='Indicator for contig assembly type, genbank or fasta (default fasta)')
     parser.add_argument('--extension', type=str, required=False, default='_contigs', help='Identifier for assemblies (default _contigs')
     parser.add_argument('--typingRef', type=str, required=False, help='Reference genome for typing against')
@@ -286,6 +287,7 @@ def main():
         three_contigHits = output_path + sample + "_3_contigHits.txt"
 
         #map to IS reference
+        subprocess.check_call(['bwa', 'mem', args.reference, forward_read, reverse_read, '>', output_sam], shell=True)
         run_command(['bwa', 'mem', args.reference, forward_read, reverse_read, '>', output_sam])
         #print(' '.join(['bwa', 'mem', args.reference, forward_read, reverse_read, '>', output_sam]))
 
