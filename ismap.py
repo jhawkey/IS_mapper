@@ -286,7 +286,7 @@ def main():
         three_contigHits = output_path + sample + "_3_contigHits.txt"
 
         #map to IS reference
-        run_command(['bwa', 'mem', args.reference, forward_read, reverse_read, '>', output_sam], shell=True)
+        run_command(['bwa mem', args.reference, forward_read, reverse_read, '>', output_sam], shell=True)
         #print(' '.join(['bwa', 'mem', args.reference, forward_read, reverse_read, '>', output_sam]))
 
         #pull unmapped reads flanking IS
