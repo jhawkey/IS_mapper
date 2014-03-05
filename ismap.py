@@ -309,9 +309,9 @@ def main():
             check_blast_database(assembly)
 
             #get prefix for output filenames
-            genbank_output = output + sample + "_annotated.gbk"
-            final_genbank = output + sample + "_annotatedAll.gbk"
-            table_output = output + sample + "_table.txt"
+            genbank_output = output_path + sample + "_annotated.gbk"
+            final_genbank = output_path + sample + "_annotatedAll.gbk"
+            table_output = output_path + sample + "_table.txt"
 
             #blast ends against assemblies
             #run_command(['blastn', '-db', args.assemblies, '-query', five_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", five_contigHits])
