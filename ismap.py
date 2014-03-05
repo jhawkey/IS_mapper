@@ -286,13 +286,13 @@ def main():
         three_contigHits = output_path + sample + "_3_contigHits.txt"
 
         #map to IS reference
-        run_command(['bwa', 'mem', args.reference, forward_read, reverse_read, '>', output_sam])
+        run_command(['bwa', 'mem', args.reference, forward_read, reverse_read, '>', output_sam], shell=True)
         #print(' '.join(['bwa', 'mem', args.reference, forward_read, reverse_read, '>', output_sam]))
 
         #pull unmapped reads flanking IS
-        run_command(['samtools view', '-Sb', '-f 36', output_sam, '>', five_bam])
+        run_command(['samtools view', '-Sb', '-f 36', output_sam, '>', five_bam], shell=True)
         #print(' '.join(['samtools', 'view -Sb -f 36', output_sam, '>', five_bam]))
-        run_command(['samtools view', '-Sb', '-f 4', '-F 40', output_sam, '>', three_bam])
+        run_command(['samtools view', '-Sb', '-f 4', '-F 40', output_sam, '>', three_bam], shell=True)
         #print(' '.join(['samtools', 'view -Sb -f 4 -F 40', output_sam, '>', three_bam]))
 
         #assemble ends
@@ -312,9 +312,9 @@ def main():
             table_output = sample + "_table.txt"
 
             #blast ends against assemblies
-            run_command(['blastn', '-db', args.assemblies, '-query', five_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", five_contigHits])
+            run_command(['blastn', '-db', args.assemblies, '-query', five_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", five_contigHits], shell=True)
             #print(' '.join(['blastn', '-db', assembly, '-query', five_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", five_contigHits]))
-            run_command(['blastn', '-db', args.assemblies, '-query', five_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", three_contigHits])
+            run_command(['blastn', '-db', args.assemblies, '-query', five_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", three_contigHits], shell=True)
             #print(' '.join(['blastn', '-db', assembly, '-query', five_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", three_contigHits]))
 
             #annotate hits to genbank
@@ -324,7 +324,7 @@ def main():
             #print(' '.join(['python', 'annotateMultiGenbank.py', '-s', three_contigHits, '-g', genbank_output, '-n', final_genbank, '-p', '80', '-c', '80']))
 
             #create output table
-            run_command(['python', 'createTableImprovement.py', '--genbank', final_genbank, '>', table_output])
+            run_command(['python', 'createTableImprovement.py', '--genbank', final_genbank, '>', table_output], shell=True)
             #print(' '.join(['python', 'createTableImprovement.py', '--genbank', final_genbank, '>', table_output]))
 
         if args.runtype == "typing":
