@@ -314,8 +314,8 @@ def main():
             table_output = output_path + sample + "_table.txt"
 
             #blast ends against assemblies
-            run_command(['blastn', '-db', args.assemblies, '-query', five_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", five_contigHits], shell=True)
-            run_command(['blastn', '-db', args.assemblies, '-query', five_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", three_contigHits], shell=True)
+            run_command(['blastn', '-db', assembly, '-query', five_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", five_contigHits], shell=True)
+            run_command(['blastn', '-db', assembly, '-query', five_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", three_contigHits], shell=True)
 
             #annotate hits to genbank
             run_command(['python', 'annotateMultiGenbank.py', '-s', five_contigHits, '-f', args.aseemblies, '-p', str(args.percentid), '-c', str(args.coverage), '-i', sample, '-n', genbank_output ])
