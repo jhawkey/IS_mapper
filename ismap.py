@@ -39,9 +39,7 @@ class CommandError(Exception):
     pass
 
 '''def run_command(command, **kwargs):
-    '''
     #Execute a shell command and check the exit status and any O/S exceptions.
-    '''
     
     command_str = ' '.join(command)
     logging.info('Running: {}'.format(command_str))
