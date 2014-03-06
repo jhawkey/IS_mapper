@@ -38,7 +38,7 @@ def parse_args():
 class CommandError(Exception):
     pass
 
-def run_command(command, **kwargs):
+'''def run_command(command, **kwargs):
     '''
     Execute a shell command and check the exit status and any O/S exceptions.
     '''
@@ -53,7 +53,26 @@ def run_command(command, **kwargs):
     if exit_status != 0:
         message = "Command '{}' failed with non-zero exit status: {}".format(command_str, exit_status)
         raise CommandError({"message": message})
+'''
+def run_command(command, **kwargs): 
+    ''' 
+    Execute a shell command and check the exit status and any O/S exceptions. 
+    ''' 
 
+    print("command = {}".format(command)) 
+
+    command_str = ' '.join(command) 
+    logging.info('Running: {}'.format(command_str)) 
+    try: 
+        exit_status = call(command_str, **kwargs) 
+    except OSError as e: 
+        message = "Command '{}' failed due to O/S error: {}".format(command_str, str(e)) 
+        #raise CommandError({"message": message}) 
+        exit(message) 
+    if exit_status != 0: 
+        message = "Command '{}' failed with non-zero exit status: {}".format(command_str, exit_status) 
+        #raise CommandError({"message": message}) 
+        exit(message) 
 def bwa_index(fasta):
     '''
     Check to see if bwa index for given input fasta exists.
