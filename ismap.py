@@ -311,6 +311,7 @@ def main():
             #get prefix for output filenames
             genbank_output = output_path + sample + "_annotated.gbk"
             final_genbank = output_path + sample + "_annotatedAll.gbk"
+            final_genbankSingle = output_path + sample + "_annotatedAllSingle.gbk"
             table_output = output_path + sample + "_table.txt"
 
             #blast ends against assemblies
@@ -325,9 +326,10 @@ def main():
             #run_command(['python', 'annotateMultiGenbank.py', '-s', three_contigHits, '-g', genbank_output, '-n', final_genbank, '-p', '80', '-c', '80'])
             os.system(' '.join(['python', 'annotateMultiGenbank.py', '-s', three_contigHits, '-g', genbank_output, '-n', final_genbank, '-p', '80', '-c', '80']))
 
-            #create output table
+            #create single genbank and output table
+            os.system(' '.join(['python', 'multiGenbankToSingle.py', '-i', final_genbank, '-n', sample, '-o', final_genbankSingle]))
             #run_command(['python', 'createTableImprovement.py', '--genbank', final_genbank, '>', table_output])
-            os.system(' '.join(['python', 'createTableImprovement.py', '--genbank', final_genbank, '--output', table_output]))
+            os.system(' '.join(['python', 'createTableImprovement.py', '--genbank', final_genbankSingle, '--output', table_output]))
 
         if args.runtype == "typing":
             pass
