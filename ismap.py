@@ -38,20 +38,6 @@ def parse_args():
 class CommandError(Exception):
     pass
 
-'''def run_command(command, **kwargs):
-    #Execute a shell command and check the exit status and any O/S exceptions.
-    
-    command_str = ' '.join(command)
-    logging.info('Running: {}'.format(command_str))
-    try:
-        exit_status = call(command, **kwargs)
-    except OSError as e:
-        message = "Command '{}' failed due to O/S error: {}".format(command_str, str(e))
-        raise CommandError({"message": message})
-    if exit_status != 0:
-        message = "Command '{}' failed with non-zero exit status: {}".format(command_str, exit_status)
-        raise CommandError({"message": message})
-'''
 def run_command(command, **kwargs): 
     ''' 
     Execute a shell command and check the exit status and any O/S exceptions. 
@@ -65,12 +51,12 @@ def run_command(command, **kwargs):
         exit_status = call(command_str, **kwargs) 
     except OSError as e: 
         message = "Command '{}' failed due to O/S error: {}".format(command_str, str(e)) 
-        #raise CommandError({"message": message}) 
-        exit(message) 
+        raise CommandError({"message": message}) 
+        #exit(message) 
     if exit_status != 0: 
         message = "Command '{}' failed with non-zero exit status: {}".format(command_str, exit_status) 
-        #raise CommandError({"message": message}) 
-        exit(message)
+        raise CommandError({"message": message}) 
+        #exit(message)
 
 def bwa_index(fasta):
     '''
@@ -315,7 +301,7 @@ def main():
         #os.system(' '.join(['samtools', 'view -Sb -f 4 -F 40', output_sam, '>', three_bam]))
 
         #assemble ends
-        #os.system(' '.join(['mkdir', '-p', VOdir_three, VOdir_five]))
+        run_command(' '.join(['mkdir', '-p', VOdir_three, VOdir_five]),shell=True)
         run_command(['./velvetshell.sh', VOdir_five, str(sKmer), str(eKmer), five_bam, VO_fiveout, five_assembly])
         #os.system(' '.join(['./velvetshell.sh', VOdir_five, str(sKmer), str(eKmer), five_bam, VO_fiveout, five_assembly]))
         run_command(['./velvetshell.sh', VOdir_three, str(sKmer), str(eKmer), three_bam, VO_threeout, three_assembly])
