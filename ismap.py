@@ -40,7 +40,7 @@ class CommandError(Exception):
 
 '''def run_command(command, **kwargs):
     '''
-    Execute a shell command and check the exit status and any O/S exceptions.
+    #Execute a shell command and check the exit status and any O/S exceptions.
     '''
     
     command_str = ' '.join(command)
