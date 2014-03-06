@@ -38,7 +38,7 @@ def parse_args():
 class CommandError(Exception):
     pass
 
-def run_command(command):
+def run_command(command, **kwargs):
     '''
     Execute a shell command and check the exit status and any O/S exceptions.
     '''
@@ -46,7 +46,7 @@ def run_command(command):
     command_str = ' '.join(command)
     logging.info('Running: {}'.format(command_str))
     try:
-        exit_status = call(command, shell=True)
+        exit_status = call(command, **kwargs)
     except OSError as e:
         message = "Command '{}' failed due to O/S error: {}".format(command_str, str(e))
         raise CommandError({"message": message})
@@ -287,7 +287,7 @@ def main():
         three_contigHits = output_path + sample + "_3_contigHits.txt"
 
         #map to IS reference
-        run_command(['bwa', 'mem', args.reference, forward_read, reverse_read, '>', output_sam])
+        run_command(['bwa', 'mem', args.reference, forward_read, reverse_read, '>', output_sam], shell=True)
         #os.system(' '.join(['bwa', 'mem', args.reference, forward_read, reverse_read, '>', output_sam]))
 
         #pull unmapped reads flanking IS
@@ -321,9 +321,9 @@ def main():
             #os.system(' '.join(['blastn', '-db', assembly, '-query', five_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", three_contigHits]))
 
             #annotate hits to genbank
-            run_command(['python', 'annotateMultiGenbank.py', '-s', five_contigHits, '-f', args.aseemblies, '-p', '80', '-c', '80', '-i', sample, '-n', genbank_output ])
+            run_command(['python', 'annotateMultiGenbank.py', '-s', five_contigHits, '-f', args.aseemblies, '-p', str(args.percentid), '-c', str(args.coverage), '-i', sample, '-n', genbank_output ])
             #os.system(' '.join(['python', 'annotateMultiGenbank.py', '-s', five_contigHits, '-f', assembly, '-p', '80', '-c', '80', '-i', sample, '-n', genbank_output ]))
-            run_command(['python', 'annotateMultiGenbank.py', '-s', three_contigHits, '-g', genbank_output, '-n', final_genbank, '-p', '80', '-c', '80'])
+            run_command(['python', 'annotateMultiGenbank.py', '-s', three_contigHits, '-g', genbank_output, '-n', final_genbank, '-p', str(args.percentid), '-c', str(args.coverage)])
             #os.system(' '.join(['python', 'annotateMultiGenbank.py', '-s', three_contigHits, '-g', genbank_output, '-n', final_genbank, '-p', '80', '-c', '80']))
 
             #create single genbank and output table
