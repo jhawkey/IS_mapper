@@ -70,7 +70,8 @@ def run_command(command, **kwargs):
     if exit_status != 0: 
         message = "Command '{}' failed with non-zero exit status: {}".format(command_str, exit_status) 
         #raise CommandError({"message": message}) 
-        exit(message) 
+        exit(message)
+
 def bwa_index(fasta):
     '''
     Check to see if bwa index for given input fasta exists.
@@ -308,9 +309,9 @@ def main():
         #os.system(' '.join(['bwa', 'mem', args.reference, forward_read, reverse_read, '>', output_sam]))
 
         #pull unmapped reads flanking IS
-        run_command(['samtools view', '-Sb', '-f 36', output_sam, '>', five_bam])
+        run_command(['samtools view', '-Sb', '-f 36', output_sam, '>', five_bam], shell=True)
         #os.system(' '.join(['samtools', 'view -Sb -f 36', output_sam, '>', five_bam]))
-        run_command(['samtools view', '-Sb', '-f 4', '-F 40', output_sam, '>', three_bam])
+        run_command(['samtools view', '-Sb', '-f 4', '-F 40', output_sam, '>', three_bam], shell=True)
         #os.system(' '.join(['samtools', 'view -Sb -f 4 -F 40', output_sam, '>', three_bam]))
 
         #assemble ends
@@ -332,9 +333,9 @@ def main():
             table_output = output_path + sample + "_table.txt"
 
             #blast ends against assemblies
-            run_command(['blastn', '-db', args.assemblies, '-query', five_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", five_contigHits])
+            run_command(['blastn', '-db', args.assemblies, '-query', five_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", five_contigHits], shell=True)
             #os.system(' '.join(['blastn', '-db', assembly, '-query', five_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", five_contigHits]))
-            run_command(['blastn', '-db', args.assemblies, '-query', five_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", three_contigHits])
+            run_command(['blastn', '-db', args.assemblies, '-query', five_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", three_contigHits], shell=True)
             #os.system(' '.join(['blastn', '-db', assembly, '-query', five_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", three_contigHits]))
 
             #annotate hits to genbank
@@ -346,7 +347,7 @@ def main():
             #create single genbank and output table
             run_command(['python', 'multiGenbankToSingle.py', '-i', final_genbank, '-n', sample, '-o', final_genbankSingle])
             #os.system(' '.join(['python', 'multiGenbankToSingle.py', '-i', final_genbank, '-n', sample, '-o', final_genbankSingle]))
-            run_command(['python', 'createTableImprovement.py', '--genbank', final_genbank, '>', table_output])
+            run_command(['python', 'createTableImprovement.py', '--genbank', final_genbankSingle, '--output', table_output])
             #os.system(' '.join(['python', 'createTableImprovement.py', '--genbank', final_genbankSingle, '--output', table_output]))
 
         if args.runtype == "typing":
