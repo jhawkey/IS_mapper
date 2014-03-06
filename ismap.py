@@ -301,7 +301,7 @@ def main():
         #os.system(' '.join(['samtools', 'view -Sb -f 4 -F 40', output_sam, '>', three_bam]))
 
         #assemble ends
-        run_command(' '.join(['mkdir', '-p', VOdir_three, VOdir_five]),shell=True)
+        run_command(['mkdir', '-p', VOdir_three, VOdir_five],shell=True)
         run_command(['./velvetshell.sh', VOdir_five, str(sKmer), str(eKmer), five_bam, VO_fiveout, five_assembly])
         #os.system(' '.join(['./velvetshell.sh', VOdir_five, str(sKmer), str(eKmer), five_bam, VO_fiveout, five_assembly]))
         run_command(['./velvetshell.sh', VOdir_three, str(sKmer), str(eKmer), three_bam, VO_threeout, three_assembly])
