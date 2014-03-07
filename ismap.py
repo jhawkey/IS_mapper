@@ -318,12 +318,12 @@ def main():
             run_command(['blastn', '-db', assembly, '-query', five_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", three_contigHits], shell=True)
 
             #annotate hits to genbank
-            run_command(['python', 'annotateMultiGenbank.py', '-s', five_contigHits, '-f', assembly, '-p', str(args.percentid), '-c', str(args.coverage), '-i', sample, '-n', genbank_output ])
-            run_command(['python', 'annotateMultiGenbank.py', '-s', three_contigHits, '-g', genbank_output, '-n', final_genbank, '-p', str(args.percentid), '-c', str(args.coverage)])
+            run_command(['python', 'annotateMultiGenbank.py', '-s', five_contigHits, '-f', assembly, '-p', str(args.percentid), '-c', str(args.coverage), '-i', sample, '-n', genbank_output ], shell=True)
+            run_command(['python', 'annotateMultiGenbank.py', '-s', three_contigHits, '-g', genbank_output, '-n', final_genbank, '-p', str(args.percentid), '-c', str(args.coverage)], shell=True)
 
             #create single genbank and output table
-            run_command(['python', 'multiGenbankToSingle.py', '-i', final_genbank, '-n', sample, '-o', final_genbankSingle])
-            run_command(['python', 'createTableImprovement.py', '--genbank', final_genbankSingle, '--output', table_output])
+            run_command(['python', 'multiGenbankToSingle.py', '-i', final_genbank, '-n', sample, '-o', final_genbankSingle], shell=True)
+            run_command(['python', 'createTableImprovement.py', '--genbank', final_genbankSingle, '--output', table_output], shell=True)
 
         if args.runtype == "typing":
             pass
