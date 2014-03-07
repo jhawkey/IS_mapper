@@ -146,7 +146,7 @@ def main():
         cmd += "\nmodule load blast+-intel/2.2.28"
         cmd += "\nmodule load velvetoptimiser/2.2.5"
         cmd += "\npython " + args.script
-        cmd += " --runtype " + args.runtype + " --reads " + file_path + sample + "*.fastq.gz"
+        cmd += " --runtype " + args.runtype + " --reads " + file_path + "/" + sample + "*.fastq.gz"
         if args.forward != "_1":
             cmd += " --forward " + args.forward
         if args.reverse != "_2":
