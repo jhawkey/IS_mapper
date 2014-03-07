@@ -21,7 +21,7 @@ def parse_args():
     parser.add_argument('--forward', type = str, required=False, default = '_1', help = 'Identifier for forward reads if not in MiSeq format (default _1)')
     parser.add_argument('--reverse', type=str, required=False, default='_2', help='Identifier for reverse reads if not in MiSeq format (default _2)')
     parser.add_argument('--reference', type = str, required=True, help='Fasta file for reference gene (eg: insertion sequence) that will be mapped to')
-    parser.add_argument('--assemblies', type=str, required=False, help='Contig assemblies, one for each read set')
+    parser.add_argument('--assemblies', nargs = '+', type=str, required=False, help='Contig assemblies, one for each read set')
     parser.add_argument('--assemblyid', type=str, required=False, help='Identifier for assemblies eg: sampleName_contigs (specify _contigs) or sampleName_assembly (specify _assembly). Do not specify extension.')
     parser.add_argument('--typingRef', type=str, required=False, help='Reference genome for typing against')
     parser.add_argument('--type', type=str, required=False, default='fasta', help='Indicator for contig assembly type, genbank or fasta (default fasta)')
