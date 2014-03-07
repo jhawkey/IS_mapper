@@ -131,7 +131,7 @@ def main():
 
     for sample in fileSets:
 
-        (file_path,file_name_before_ext,full_ext) = get_readFile_components(fileSets[sample[0]])
+        (file_path,file_name_before_ext,full_ext) = get_readFile_components(fileSets[sample][0])
 
         cmd = "#!/bin/bash"
         cmd += "\n#SBATCH -p main"
@@ -152,7 +152,7 @@ def main():
         if args.reverse != "_2":
             cmd += " --reverse " + args.reverse
         if args.assemblies:
-            cmd += " --assemblies " + fastq[2]
+            cmd += " --assemblies " + fileSets[sample][2]
         if args.assemblyid:
             cmd += " --assemblyid " + args.assemblyid
         cmd += " " + args.other_args
