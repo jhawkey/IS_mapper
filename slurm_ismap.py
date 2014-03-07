@@ -130,6 +130,9 @@ def main():
     print fileSets
 
     for sample in fileSets:
+
+        (file_path,file_name_before_ext,full_ext) = get_readFile_components(fileSets[sample[0]])
+
         cmd = "#!/bin/bash"
         cmd += "\n#SBATCH -p main"
         cmd += "\n#SBATCH --job-name=ismapper" + sample
@@ -143,12 +146,10 @@ def main():
         cmd += "\nmodule load blast+-intel/2.2.28"
         cmd += "\nmodule load velvetoptimiser/2.2.5"
         cmd += "\npython " + args.script
-        fastq = fileSets[sample]
-        print fastq
-        cmd += " --runtype " + args.runtype + " --foward_read " + fastq[0] + " --reverse_read " + fastq[1]
-        if args.forward:
+        cmd += " --runtype " + args.runtype + " --reads " + file_path + sample + "*.fastq.gz"
+        if args.forward != "_1":
             cmd += " --forward " + args.forward
-        if args.reverse:
+        if args.reverse != "_2":
             cmd += " --reverse " + args.reverse
         if args.assemblies:
             cmd += " --assemblies " + fastq[2]
