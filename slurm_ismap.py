@@ -97,24 +97,24 @@ def read_file_sets(args):
         else:
             fileSets[sample] = [forward_reads[sample]] # no reverse found
             num_single_readsets += 1
-            logging.info('Warning, could not find pair for read:' + forward_reads[sample])
+            print('Warning, could not find pair for read:' + forward_reads[sample])
     for sample in reverse_reads:
         if sample not in fileSets:
             fileSets[sample] = reverse_reads[sample] # no forward found
             num_single_readsets += 1
-            logging.info('Warning, could not find pair for read:' + reverse_reads[sample])
+            print('Warning, could not find pair for read:' + reverse_reads[sample])
     for sample in assemblies:
         if sample not in fileSets:
             fileSets[sample] = assemblies[sample]
             num_assemblies += 1
-            logging.info('Warning, could not find reads for assembly:' + assemblies[sample])
+            print('Warning, could not find reads for assembly:' + assemblies[sample])
 
     if num_paired_readsets > 0:
-        logging.info('Total paired readsets found:' + str(num_paired_readsets)) 
+        print('Total paired readsets found:' + str(num_paired_readsets)) 
     if num_single_readsets > 0:
-        logging.info('Total single reads found:' + str(num_single_readsets))
+        print('Total single reads found:' + str(num_single_readsets))
     if num_assemblies > 0:
-        logging.info('Total number of assemblies found:' + str(num_assemblies))
+        print('Total number of assemblies found:' + str(num_assemblies))
 
     return fileSet
 
