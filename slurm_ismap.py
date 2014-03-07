@@ -116,7 +116,7 @@ def read_file_sets(args):
     if num_assemblies > 0:
         print('Total number of assemblies found:' + str(num_assemblies))
 
-    return fileSet
+    return fileSets
 
 def main():
 
