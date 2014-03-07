@@ -143,7 +143,7 @@ def main():
         cmd += "\nmodule load velvetoptimiser/2.2.5"
         cmd += "\npython " + args.script
         fastq = fileSets[sample]
-        cmd += " --runtype " + args.runtype + " --reads " + sample + "*fastq.gz"
+        cmd += " --runtype " + args.runtype + " --reads " + sample[0]
         if args.forward:
             cmd += " --forward " + args.forward
         if args.reverse:
