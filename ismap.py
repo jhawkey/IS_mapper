@@ -15,22 +15,25 @@ def parse_args():
     # need to add verison info later
     #parser.add_argument("--version", action='version', ...)
 
+    # Inputs
+    parser.add_argument('--runtype', type=str, required=True, help='"typing" or "improvement"')
     parser.add_argument('--reads', nargs = '+', type = str, required=True, help='Paired end reads for analysing (can be gzipped)')
     parser.add_argument('--forward', type = str, required=False, default = '_1', help = 'Identifier for forward reads if not in MiSeq format (default _1)')
     parser.add_argument('--reverse', type=str, required=False, default='_2', help='Identifier for reverse reads if not in MiSeq format (default _2)')
     parser.add_argument('--reference', type = str, required=True, help='Fasta file for reference gene (eg: insertion sequence) that will be mapped to')
     parser.add_argument('--assemblies', nargs='+', type=str, required=False, help='Contig assemblies, one for each read set')
     parser.add_argument('--assemblyid', type=str, required=False, help='Identifier for assemblies eg: sampleName_contigs (specify _contigs) or sampleName_assembly (specify _assembly). Do not specify extension.')
-    parser.add_argument('--type', type=str, required=False, default='fasta', help='Indicator for contig assembly type, genbank or fasta (default fasta)')
-    parser.add_argument('--extension', type=str, required=False, default='_contigs', help='Identifier for assemblies (default _contigs')
     parser.add_argument('--typingRef', type=str, required=False, help='Reference genome for typing against')
+    parser.add_argument('--type', type=str, required=False, default='fasta', help='Indicator for contig assembly type, genbank or fasta (default fasta)')
+
+    # Cutoffs for annotation
     parser.add_argument('--coverage', type=float, required=False, default=90.0, help='Minimum coverage for hit to be annotated (default 90.0)')
     parser.add_argument('--percentid', type=float, required=False, default=90.0, help='Minimum percent ID for hit to be annotated (default 90.0')
+    
+    # Reporting options
     parser.add_argument('--log', action="store_true", required=False, help='Switch on logging to file (otherwise log to stdout')
-    parser.add_argument('--runtype', type=str, required=True, help='"typing" or "improvement"')
-
-    # Do I need this?
     parser.add_argument('--output', type=str, required=True, help='Path to location for output files')
+
 
     return parser.parse_args()
 
@@ -43,20 +46,16 @@ def run_command(command, **kwargs):
     Execute a shell command and check the exit status and any O/S exceptions. 
     ''' 
 
-    print("command = {}".format(command)) 
-
     command_str = ' '.join(command) 
     logging.info('Running: {}'.format(command_str)) 
     try: 
         exit_status = call(command_str, **kwargs) 
     except OSError as e: 
         message = "Command '{}' failed due to O/S error: {}".format(command_str, str(e)) 
-        raise CommandError({"message": message}) 
-        #exit(message) 
+        raise CommandError({"message": message})  
     if exit_status != 0: 
         message = "Command '{}' failed with non-zero exit status: {}".format(command_str, exit_status) 
         raise CommandError({"message": message}) 
-        #exit(message)
 
 def bwa_index(fasta):
     '''
@@ -240,6 +239,9 @@ def main():
 
     args = parse_args()
 
+    #check_command_version(['bwa'], 'Version: 0.7.5a', 'bwa', '0.7.5a')
+    #check_command_version(['samtools'], 'Version: 0.1.19', 'samtools', '0.1.19')
+
     #check output path has a final slash
     if args.output[-1] != "/":
         output_path = args.output + "/"
@@ -260,8 +262,9 @@ def main():
     logging.info('program started')
     logging.info('command line: {0}'.format(' '.join(sys.argv)))
 
+    
+
     fileSets = read_file_sets(args)
-    print fileSets
 
     bwa_index(args.reference)
 
