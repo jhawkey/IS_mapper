@@ -141,7 +141,7 @@ def main():
         cmd += "\nmodule load samtools-gcc/0.1.19"
         cmd += "\nmodule load blast+-intel/2.2.28"
         cmd += "\nmodule load velvetoptimiser/2.2.5"
-        cmd += "\n" + args.script
+        cmd += "\npython " + args.script
         fastq = fileSets[sample]
         cmd += " --runtype " + args.runtype + " --reads " + sample + "*fastq.gz"
         if args.forward:
