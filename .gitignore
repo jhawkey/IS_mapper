@@ -12,3 +12,5 @@ reads_2.fastq
 reads_contigs.fasta
 
 *.log
+
+*.gz

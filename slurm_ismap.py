@@ -127,6 +127,7 @@ def main():
 
 
     fileSets = read_file_sets(args)
+    print fileSets
 
     for sample in fileSets:
         cmd = "#!/bin/bash"
@@ -143,7 +144,8 @@ def main():
         cmd += "\nmodule load velvetoptimiser/2.2.5"
         cmd += "\npython " + args.script
         fastq = fileSets[sample]
-        cmd += " --runtype " + args.runtype + " --reads " + sample[0]
+        print fastq
+        cmd += " --runtype " + args.runtype + " --foward_read " + fastq[0] + " --reverse_read " + fastq[1]
         if args.forward:
             cmd += " --forward " + args.forward
         if args.reverse:
@@ -156,7 +158,7 @@ def main():
 
         print cmd
 
-        os.system('echo "' + cmd + '" | sbatch')
+        '''os.system('echo "' + cmd + '" | sbatch')'''
 
 if __name__ == '__main__':
     main() 

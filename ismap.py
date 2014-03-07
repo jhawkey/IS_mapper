@@ -17,7 +17,9 @@ def parse_args():
 
     # Inputs
     parser.add_argument('--runtype', type=str, required=True, help='"typing" or "improvement"')
-    parser.add_argument('--reads', nargs = '+', type = str, required=True, help='Paired end reads for analysing (can be gzipped)')
+    parser.add_argument('--reads', nargs = '+', type = str, required=False, help='Paired end reads for analysing (can be gzipped)')
+    parser.add_argument('--forward_read', type=str, required=False, help='Path to forward read')
+    parser.add_argument('--reverse_read', type=str, required=False, help='Path to revserse read')
     parser.add_argument('--forward', type = str, required=False, default = '_1', help = 'Identifier for forward reads if not in MiSeq format (default _1)')
     parser.add_argument('--reverse', type=str, required=False, default='_2', help='Identifier for reverse reads if not in MiSeq format (default _2)')
     parser.add_argument('--reference', type = str, required=True, help='Fasta file for reference gene (eg: insertion sequence) that will be mapped to')
