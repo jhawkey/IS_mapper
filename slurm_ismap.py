@@ -131,7 +131,7 @@ def main():
     for sample in fileSets:
         cmd = "#!/bin/bash"
         cmd += "\n#SBATCH -p main"
-        cmd += "\n#SBATCH --job-name=ismapper" + sample + args.output
+        cmd += "\n#SBATCH --job-name=ismapper" + sample
         cmd += "\n#SBATCH --ntasks=1"
         cmd += "\n#SBATCH --mem-per-cpu=" + args.memory
         cmd += "\n#SBATCH --time=" + args.walltime
