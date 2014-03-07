@@ -159,7 +159,7 @@ def main():
 
         print cmd
 
-        '''os.system('echo "' + cmd + '" | sbatch')'''
+        os.system('echo "' + cmd + '" | sbatch')
 
 if __name__ == '__main__':
     main() 
