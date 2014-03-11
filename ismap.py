@@ -279,9 +279,6 @@ def main():
         five_assembly = sample + "_5_contigs.fasta"
         three_assembly = sample + "_3_contigs.fasta"
 
-        VO_fiveout = VOdir_five + "/out/"
-        VO_threeout = VOdir_three + "/out/"
-
         five_contigHits = sample + "_5_contigHits.txt"
         three_contigHits = sample + "_3_contigHits.txt"
 
