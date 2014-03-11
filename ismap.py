@@ -268,6 +268,7 @@ def main():
         except IndexError:
             pass
 
+        current_dir = os.getcwd() + '/'
         output_sam = sample + '.sam'
         five_bam = sample + '_5.bam'
         three_bam = sample + '_3.bam'
@@ -290,15 +291,15 @@ def main():
         run_command(['samtools view', '-Sb', '-f 4', '-F 40', output_sam, '>', three_bam], shell=True)
 
         #assemble ends
-        run_command(['mkdir', '-p', VOdir_three, VOdir_five], shell=True)
-        run_command(["cd", VOdir_five], shell=True) 
-        run_command(["VelvetOptimiser.pl", "-s", str(sKmer), "-e", str(eKmer), "-f '-short -bam ../" + five_bam + "'"])
-        run_command(['cd ../', '&&', 'mv', VOdir_five, '/auto*/contigs.fa', five_assembly], shell=True)
-        run_command(["cd", VOdir_three], shell=True)
-        run_command(["cd", VOdir_three, "VelvetOptimiser.pl", "-s", str(sKmer), "-e", str(eKmer), "-f '-short -bam ../" + three_bam + "'"])
-        run_command(['cd ../', '&&', 'mv', VOdir_three, '/auto*/contigs.fa', three_assembly], shell=True)
-        #run_command(['./velvetshell.sh', VOdir_five, str(sKmer), str(eKmer), five_bam, VO_fiveout, five_assembly], shell=True)
-        #run_command(['./velvetshell.sh', VOdir_three, str(sKmer), str(eKmer), three_bam, VO_threeout, three_assembly], shell=True)
+        #run_command(['mkdir', '-p', VOdir_three, VOdir_five], shell=True)
+        #run_command(["cd", VOdir_five], shell=True) 
+        #run_command(["VelvetOptimiser.pl", "-s", str(sKmer), "-e", str(eKmer), "-f '-short -bam ../" + five_bam + "'"])
+        #run_command(['cd ../', '&&', 'mv', VOdir_five, '/auto*/contigs.fa', five_assembly], shell=True)
+        #run_command(["cd", VOdir_three], shell=True)
+        #run_command(["cd", VOdir_three, "VelvetOptimiser.pl", "-s", str(sKmer), "-e", str(eKmer), "-f '-short -bam ../" + three_bam + "'"])
+        #run_command(['cd ../', '&&', 'mv', VOdir_three, '/auto*/contigs.fa', three_assembly], shell=True)
+        run_command(['./velvetshell.sh', VOdir_five, str(sKmer), str(eKmer), current_dir + five_bam, VO_fiveout, five_assembly], shell=True)
+        run_command(['./velvetshell.sh', VOdir_three, str(sKmer), str(eKmer), current_dir + three_bam, VO_threeout, three_assembly], shell=True)
 
         if args.runtype == "improvement":
 
@@ -327,10 +328,18 @@ def main():
             pass
 
             #check database for reference genome and create if it doesn't exist
+            #check_blast_database(args.typingRef)
 
             #blast ends against reference genome
+            #run_command(['blastn', '-db', args.typingRef, '-query', five_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", five_contigHits], shell=True)
+            #run_command(['blastn', '-db', args.typingRef, '-query', three_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >" three_contigHits], shell=True)
+
+            #turn typingRef into a fasta
+            #typingRefFasta = args.typingRef + '.fasta'
+            #run_command(['python', 'gbkToFasta.py', '-i', args.typingRef, '-o', typingRefFasta])
 
             #annotate hits to a genbank
+            #run_command(['python', 'annotateMultiGenbank.py', '-s', five_contigHits, '-f', typingRefFasta, '-p', str(args.percentid), '-c', str(args.coverage), '])
 
             #create output table
 
