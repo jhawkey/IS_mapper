@@ -277,6 +277,8 @@ def main():
 
         VOdir_five = sample + "_VO_5"
         VOdir_three = sample + "_VO_3"
+        VO_fiveout = VOdir_five + "/out/"
+        VO_threeout = VOdir_three + "/out"
         five_assembly = sample + "_5_contigs.fasta"
         three_assembly = sample + "_3_contigs.fasta"
 
