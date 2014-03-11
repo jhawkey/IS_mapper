@@ -291,7 +291,7 @@ def main():
         run_command(['samtools view', '-Sb', '-f 4', '-F 40', output_sam, '>', three_bam], shell=True)
 
         #assemble ends
-        #run_command(['mkdir', '-p', VOdir_three, VOdir_five], shell=True)
+        run_command(['mkdir', '-p', VOdir_three, VOdir_five], shell=True)
         #run_command(["cd", VOdir_five], shell=True) 
         #run_command(["VelvetOptimiser.pl", "-s", str(sKmer), "-e", str(eKmer), "-f '-short -bam ../" + five_bam + "'"])
         #run_command(['cd ../', '&&', 'mv', VOdir_five, '/auto*/contigs.fa', five_assembly], shell=True)
