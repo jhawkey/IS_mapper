@@ -291,9 +291,9 @@ def main():
 
         #assemble ends
         run_command(['mkdir', '-p', VOdir_three, VOdir_five], shell=True)
-        run_command(["VelvetOptimiser.pl", "-s", str(sKmer), "-e", str(eKmer), "-f '-short -bam ../", five_bam, "'"])
+        run_command(["VelvetOptimiser.pl", "-s", str(sKmer), "-e", str(eKmer), "-f '-short -bam ../" + five_bam + "'"])
         run_command(['cd ../', '&&', 'mv', VOdir_five, '/auto*/contigs.fa', five_assembly], shell=True)
-        run_command(["VelvetOptimiser.pl", "-s", str(sKmer), "-e", str(eKmer), "-f '-short -bam ../", three_bam, "'"])
+        run_command(["VelvetOptimiser.pl", "-s", str(sKmer), "-e", str(eKmer), "-f '-short -bam ../" + three_bam + "'"])
         run_command(['cd ../', '&&', 'mv', VOdir_three, '/auto*/contigs.fa', three_assembly], shell=True)
         #run_command(['./velvetshell.sh', VOdir_five, str(sKmer), str(eKmer), five_bam, VO_fiveout, five_assembly], shell=True)
         #run_command(['./velvetshell.sh', VOdir_three, str(sKmer), str(eKmer), three_bam, VO_threeout, three_assembly], shell=True)
