@@ -25,6 +25,7 @@ def parse_args():
     parser.add_argument('--assemblyid', type=str, required=False, help='Identifier for assemblies eg: sampleName_contigs (specify _contigs) or sampleName_assembly (specify _assembly). Do not specify extension.')
     parser.add_argument('--typingRef', type=str, required=False, help='Reference genome for typing against')
     parser.add_argument('--type', type=str, required=False, default='fasta', help='Indicator for contig assembly type, genbank or fasta (default fasta)')
+    parser.add_argument('--path', type=str, required=True, default='', help='Path to folder where scripts are.')
 
     # Cutoffs for annotation
     parser.add_argument('--coverage', type=float, required=False, default=90.0, help='Minimum coverage for hit to be annotated (default 90.0)')
@@ -239,6 +240,9 @@ def main():
 
     args = parse_args()
 
+    if args.path[-1] != "/":
+        args.path = args.path + "/"
+
     #check_command_version(['bwa'], 'Version: 0.7.5a', 'bwa', '0.7.5a')
     #check_command_version(['samtools'], 'Version: 0.1.19', 'samtools', '0.1.19')
     
@@ -300,8 +304,8 @@ def main():
         #run_command(["cd", VOdir_three], shell=True)
         #run_command(["cd", VOdir_three, "VelvetOptimiser.pl", "-s", str(sKmer), "-e", str(eKmer), "-f '-short -bam ../" + three_bam + "'"])
         #run_command(['cd ../', '&&', 'mv', VOdir_three, '/auto*/contigs.fa', three_assembly], shell=True)
-        run_command(['./velvetshell.sh', VOdir_five, str(sKmer), str(eKmer), current_dir + five_bam, VO_fiveout, five_assembly], shell=True)
-        run_command(['./velvetshell.sh', VOdir_three, str(sKmer), str(eKmer), current_dir + three_bam, VO_threeout, three_assembly], shell=True)
+        run_command([args.path + 'velvetshell.sh', VOdir_five, str(sKmer), str(eKmer), current_dir + five_bam, VO_fiveout, five_assembly], shell=True)
+        run_command([args.path + 'velvetshell.sh', VOdir_three, str(sKmer), str(eKmer), current_dir + three_bam, VO_threeout, three_assembly], shell=True)
 
         if args.runtype == "improvement":
 
@@ -319,12 +323,12 @@ def main():
             run_command(['blastn', '-db', assembly, '-query', three_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", three_contigHits], shell=True)
 
             #annotate hits to genbank
-            run_command(['python', 'annotateMultiGenbank.py', '-s', five_contigHits, '-f', assembly, '-p', str(args.percentid), '-c', str(args.coverage), '-i', sample, '-n', genbank_output ], shell=True)
-            run_command(['python', 'annotateMultiGenbank.py', '-s', three_contigHits, '-g', genbank_output, '-n', final_genbank, '-p', str(args.percentid), '-c', str(args.coverage)], shell=True)
+            run_command(['python', args.path + 'annotateMultiGenbank.py', '-s', five_contigHits, '-f', assembly, '-p', str(args.percentid), '-c', str(args.coverage), '-i', sample, '-n', genbank_output ], shell=True)
+            run_command(['python', args.path + 'annotateMultiGenbank.py', '-s', three_contigHits, '-g', genbank_output, '-n', final_genbank, '-p', str(args.percentid), '-c', str(args.coverage)], shell=True)
 
             #create single genbank and output table
-            run_command(['python', 'multiGenbankToSingle.py', '-i', final_genbank, '-n', sample, '-o', final_genbankSingle], shell=True)
-            run_command(['python', 'createTableImprovement.py', '--genbank', final_genbankSingle, '--output', table_output], shell=True)
+            run_command(['python', args.path + 'multiGenbankToSingle.py', '-i', final_genbank, '-n', sample, '-o', final_genbankSingle], shell=True)
+            run_command(['python', args.path + 'createTableImprovement.py', '--genbank', final_genbankSingle, '--output', table_output], shell=True)
 
         if args.runtype == "typing":
             pass
