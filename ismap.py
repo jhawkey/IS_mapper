@@ -32,7 +32,7 @@ def parse_args():
     
     # Reporting options
     parser.add_argument('--log', action="store_true", required=False, help='Switch on logging to file (otherwise log to stdout')
-    parser.add_argument('--output', type=str, required=True, help='Path to location for output files')
+    parser.add_argument('--output', type=str, required=True, help='prefix for output files')
 
 
     return parser.parse_args()
@@ -241,16 +241,10 @@ def main():
 
     #check_command_version(['bwa'], 'Version: 0.7.5a', 'bwa', '0.7.5a')
     #check_command_version(['samtools'], 'Version: 0.1.19', 'samtools', '0.1.19')
-
-    #check output path has a final slash
-    if args.output[-1] != "/":
-        output_path = args.output + "/"
-    else:
-        output_path = args.output
     
     #set up logfile
     if args.log is True:
-        logfile = output_path + "log.log"
+        logfile = args.output + ".log"
     else:
         logfile = None
     logging.basicConfig(
@@ -274,22 +268,22 @@ def main():
         except IndexError:
             pass
 
-        output_sam = output_path + sample + '.sam'
-        five_bam = output_path + sample + '_5.bam'
-        three_bam = output_path + sample + '_3.bam'
+        output_sam = sample + '.sam'
+        five_bam = sample + '_5.bam'
+        three_bam = sample + '_3.bam'
 
         sKmer, eKmer = get_kmer_size(forward_read)
 
-        VOdir_five = output_path + sample + "_VO_5"
-        VOdir_three = output_path + sample + "_VO_3"
-        five_assembly = output_path + sample + "_5_contigs.fasta"
-        three_assembly = output_path + sample + "_3_contigs.fasta"
+        VOdir_five = sample + "_VO_5"
+        VOdir_three = sample + "_VO_3"
+        five_assembly = sample + "_5_contigs.fasta"
+        three_assembly = sample + "_3_contigs.fasta"
 
         VO_fiveout = VOdir_five + "/out/"
         VO_threeout = VOdir_three + "/out/"
 
-        five_contigHits = output_path + sample + "_5_contigHits.txt"
-        three_contigHits = output_path + sample + "_3_contigHits.txt"
+        five_contigHits = sample + "_5_contigHits.txt"
+        three_contigHits = sample + "_3_contigHits.txt"
 
         #map to IS reference
         run_command(['bwa', 'mem', args.reference, forward_read, reverse_read, '>', output_sam], shell=True)
@@ -309,10 +303,10 @@ def main():
             check_blast_database(assembly)
 
             #get prefix for output filenames
-            genbank_output = output_path + sample + "_annotated.gbk"
-            final_genbank = output_path + sample + "_annotatedAll.gbk"
-            final_genbankSingle = output_path + sample + "_annotatedAllSingle.gbk"
-            table_output = output_path + sample + "_table.txt"
+            genbank_output = sample + "_annotated.gbk"
+            final_genbank = sample + "_annotatedAll.gbk"
+            final_genbankSingle = sample + "_annotatedAllSingle.gbk"
+            table_output = sample + "_table.txt"
 
             #blast ends against assemblies
             run_command(['blastn', '-db', assembly, '-query', five_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", five_contigHits], shell=True)
