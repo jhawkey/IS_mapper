@@ -249,7 +249,7 @@ if __name__ == "__main__":
 				else:
 					new_record_list.append(record)
 
-			SeqIO.write(new_record_list, handle, "genbank")
+			SeqIO.write(new_record_list, options.newfile, "genbank")
 
 			print("Added " + str(feature_count) + " features to " + options.newfile)
 
