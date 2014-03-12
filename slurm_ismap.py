@@ -16,6 +16,7 @@ def parse_args():
     parser.add_argument('--assemblies', nargs='+', type=str, required=False, help='Contig assemblies, one for each read set (If using improvement option)')
     parser.add_argument('--assemblyid', type=str, required=False, help='Identifier for assemblies eg: sampleName_contigs (specify _contigs) or sampleName_assembly (specify _assembly). Do not specify extension.')
     parser.add_argument('--runtype', type=str, required=True, help='Runtype for the program, either improvement or typing')
+    parser.add_argument('--logprefix', type=str, required=False, help='If setting log, use a prefix (default is just sample name)')
     parser.add_argument('--other_args', type=str, required=True, help='String containing all other arguments to pass to ISMapper')
 
     return parser.parse_args()
@@ -155,6 +156,10 @@ def main():
             cmd += " --assemblies " + fileSets[sample][2]
         if args.assemblyid:
             cmd += " --assemblyid " + args.assemblyid
+        if args.logprefix == '':
+            cmd += " --log --output " + sample
+        elif args.logprefix != '':
+            cmd += " --log --output " + args.logprefix + "_" + sample
         cmd += " " + args.other_args
 
         print cmd
