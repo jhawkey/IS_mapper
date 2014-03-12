@@ -6,10 +6,12 @@
 #if there are six arguments given
 if [ $# -eq 6 ]; then
 	#run VelvetOptimiser
+	echo "$1" && VelvetOptimiser.pl -s "$2" -e "$3" -f " -short -bam $4 " -d "$5"
 	cd "$1" && VelvetOptimiser.pl -s "$2" -e "$3" -f " -short -bam $4 " -d "$5"
 
 	#if this runs correctly then copy the contigs file to its new location and name
 	if [ $? -eq 0 ]; then
+		echo "Moving contigs from $5 to $6"
 		cp "$5"contigs.fa "$6"
 
 	#otherwise report exit status
