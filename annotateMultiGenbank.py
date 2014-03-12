@@ -7,6 +7,7 @@ from Bio.SeqRecord import SeqRecord
 from optparse import OptionParser
 import string, re
 import os, sys, subprocess
+import collections
 
 def main():
 
@@ -32,15 +33,15 @@ def parseBLAST(hits, genbank_type):
 	summary_list = summary.readlines()
 	summary.close()
 
-	hits = {}
+	hits = collections.defaultdict(dict)
 
 	#lists for qualifiers
 	start = []
 	end = []
 	percentID = []
-	node = []
+	query_id = []
 	blast_score = []
-	record_name = []
+	hit_id = []
 	query_length = []
 	hit_length = []
 
@@ -48,32 +49,33 @@ def parseBLAST(hits, genbank_type):
 	for columns in (raw.strip().split() for raw in summary_list):
 		start.append(columns[6])
 		end.append(columns[7])
-		node.append(columns[0])
+		query_id.append(columns[0])
 		percentID.append(columns[3])
 		blast_score.append(columns[9])
-		record_name.append(columns[2])
+		hit_id.append(columns[2])
 		query_length.append(columns[1])
 		hit_length.append(columns[4])
 
 	#add values to dicionary
 	if genbank_type == "multi":	
-		for i in range(0, len(record_name)):
+		for i in range(0, len(hit_id)):
 			try:
-				hits[record_name[i]] = [start[i], end[i], percentID[i], node[i], blast_score[i], query_length[i], hit_length[i]]
+				hits[hit_id[i]][query_id[i]] = [start[i], end[i], percentID[i], blast_score[i], query_length[i], hit_length[i]]
+				#hits[node[i]] = [start[i], end[i], percentID[i], record_name[i], blast_score[i], query_length[i], hit_length[i]]
 			except KeyError:
 				pass
-		return (hits, record_name)
+		return (hits)
 
 	#different dictionary setup if genbank is a single type
 	elif genbank_type == "single":
 
 		count = 1
 
-		for i in range(0, len(record_name)):
-			hits[count] = [start[i], end[i], percentID[i], node[i], blast_score[i], query_length[i], hit_length[i]]
+		for i in range(0, len(hit_id)):
+			hits[hit_id[i]][query_id[i]] = [start[i], end[i], percentID[i], blast_score[i], query_length[i], hit_length[i]]
 			count += 1
 
-		return(hits, record_name)
+		return(hits)
 	
 	else:
 		print("Genbank type not correctly specified, must be either single or multi.")
@@ -90,12 +92,12 @@ def createFeature(hits, record_id):
 		feature_type = "misc_feature"
 
 	#get query coverage for hit
-	queryCoverage = (float(hits[record_id][6])/float(hits[record_id][5])) * 100
+	queryCoverage = (float(hits[record_id][5])/float(hits[record_id][4])) * 100
 
 	#check percent ID is at least minimum value set by user
 	if float(hits[record_id][2]) >= float(options.pid) and queryCoverage >= float(options.qcov):
 		quals = {}
-		quals['note'] = "Node: " + hits[record_id][3] + " query length: " + hits[record_id][5] + " blast score: " + hits[record_id][4] + " query coverage: " + str(queryCoverage) + " percent ID: " + hits[record_id][2]
+		quals['note'] = "Node: " + record_id + " query length: " + hits[record_id][4] + " blast score: " + hits[record_id][3] + " query coverage: " + str(queryCoverage) + " percent ID: " + hits[record_id][2]
 
 		#set Artemis colour to represent percent ID of hit
 		quals['colour'] = artemisColour(hits[record_id][2])
@@ -151,7 +153,8 @@ if __name__ == "__main__":
 
 		print("Successfully converted %i records" % count)
 
-		hits_dictionary, record_name_list = parseBLAST(options.summary, options.genbank_type)
+		hits_dictionary = parseBLAST(options.summary, options.genbank_type)
+		print hits_dictionary
 
 		annotatedGenbank = options.newfile
 
@@ -172,24 +175,27 @@ if __name__ == "__main__":
 		for record in record_list:
 			
 			#check to see if that contig is in the genbank file
-			if record.id in record_name_list:
+			if record.id in hits_dictionary:
+				print record.id
 
-				#create the feature
-				new_feature = createFeature(hits_dictionary, record.id)	
+				for node in hits_dictionary[record.id]:
+					print hits_dictionary[record.id][node]
 
-				#check that the feature has passed the creation step
-				if new_feature != 0:
+					#create the feature
+					new_feature = createFeature(hits_dictionary[record.id], node)	
 
-					#add feature to record	
-					record.features.append(new_feature)
-					new_record_list.append(record)
+					#check that the feature has passed the creation step
+					if new_feature != 0:
 
-					feature_count = feature_count + 1
+						#add feature to record	
+						record.features.append(new_feature)
+						feature_count = feature_count + 1
+					#just append the record if there was no feature to be added
+					else:
+						new_record_list.append(record)
+
+				new_record_list.append(record)
 				
-				#just append the record if there was no feature to be added
-				else:
-					new_record_list.append(record)
-			
 			#just append the record if the id was not in the list
 			else:
 				new_record_list.append(record)
@@ -203,7 +209,8 @@ if __name__ == "__main__":
 	else:
 
 		#get variables for annotations
-		hits_dictionary, record_name_list = parseBLAST(options.summary, options.genbank_type)
+		hits_dictionary = parseBLAST(options.summary, options.genbank_type)
+		print hits_dictionary
 
 		feature_count = 0
 
@@ -216,31 +223,37 @@ if __name__ == "__main__":
 			#iterate through the contigs in the genbank file
 			for record in record_list:
 				
-				if record.id in record_name_list:
+				#check to see if that contig is in the genbank file
+				if record.id in hits_dictionary:
+					print record.id
 
-					#create the feature
-					new_feature = createFeature(hits_dictionary, record.id)	
+					for node in hits_dictionary[record.id]:
+						print hits_dictionary[record.id][node]
 
-					#check that the feature has passed the creation step
-					if new_feature != 0:
-						
-						#add feature to record	
-						record.features.append(new_feature)
-						new_record_list.append(record)
+						#create the feature
+						new_feature = createFeature(hits_dictionary[record.id], node)	
 
-						feature_count = feature_count + 1
-				
-					#just append the record if there was no feature to be added
-					else:
-						new_record_list.append(record)
-			
+						#check that the feature has passed the creation step
+						if new_feature != 0:
+
+							#add feature to record	
+							record.features.append(new_feature)
+							feature_count = feature_count + 1
+						#just append the record if there was no feature to be added
+						else:
+							new_record_list.append(record)
+
+					new_record_list.append(record)
+					
 				#just append the record if the id was not in the list
 				else:
 					new_record_list.append(record)
 
-			#write record out to new file
-			SeqIO.write(new_record_list, options.newfile, "genbank")
-			print("Added " + str(feature_count) + " features to " + options.newfile)
+				SeqIO.write(new_record_list, handle, "genbank")
+
+				handle.close()	
+
+				print("Added " + str(feature_count) + " features to " + options.newfile)
 
 		if options.genbank_type == "single":
 
@@ -248,13 +261,15 @@ if __name__ == "__main__":
 
 			for key in hits_dictionary:
 
-				new_feature = createFeature(hits_dictionary, key)
+				for node in hits_dictionary[key]:
 
-				if new_feature != 0:
+					new_feature = createFeature(hits_dictionary[key], node)
 
-					genbank.features.append(new_feature)
+					if new_feature != 0:
 
-					feature_count += 1
+						genbank.features.append(new_feature)
+
+						feature_count += 1
 				
 			SeqIO.write(genbank, options.newfile, "genbank")
 			print("Added " + str(feature_count) + " features to " + options.newfile)
