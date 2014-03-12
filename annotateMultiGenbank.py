@@ -214,6 +214,10 @@ if __name__ == "__main__":
 
 		feature_count = 0
 
+		annotatedGenbank = options.newfile
+
+		handle = open(annotatedGenbank, "w")
+
 		if options.genbank_type == "multi":
 
 			new_record_list = []
