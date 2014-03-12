@@ -6,7 +6,7 @@
 #if there are six arguments given
 if [ $# -eq 6 ]; then
 	#run VelvetOptimiser
-	echo "$1" && VelvetOptimiser.pl -s "$2" -e "$3" -f " -short -bam $4 " -d "$5"
+	echo "$1 && VelvetOptimiser.pl -s $2 -e $3 -f -short -bam $4 -d $5"
 	cd "$1" && VelvetOptimiser.pl -s "$2" -e "$3" -f " -short -bam $4 " -d "$5"
 
 	#if this runs correctly then copy the contigs file to its new location and name
