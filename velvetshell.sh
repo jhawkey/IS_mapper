@@ -10,7 +10,7 @@ if [ $# -eq 6 ]; then
 
 	#if this runs correctly then copy the contigs file to its new location and name
 	if [ $? -eq 0 ]; then
-		cp "$5"/contigs.fa "$6"
+		cp "$5"contigs.fa "$6"
 
 	#otherwise report exit status
 	else

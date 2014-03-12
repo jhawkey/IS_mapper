@@ -282,7 +282,7 @@ def main():
         VOdir_five = sample + "_VO_5"
         VOdir_three = sample + "_VO_3"
         VO_fiveout = VOdir_five + "/out/"
-        VO_threeout = VOdir_three + "/out"
+        VO_threeout = VOdir_three + "/out/"
         five_assembly = sample + "_5_contigs.fasta"
         three_assembly = sample + "_3_contigs.fasta"
 
@@ -304,8 +304,8 @@ def main():
         #run_command(["cd", VOdir_three], shell=True)
         #run_command(["cd", VOdir_three, "VelvetOptimiser.pl", "-s", str(sKmer), "-e", str(eKmer), "-f '-short -bam ../" + three_bam + "'"])
         #run_command(['cd ../', '&&', 'mv', VOdir_three, '/auto*/contigs.fa', three_assembly], shell=True)
-        run_command([args.path + 'velvetshell.sh', VOdir_five, str(sKmer), str(eKmer), current_dir + five_bam, VO_fiveout, five_assembly], shell=True)
-        run_command([args.path + 'velvetshell.sh', VOdir_three, str(sKmer), str(eKmer), current_dir + three_bam, VO_threeout, three_assembly], shell=True)
+        run_command([args.path + 'velvetshell.sh', VOdir_five, str(sKmer), str(eKmer), current_dir + five_bam, current_dir + VO_fiveout, five_assembly], shell=True)
+        run_command([args.path + 'velvetshell.sh', VOdir_three, str(sKmer), str(eKmer), current_dir + three_bam, current_dir + VO_threeout, three_assembly], shell=True)
 
         if args.runtype == "improvement":
 
