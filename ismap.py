@@ -290,11 +290,11 @@ def main():
         three_contigHits = sample + "_3_contigHits.txt"
 
         #map to IS reference
-        #run_command(['bwa', 'mem', args.reference, forward_read, reverse_read, '>', output_sam], shell=True)
+        run_command(['bwa', 'mem', args.reference, forward_read, reverse_read, '>', output_sam], shell=True)
 
         #pull unmapped reads flanking IS
-        #run_command(['samtools view', '-Sb', '-f 36', output_sam, '>', five_bam], shell=True)
-        #run_command(['samtools view', '-Sb', '-f 4', '-F 40', output_sam, '>', three_bam], shell=True)
+        run_command(['samtools view', '-Sb', '-f 36', output_sam, '>', five_bam], shell=True)
+        run_command(['samtools view', '-Sb', '-f 4', '-F 40', output_sam, '>', three_bam], shell=True)
 
         #assemble ends
         run_command(['mkdir', '-p', VOdir_three, VOdir_five], shell=True)
