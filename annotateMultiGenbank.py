@@ -214,10 +214,6 @@ if __name__ == "__main__":
 
 		feature_count = 0
 
-		annotatedGenbank = options.newfile
-
-		handle = open(annotatedGenbank, "w")
-
 		if options.genbank_type == "multi":
 
 			new_record_list = []
@@ -253,9 +249,7 @@ if __name__ == "__main__":
 				else:
 					new_record_list.append(record)
 
-				SeqIO.write(new_record_list, handle, "genbank")
-
-				handle.close()	
+				SeqIO.write(new_record_list, options.newfile, "genbank")
 
 				print("Added " + str(feature_count) + " features to " + options.newfile)
 
