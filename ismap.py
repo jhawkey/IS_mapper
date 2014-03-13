@@ -383,7 +383,7 @@ def main():
             run_command(['python', args.path + 'createTableImprovement.py', '--genbank', final_genbankSingle, '--output', table_output], shell=True)
 
             if args.temp == False:
-                run_command(['rm', '-rf', temp_folder])
+                run_command(['rm', '-rf', temp_folder], shell=True)
 
         if args.runtype == "typing":
             pass
