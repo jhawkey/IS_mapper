@@ -256,7 +256,7 @@ def main():
 
     check_command(['bwa'], 'bwa')
     check_command(['samtools'], 'samtools')
-    check_command(['VevletOptimiser.pl', '--version'], 'VelvetOptimiser')
+    check_command(['VelvetOptimiser.pl', '--version'], 'VelvetOptimiser')
     check_command(['makeblastdb'], 'blast')
     
     #set up logfile
