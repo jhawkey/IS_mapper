@@ -252,6 +252,7 @@ if __name__ == "__main__":
 
 					for node in hits_dictionary[record.id]:
 						print hits_dictionary[record.id][node]
+						record_length = len(record)
 
 						#create the feature
 						new_feature = createFeature(hits_dictionary[record.id], node, options.limit, record_length = record_length)	
