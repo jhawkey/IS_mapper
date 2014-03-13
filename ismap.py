@@ -273,6 +273,11 @@ def main():
     check_command(['VelvetOptimiser.pl', '--version'], 'VelvetOptimiser')
     check_command(['makeblastdb'], 'blast')
 
+    if args.runtype != "improvement" or args.runtype != "typing":
+        logging.info('Invalid runtype selected: {}'.format(args.runtype))
+        logging.info('Runtype should be improvement or typing (see instructions for further details)')
+        exit(-1)
+
     fileSets = read_file_sets(args)
 
     bwa_index(args.reference)
