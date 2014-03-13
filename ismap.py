@@ -253,11 +253,6 @@ def main():
 
     if args.path[-1] != "/":
         args.path = args.path + "/"
-
-    check_command(['bwa'], 'bwa')
-    check_command(['samtools'], 'samtools')
-    check_command(['VelvetOptimiser.pl', '--version'], 'VelvetOptimiser')
-    check_command(['makeblastdb'], 'blast')
     
     #set up logfile
     if args.log is True:
@@ -272,6 +267,11 @@ def main():
         datefmt='%m/%d/%Y %H:%M:%S')
     logging.info('program started')
     logging.info('command line: {0}'.format(' '.join(sys.argv)))
+
+    check_command(['bwa'], 'bwa')
+    check_command(['samtools'], 'samtools')
+    check_command(['VelvetOptimiser.pl', '--version'], 'VelvetOptimiser')
+    check_command(['makeblastdb'], 'blast')
 
     fileSets = read_file_sets(args)
 
