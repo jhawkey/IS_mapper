@@ -34,6 +34,7 @@ def parse_args():
     # Reporting options
     parser.add_argument('--log', action="store_true", required=False, help='Switch on logging to file (otherwise log to stdout')
     parser.add_argument('--output', type=str, required=True, help='prefix for output files')
+    parser.add_argument('--temp', action="store_true", required=False, help='Switch on keeping the temp folder instead of deleting it at the end of the program')
 
 
     return parser.parse_args()
@@ -102,6 +103,12 @@ def check_command_version(command_list, version_identifier, command_name, requir
         exit(-1)
 
 def check_command(command_list, command_name):
+    '''
+    Check that the dependency is installed.
+    Exits the program if it can't be found.
+        - command_list is the command to run to determine the version.
+        - command_name is the name of the command to show in the error message.
+    '''
     try:
         command_stdout = check_output(command_list, stderr=STDOUT)
     except OSError as e:
@@ -110,6 +117,8 @@ def check_command(command_list, command_name):
         logging.error("Do you have {} installed in your PATH?".format(command_name))
         exit(-1)
     except CalledProcessError as e:
+        # some programs such as samtools return a non zero exit status
+        # when you ask for the version. We ignore it here.
         command_stdout = e.output
 
 def get_readFile_components(full_file_path):
@@ -247,6 +256,25 @@ def check_blast_database(fasta):
         os.system(' '.join(['makeblastdb -in', fasta, '-dbtype nucl']))
         #run_command(['makeblast db -in', fasta, '-dbtype nucl'])
 
+def make_directories(dir_list):
+    '''
+    Makes the directories specified in the list.
+    Checks to make sure they exist first.
+    If the directory is a VO directory, REMOVE IT before making it again,
+    as this will cause Velvet to give an error.
+    '''
+    for directory in dir_list:
+        if "VO" not in direcotry:
+            run_command(['mkdir', '-p', directory], shell=True)
+        elif "VO" in directory:
+            if os.path.exists(directory):
+                run_command(['rm', '-rf', directory], shell=True)
+                run_command(['mkdir', '-p', directory], shell=True)
+            else:
+                run_command(['mkdir', '-p', directory], shell=True)
+        else:
+            logging.info('Cannot make diretory {}'.format(directory))
+
 def main():
 
     args = parse_args()
@@ -273,6 +301,8 @@ def main():
     check_command(['VelvetOptimiser.pl', '--version'], 'VelvetOptimiser')
     check_command(['makeblastdb'], 'blast')
 
+    # checks to make sure the runtype is valid and provides an error
+    # if it's not.
     if args.runtype != "improvement" or args.runtype != "typing":
         logging.info('Invalid runtype selected: {}'.format(args.runtype))
         logging.info('Runtype should be improvement or typing (see instructions for further details)')
@@ -291,30 +321,33 @@ def main():
             pass
 
         current_dir = os.getcwd() + '/'
-        output_sam = sample + '.sam'
-        five_bam = sample + '_5.bam'
-        three_bam = sample + '_3.bam'
-
-        sKmer, eKmer = get_kmer_size(forward_read)
-
-        VOdir_five = sample + "_VO_5"
-        VOdir_three = sample + "_VO_3"
+        temp_folder = '/temp/'
+        output_sam = temp_folder + sample + '.sam'
+        five_bam = temp_folder + sample + '_5.bam'
+        three_bam = temp_folder + sample + '_3.bam'
+        VOdir_five = temp_folder + sample + '_VO_5'
+        VOdir_three = temp_folder + sample + '_VO_3'
         VO_fiveout = VOdir_five + "/out/"
-        VO_threeout = VOdir_three + "/out/"
+        VO_threeout = VOdir_three + "/out/"  
         five_assembly = sample + "_5_contigs.fasta"
         three_assembly = sample + "_3_contigs.fasta"
-
         five_contigHits = sample + "_5_contigHits.txt"
         three_contigHits = sample + "_3_contigHits.txt"
 
-        #map to IS reference
+        # get Velvet kmer range
+        sKmer, eKmer = get_kmer_size(forward_read)
+
+        # create all required directories
+        make_directories(VOdir_five, VOdir_three)
+
+        # map to IS reference
         run_command(['bwa', 'mem', args.reference, forward_read, reverse_read, '>', output_sam], shell=True)
 
-        #pull unmapped reads flanking IS
+        # pull unmapped reads flanking IS
         run_command(['samtools view', '-Sb', '-f 36', output_sam, '>', five_bam], shell=True)
         run_command(['samtools view', '-Sb', '-f 4', '-F 40', output_sam, '>', three_bam], shell=True)
 
-        #assemble ends
+        # assemble ends
         run_command(['mkdir', '-p', VOdir_three, VOdir_five], shell=True)
         #run_command(["cd", VOdir_five], shell=True) 
         #run_command(["VelvetOptimiser.pl", "-s", str(sKmer), "-e", str(eKmer), "-f '-short -bam ../" + five_bam + "'"])
@@ -329,26 +362,29 @@ def main():
 
         if args.runtype == "improvement":
 
-            #check database for assemblies and create one if it doesn't already exist
+            # check database for assemblies and create one if it doesn't already exist
             check_blast_database(assembly)
 
-            #get prefix for output filenames
-            genbank_output = sample + "_annotated.gbk"
+            # get prefix for output filenames
+            genbank_output = temp_output + sample + "_annotated.gbk"
             final_genbank = sample + "_annotatedAll.gbk"
             final_genbankSingle = sample + "_annotatedAllSingle.gbk"
             table_output = sample + "_table.txt"
 
-            #blast ends against assemblies
+            # blast ends against assemblies
             run_command(['blastn', '-db', assembly, '-query', five_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", five_contigHits], shell=True)
             run_command(['blastn', '-db', assembly, '-query', three_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", three_contigHits], shell=True)
 
-            #annotate hits to genbank
+            # annotate hits to genbank
             run_command(['python', args.path + 'annotateMultiGenbank.py', '-s', five_contigHits, '-f', assembly, '-p', str(args.percentid), '-c', str(args.coverage), '-i', sample, '-n', genbank_output ], shell=True)
             run_command(['python', args.path + 'annotateMultiGenbank.py', '-s', three_contigHits, '-g', genbank_output, '-n', final_genbank, '-p', str(args.percentid), '-c', str(args.coverage)], shell=True)
 
-            #create single genbank and output table
+            # create single genbank and output table
             run_command(['python', args.path + 'multiGenbankToSingle.py', '-i', final_genbank, '-n', sample, '-o', final_genbankSingle], shell=True)
             run_command(['python', args.path + 'createTableImprovement.py', '--genbank', final_genbankSingle, '--output', table_output], shell=True)
+
+            if args.temp == False:
+                run_command(['rm', '-rf', temp_folder])
 
         if args.runtype == "typing":
             pass
