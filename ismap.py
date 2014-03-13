@@ -101,6 +101,17 @@ def check_command_version(command_list, version_identifier, command_name, requir
         logging.error("{} version {} is required by ISmapper.".format(command_name, required_version))
         exit(-1)
 
+def check_command(command_list, command_name):
+    try:
+        command_stdout = check_output(command_list, stderr=STDOUT)
+    except OSError as e:
+        logging.error("Failed command: {}".format(' '.join(command_list)))
+        logging.error(str(e))
+        logging.error("Do you have {} installed in your PATH?".format(command_name))
+        exit(-1)
+    except CalledProcessError as e:
+        command_stdout = e.output
+
 def get_readFile_components(full_file_path):
 
     (file_path,file_name) = os.path.split(full_file_path)
@@ -243,8 +254,7 @@ def main():
     if args.path[-1] != "/":
         args.path = args.path + "/"
 
-    #check_command_version(['bwa'], 'Version: 0.7.5a', 'bwa', '0.7.5a')
-    #check_command_version(['samtools'], 'Version: 0.1.19', 'samtools', '0.1.19')
+    check_command('bwa', 'bwa')
     
     #set up logfile
     if args.log is True:
