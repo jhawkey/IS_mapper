@@ -264,7 +264,7 @@ def make_directories(dir_list):
     as this will cause Velvet to give an error.
     '''
     for directory in dir_list:
-        if "VO" not in direcotry:
+        if "VO" not in directory:
             run_command(['mkdir', '-p', directory], shell=True)
         elif "VO" in directory:
             if os.path.exists(directory):
