@@ -254,10 +254,10 @@ def main():
     if args.path[-1] != "/":
         args.path = args.path + "/"
 
-    check_command('bwa', 'bwa')
-    check_command('samtools', 'samtools')
-    check_command('VevletOptimiser.pl', 'VelvetOptimiser')
-    check_command('makeblastdb', 'blast')
+    check_command(['bwa'], 'bwa')
+    check_command(['samtools'], 'samtools')
+    check_command(['VevletOptimiser.pl'], 'VelvetOptimiser')
+    check_command(['makeblastdb'], 'blast')
     
     #set up logfile
     if args.log is True:
