@@ -23,6 +23,7 @@ def main():
 	parser.add_option("-f", "--fasta", action="store", dest="fasta", help="fasta file to create multi-genbank from", default="")
 	parser.add_option("-p", "--pid", action="store", dest="pid", help="minimum percent id of blast hit to be annotated (default 95)", default="95")
 	parser.add_option("-c", "--qcov", action="store", dest="qcov", help="minimum coverage of the query to the reference to be annotated (default 100)", default="100")
+	parser.add_option("-l", "--limit", action="store", dest="limit", help="distance from ends of contigs for start or end of contig value to be called" , default=300)
 
 	return parser.parse_args()
 
@@ -81,7 +82,7 @@ def parseBLAST(hits, genbank_type):
 		print("Genbank type not correctly specified, must be either single or multi.")
 
 
-def createFeature(hits, record_id):
+def createFeature(hits, record_id, limit, record_length = None):
 
 	#set feature type
 	if "_5_" in options.summary:
@@ -94,10 +95,31 @@ def createFeature(hits, record_id):
 	#get query coverage for hit
 	queryCoverage = (float(hits[record_id][5])/float(hits[record_id][4])) * 100
 
+	if record_length != None:
+		#find out if hit is at the beginning or end of a contig based on a specified limit
+		start_range = range(0, limit)
+		end_region = record_length - limit
+		end_range = range(end_region, record_length + 1)
+		start_set = set(start_range)
+		end_set = set(end_range)
+		if len(start_set.intersection(end_set)) != 0:
+			hit_location_value = "contig too small to call"
+
+		else:
+			if int(hits[record_id][0]) in start_range or int(hits[record_id][1]) in start_range:
+				hit_location_value = "start of contig"
+			elif int(hits[record_id][0]) in end_range or int(hits[record_id][1]) in end_range:
+				hit_location_value = "end of contig"
+			else:
+				hit_location_value = "middle of contig"
+
+
 	#check percent ID is at least minimum value set by user
 	if float(hits[record_id][2]) >= float(options.pid) and queryCoverage >= float(options.qcov):
 		quals = {}
 		quals['note'] = "Node: " + record_id + " query length: " + hits[record_id][4] + " blast score: " + hits[record_id][3] + " query coverage: " + str(queryCoverage) + " percent ID: " + hits[record_id][2]
+		if record_length != None:
+			quals['location'] = hit_location_value
 
 		#set Artemis colour to represent percent ID of hit
 		quals['colour'] = artemisColour(hits[record_id][2])
@@ -180,9 +202,10 @@ if __name__ == "__main__":
 
 				for node in hits_dictionary[record.id]:
 					print hits_dictionary[record.id][node]
+					record_length = len(record)
 
 					#create the feature
-					new_feature = createFeature(hits_dictionary[record.id], node)	
+					new_feature = createFeature(hits_dictionary[record.id], node, options.limit, record_length = record_length)	
 
 					#check that the feature has passed the creation step
 					if new_feature != 0:
@@ -231,7 +254,7 @@ if __name__ == "__main__":
 						print hits_dictionary[record.id][node]
 
 						#create the feature
-						new_feature = createFeature(hits_dictionary[record.id], node)	
+						new_feature = createFeature(hits_dictionary[record.id], node, options.limit, record_length = record_length)	
 
 						#check that the feature has passed the creation step
 						if new_feature != 0:
@@ -261,7 +284,7 @@ if __name__ == "__main__":
 
 				for node in hits_dictionary[key]:
 
-					new_feature = createFeature(hits_dictionary[key], node)
+					new_feature = createFeature(hits_dictionary[key], node, options.limit)
 
 					if new_feature != 0:
 

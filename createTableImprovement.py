@@ -101,7 +101,6 @@ def withinContig(ranges, contigs):
 	for start in ranges:
 		for key in contigs:
 			if start >= contigs[key][0] and ranges[start][0] <= contigs[key][1]:
-
 				lines_dict["region_" + str(count)] = [start, ranges[start][0], key, ranges[start][1]]
 				count = count + 1
 
@@ -121,13 +120,11 @@ def main():
 	contigs = extractContigs(args.genbank)
 
 	#combine hits next to each other into one hit
-	five_rangesNew = collapseRanges(five_ranges, 300, "5 prime")
-	three_rangesNew = collapseRanges(three_ranges, 300, "3 prime")
+	five_rangesNew = collapseRanges(five_ranges, 500, "5 prime")
+	three_rangesNew = collapseRanges(three_ranges, 500, "3 prime")
 
 	new_ranges_dict = dict(three_rangesNew.items() + five_rangesNew.items())
-
 	lines_list = withinContig(new_ranges_dict, contigs)
-
 	count = 1	
 
 	output = open(args.output, "w")	
