@@ -338,7 +338,7 @@ def main():
         sKmer, eKmer = get_kmer_size(forward_read)
 
         # create all required directories
-        make_directories(VOdir_five, VOdir_three)
+        make_directories([VOdir_five, VOdir_three])
 
         # map to IS reference
         run_command(['bwa', 'mem', args.reference, forward_read, reverse_read, '>', output_sam], shell=True)
