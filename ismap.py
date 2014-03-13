@@ -366,7 +366,7 @@ def main():
             check_blast_database(assembly)
 
             # get prefix for output filenames
-            genbank_output = temp_output + sample + "_annotated.gbk"
+            genbank_output = temp_folder + sample + "_annotated.gbk"
             final_genbank = sample + "_annotatedAll.gbk"
             final_genbankSingle = sample + "_annotatedAllSingle.gbk"
             table_output = sample + "_table.txt"
