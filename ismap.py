@@ -303,7 +303,7 @@ def main():
 
     # checks to make sure the runtype is valid and provides an error
     # if it's not.
-    if args.runtype != "improvement" or args.runtype != "typing":
+    if args.runtype != "improvement" and args.runtype != "typing":
         logging.info('Invalid runtype selected: {}'.format(args.runtype))
         logging.info('Runtype should be improvement or typing (see instructions for further details)')
         exit(-1)
