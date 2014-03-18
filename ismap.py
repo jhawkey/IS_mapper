@@ -321,7 +321,7 @@ def main():
             pass
 
         current_dir = os.getcwd() + '/'
-        temp_folder = current_dir + 'temp/'
+        temp_folder = current_dir + sample + '_temp/'
         output_sam = temp_folder + sample + '.sam'
         five_bam = temp_folder + sample + '_5.bam'
         three_bam = temp_folder + sample + '_3.bam'
