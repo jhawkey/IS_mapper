@@ -33,6 +33,9 @@ if __name__ == "__main__":
 
 	colour_count = 0
 
+	if len(options.name) >= 10:
+		options.name = options.name[:9]
+
 	for r in records:
 		length = len(r)
 		id = r.name
