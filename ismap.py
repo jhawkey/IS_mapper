@@ -368,7 +368,7 @@ def main():
             final_genbankSingle = sample + "_annotatedAllSingle.gbk"
             table_output = sample + "_table.txt"
 
-            if args.extension = '.gbk':
+            if args.extension == '.gbk':
                 assembly_gbk = assembly
                 (file_path, file_name_before_ext, full_ext) = get_readFile_components(assembly_gbk)
                 assembly_fasta = os.path.join(file_path, file_name_before_ext, '.fasta')
