@@ -371,7 +371,7 @@ def main():
             if args.extension == '.gbk':
                 assembly_gbk = assembly
                 (file_path, file_name_before_ext, full_ext) = get_readFile_components(assembly_gbk)
-                assembly_fasta = os.path.join(file_path, file_name_before_ext, '.fasta')
+                assembly_fasta = os.path.join(temp_folder, file_name_before_ext) + '.fasta'
                 run_command(['python', 'gbkToFasta', '-i', assembly, '-o', assembly_fasta])
                 assembly = assembly_fasta
 
