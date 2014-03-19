@@ -23,6 +23,7 @@ def parse_args():
     parser.add_argument('--reference', type = str, required=True, help='Fasta file for reference gene (eg: insertion sequence) that will be mapped to')
     parser.add_argument('--assemblies', nargs = '+', type=str, required=False, help='Contig assemblies, one for each read set')
     parser.add_argument('--assemblyid', type=str, required=False, help='Identifier for assemblies eg: sampleName_contigs (specify _contigs) or sampleName_assembly (specify _assembly). Do not specify extension.')
+    parser.add_argument('--extension', type=str, required=False, help='Extension for assemblies (.fasta or .gbk, default is .fasta)', default='.fasta')
     parser.add_argument('--typingRef', type=str, required=False, help='Reference genome for typing against')
     parser.add_argument('--type', type=str, required=False, default='fasta', help='Indicator for contig assembly type, genbank or fasta (default fasta)')
     parser.add_argument('--path', type=str, required=True, default='', help='Path to folder where scripts are.')
@@ -361,14 +362,21 @@ def main():
 
         if args.runtype == "improvement":
 
-            # check database for assemblies and create one if it doesn't already exist
-            check_blast_database(assembly)
-
             # get prefix for output filenames
             genbank_output = temp_folder + sample + "_annotated.gbk"
             final_genbank = sample + "_annotatedAll.gbk"
             final_genbankSingle = sample + "_annotatedAllSingle.gbk"
             table_output = sample + "_table.txt"
+
+            if args.extension = '.gbk':
+                assembly_gbk = assembly
+                (file_path, file_name_before_ext, full_ext) = get_readFile_components(assembly_gbk)
+                assembly_fasta = os.path.join(file_path, file_name_before_ext, '.fasta')
+                run_command(['python', 'gbkToFasta', '-i', assembly, '-o', assembly_fasta])
+                assembly = assembly_fasta
+
+            # check database for assemblies and create one if it doesn't already exist
+            check_blast_database(assembly)
 
             # blast ends against assemblies
             run_command(['blastn', '-db', assembly, '-query', five_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", five_contigHits], shell=True)
