@@ -372,7 +372,7 @@ def main():
                 assembly_gbk = assembly
                 (file_path, file_name_before_ext, full_ext) = get_readFile_components(assembly_gbk)
                 assembly_fasta = os.path.join(temp_folder, file_name_before_ext) + '.fasta'
-                run_command(['python', 'gbkToFasta', '-i', assembly, '-o', assembly_fasta])
+                run_command(['python', args.path + 'gbkToFasta', '-i', assembly, '-o', assembly_fasta], shell=True)
                 assembly = assembly_fasta
 
             # check database for assemblies and create one if it doesn't already exist
