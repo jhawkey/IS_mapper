@@ -367,12 +367,6 @@ def main():
         run_command(['samtools view', '-Sb', '-f 4', '-F 40', output_sam, '>', three_bam], shell=True)
 
         # assemble ends
-        #run_command(["cd", VOdir_five], shell=True) 
-        #run_command(["VelvetOptimiser.pl", "-s", str(sKmer), "-e", str(eKmer), "-f '-short -bam ../" + five_bam + "'"])
-        #run_command(['cd ../', '&&', 'mv', VOdir_five, '/auto*/contigs.fa', five_assembly], shell=True)
-        #run_command(["cd", VOdir_three], shell=True)
-        #run_command(["cd", VOdir_three, "VelvetOptimiser.pl", "-s", str(sKmer), "-e", str(eKmer), "-f '-short -bam ../" + three_bam + "'"])
-        #run_command(['cd ../', '&&', 'mv', VOdir_three, '/auto*/contigs.fa', three_assembly], shell=True)
         print ' '.join([args.path + 'velvetshell.sh', VOdir_five, str(sKmer), str(eKmer), five_bam, current_dir + VO_fiveout, current_dir + five_assembly])
         print ' '.join([args.path + 'velvetshell.sh', VOdir_three, str(sKmer), str(eKmer), three_bam, current_dir + VO_threeout, current_dir + three_assembly])
         run_command([args.path + 'velvetshell.sh', VOdir_five, str(sKmer), str(eKmer), five_bam, VO_fiveout, current_dir + five_assembly], shell=True)
