@@ -185,7 +185,7 @@ if __name__ == "__main__":
 					#just append the record if there was no feature to be added
 					else:
 						new_record_list.append(record)
-				#new_record_list.append(record)
+				new_record_list.append(record)
 			#just append the record if the id was not in the list
 			else:
 				new_record_list.append(record)
@@ -216,7 +216,7 @@ if __name__ == "__main__":
 						#just append the record if there was no feature to be added
 						else:
 							new_record_list.append(record)
-					#new_record_list.append(record)					
+					new_record_list.append(record)					
 				#just append the record if the id was not in the list
 				else:
 					new_record_list.append(record)
