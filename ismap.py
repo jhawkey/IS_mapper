@@ -3,10 +3,7 @@ import sys, re, os
 from argparse import (ArgumentParser, FileType)
 import subprocess
 from subprocess import call, check_output, CalledProcessError, STDOUT
-import commands
 from Bio.Blast.Applications import NcbiblastnCommandline
-from Bio import SeqIO
-from Bio.SeqRecord import SeqRecord
 
 def parse_args():
     '''
@@ -252,28 +249,13 @@ def get_kmer_size(read):
 def check_blast_database(fasta):
 
     database_path = fasta + ".nin"
-    status, output = commands.getstatusoutput("grep '>' " + fasta " | wc -l")
-    if status == 0:
-        if output == 1:
-            if os.path.exists(database_path):
-                logging.info('Index for {} is already built...'.format(fasta))
-            else:
-                logging.info('Building blast index for {}...'.format(fasta))
-                run_command(['makeblastdb', '-in', fasta, '-dbtype', 'nucl'])
-        elif output > 1:
-            logging.info('Creating single fasta from multi entry fasta file {}...'.format(fasta))
-            fasta_file = SeqIO.parse(fasta, 'fasta')
-            single_fasta = ""
-            ids = []
-            for record in fasta_file:
-                single_fasta += record.seq
-                ids.append(record.id)
-            single_fasta_file = SeqRecord(single_fasta, record.id[0])
-            SeqIO.write(single_fasta_file, fasta + '_single.fasta', 'fasta')
-            logging.info('Building blast index for {}...'.format(fasta + '_single.fasta'))
-            run_command(['makeblastdb', '-in', fasta + '_single.fasta', '-dbtype', 'nucl'])
+
+    if os.path.exists(database_path):
+        logging.info('Index for {} is already built...'.format(fasta))
     else:
-        logging.info('Unable to determine if fasta {} is single or multi entry. Please check {} is in correct format.'.format(fasta))
+        logging.info('Building blast index for {}...'.format(fasta))
+        os.system(' '.join(['makeblastdb -in', fasta, '-dbtype nucl']))
+        #run_command(['makeblast db -in', fasta, '-dbtype nucl'])
 
 def make_directories(dir_list):
     '''
@@ -367,6 +349,12 @@ def main():
         run_command(['samtools view', '-Sb', '-f 4', '-F 40', output_sam, '>', three_bam], shell=True)
 
         # assemble ends
+        #run_command(["cd", VOdir_five], shell=True) 
+        #run_command(["VelvetOptimiser.pl", "-s", str(sKmer), "-e", str(eKmer), "-f '-short -bam ../" + five_bam + "'"])
+        #run_command(['cd ../', '&&', 'mv', VOdir_five, '/auto*/contigs.fa', five_assembly], shell=True)
+        #run_command(["cd", VOdir_three], shell=True)
+        #run_command(["cd", VOdir_three, "VelvetOptimiser.pl", "-s", str(sKmer), "-e", str(eKmer), "-f '-short -bam ../" + three_bam + "'"])
+        #run_command(['cd ../', '&&', 'mv', VOdir_three, '/auto*/contigs.fa', three_assembly], shell=True)
         print ' '.join([args.path + 'velvetshell.sh', VOdir_five, str(sKmer), str(eKmer), five_bam, current_dir + VO_fiveout, current_dir + five_assembly])
         print ' '.join([args.path + 'velvetshell.sh', VOdir_three, str(sKmer), str(eKmer), three_bam, current_dir + VO_threeout, current_dir + three_assembly])
         run_command([args.path + 'velvetshell.sh', VOdir_five, str(sKmer), str(eKmer), five_bam, VO_fiveout, current_dir + five_assembly], shell=True)
