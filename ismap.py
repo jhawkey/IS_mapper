@@ -383,8 +383,12 @@ def main():
             run_command(['blastn', '-db', assembly, '-query', three_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", three_contigHits], shell=True)
 
             # annotate hits to genbank
-            run_command(['python', args.path + 'annotateMultiGenbank.py', '-s', five_contigHits, '-f', assembly, '-p', str(args.percentid), '-c', str(args.coverage), '-i', sample, '-n', genbank_output ], shell=True)
-            run_command(['python', args.path + 'annotateMultiGenbank.py', '-s', three_contigHits, '-g', genbank_output, '-n', final_genbank, '-p', str(args.percentid), '-c', str(args.coverage)], shell=True)
+            if args.extension == '.gbk':
+                run_command(['python', args.path + 'annotateMultiGenbank.py', '-s', five_contigHits, '-g', assembly_gbk, '-p', str(args.percentid), '-c', str(args.coverage), '-i', sample, '-n', genbank_output ], shell=True)
+                run_command(['python', args.path + 'annotateMultiGenbank.py', '-s', three_contigHits, '-g', genbank_output, '-n', final_genbank, '-p', str(args.percentid), '-c', str(args.coverage)], shell=True)
+            else:
+                run_command(['python', args.path + 'annotateMultiGenbank.py', '-s', five_contigHits, '-f', assembly, '-p', str(args.percentid), '-c', str(args.coverage), '-i', sample, '-n', genbank_output ], shell=True)
+                run_command(['python', args.path + 'annotateMultiGenbank.py', '-s', three_contigHits, '-g', genbank_output, '-n', final_genbank, '-p', str(args.percentid), '-c', str(args.coverage)], shell=True)
 
             # create single genbank and output table
             run_command(['python', args.path + 'multiGenbankToSingle.py', '-i', final_genbank, '-n', sample, '-o', final_genbankSingle], shell=True)
