@@ -3,7 +3,10 @@ import sys, re, os
 from argparse import (ArgumentParser, FileType)
 import subprocess
 from subprocess import call, check_output, CalledProcessError, STDOUT
+import commands
 from Bio.Blast.Applications import NcbiblastnCommandline
+from Bio import SeqIO
+from Bio.SeqRecord import SeqRecord
 
 def parse_args():
     '''
@@ -249,13 +252,28 @@ def get_kmer_size(read):
 def check_blast_database(fasta):
 
     database_path = fasta + ".nin"
-
-    if os.path.exists(database_path):
-        logging.info('Index for {} is already built...'.format(fasta))
+    status, output = commands.getstatusoutput("grep '>' " + fasta " | wc -l")
+    if status == 0:
+        if output == 1:
+            if os.path.exists(database_path):
+                logging.info('Index for {} is already built...'.format(fasta))
+            else:
+                logging.info('Building blast index for {}...'.format(fasta))
+                run_command(['makeblastdb', '-in', fasta, '-dbtype', 'nucl'])
+        elif output > 1:
+            logging.info('Creating single fasta from multi entry fasta file {}...'.format(fasta))
+            fasta_file = SeqIO.parse(fasta, 'fasta')
+            single_fasta = ""
+            ids = []
+            for record in fasta_file:
+                single_fasta += record.seq
+                ids.append(record.id)
+            single_fasta_file = SeqRecord(single_fasta, record.id[0])
+            SeqIO.write(single_fasta_file, fasta + '_single.fasta', 'fasta')
+            logging.info('Building blast index for {}...'.format(fasta + '_single.fasta'))
+            run_command(['makeblastdb', '-in', fasta + '_single.fasta', '-dbtype', 'nucl'])
     else:
-        logging.info('Building blast index for {}...'.format(fasta))
-        os.system(' '.join(['makeblastdb -in', fasta, '-dbtype nucl']))
-        #run_command(['makeblast db -in', fasta, '-dbtype nucl'])
+        logging.info('Unable to determine if fasta {} is single or multi entry. Please check {} is in correct format.'.format(fasta))
 
 def make_directories(dir_list):
     '''
