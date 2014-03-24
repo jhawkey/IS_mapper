@@ -57,10 +57,12 @@ def parseBLAST(hits, genbank_type):
 		hit_length.append(columns[4])
 
 	#add values to dicionary
-	if genbank_type == "multi":	
+	if genbank_type == "multi":
+		hit_no = 1	
 		for i in range(0, len(hit_id)):
 			try:
-				hits[hit_id[i]][query_id[i]] = [start[i], end[i], percentID[i], blast_score[i], query_length[i], hit_length[i]]
+				hits[hit_id[i]]['hit_' + str(hit_no)] = [start[i], end[i], percentID[i], blast_score[i], query_length[i], hit_length[i], query_id[i]]
+				hit_no += 1
 				#hits[node[i]] = [start[i], end[i], percentID[i], record_name[i], blast_score[i], query_length[i], hit_length[i]]
 			except KeyError:
 				pass
@@ -68,10 +70,10 @@ def parseBLAST(hits, genbank_type):
 
 	#different dictionary setup if genbank is a single type
 	elif genbank_type == "single":
-		count = 1
+		hit_no = 1
 		for i in range(0, len(hit_id)):
-			hits[hit_id[i]][query_id[i]] = [start[i], end[i], percentID[i], blast_score[i], query_length[i], hit_length[i]]
-			count += 1
+			hits[hit_id[i]]['hit_' + str(hit_no)] = [start[i], end[i], percentID[i], blast_score[i], query_length[i], hit_length[i], query_id[i]]
+			hit_no += 1
 		return(hits)	
 	else:
 		print("Genbank type not correctly specified, must be either single or multi.")
@@ -107,7 +109,7 @@ def createFeature(hits, record_id, limit, record_length = None):
 	#check percent ID is at least minimum value set by user
 	if float(hits[record_id][2]) >= float(options.pid) and queryCoverage >= float(options.qcov):
 		quals = {}
-		quals['note'] = "Node: " + record_id + " query length: " + hits[record_id][4] + " blast score: " + hits[record_id][3] + " query coverage: " + str(queryCoverage) + " percent ID: " + hits[record_id][2]
+		quals['note'] = "Node: " + hits[record_id][6] + " query length: " + hits[record_id][4] + " blast score: " + hits[record_id][3] + " query coverage: " + str(queryCoverage) + " percent ID: " + hits[record_id][2]
 		if record_length != None:
 			quals['location'] = hit_location_value
 		#set Artemis colour to represent percent ID of hit
