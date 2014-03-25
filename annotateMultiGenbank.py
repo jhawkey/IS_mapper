@@ -109,7 +109,7 @@ def createFeature(hits, record_id, limit, record_length = None):
 	#check percent ID is at least minimum value set by user
 	if float(hits[record_id][2]) >= float(options.pid) and queryCoverage >= float(options.qcov):
 		quals = {}
-		quals['note'] = "Node: " + hits[record_id][6] + " query length: " + hits[record_id][4] + " blast score: " + hits[record_id][3] + " query coverage: " + str(queryCoverage) + " percent ID: " + hits[record_id][2]
+		quals['note'] = "Node: " + hits[record_id][6] + " query length: " + hits[record_id][4] + " blast score: " + hits[record_id][3] + " query coverage: " + str(queryCoverage) + " percent ID: " + hits[record_id][2] + " " + feature_type
 		if record_length != None:
 			quals['location'] = hit_location_value
 		#set Artemis colour to represent percent ID of hit
