@@ -418,7 +418,7 @@ def main():
             run_command(['python', args.path + 'multiGenbankToSingle.py', '-i', final_genbank, '-n', sample, '-o', final_genbankSingle], shell=True)
 
             #create output table
-            run_command(['python', args.path +'createTypingTable.py', '--genbank', final_genbankSingle, '--insertion', args.reference], shell=True)
+            run_command(['python', args.path +'createTypingTable.py', '--genbank', final_genbankSingle, '--insertion', args.reference, '--temp', temp_folder, '>', table_output], shell=True)
 
         if args.temp == False:
             run_command(['rm', '-rf', temp_folder], shell=True)
