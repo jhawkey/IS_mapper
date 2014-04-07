@@ -254,8 +254,7 @@ def check_blast_database(fasta):
         logging.info('Index for {} is already built...'.format(fasta))
     else:
         logging.info('Building blast index for {}...'.format(fasta))
-        os.system(' '.join(['makeblastdb -in', fasta, '-dbtype nucl']))
-        #run_command(['makeblast db -in', fasta, '-dbtype nucl'])
+        run_command(['makeblast db -in', fasta, '-dbtype nucl'])
 
 def make_directories(dir_list):
     '''
@@ -349,14 +348,6 @@ def main():
         run_command(['samtools view', '-Sb', '-f 4', '-F 40', output_sam, '>', three_bam], shell=True)
 
         # assemble ends
-        #run_command(["cd", VOdir_five], shell=True) 
-        #run_command(["VelvetOptimiser.pl", "-s", str(sKmer), "-e", str(eKmer), "-f '-short -bam ../" + five_bam + "'"])
-        #run_command(['cd ../', '&&', 'mv', VOdir_five, '/auto*/contigs.fa', five_assembly], shell=True)
-        #run_command(["cd", VOdir_three], shell=True)
-        #run_command(["cd", VOdir_three, "VelvetOptimiser.pl", "-s", str(sKmer), "-e", str(eKmer), "-f '-short -bam ../" + three_bam + "'"])
-        #run_command(['cd ../', '&&', 'mv', VOdir_three, '/auto*/contigs.fa', three_assembly], shell=True)
-        print ' '.join([args.path + 'velvetshell.sh', VOdir_five, str(sKmer), str(eKmer), five_bam, current_dir + VO_fiveout, current_dir + five_assembly])
-        print ' '.join([args.path + 'velvetshell.sh', VOdir_three, str(sKmer), str(eKmer), three_bam, current_dir + VO_threeout, current_dir + three_assembly])
         run_command([args.path + 'velvetshell.sh', VOdir_five, str(sKmer), str(eKmer), five_bam, VO_fiveout, current_dir + five_assembly], shell=True)
         run_command([args.path + 'velvetshell.sh', VOdir_three, str(sKmer), str(eKmer), three_bam, VO_threeout, current_dir + three_assembly], shell=True)
 
@@ -384,9 +375,13 @@ def main():
 
             # annotate hits to genbank
             if args.extension == '.gbk':
+                if len(sample) > 10:
+                    sample = sample[0:9]
                 run_command(['python', args.path + 'annotateMultiGenbank.py', '-s', five_contigHits, '-g', assembly_gbk, '-p', str(args.percentid), '-c', str(args.coverage), '-i', sample, '-n', genbank_output ], shell=True)
                 run_command(['python', args.path + 'annotateMultiGenbank.py', '-s', three_contigHits, '-g', genbank_output, '-n', final_genbank, '-p', str(args.percentid), '-c', str(args.coverage)], shell=True)
             else:
+                if len(sample) > 10:
+                    sample = sample[0:9]
                 run_command(['python', args.path + 'annotateMultiGenbank.py', '-s', five_contigHits, '-f', assembly, '-p', str(args.percentid), '-c', str(args.coverage), '-i', sample, '-n', genbank_output ], shell=True)
                 run_command(['python', args.path + 'annotateMultiGenbank.py', '-s', three_contigHits, '-g', genbank_output, '-n', final_genbank, '-p', str(args.percentid), '-c', str(args.coverage)], shell=True)
 
@@ -394,27 +389,39 @@ def main():
             run_command(['python', args.path + 'multiGenbankToSingle.py', '-i', final_genbank, '-n', sample, '-o', final_genbankSingle], shell=True)
             run_command(['python', args.path + 'createTableImprovement.py', '--genbank', final_genbankSingle, '--output', table_output], shell=True)
 
-            if args.temp == False:
-                run_command(['rm', '-rf', temp_folder], shell=True)
-
         if args.runtype == "typing":
-            pass
 
-            #check database for reference genome and create if it doesn't exist
-            #check_blast_database(args.typingRef)
-
-            #blast ends against reference genome
-            #run_command(['blastn', '-db', args.typingRef, '-query', five_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", five_contigHits], shell=True)
-            #run_command(['blastn', '-db', args.typingRef, '-query', three_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >" three_contigHits], shell=True)
+            #get prefix for output filenames
+            (file_path, file_name) = os.path.split(args.typingRef)
+            typingName = file_name.split('.g')
+            typingRefFasta = typingName + '.fasta'
+            genbank_output = temp_folder + sample + '_annotated.gbk'
+            final_genbank = sample + '_annotatedAll.gbk'
+            final_genbankSingle = sample + '_annotatedAllSingle.gbk'
+            table_output = sample + '_table.txt'
 
             #turn typingRef into a fasta
-            #typingRefFasta = args.typingRef + '.fasta'
-            #run_command(['python', 'gbkToFasta.py', '-i', args.typingRef, '-o', typingRefFasta])
+            run_command(['python', 'gbkToFasta.py', '-i', args.typingRef, '-o', temp_folder + typingRefFasta])
+            
+            #check database for reference genome and create if it doesn't exist
+            check_blast_database(typingRefFasta)
+
+            #blast ends against reference genome
+            run_command(['blastn', '-db', typingRefFasta, '-query', five_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", five_contigHits], shell=True)
+            run_command(['blastn', '-db', typingRefFasta, '-query', three_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >" three_contigHits], shell=True)
 
             #annotate hits to a genbank
-            #run_command(['python', 'annotateMultiGenbank.py', '-s', five_contigHits, '-f', typingRefFasta, '-p', str(args.percentid), '-c', str(args.coverage), '])
+            if len(sample) > 10:
+                sample = sample[0:9]
+            run_command(['python', 'annotateMultiGenbank.py', '-s', five_contigHits, '-f', typingRefFasta, '-p', str(args.percentid), '-c', str(args.coverage) '-n', genbank_output, '-i', sample])
+            run_command(['python', 'annotatedMultiGenbank.py', '-s', three_contigHits, '-g', genbank_output, '-n', final_genbank, '-p', str(args.percentid), '-c', str(args.coverage)])
+            run_command(['python', 'multiGenbankToSingle.py', '-i', final_genbank, '-n', sample, '-o', final_genbankSingle])
 
             #create output table
+            run_command(['python', 'createTypingTable.py', '--genbank', final_genbankSingle, '--insertion', args.reference])
+
+        if args.temp == False:
+            run_command(['rm', '-rf', temp_folder], shell=True)
 
 
 if __name__ == '__main__':
