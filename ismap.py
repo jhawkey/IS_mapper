@@ -393,7 +393,7 @@ def main():
 
             #get prefix for output filenames
             (file_path, file_name) = os.path.split(args.typingRef)
-            typingName = file_name.split('.g')
+            typingName = file_name.split('.g')[0]
             typingRefFasta = typingName + '.fasta'
             genbank_output = temp_folder + sample + '_annotated.gbk'
             final_genbank = sample + '_annotatedAll.gbk'
