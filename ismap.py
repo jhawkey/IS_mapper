@@ -401,7 +401,7 @@ def main():
             table_output = sample + '_table.txt'
 
             #turn typingRef into a fasta
-            run_command(['python', args.path + 'gbkToFasta.py', '-i', args.typingRef, '-o', temp_folder + typingRefFasta])
+            run_command(['python', args.path + 'gbkToFasta.py', '-i', args.typingRef, '-o', temp_folder + typingRefFasta], shell=True)
             
             #check database for reference genome and create if it doesn't exist
             check_blast_database(typingRefFasta)
