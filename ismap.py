@@ -394,14 +394,14 @@ def main():
             #get prefix for output filenames
             (file_path, file_name) = os.path.split(args.typingRef)
             typingName = file_name.split('.g')[0]
-            typingRefFasta = typingName + '.fasta'
+            typingRefFasta = temp_folder + typingName + '.fasta'
             genbank_output = temp_folder + sample + '_annotated.gbk'
             final_genbank = sample + '_annotatedAll.gbk'
             final_genbankSingle = sample + '_annotatedAllSingle.gbk'
             table_output = sample + '_table.txt'
 
             #turn typingRef into a fasta
-            run_command(['python', args.path + 'gbkToFasta.py', '-i', args.typingRef, '-o', temp_folder + typingRefFasta], shell=True)
+            run_command(['python', args.path + 'gbkToFasta.py', '-i', args.typingRef, '-o', typingRefFasta], shell=True)
             
             #check database for reference genome and create if it doesn't exist
             check_blast_database(typingRefFasta)
