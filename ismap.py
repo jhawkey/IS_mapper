@@ -254,7 +254,7 @@ def check_blast_database(fasta):
         logging.info('Index for {} is already built...'.format(fasta))
     else:
         logging.info('Building blast index for {}...'.format(fasta))
-        run_command(['makeblast db -in', fasta, '-dbtype nucl'])
+        run_command(['makeblastdb -in', fasta, '-dbtype nucl'])
 
 def make_directories(dir_list):
     '''
