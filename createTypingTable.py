@@ -16,6 +16,7 @@ def parse_args():
 	parser = ArgumentParser(description="create a table of features for the is mapping pipeline")
 	parser.add_argument('--genbank', type=str, required=False, help='genbank file to look for features in')
 	parser.add_argument('--insertion', type=str, required=False, help='path to insertion sequence fasta file for BLAST hits')
+	parser.add_argument('--temp', type=str, required=False, help='path to temp folder for storing temporary BLAST files if needed')
 	return parser.parse_args()
 
 def extractFeatures(genbank, feature_name):
@@ -116,7 +117,7 @@ def insertionLength(insertion):
 
 	return length
 
-def pairHits(first_ranges, second_ranges):
+def pairHits(first_ranges, second_ranges, seqLength):
 
 	correct_indexes = []
 
@@ -146,7 +147,10 @@ def pairHits(first_ranges, second_ranges):
 			count = count + 1
 
 		#the correct pair is the one with the smallest distance between them
-		correct_indexes.append([distances.index(min(distances)), shorter_ranges.index(i)])
+		if min(distances) < 2 * seqLength:
+			correct_indexes.append([distances.index(min(distances)), shorter_ranges.index(i)])
+		else:
+			pass
 
 	return correct_indexes, longest_ranges
 
@@ -279,19 +283,29 @@ def main():
 
 	args = parse_args()	
 
+	#find the length of the insertion sequence
+	insertionSeqLength = insertionLength(args.insertion)
+
 	#get the features from the genbank
 	five_ranges = extractFeatures(args.genbank, "5_prime_end")
 	three_ranges = extractFeatures(args.genbank, "3_prime_end")
+	#print 'five_ranges'
+	#print five_ranges
+	#print 'three_ranges'
+	#print three_ranges
 
 	#combine hits next to each other into one hit
 	five_rangesNew = collapseRanges(five_ranges, 300)
 	three_rangesNew = collapseRanges(three_ranges, 300)
 
 	#create the prefix of the file which will contain sequences for blast and then the blast output
-	region_blast_fasta = os.path.split(args.genbank)[1].split('.gbk')[0]
+	if args.temp == "":
+		region_blast_fasta = os.path.split(args.genbank)[1].split('.gbk')[0]
+	else:
+		region_blast_fasta = args.temp + os.path.split(args.genbank)[1].split('.gbk')[0]
 
 	#work out which hits pair together and return the correct indexes and the group that have the most number of hits (both even if all paired)
-	indexes, longest_ranges = pairHits(five_rangesNew, three_rangesNew)
+	indexes, longest_ranges = pairHits(five_rangesNew, three_rangesNew, insertionSeqLength)
 
 	#return a dictionary with all the information for each region and a list that gives you the keys used in that dictionary
 	table, table_keys = createTableLines(five_rangesNew, three_rangesNew, indexes, args.genbank, args.insertion, region_blast_fasta + ".fasta")
@@ -303,13 +317,7 @@ def main():
 	#parse the BLAST output 
 	blast_results = (parseBLAST(region_blast_fasta + ".txt"))
 
-	#find the length of the insertion sequence
-	insertionSeqLength = insertionLength(args.insertion)
-
-	print insertionSeqLength
-
 	#add the percent ID and query coverage for the blast hits to the table
-	print blast_results
 	for i in blast_results:
 
 		#caclulate percent ID and coverage
@@ -322,7 +330,6 @@ def main():
 			table[i].append(str("%.2f" % queryCoverage))
 		#this is for the unpaired hits where the before or after sequence has been taken
 		if "before" in i or "after" in i:
-			print i
 			region_no = i.split('_')[1]
 			table["region_" + region_no].append(str(percentID))
 			table["region_" + region_no].append(str("%.2f" % queryCoverage))
@@ -331,9 +338,6 @@ def main():
 			else:
 				table["region_" + region_no].append("after")
 
-
-	print table
-
 	#go through the keys and find these in table so it's printed in order
 	header = ["region", "orientation", "hit start", "IS start", "IS end", "hit end", "length of IS region", "percent ID to IS", "coverage of region to IS", "call"]
 	print "\t".join(header)
@@ -341,24 +345,26 @@ def main():
 		if "before" not in table[key] and "after" not in table[key]:
 			try:
 				#if the hits are right next to each other and there is little or no sequence in between, report it as novel	
-				if float(table[key][5]) == 0:
+				if float(table[key][5]) == 0 or float(table[key][5]) <= (insertionSeqLength * 0.25):
 					print key + "\t", "\t".join(table[key]) + "\t \t \tNovel insertion site"
 				
 				#if the sequence between has good ID and coverage to the IS in question, report it as known
 				elif float(table[key][6]) >= 80 and float(table[key][7]) >= 60:
 					print key + "\t", "\t".join(table[key]) + "\tKnown insertion site"
 					print(table[key][6])
-				
 				#Otherwise report as unknown
 				else:
 					print key + "\t", "\t".join(table[key]) + "\tUnknown"
-			except KeyError:
-				print key + "\t", "\t".join(table[key]) + "\t \t \tUnknown Key Error"
+			except (KeyError, IndexError):
+				print key + "\t", "\t".join(table[key]) + "\t \t \tUnknown: no BLAST hit before or after"
 		if "after" in table[key] or "before" in table[key]:
-			if float(table[key][6]) >= 80 and float(table[key][7]) >= 60:
-				print key + "\t", "\t".join(table[key][:-1]) + "\tKnown insertion site " + table[key][8]
-			else:
-				print key + "\t", "\t".join(table[key][:-1]) + "\tUnknown: positioned " + table[key][8]
+			try:
+				if float(table[key][6]) >= 80 and float(table[key][7]) >= 60:
+					print key + "\t", "\t".join(table[key][:-1]) + "\tKnown insertion site " + table[key][8]
+				else:
+					print key + "\t", "\t".join(table[key][:-1]) + "\tUnknown: positioned " + table[key][8] + " BLAST hit"
+			except IndexError:
+				print key + "\t", "\t".join(table[key][:-1]) + "\tUnknown: no BLAST hit before or after"
 
 if __name__ == "__main__":
 	main()
