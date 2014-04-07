@@ -408,17 +408,17 @@ def main():
 
             #blast ends against reference genome
             run_command(['blastn', '-db', typingRefFasta, '-query', five_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", five_contigHits], shell=True)
-            run_command(['blastn', '-db', typingRefFasta, '-query', three_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >" three_contigHits], shell=True)
+            run_command(['blastn', '-db', typingRefFasta, '-query', three_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", three_contigHits], shell=True)
 
             #annotate hits to a genbank
             if len(sample) > 10:
                 sample = sample[0:9]
-            run_command(['python', 'annotateMultiGenbank.py', '-s', five_contigHits, '-f', typingRefFasta, '-p', str(args.percentid), '-c', str(args.coverage) '-n', genbank_output, '-i', sample])
-            run_command(['python', 'annotatedMultiGenbank.py', '-s', three_contigHits, '-g', genbank_output, '-n', final_genbank, '-p', str(args.percentid), '-c', str(args.coverage)])
-            run_command(['python', 'multiGenbankToSingle.py', '-i', final_genbank, '-n', sample, '-o', final_genbankSingle])
+            run_command(['python', 'annotateMultiGenbank.py', '-s', five_contigHits, '-f', typingRefFasta, '-p', str(args.percentid), '-c', str(args.coverage) '-n', genbank_output, '-i', sample], shell=True)
+            run_command(['python', 'annotatedMultiGenbank.py', '-s', three_contigHits, '-g', genbank_output, '-n', final_genbank, '-p', str(args.percentid), '-c', str(args.coverage)], shell=True)
+            run_command(['python', 'multiGenbankToSingle.py', '-i', final_genbank, '-n', sample, '-o', final_genbankSingle], shell=True)
 
             #create output table
-            run_command(['python', 'createTypingTable.py', '--genbank', final_genbankSingle, '--insertion', args.reference])
+            run_command(['python', 'createTypingTable.py', '--genbank', final_genbankSingle, '--insertion', args.reference], shell=True)
 
         if args.temp == False:
             run_command(['rm', '-rf', temp_folder], shell=True)
