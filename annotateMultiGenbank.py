@@ -151,7 +151,7 @@ if __name__ == "__main__":
 	(fastaDir, fastaFileName) = os.path.split(options.fasta)
 
 	#check for summary file
-	if options.summary=="":
+	if options.summary == "":
 		DoError("No summary file provided (-s)")
 	#if no genbank already, fasta only
 	if options.fasta != "":
@@ -185,8 +185,8 @@ if __name__ == "__main__":
 						record.features.append(new_feature)
 						feature_count = feature_count + 1
 					#just append the record if there was no feature to be added
-					else:
-						new_record_list.append(record)
+					elif new_feature == 0:
+						pass
 				new_record_list.append(record)
 			#just append the record if the id was not in the list
 			else:
@@ -201,9 +201,9 @@ if __name__ == "__main__":
 		feature_count = 0
 		if options.genbank_type == "multi":
 			new_record_list = []
-			record_list = SeqIO.parse(options.genbank, "genbank")		
+			record_list = SeqIO.parse(options.genbank, "genbank")	
 			#iterate through the contigs in the genbank file
-			for record in record_list:				
+			for record in record_list:			
 				#check to see if that contig is in the genbank file
 				if record.id in hits_dictionary:
 					for node in hits_dictionary[record.id]:
@@ -216,12 +216,13 @@ if __name__ == "__main__":
 							record.features.append(new_feature)
 							feature_count = feature_count + 1
 						#just append the record if there was no feature to be added
-						else:
-							new_record_list.append(record)
+						elif new_feature == 0:
+							pass
 					new_record_list.append(record)					
 				#just append the record if the id was not in the list
 				else:
 					new_record_list.append(record)
+			print new_record_list
 			SeqIO.write(new_record_list, options.newfile, "genbank")
 			print("Added " + str(feature_count) + " features to " + options.newfile)
 
