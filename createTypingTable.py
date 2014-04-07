@@ -347,11 +347,9 @@ def main():
 				#if the hits are right next to each other and there is little or no sequence in between, report it as novel	
 				if float(table[key][5]) == 0 or float(table[key][5]) <= (insertionSeqLength * 0.25):
 					print key + "\t", "\t".join(table[key]) + "\t \t \tNovel insertion site"
-				
 				#if the sequence between has good ID and coverage to the IS in question, report it as known
 				elif float(table[key][6]) >= 80 and float(table[key][7]) >= 60:
 					print key + "\t", "\t".join(table[key]) + "\tKnown insertion site"
-					print(table[key][6])
 				#Otherwise report as unknown
 				else:
 					print key + "\t", "\t".join(table[key]) + "\tUnknown"
