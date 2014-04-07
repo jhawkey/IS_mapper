@@ -401,7 +401,7 @@ def main():
             table_output = sample + '_table.txt'
 
             #turn typingRef into a fasta
-            run_command(['python', 'gbkToFasta.py', '-i', args.typingRef, '-o', temp_folder + typingRefFasta])
+            run_command(['python', args.path + 'gbkToFasta.py', '-i', args.typingRef, '-o', temp_folder + typingRefFasta])
             
             #check database for reference genome and create if it doesn't exist
             check_blast_database(typingRefFasta)
@@ -413,12 +413,12 @@ def main():
             #annotate hits to a genbank
             if len(sample) > 10:
                 sample = sample[0:9]
-            run_command(['python', 'annotateMultiGenbank.py', '-s', five_contigHits, '-f', typingRefFasta, '-p', str(args.percentid), '-c', str(args.coverage), '-n', genbank_output, '-i', sample], shell=True)
-            run_command(['python', 'annotatedMultiGenbank.py', '-s', three_contigHits, '-g', genbank_output, '-n', final_genbank, '-p', str(args.percentid), '-c', str(args.coverage)], shell=True)
-            run_command(['python', 'multiGenbankToSingle.py', '-i', final_genbank, '-n', sample, '-o', final_genbankSingle], shell=True)
+            run_command(['python', args.path + 'annotateMultiGenbank.py', '-s', five_contigHits, '-f', typingRefFasta, '-p', str(args.percentid), '-c', str(args.coverage), '-n', genbank_output, '-i', sample], shell=True)
+            run_command(['python', args.path + 'annotatedMultiGenbank.py', '-s', three_contigHits, '-g', genbank_output, '-n', final_genbank, '-p', str(args.percentid), '-c', str(args.coverage)], shell=True)
+            run_command(['python', args.path + 'multiGenbankToSingle.py', '-i', final_genbank, '-n', sample, '-o', final_genbankSingle], shell=True)
 
             #create output table
-            run_command(['python', 'createTypingTable.py', '--genbank', final_genbankSingle, '--insertion', args.reference], shell=True)
+            run_command(['python', args.path +'createTypingTable.py', '--genbank', final_genbankSingle, '--insertion', args.reference], shell=True)
 
         if args.temp == False:
             run_command(['rm', '-rf', temp_folder], shell=True)
