@@ -413,7 +413,7 @@ def main():
             #annotate hits to a genbank
             if len(sample) > 10:
                 sample = sample[0:9]
-            run_command(['python', args.path + 'annotateMultiGenbank.py', '-s', five_contigHits, '-g', typingRef, '-p', str(args.percentid), '-c', str(args.coverage), '-n', genbank_output, '-i', sample], shell=True)
+            run_command(['python', args.path + 'annotateMultiGenbank.py', '-s', five_contigHits, '-g', args.typingRef, '-p', str(args.percentid), '-c', str(args.coverage), '-n', genbank_output, '-i', sample], shell=True)
             run_command(['python', args.path + 'annotateMultiGenbank.py', '-s', three_contigHits, '-g', genbank_output, '-n', final_genbank, '-p', str(args.percentid), '-c', str(args.coverage)], shell=True)
             run_command(['python', args.path + 'multiGenbankToSingle.py', '-i', final_genbank, '-n', sample, '-o', final_genbankSingle], shell=True)
 
