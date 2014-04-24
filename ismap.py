@@ -370,8 +370,8 @@ def main():
             check_blast_database(assembly)
 
             # blast ends against assemblies
-            run_command(['blastn', '-db', assembly, '-query', five_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", five_contigHits], shell=True)
-            run_command(['blastn', '-db', assembly, '-query', three_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", three_contigHits], shell=True)
+            run_command(['blastn', '-db', assembly, '-query', five_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' | sort -k1,1 -k12,12nr -k11,11n | sort -u -k1,1 --merge >", five_contigHits], shell=True)
+            run_command(['blastn', '-db', assembly, '-query', three_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' | sort -k1,1 -k12,12nr -k11,11n | sort -u -k1,1 --merge >", three_contigHits], shell=True)
 
             # annotate hits to genbank
             if args.extension == '.gbk':
@@ -407,8 +407,8 @@ def main():
             check_blast_database(typingRefFasta)
 
             #blast ends against reference genome
-            run_command(['blastn', '-db', typingRefFasta, '-query', five_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", five_contigHits], shell=True)
-            run_command(['blastn', '-db', typingRefFasta, '-query', three_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", three_contigHits], shell=True)
+            run_command(['blastn', '-db', typingRefFasta, '-query', five_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' | sort -k1,1 -k12,12nr -k11,11n | sort -u -k1,1 --merge > ", five_contigHits], shell=True)
+            run_command(['blastn', '-db', typingRefFasta, '-query', three_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' | sort -k1,1 -k12,12nr -k11,11n | sort -u -k1,1 --merge >", three_contigHits], shell=True)
 
             #annotate hits to a genbank
             if len(sample) > 10:
