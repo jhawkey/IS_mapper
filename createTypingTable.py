@@ -185,169 +185,21 @@ def pairHits(five_ranges, three_ranges, seqLength, genbank, output_file):
 				SeqIO.write(seq_between, output, 'fasta')
 
 	return paired_hits
-
-def createTableLines(five_ranges, three_ranges, paired_indexes, genbank, insertion, output_file):
-
-	#set up count (becomes region number keeps track of what has already been looked at), and empty dict and list for the table info
+def unpairedHits(ranges, seqLength, genbank, output_file, orientation):
+	record = SeqIO.read(genbank, 'genbank')
+	output = open(output_file, 'w')
 	count = 1
-	table = {}
-	table_keys = []
-
-	#open the fasta file for writing sequences into that will be used in the BLAST step
-	output = open(output_file, "w")
-
-	#get the number of paired hits
-	paired_hits = len(paired_indexes)
-
-	#get the length of the insertion sequence
-	insertionSeqLength = insertionLength(insertion)
-
-	#open the genbank so sequences between or on the ends of hits can be pulled out
-	record = SeqIO.read(genbank, "genbank")
-
-	#set up orientaitons, 'normal' and 'reverse' orientations differ depending on which set of ranges is the longest
-	if len(five_ranges) > len(three_ranges):
-		longest_ranges = five_ranges
-		shorter_ranges = three_ranges
-		normal_orient = "3' to 5'"
-		reverse_orient = "5' to 3'"
-	else:
-		longest_ranges = three_ranges
-		shorter_ranges = five_ranges
-		normal_orient = "5' to 3'"
-		reverse_orient = "3' to 5'"
-
-	#loop through the paired hits
-	while count <= paired_hits:
-		#look at each set of indexes
-		for i in paired_indexes:
-			#print "Count value " + str(count)
-			#print "Number of paired hits: " + str(paired_hits)
-			
-			#work out orientaiton based on the start and end coordinates of the hits
-			#give each region it's own unique identifier that is also saved in the keys list so this can be iterated through later
-			if longest_ranges[i[0]][0] > shorter_ranges[i[1]][1]:
-				start = shorter_ranges[i[1]][1]
-				end = longest_ranges[i[0]][0]
-				table["region_" + str(count)] = [normal_orient, str(shorter_ranges[i[1]][0]), str(start), str(end), str(longest_ranges[i[0]][1])]
-				table_keys.append("region_" + str(count))
-			else:
-				start = longest_ranges[i[0]][1]
-				end = shorter_ranges[i[1]][0]
-				table["region_" + str(count)] = [reverse_orient, str(longest_ranges[i[0]][0]), str(start), str(end), str(shorter_ranges[i[1]][1])]
-				table_keys.append("region_" + str(count))
-
-			#pull out the sequence between the hits and save it in the fasta file for later blasting
-			seq_between = record.seq[start:end]
-			seq_between = SeqRecord(Seq(str(seq_between), generic_dna), id="region_" + str(count))
-			if len(seq_between) > 0:
-				SeqIO.write(seq_between, output, "fasta")
-			table["region_" + str(count)].append(str(len(seq_between)))
-			#table["region_" + str(count)].append("")
-			#table["region_" + str(count)].append("")
-
-			#update the count value
-			count = count + 1
-
-	#setup empty list for unpaired hits
-	new_line = []
-
-	#set the region number to the same value as the count variable
-	region_no = count  
-
-	#print "Count value now: " + str(count)
-	#print "Length of five_ranges: " + str(len(five_ranges))
-
-	#go through the five end hits and compare the start and end coordinates to everything in the dict. If it's always false,
-	#then the hit is not paired, and not already in the table so must be an unpaired hit
-	for i in five_ranges:
-		boolean = []
-		for values in table:
-			boolean.append(str(i[0]) in table[values] or str(i[1]) in table[values])
-		if True not in boolean:
-			start = i[0]
-			end = i[1]
-			new_line.append(["5' unpaired", str(start), str(end), "region_" + str(region_no)])
-			table_keys.append("region_" + str(region_no))
-			
-			#extract the sequence before and after the hit and add it to the fasta file (IS could be on either end)
-			seq_before = record[start - insertionSeqLength:start]
-			seq_before = SeqRecord(Seq(str(seq_before.seq), generic_dna), id="region_" + str(region_no) + "_before")
-			SeqIO.write(seq_before, output, "fasta")
-
-			seq_after = record[end:end + insertionSeqLength]
-			seq_after = SeqRecord(Seq(str(seq_after.seq), generic_dna), id="region_" + str(region_no) + "_after")
-			SeqIO.write(seq_after, output, "fasta")
-			region_no = region_no + 1
-			count = count + 1
-
-	#do the same for the three prime hits
-	for i in three_ranges:
-		boolean = []
-		for values in table:
-			boolean.append(str(i[0]) in table[values] or str(i[1]) in table[values])
-		if True not in boolean:
-			start = i[0]
-			end = i[1]
-			new_line.append(["3' unpaired", str(start), str(end), "region_" + str(region_no)])
-			table_keys.append("region_" + str(region_no))
-			
-			#extract the sequence before and after the hit and add it to the fasta file (IS could be on either end)
-			seq_before = record[start - insertionSeqLength:start]
-			seq_before = SeqRecord(Seq(str(seq_before.seq), generic_dna), id="region_" + str(region_no) + "_before")
-			SeqIO.write(seq_before, output, "fasta")
-
-			seq_after = record[end:end + insertionSeqLength]
-			seq_after = SeqRecord(Seq(str(seq_after.seq), generic_dna), id="region_" + str(region_no) + "_after")
-			SeqIO.write(seq_after, output, "fasta")
-			region_no = region_no + 1
-			count = count + 1
-
-	#add all these new lines to the table
-	for i in range(0, len(new_line)):
-		table[new_line[i][3]] = [new_line[i][0], new_line[i][1], new_line[i][2], "", "", str(insertionSeqLength)]
-
-	output.close()
-
-	return table, table_keys
-
-def main():
-
-	args = parse_args()	
-
-	#find the length of the insertion sequence
-	insertionSeqLength = insertionLength(args.insertion)
-
-	#get the features from the genbank
-	five_ranges = extractFeatures(args.genbank, "5_prime_end")
-	three_ranges = extractFeatures(args.genbank, "3_prime_end")
-	#print 'five_ranges'
-	#print five_ranges
-	#print 'three_ranges'
-	#print three_ranges
-
-	#combine hits next to each other into one hit
-	five_rangesNew = collapseRanges(five_ranges, 300)
-	three_rangesNew = collapseRanges(three_ranges, 300)
-
-	#create the prefix of the file which will contain sequences for blast and then the blast output
-	if args.temp == None:
-		region_blast_fasta = os.path.split(args.genbank)[1].split('.gbk')[0]
-	else:
-		region_blast_fasta = args.temp + os.path.split(args.genbank)[1].split('.gbk')[0]
-
-	#work out which hits pair together and return the correct indexes and the group that have the most number of hits (both even if all paired)
-	table = pairHits(five_rangesNew, three_rangesNew, insertionSeqLength, args.genbank, region_blast_fasta + '.fasta')
-
-	#return a dictionary with all the information for each region and a list that gives you the keys used in that dictionary
-	#table, table_keys = createTableLines(five_rangesNew, three_rangesNew, indexes, args.genbank, args.insertion, region_blast_fasta + ".fasta")
-
-	#perform BLAST
-	blastn_cline = NcbiblastnCommandline(query=region_blast_fasta + ".fasta", db=args.insertion, outfmt="'6 qseqid qlen sacc pident length slen sstart send evalue bitscore qcovs'", out=region_blast_fasta + ".txt")
-	stdout, stderr = blastn_cline()
-
-	#parse the BLAST output 
-	blast_results = (parseBLAST(region_blast_fasta + ".txt"))
+	for i in range(0, len(ranges)):
+		hits['region_' + str(count)] = [orientation, str(ranges[i][0]), str(ranges[i][1]), '', '', '']
+		seq_before = record[ranges[i][0] - seqLength:ranges[i][1]]
+		seq_before = SeqRecord(Seq(str(seq_before.seq), generic_dna), id = 'region_' + str(count) + '_before')
+		seq_after = record[ranges[i][1]:ranges[i][1] + seqLength]
+		seq_after = SeqRecord(Seq(str(seq_after.seq), generic_dna), id='region_' + str(count) + '_after')
+		SeqIO.write(seq_before, output, 'fasta')
+		SeqIO.write(seq_after, output, 'fasta')
+		count += 1
+	return hits
+def createTable(table, blast_results, insertionSeqLength):
 
 	#add the percent ID and query coverage for the blast hits to the table
 	for i in blast_results:
@@ -403,6 +255,50 @@ def main():
 					print key + "\t", "\t".join(table[key][:-1]) + "\tUnknown: positioned " + table[key][8] + " BLAST hit"
 			except IndexError:
 				print key + "\t", "\t".join(table[key][:-1]) + "\tUnknown: no BLAST hit before or after"
+def doBlast(blast_input, blast_output, database):
+	#perform BLAST
+	blastn_cline = NcbiblastnCommandline(query=blast_input, db=database, outfmt="'6 qseqid qlen sacc pident length slen sstart send evalue bitscore qcovs'", out=blast_output)
+	stdout, stderr = blastn_cline()
+
+def main():
+
+	args = parse_args()	
+
+	#find the length of the insertion sequence
+	insertionSeqLength = insertionLength(args.insertion)
+
+	#create the prefix of the file which will contain sequences for blast and then the blast output
+	if args.temp == None:
+		region_blast_fasta = os.path.split(args.genbank)[1].split('.gbk')[0]
+	else:
+		region_blast_fasta = args.temp + os.path.split(args.genbank)[1].split('.gbk')[0]
+
+	#get the features from the genbank
+	five_ranges = extractFeatures(args.genbank, '5_prime_end')
+	three_ranges = extractFeatures(args.genbank, '3_prime_end')
+
+	#combine hits next to each other into one hit
+	if five_ranges == [] and three_ranges != []:
+		three_rangesNew = collapseRanges(three_ranges, 300)
+		unpaired_three = unpairedHits(three_rangesNew, insertionSeqLength, args.genbank, region_blast_fasta + '_3only.fasta', "3' unpaired")
+		doBlast(region_blast_fasta + '_3only.fasta', region_blast_fasta + '_3only.txt', args.insertion)
+		blast_results = parseBLAST(region_blast_fasta + '_3only.txt')
+		createTable(unpaired_three, blast_results, insertionSeqLength)
+	elif three_ranges == [] and five_ranges != []:
+		five_rangesNew = collapseRanges(five_ranges, 300)
+		unpaired_five = unpairedHits(five_ranges, insertionSeqLength, args.genbank, region_blast_fasta + '_5only.fasta', "5' unpaired")
+		doBlast(region_blast_fasta + '_5only.fasta', region_blast_fasta + '_5only.txt', args.insertion)
+		blast_results = parseBLAST(region_blast_fasta + '_5only.txt')
+		createTable(unpaired_five, blast_results, insertionSeqLength)
+	else:
+		five_rangesNew = collapseRanges(five_ranges, 300)
+		three_rangesNew = collapseRanges(three_ranges, 300)
+		#work out which hits pair together and return the correct indexes and the group that have the most number of hits (both even if all paired)
+		table = pairHits(five_rangesNew, three_rangesNew, insertionSeqLength, args.genbank, region_blast_fasta + '.fasta')
+		doBlast(region_blast_fasta + '.fasta', region_blast_fasta + '.txt', args.insertion)
+		#parse the BLAST output 
+		blast_results = parseBLAST(region_blast_fasta + '.txt')
+		createTable(table, blast_results, insertionSeqLength)
 
 if __name__ == "__main__":
 	main()
