@@ -19,13 +19,15 @@ def main():
         f = open(i, 'r')
         starts = []
         ends = []
-        for columns in (raw.strip().split() for raw in f):
-            try:
-                starts.append(columns[3])
-                ends.append(columns[4])
-            except IndexError:
+        for line in f:
+            newline = line.strip().split('\t')
+            if 'orientation' in newline:
                 pass
-
+            elif newline[4] == '':
+                pass
+            else:
+                starts.append(newline[3])
+                ends.append(newline[4])
         for coord in range(0, len(starts)):
             out.write(header + '\t' + starts[coord] + '\t' + ends[coord] + '\n')
 
