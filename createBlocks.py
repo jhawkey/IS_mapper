@@ -3,7 +3,7 @@ from argparse import (ArgumentParser, FileType)
 def parse_args():
 
     parser = ArgumentParser(description="concatenate tables file to make blocks file")
-    parser.add_argument('--table', nrags='+', type=str, required=True, help='table files to plot blocks from')
+    parser.add_argument('--table', nargs='+', type=str, required=True, help='table files to plot blocks from')
     parser.add_argument('--output', type=str, required=True, help='output file name')
     return parser.parse_args()
 
