@@ -189,6 +189,7 @@ def unpairedHits(ranges, seqLength, genbank, output_file, orientation):
 	record = SeqIO.read(genbank, 'genbank')
 	output = open(output_file, 'w')
 	count = 1
+	hits = {}
 	for i in range(0, len(ranges)):
 		hits['region_' + str(count)] = [orientation, str(ranges[i][0]), str(ranges[i][1]), '', '', '']
 		seq_before = record[ranges[i][0] - seqLength:ranges[i][1]]
