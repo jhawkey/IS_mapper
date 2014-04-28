@@ -168,7 +168,6 @@ def pairHits(five_ranges, three_ranges, seqLength, genbank, output_file):
 	#print len(found_threes)
 	for value in three_ranges:
 		if value not in found_threes:
-			print value
 			paired_hits['region_' + str(count)] = ["3' unpaired", str(value[0]), str(value[1]), '', '', '']
 			seq_before = record[value[0] - seqLength:value[0]]
 			seq_before = SeqRecord(Seq(str(seq_before.seq), generic_dna), id='region_' + str(count) + '_before')
@@ -183,7 +182,6 @@ def pairHits(five_ranges, three_ranges, seqLength, genbank, output_file):
 			seq_between = record.seq[int(paired_hits[key][2]):int(paired_hits[key][3])]
 			seq_between = SeqRecord(Seq(str(seq_between), generic_dna), id=key)
 			if len(seq_between) > 0:
-				print "greater than 0"
 				SeqIO.write(seq_between, output, 'fasta')
 
 	return paired_hits
@@ -380,8 +378,6 @@ def main():
 		region_indexes.append(region.split('region_')[1])
 	arr = np.vstack((table_keys, region_indexes)).transpose()
 	sorted_keys = arr[arr[:,1].astype('int').argsort()]
-	print sorted_keys
-	print table
 	#go through the keys and find these in table so it's printed in order
 	header = ["region", "orientation", "hit start", "IS start", "IS end", "hit end", "length of IS region", "percent ID to IS", "coverage of region to IS", "call"]
 	print "\t".join(header)
