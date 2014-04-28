@@ -30,3 +30,6 @@ def main():
             out.write(header + '\t' + starts[coord] + '\t' + ends[coord] + '\n')
 
     out.close()
+
+if __name__ == '__main__':
+    main()
