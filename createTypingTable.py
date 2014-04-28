@@ -10,6 +10,7 @@ from Bio.Alphabet import generic_dna
 from Bio.Blast.Applications import NcbiblastnCommandline
 from operator import itemgetter
 import os, sys, re, collections, operator
+import numpy as np
 
 def parse_args():
 
@@ -117,42 +118,75 @@ def insertionLength(insertion):
 
 	return length
 
-def pairHits(first_ranges, second_ranges, seqLength):
+def pairHits(five_ranges, three_ranges, seqLength, genbank, output_file):
+	#print "these are all the 5' hits"
+	#print five_ranges
+	#print "these are all the 3' hits"
+	#print three_ranges
 
-	correct_indexes = []
+	record = SeqIO.read(genbank, 'genbank')
+	output = open(output_file, 'w')
+	paired_hits = {}
+	table_keys = []
+	found_threes = []
+	count = 1
 
-	if len(first_ranges) >= len(second_ranges):
-		longest_ranges = first_ranges
-		shorter_ranges = second_ranges
-	else:
-		longest_ranges = second_ranges
-		shorter_ranges = first_ranges
-
-	#for each 5' hit
-	for i in shorter_ranges:
-		#only look at each hit in the shortest set once
-		values = len(longest_ranges)
-		count = 0
-		#track distances between each 5' and 3' possible pair
+	for i in range(0, len(five_ranges)):
 		distances = []
-
-		while count < values:
-			#calculate the distance between, taking the absolute value (and getting orientation)
-			if longest_ranges[count][0] > i[1]: #therefore 5' to 3' orientation
-				distance = abs(longest_ranges[count][0] - i[1])
+		for l in range(0, len(three_ranges)):
+			if five_ranges[i][0] < three_ranges[l][0]:
+				distance = three_ranges[l][0] - five_ranges[i][1]
+				distances.append(distance)
 			else:
-				distance = abs(i[0] - longest_ranges[count][1]) #threfore 3' to 5' orientation
-			#append the distance
-			distances.append(distance)
-			count = count + 1
-
-		#the correct pair is the one with the smallest distance between them
-		if min(distances) < 2 * seqLength:
-			correct_indexes.append([distances.index(min(distances)), shorter_ranges.index(i)])
+				distance = five_ranges[i][0] - three_ranges[l][1]
+				distances.append(distance)
+		if min(distances) < (2 * seqLength):
+			correct_index = distances.index(min(distances))
+			if five_ranges[i][1] > three_ranges[correct_index][0]:
+				orientation = "3' to 5'"
+				paired_hits['region_' + str(count)] = [orientation, str(three_ranges[correct_index][0]), str(three_ranges[correct_index][1]), str(five_ranges[i][0]), str(five_ranges[i][1]), str(abs(min(distances)))]
+			else:
+				orientation = "5' to 3'"
+				paired_hits['region_' + str(count)] = [orientation, str(five_ranges[i][0]), str(five_ranges[i][1]), str(three_ranges[correct_index][0]), str(three_ranges[correct_index][1]), str(abs(min(distances)))]
+			# append the 3' hit into this list so all unpaired 3's can be found later
+			found_threes.append(three_ranges[correct_index])
+			count += 1
 		else:
-			pass
+			#an unpaired 5'
+			paired_hits['region_' + str(count)] = ["5' unpaired", str(five_ranges[i][0]), str(five_ranges[i][1]), '', '', '']
+			seq_before = record[five_ranges[i][0] - seqLength:five_ranges[i][0]]
+			seq_before = SeqRecord(Seq(str(seq_before.seq), generic_dna), id='region_' + str(count) + '_before')
+			seq_after = record[five_ranges[i][1]:five_ranges[i][1] + seqLength]
+			seq_after = SeqRecord(Seq(str(seq_after.seq), generic_dna), id='region_' + str(count) + '_after')
+			SeqIO.write(seq_before, output, 'fasta')
+			SeqIO.write(seq_before, output, 'fasta')
+			count += 1
 
-	return correct_indexes, longest_ranges
+	#print "length of 3'"
+	#print len(three_ranges)
+	#print "length of found 3"
+	#print len(found_threes)
+	for value in three_ranges:
+		if value not in found_threes:
+			print value
+			paired_hits['region_' + str(count)] = ["3' unpaired", str(value[0]), str(value[1]), '', '', '']
+			seq_before = record[value[0] - seqLength:value[0]]
+			seq_before = SeqRecord(Seq(str(seq_before.seq), generic_dna), id='region_' + str(count) + '_before')
+			seq_after = record[value[1]:value[1] + seqLength]
+			seq_after = SeqRecord(Seq(str(seq_after.seq), generic_dna), id='region_' + str(count) + '_after')
+			SeqIO.write(seq_before, output, 'fasta')
+			SeqIO.write(seq_before, output, 'fasta')
+			count += 1
+
+	for key in paired_hits:
+		if "3' to 5" in paired_hits[key] or "3' to 5'" in paired_hits[key]:
+			seq_between = record.seq[int(paired_hits[key][2]):int(paired_hits[key][3])]
+			seq_between = SeqRecord(Seq(str(seq_between), generic_dna), id=key)
+			if len(seq_between) > 0:
+				print "greater than 0"
+				SeqIO.write(seq_between, output, 'fasta')
+
+	return paired_hits
 
 def createTableLines(five_ranges, three_ranges, paired_indexes, genbank, insertion, output_file):
 
@@ -299,16 +333,16 @@ def main():
 	three_rangesNew = collapseRanges(three_ranges, 300)
 
 	#create the prefix of the file which will contain sequences for blast and then the blast output
-	if args.temp == "":
+	if args.temp == None:
 		region_blast_fasta = os.path.split(args.genbank)[1].split('.gbk')[0]
 	else:
 		region_blast_fasta = args.temp + os.path.split(args.genbank)[1].split('.gbk')[0]
 
 	#work out which hits pair together and return the correct indexes and the group that have the most number of hits (both even if all paired)
-	indexes, longest_ranges = pairHits(five_rangesNew, three_rangesNew, insertionSeqLength)
+	table = pairHits(five_rangesNew, three_rangesNew, insertionSeqLength, args.genbank, region_blast_fasta + '.fasta')
 
 	#return a dictionary with all the information for each region and a list that gives you the keys used in that dictionary
-	table, table_keys = createTableLines(five_rangesNew, three_rangesNew, indexes, args.genbank, args.insertion, region_blast_fasta + ".fasta")
+	#table, table_keys = createTableLines(five_rangesNew, three_rangesNew, indexes, args.genbank, args.insertion, region_blast_fasta + ".fasta")
 
 	#perform BLAST
 	blastn_cline = NcbiblastnCommandline(query=region_blast_fasta + ".fasta", db=args.insertion, outfmt="'6 qseqid qlen sacc pident length slen sstart send evalue bitscore qcovs'", out=region_blast_fasta + ".txt")
@@ -338,11 +372,21 @@ def main():
 			else:
 				table["region_" + region_no].append("after")
 
+	table_keys = []
+	for key in table:
+		table_keys.append(key)
+	region_indexes = []
+	for region in table_keys:
+		region_indexes.append(region.split('region_')[1])
+	arr = np.vstack((table_keys, region_indexes)).transpose()
+	sorted_keys = arr[arr[:,1].astype('int').argsort()]
+	print sorted_keys
+	print table
 	#go through the keys and find these in table so it's printed in order
 	header = ["region", "orientation", "hit start", "IS start", "IS end", "hit end", "length of IS region", "percent ID to IS", "coverage of region to IS", "call"]
 	print "\t".join(header)
-	for key in table_keys:
-		if "before" not in table[key] and "after" not in table[key]:
+	for key in sorted_keys[:,0]:
+		if "5' unpaired" not in table[key] and "3' unpaired" not in table[key]:
 			try:
 				#if the hits are right next to each other and there is little or no sequence in between, report it as novel	
 				if float(table[key][5]) == 0 or float(table[key][5]) <= (insertionSeqLength * 0.25):
@@ -355,7 +399,7 @@ def main():
 					print key + "\t", "\t".join(table[key]) + "\tUnknown"
 			except (KeyError, IndexError):
 				print key + "\t", "\t".join(table[key]) + "\t \t \tUnknown: no BLAST hit before or after"
-		if "after" in table[key] or "before" in table[key]:
+		if "5' unpaired" in table[key] or "3' unpaired" in table[key]:
 			try:
 				if float(table[key][6]) >= 80 and float(table[key][7]) >= 60:
 					print key + "\t", "\t".join(table[key][:-1]) + "\tKnown insertion site " + table[key][8]
