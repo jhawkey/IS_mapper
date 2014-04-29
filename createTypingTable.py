@@ -193,12 +193,9 @@ def unpairedHits(ranges, seqLength, genbank, output_file, orientation):
 		count += 1
 	return hits
 def createTable(table, blast_results, insertionSeqLength):
-	print blast_results
 
 	#add the percent ID and query coverage for the blast hits to the table
 	for i in blast_results:
-		print 'this is the first print'
-		print i
 		#caclulate percent ID and coverage
 		percentID = float(blast_results[i][2])
 		queryCoverage = (float(blast_results[i][6])/float(blast_results[i][5])) * 100
@@ -209,14 +206,12 @@ def createTable(table, blast_results, insertionSeqLength):
 			table[i].append(str("%.2f" % queryCoverage))
 		#this is for the unpaired hits where the before or after sequence has been taken
 		if "before" in i:
-			print i
 			if percentID > 80 and queryCoverage > 60:
 				region_no = i.split('_')[1]
 				table["region_" + region_no].append(str(percentID))
 				table["region_" + region_no].append(str("%.2f" % queryCoverage))
 				table["region_" + region_no].append("before")
 		elif "after" in i:
-			print i
 			if percentID > 80 and queryCoverage > 60:
 				region_no = i.split('_')[1]
 				table["region_" + region_no].append(str(percentID))
@@ -224,8 +219,7 @@ def createTable(table, blast_results, insertionSeqLength):
 				table["region_" + region_no].append("after")
 		else:
 			pass
-		print table
-
+			
 	table_keys = []
 	for key in table:
 		table_keys.append(key)
