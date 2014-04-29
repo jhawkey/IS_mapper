@@ -119,10 +119,6 @@ def insertionLength(insertion):
 	return length
 
 def pairHits(five_ranges, three_ranges, seqLength, genbank, output_file):
-	#print "these are all the 5' hits"
-	#print five_ranges
-	#print "these are all the 3' hits"
-	#print three_ranges
 
 	record = SeqIO.read(genbank, 'genbank')
 	output = open(output_file, 'w')
@@ -162,10 +158,6 @@ def pairHits(five_ranges, three_ranges, seqLength, genbank, output_file):
 			SeqIO.write(seq_before, output, 'fasta')
 			count += 1
 
-	#print "length of 3'"
-	#print len(three_ranges)
-	#print "length of found 3"
-	#print len(found_threes)
 	for value in three_ranges:
 		if value not in found_threes:
 			paired_hits['region_' + str(count)] = ["3' unpaired", str(value[0]), str(value[1]), '', '', '']
@@ -181,7 +173,7 @@ def pairHits(five_ranges, three_ranges, seqLength, genbank, output_file):
 		if "3' to 5" in paired_hits[key] or "3' to 5'" in paired_hits[key]:
 			seq_between = record.seq[int(paired_hits[key][2]):int(paired_hits[key][3])]
 			seq_between = SeqRecord(Seq(str(seq_between), generic_dna), id=key)
-			if len(seq_between) > 0:
+			if len(seq_between) >= (insertionSeqLength * 0.25):
 				SeqIO.write(seq_between, output, 'fasta')
 
 	return paired_hits
@@ -201,10 +193,12 @@ def unpairedHits(ranges, seqLength, genbank, output_file, orientation):
 		count += 1
 	return hits
 def createTable(table, blast_results, insertionSeqLength):
+	print blast_results
 
 	#add the percent ID and query coverage for the blast hits to the table
 	for i in blast_results:
-
+		print 'this is the first print'
+		print i
 		#caclulate percent ID and coverage
 		percentID = float(blast_results[i][2])
 		queryCoverage = (float(blast_results[i][6])/float(blast_results[i][5])) * 100
@@ -214,14 +208,23 @@ def createTable(table, blast_results, insertionSeqLength):
 			table[i].append(str(percentID))
 			table[i].append(str("%.2f" % queryCoverage))
 		#this is for the unpaired hits where the before or after sequence has been taken
-		if "before" in i or "after" in i:
-			region_no = i.split('_')[1]
-			table["region_" + region_no].append(str(percentID))
-			table["region_" + region_no].append(str("%.2f" % queryCoverage))
-			if i.split('_')[2] == "before":
+		if "before" in i:
+			print i
+			if percentID > 80 and queryCoverage > 60:
+				region_no = i.split('_')[1]
+				table["region_" + region_no].append(str(percentID))
+				table["region_" + region_no].append(str("%.2f" % queryCoverage))
 				table["region_" + region_no].append("before")
-			else:
+		elif "after" in i:
+			print i
+			if percentID > 80 and queryCoverage > 60:
+				region_no = i.split('_')[1]
+				table["region_" + region_no].append(str(percentID))
+				table["region_" + region_no].append(str("%.2f" % queryCoverage))
 				table["region_" + region_no].append("after")
+		else:
+			pass
+		print table
 
 	table_keys = []
 	for key in table:
