@@ -256,6 +256,7 @@ def createTable(table, blast_results, insertionSeqLength):
 					print key + "\t", "\t".join(table[key][:-1]) + "\tUnknown: positioned " + table[key][8] + " BLAST hit"
 			except IndexError:
 				print key + "\t", "\t".join(table[key][:-1]) + "\tUnknown: no BLAST hit before or after"
+
 def doBlast(blast_input, blast_output, database):
 	#perform BLAST
 	blastn_cline = NcbiblastnCommandline(query=blast_input, db=database, outfmt="'6 qseqid qlen sacc pident length slen sstart send evalue bitscore qcovs'", out=blast_output)
@@ -291,7 +292,7 @@ def main():
 		doBlast(region_blast_fasta + '_5only.fasta', region_blast_fasta + '_5only.txt', args.insertion)
 		blast_results = parseBLAST(region_blast_fasta + '_5only.txt')
 		createTable(unpaired_five, blast_results, insertionSeqLength)
-	else:
+	elif five_ranges != [] and three_ranges != []:
 		five_rangesNew = collapseRanges(five_ranges, 300)
 		three_rangesNew = collapseRanges(three_ranges, 300)
 		#work out which hits pair together and return the correct indexes and the group that have the most number of hits (both even if all paired)
@@ -300,6 +301,9 @@ def main():
 		#parse the BLAST output 
 		blast_results = parseBLAST(region_blast_fasta + '.txt')
 		createTable(table, blast_results, insertionSeqLength)
+	else:
+		print "\t".join(header)
+		print "\nNo hits found"
 
 if __name__ == "__main__":
 	main()
