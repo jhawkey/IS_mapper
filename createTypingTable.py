@@ -305,7 +305,7 @@ def main():
 		blast_results = parseBLAST(region_blast_fasta + '.txt')
 		createTable(table, blast_results, insertionSeqLength)
 	else:
-		print "\t".join(header)
+		print "\t".join(["region", "orientation", "hit start", "IS start", "IS end", "hit end", "length of IS region", "percent ID to IS", "coverage of region to IS", "call"])
 		print "\nNo hits found"
 
 if __name__ == "__main__":
