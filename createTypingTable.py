@@ -173,7 +173,7 @@ def pairHits(five_ranges, three_ranges, seqLength, genbank, output_file):
 		if "3' to 5" in paired_hits[key] or "3' to 5'" in paired_hits[key]:
 			seq_between = record.seq[int(paired_hits[key][2]):int(paired_hits[key][3])]
 			seq_between = SeqRecord(Seq(str(seq_between), generic_dna), id=key)
-			if len(seq_between) >= (insertionSeqLength * 0.25):
+			if len(seq_between) >= (seqLength * 0.25):
 				SeqIO.write(seq_between, output, 'fasta')
 
 	return paired_hits
