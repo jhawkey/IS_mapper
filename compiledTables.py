@@ -61,18 +61,19 @@ def main():
                     is_start = int(info[3])
                     if info[4] != '':
                         is_end = int(info[4])
-                    else:
-                        is_end = ''
                     if (is_start, is_end) not in list_of_positions and is_end != '':
                         if list_of_positions.keys() != []:
-                            old_range, new_range = check_ranges(list_of_positions.keys(), (is_start, is_end), 1000)
+                            old_range, new_range = check_ranges(list_of_positions.keys(), (is_start, is_end), 300)
                             print old_range, new_range
                             if old_range != False:
                                 store_values = list_of_positions[old_range]
                                 del list_of_positions[old_range]
                                 list_of_positions[new_range] = store_values
                                 list_of_positions[new_range].append(isolate)
-                        list_of_positions[(is_start, is_end)] = [isolate]
+                            else:
+                                list_of_positions[(is_start, is_end)] = [isolate]
+                        else:
+                            list_of_positions[(is_start, is_end)] = [isolate]
                     elif (is_start, is_end) in list_of_positions and is_end != '':
                         list_of_positions[(is_start, is_end)].append(isolate)
                     '''elif is_end == '':
