@@ -29,12 +29,14 @@ def check_ranges(ranges, range_to_check, gap, unpaired = None):
             if start in range(x-gap, y+1):
                 new_start = min(x, start)
                 new_end = max(y, stop)
+                print 'we are at the first return'
                 return ranges[i], (new_start, new_end)
             elif stop in range(x, y+gap+1):
                 new_start = min(x, start)
                 new_end = max(y, stop)
+                print 'we are at the second return'
                 return ranges[i], (new_start, new_end)
-
+        print 'we are at the last return'
         return False, False
     elif unpaired == True:
         coord = range_to_check
@@ -62,29 +64,33 @@ def main():
         header = 0
         with open(result_file) as file_open:
             for line in file_open:
-                print isolate
                 if header == 0:
                     header = header + 1
                 else:
+                    print isolate
                     info = line.strip('\n').split('\t')
                     is_start = int(info[3])
+                    print is_start
                     if info[4] != '':
+                        print 'this is a paired hit'
                         is_end = int(info[4])
+                        print is_end
                     else:
+                        print 'this is not a paired hit'
                         is_end = info[4]
                         if isolate not in unpaired_hits:
+                            print 'adding it to the unpaired hits'
                             unpaired_hits[isolate] = [is_start]
                         else:
+                            print 'adding it to the unpaired hits (else)'
                             unpaired_hits[isolate].append(is_start)
                     if (is_start, is_end) not in list_of_positions and is_end != '':
-                        list_of_positions[(is_start, is_end)][isolate] = '+'
                         if list_of_positions.keys() != []:
                             old_range, new_range = check_ranges(list_of_positions.keys(), (is_start, is_end), 300, unpaired=None)
                             if old_range != False:
-                                print old_range, new_range
                                 store_values = list_of_positions[old_range]
                                 del list_of_positions[old_range]
-                                list_of_positions[new_range] = store_values
+                                list_of_positions[new_range] = store_values)
                                 list_of_positions[new_range][isolate] = '+'
                             else:
                                 list_of_positions[(is_start, is_end)][isolate] = '+'
@@ -92,6 +98,8 @@ def main():
                             list_of_positions[(is_start, is_end)][isolate] = '+'
                     elif (is_start, is_end) in list_of_positions and is_end != '':
                         list_of_positions[(is_start, is_end)][isolate] = '+'
+        
+        # dealing with unpaired hits after files have been read in
         paired_hits = list_of_positions.keys()
         for isolate in unpaired_hits:
             for hit in unpaired_hits[isolate]:
