@@ -29,14 +29,14 @@ def check_ranges(ranges, range_to_check, gap, unpaired = None):
             if start in range(x-gap, y+1):
                 new_start = min(x, start)
                 new_end = max(y, stop)
-                print 'we are at the first return'
+                #print 'we are at the first return'
                 return ranges[i], (new_start, new_end)
             elif stop in range(x, y+gap+1):
                 new_start = min(x, start)
                 new_end = max(y, stop)
-                print 'we are at the second return'
+                #print 'we are at the second return'
                 return ranges[i], (new_start, new_end)
-        print 'we are at the last return'
+        #print 'we are at the last return'
         return False, False
     elif unpaired == True:
         coord = range_to_check
@@ -47,8 +47,8 @@ def check_ranges(ranges, range_to_check, gap, unpaired = None):
                 return ranges[i], True
             elif coord in range(x, y+gap+1):
                 return ranges[i], True
-            else:
-                return False, False
+           
+        return False, False
 
 
 def main():
@@ -67,22 +67,22 @@ def main():
                 if header == 0:
                     header = header + 1
                 else:
-                    print isolate
+                    #print isolate
                     info = line.strip('\n').split('\t')
                     is_start = int(info[3])
-                    print is_start
+                    #print is_start
                     if info[4] != '':
-                        print 'this is a paired hit'
+                        #print 'this is a paired hit'
                         is_end = int(info[4])
-                        print is_end
+                        #print is_end
                     else:
-                        print 'this is not a paired hit'
+                        #print 'this is not a paired hit'
                         is_end = info[4]
                         if isolate not in unpaired_hits:
-                            print 'adding it to the unpaired hits'
+                            #print 'adding it to the unpaired hits'
                             unpaired_hits[isolate] = [is_start]
                         else:
-                            print 'adding it to the unpaired hits (else)'
+                            #print 'adding it to the unpaired hits (else)'
                             unpaired_hits[isolate].append(is_start)
                     if (is_start, is_end) not in list_of_positions and is_end != '':
                         if list_of_positions.keys() != []:
@@ -90,7 +90,7 @@ def main():
                             if old_range != False:
                                 store_values = list_of_positions[old_range]
                                 del list_of_positions[old_range]
-                                list_of_positions[new_range] = store_values)
+                                list_of_positions[new_range] = store_values
                                 list_of_positions[new_range][isolate] = '+'
                             else:
                                 list_of_positions[(is_start, is_end)][isolate] = '+'
@@ -100,17 +100,20 @@ def main():
                         list_of_positions[(is_start, is_end)][isolate] = '+'
         
         # dealing with unpaired hits after files have been read in
-        paired_hits = list_of_positions.keys()
-        for isolate in unpaired_hits:
-            for hit in unpaired_hits[isolate]:
-                range_hit, boolean = check_ranges(paired_hits, hit, 300, unpaired=True)
-                if boolean == True:
-                    list_of_positions[range_hit][isolate] = '+*'
-                else:
-                    pass
+    paired_hits = list_of_positions.keys()
+    for isolate in unpaired_hits:
+        for hit in unpaired_hits[isolate]:
+            range_hit, boolean = check_ranges(paired_hits, hit, 300, unpaired=True)
+            print range_hit, boolean
+            if boolean == True:
+                list_of_positions[range_hit][isolate] = '+*'
+            else:
+                list_of_positions[(hit, hit+1)][isolate] = '+?'
 
     print list_of_positions
     print unpaired_hits
+
+    
 
 
 if __name__ == "__main__":
