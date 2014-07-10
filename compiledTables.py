@@ -56,11 +56,13 @@ def main():
     args = parse_args()
 
     unique_results_files = list(OrderedDict.fromkeys(args.tables))
+    list_of_isolates = []
 
     list_of_positions = collections.defaultdict(dict) # key1 = pos, key2 = isolate, value = +/-
     unpaired_hits = {}
     for result_file in unique_results_files:
         isolate = result_file.split('__')[0]
+        list_of_isolates.append(isolate)
         header = 0
         with open(result_file) as file_open:
             for line in file_open:
@@ -99,7 +101,7 @@ def main():
                     elif (is_start, is_end) in list_of_positions and is_end != '':
                         list_of_positions[(is_start, is_end)][isolate] = '+'
         
-        # dealing with unpaired hits after files have been read in
+    # dealing with unpaired hits after files have been read in
     paired_hits = list_of_positions.keys()
     for isolate in unpaired_hits:
         for hit in unpaired_hits[isolate]:
@@ -112,8 +114,32 @@ def main():
 
     print list_of_positions
     print unpaired_hits
+    print list_of_isolates
 
+    # ordering positions from smallest to largest for final table output
+    order_position_list = list(OrderedDict.fromkeys(list_of_positions.keys()))
+    order_position_list.sort()
+    print order_position_list
+
+    # create header of table
+    print 'isolate\t'
+    for position in order_position_list:
+        print str(position[0]) + '-' + str(position[1]) + '\t'
+    print '\n'
     
+    # create each row
+    for isolate in list_of_isolates:
+        row = [isolate]
+        for position in order_position_list:
+            if isolate in list_of_positions[position]:
+                row.append(list_of_positions[position][isolate])
+            else:
+                row.append('-')
+        row.append('\n')
+        print '\t'.join(row)
+
+
+
 
 
 if __name__ == "__main__":
