@@ -18,29 +18,36 @@ def parse_args():
 
     return parser.parse_args()
 
-def check_ranges(ranges, range_to_check, gap):
+def check_ranges(ranges, range_to_check, gap, unpaired = None):
 
-    start = range_to_check[0]
-    if range_to_check[1] == '':
-        stop = range_to_check[0]
-    else:
+    if unpaired == None:
+        start = range_to_check[0]
         stop = range_to_check[1]
-    for i in range(0, len(ranges)):
-        x = min(ranges[i][0], ranges[i][1])
-        y = max(ranges[i][0], ranges[i][1])
-        if start in range(x-gap, y+1):
-            new_start = min(x, start)
-            if stop != '':
+        for i in range(0, len(ranges)):
+            x = min(ranges[i][0], ranges[i][1])
+            y = max(ranges[i][0], ranges[i][1])
+            if start in range(x-gap, y+1):
+                new_start = min(x, start)
                 new_end = max(y, stop)
-            else:
-                new_end = y
-            return ranges[i], (new_start, new_end)
-        elif stop in range(x, y+gap+1):
-            new_start = min(x, start)
-            new_end = max(y, stop)
-            return ranges[i], (new_start, new_end)
+                return ranges[i], (new_start, new_end)
+            elif stop in range(x, y+gap+1):
+                new_start = min(x, start)
+                new_end = max(y, stop)
+                return ranges[i], (new_start, new_end)
 
-    return False, False
+        return False, False
+    elif unpaired == True:
+        coord = range_to_check
+        for i in range(0, len(ranges)):
+            x = min(ranges[i][0], ranges[i][1])
+            y = max(ranges[i][0], ranges[i][1])
+            if coord in range(x-gap, y+1):
+                return ranges[i], True
+            elif coord in range(x, y+gap+1):
+                return ranges[i], True
+            else:
+                return False, False
+
 
 def main():
 
@@ -48,12 +55,14 @@ def main():
 
     unique_results_files = list(OrderedDict.fromkeys(args.tables))
 
-    list_of_positions = {} # key1 = pos, key2 = isolate, value = +/-
+    list_of_positions = collections.defaultdict(dict) # key1 = pos, key2 = isolate, value = +/-
+    unpaired_hits = {}
     for result_file in unique_results_files:
         isolate = result_file.split('__')[0]
         header = 0
         with open(result_file) as file_open:
             for line in file_open:
+                print isolate
                 if header == 0:
                     header = header + 1
                 else:
@@ -61,35 +70,39 @@ def main():
                     is_start = int(info[3])
                     if info[4] != '':
                         is_end = int(info[4])
+                    else:
+                        is_end = info[4]
+                        if isolate not in unpaired_hits:
+                            unpaired_hits[isolate] = [is_start]
+                        else:
+                            unpaired_hits[isolate].append(is_start)
                     if (is_start, is_end) not in list_of_positions and is_end != '':
+                        list_of_positions[(is_start, is_end)][isolate] = '+'
                         if list_of_positions.keys() != []:
-                            old_range, new_range = check_ranges(list_of_positions.keys(), (is_start, is_end), 300)
-                            print old_range, new_range
+                            old_range, new_range = check_ranges(list_of_positions.keys(), (is_start, is_end), 300, unpaired=None)
                             if old_range != False:
+                                print old_range, new_range
                                 store_values = list_of_positions[old_range]
                                 del list_of_positions[old_range]
                                 list_of_positions[new_range] = store_values
-                                list_of_positions[new_range].append(isolate)
+                                list_of_positions[new_range][isolate] = '+'
                             else:
-                                list_of_positions[(is_start, is_end)] = [isolate]
+                                list_of_positions[(is_start, is_end)][isolate] = '+'
                         else:
-                            list_of_positions[(is_start, is_end)] = [isolate]
+                            list_of_positions[(is_start, is_end)][isolate] = '+'
                     elif (is_start, is_end) in list_of_positions and is_end != '':
-                        list_of_positions[(is_start, is_end)].append(isolate)
-                    '''elif is_end == '':
-                        check_ranges(list_of_positions.keys(), (is_start, is_end), 1000)
-                        print old_range, new_range
-                        if old_range != False:
-                            store_values = list_of_positions[old_range]
-                            del list_of_positions[old_range]
-                            list_of_positions[new_range] = store_values
-                            list_of_positions[new_range].append(isolate)
-                        list_of_positions[(is_start, is_end)] = [isolate]'''
-
-
-    
+                        list_of_positions[(is_start, is_end)][isolate] = '+'
+        paired_hits = list_of_positions.keys()
+        for isolate in unpaired_hits:
+            for hit in unpaired_hits[isolate]:
+                range_hit, boolean = check_ranges(paired_hits, hit, 300, unpaired=True)
+                if boolean == True:
+                    list_of_positions[range_hit][isolate] = '+*'
+                else:
+                    pass
 
     print list_of_positions
+    print unpaired_hits
 
 
 if __name__ == "__main__":
