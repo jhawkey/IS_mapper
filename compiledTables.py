@@ -106,26 +106,26 @@ def main():
     for isolate in unpaired_hits:
         for hit in unpaired_hits[isolate]:
             range_hit, boolean = check_ranges(paired_hits, hit, 300, unpaired=True)
-            print range_hit, boolean
+            #print range_hit, boolean
             if boolean == True:
                 list_of_positions[range_hit][isolate] = '+*'
             else:
                 list_of_positions[(hit, hit+1)][isolate] = '+?'
 
-    print list_of_positions
-    print unpaired_hits
-    print list_of_isolates
+    #print list_of_positions
+    #print unpaired_hits
+    #print list_of_isolates
 
     # ordering positions from smallest to largest for final table output
     order_position_list = list(OrderedDict.fromkeys(list_of_positions.keys()))
     order_position_list.sort()
-    print order_position_list
+    #print order_position_list
 
     # create header of table
-    print 'isolate\t'
+    header = ['isolate']
     for position in order_position_list:
-        print str(position[0]) + '-' + str(position[1]) + '\t'
-    print '\n'
+        header.append(str(position[0]) + '-' + str(position[1]))
+    print '\t'.join(header)
     
     # create each row
     for isolate in list_of_isolates:
@@ -135,7 +135,7 @@ def main():
                 row.append(list_of_positions[position][isolate])
             else:
                 row.append('-')
-        row.append('\n')
+        #row.append('\n')
         print '\t'.join(row)
 
 
