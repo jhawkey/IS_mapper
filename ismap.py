@@ -1,3 +1,25 @@
+#!/usr/bin/env python
+
+# ISMapper
+# Python Version 2.7.5
+#
+# Authors - Jane Hawkey (jhawkey@student.unimelb.edu.au), Kathryn Holt (kholt@unimelb.edu.au)
+#
+# see LICENSE.txt for the license
+#
+# Dependencies:
+'''need to add websites and versions'''
+#   bwa
+#   Samtools
+#   Velvet
+#   VelvetOptimiser
+#   BioPython
+#   BLAST
+#
+# Git repository: 
+# README:
+# Questions or feature requests:
+
 import logging
 import sys, re, os
 from argparse import (ArgumentParser, FileType)
@@ -123,6 +145,11 @@ def check_command(command_list, command_name):
         command_stdout = e.output
 
 def get_readFile_components(full_file_path):
+    '''
+    Takes the path to the read file and splits it into
+    its different parts.
+    Returns the file path, the file name and the file extension.
+    '''
 
     (file_path,file_name) = os.path.split(full_file_path)
     m1 = re.match("(.*).gz",file_name)
@@ -136,7 +163,14 @@ def get_readFile_components(full_file_path):
 
     return(file_path,file_name_before_ext,full_ext)
 
-def read_file_sets(args):   
+def read_file_sets(args):
+    '''
+    Takes the read files and pairs them together.
+    If the improvement pathway is selected, also finds their
+    respecitive assemblies puts each set together.
+    Returns a dictionary where the key is the id fo the sample, and the value
+    is a list of files that belong to that sample.
+    '''   
 
     fileSets = {} # key = id, value = list of files for that sample
     num_paired_readsets = 0
@@ -221,6 +255,14 @@ def read_file_sets(args):
     return fileSets
 
 def get_kmer_size(read):
+    '''
+    Takes a read file and calculates the correct kmer range
+    for VelvetOptimiser.
+    Takes the first 100 reads to get an average read size,
+    then the lower kmer is one third of the average and the upper kmer
+    is two thirds of the average.
+    Returns the lower and upper kmer values as integers.
+    '''
 
     cmd = "gunzip -c " + read + " | head -n 400"
     info = os.popen(cmd)
@@ -247,6 +289,10 @@ def get_kmer_size(read):
     return sKmer, eKmer
 
 def check_blast_database(fasta):
+    '''
+    Checks to make sure the BLAST database exists, and creates it
+    if it does not.
+    '''
 
     database_path = fasta + ".nin"
 
