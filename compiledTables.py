@@ -67,6 +67,8 @@ def main():
             for line in file_open:
                 if header == 0:
                     header = header + 1
+                if 'No hits found' in line:
+                    pass
                 else:
                     #print isolate
                     info = line.strip('\n').split('\t')
