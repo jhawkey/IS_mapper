@@ -67,7 +67,7 @@ def main():
             for line in file_open:
                 if header == 0:
                     header = header + 1
-                elif 'No hits found' not in line:
+                elif 'No hits found' not in line and line != '':
                     #print isolate
                     info = line.strip('\n').split('\t')
                     is_start = int(info[3])
