@@ -21,22 +21,19 @@ def parse_args():
 def check_ranges(ranges, range_to_check, gap, unpaired = None):
 
     if unpaired == None:
-        start = range_to_check[0]
-        stop = range_to_check[1]
+        start = min(range_to_check[0], range_to_check[1])
+        stop = max(range_to_check[0], range_to_check[1])
         for i in range(0, len(ranges)):
             x = min(ranges[i][0], ranges[i][1])
             y = max(ranges[i][0], ranges[i][1])
-            if start in range(x-gap, y+1):
+            if start >= (x - gap) and start <= (y + 1):
                 new_start = min(x, start)
                 new_end = max(y, stop)
-                #print 'we are at the first return'
                 return ranges[i], (new_start, new_end)
-            elif stop in range(x, y+gap+1):
+            elif stop >= x and stop <= (y + gap + 1):
                 new_start = min(x, start)
                 new_end = max(y, stop)
-                #print 'we are at the second return'
                 return ranges[i], (new_start, new_end)
-        #print 'we are at the last return'
         return False, False
     elif unpaired == True:
         coord = range_to_check
@@ -74,7 +71,6 @@ def main():
                     is_start = int(info[3])
                     #print is_start
                     if info[4] != '':
-                        #print 'this is a paired hit'
                         is_end = int(info[4])
                         #print is_end
                     else:
@@ -137,10 +133,6 @@ def main():
                 row.append('-')
         #row.append('\n')
         print '\t'.join(row)
-
-
-
-
 
 if __name__ == "__main__":
     main()
