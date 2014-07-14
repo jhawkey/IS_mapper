@@ -67,7 +67,7 @@ def main():
             for line in file_open:
                 if header == 0:
                     header = header + 1
-                if 'No hits found' in line:
+                elif 'No hits found' in line:
                     continue
                 else:
                     #print isolate
