@@ -15,6 +15,7 @@ def parse_args():
 
     parser = ArgumentParser(description="create a table of features for the is mapping pipeline")
     parser.add_argument('--tables', nargs='+', type=str, required=False, help='tables to compile')
+    parser.add_argument('--gap', nargs = '+', type=int, required=False, default=300, help='distance between regions to call overlapping')
 
     return parser.parse_args()
 
@@ -84,7 +85,7 @@ def main():
                             unpaired_hits[isolate].append(is_start)
                     if (is_start, is_end) not in list_of_positions and is_end != '':
                         if list_of_positions.keys() != []:
-                            old_range, new_range = check_ranges(list_of_positions.keys(), (is_start, is_end), 300, unpaired=None)
+                            old_range, new_range = check_ranges(list_of_positions.keys(), (is_start, is_end), args.gap, unpaired=None)
                             if old_range != False:
                                 store_values = list_of_positions[old_range]
                                 del list_of_positions[old_range]
@@ -101,7 +102,7 @@ def main():
     paired_hits = list_of_positions.keys()
     for isolate in unpaired_hits:
         for hit in unpaired_hits[isolate]:
-            range_hit, boolean = check_ranges(paired_hits, hit, 300, unpaired=True)
+            range_hit, boolean = check_ranges(paired_hits, hit, args.gap, unpaired=True)
             #print range_hit, boolean
             if boolean == True:
                 list_of_positions[range_hit][isolate] = '+*'
