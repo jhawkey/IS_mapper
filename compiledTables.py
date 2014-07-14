@@ -62,6 +62,7 @@ def main():
         isolate = result_file.split('__')[0]
         list_of_isolates.append(isolate)
         header = 0
+        print isolate
         with open(result_file) as file_open:
             for line in file_open:
                 if header == 0:
