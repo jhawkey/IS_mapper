@@ -118,30 +118,72 @@ def get_flanking_genes(reference, positions):
         distance_start = {}
         distance_end = {}
         for feature in gb.features:
-            if feature.type == 'CDS' or feature.type == 'tRNA':
+            if feature.type == 'CDS' or feature.type == 'tRNA' or feature.type == 'rRNA':
                 #print feature
                 if feature.type == 'CDS':
-                    try:
-                        distance_start[abs(feature.location.start - x)] = feature.qualifiers['gene'][0]
-                    except KeyError:
-                        distance_start[abs(feature.location.start - x)] = feature.qualifiers['locus_tag'][0]
-                elif feature.type == 'tRNA':
+                    distance_start[abs(feature.location.start - x)] = feature.qualifiers['locus_tag'][0]
+                elif feature.type == 'tRNA' or feature.type == 'rRNA':
                     distance_start[abs(feature.location.start - x)] = feature.qualifiers['product'][0]
         distance_skeys = list(OrderedDict.fromkeys(distance_start))
         gene = distance_start[min(distance_skeys)]
         pos_gene_start[pos] = gene
         for feature in gb.features:
-            if feature.type == 'CDS' or feature.type == 'tRNA':
+            if feature.type == 'CDS' or feature.type == 'tRNA' or feature.type == 'rRNA':
                 if feature.type == 'CDS':
-                    try:
-                        distance_end[abs(feature.location.end - y)] = feature.qualifiers['gene'][0]
-                    except KeyError:
-                        distance_end[abs(feature.location.end - y)] = feature.qualifiers['locus_tag'][0]
-                elif feature.type == 'tRNA':
+                    distance_end[abs(feature.location.end - y)] = feature.qualifiers['locus_tag'][0]
+                elif feature.type == 'tRNA' or feature.type == 'rRNA':
                     distance_end[abs(feature.location.end - y)] = feature.qualifiers['product'][0]
         distance_ekeys = list(OrderedDict.fromkeys(distance_end))
         gene2 = distance_end[min(distance_ekeys)]
         pos_gene_end[pos] = gene2
+
+    pos_check = {}
+    for pos in pos_gene_start:
+        if pos_gene_start[pos] == pos_gene_end[pos]:
+            x = pos[0]
+            y = pos[1]
+            gene_test = pos_gene_start[pos]
+            if x < y:
+                for feature in gb.features:
+                    if feature.qualifiers['locus_tag'][0] == gene_test and feature.strand == 1:
+                        distance_x = abs(feature.location.start - x)
+                        distance_y = abs(eature.location.start - y)
+                        if distance_x < distance_y:
+                            pos_check[(x,y)] = 'y+20'
+                        else:
+                            pos_check[(x,y)] = 'x-20'
+                    elif feature.qualifiers['locus_tag'][0] == gene_test and feature.strand == -1:
+                        distance_x = abs(feature.location.end - x)
+                        distance_y = abs(feature.location.end - y)
+                        if distance_x < distance_y:
+                            pos_check[(x, y)] = 'y+20'
+                        else:
+                            pos_check[(x, y)] = 'x-20'
+            else:
+                for feature in gb.features:
+                    if features.qualifiers['locus_tag'][0] == gene_test and feature.strand == 1:
+                        distance_x = abs(feature.location.start - x)
+                        distance_y = abs(eature.location.start - y)
+                        if distance_y < distance_x:
+                            pos_check[(x,y)] = 'x+20'
+                        else:
+                            pos_check[(x,y)] = 'y-20'
+                    elif feature.qualifiers['locus_tag'][0] == gene_test and feature.strand == -1:
+                        distance_x = abs(feature.location.end - x)
+                        distance_y = abs(feature.location.end - y)
+                        if distance_y < distance_x:
+                            pos_check[(x, y)] = 'x+20'
+                        else:
+                            pos_check[(x, y)] = 'y-20'
+
+    # gotta fix this!
+    for position in pos_check:
+        if pos_check[position] == 'y+20':
+            pass
+
+
+
+
 
     return pos_gene_start, pos_gene_end
 
