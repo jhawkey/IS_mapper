@@ -29,6 +29,8 @@ def main():
             if header == 0:
                 print line
                 header = header + 1
+            elif 'flanking genes' in line:
+                pass
             else:
                 info = line.split('\t')
                 row = []
