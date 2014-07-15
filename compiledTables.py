@@ -15,7 +15,8 @@ def parse_args():
 
     parser = ArgumentParser(description="create a table of features for the is mapping pipeline")
     parser.add_argument('--tables', nargs='+', type=str, required=True, help='tables to compile')
-    parser.add_argument('--reference', type=str, required=True, help='gbk file of reference to determine positions against')
+    parser.add_argument('--reference_fasta', type=str, required=True, help='fasta file of reference to determine known positions')
+    parser.add_argument('--reference_gbk', type=str, required=True, help='gbk file of reference to report closest genes')
     parser.add_argument('--seq', type=str, required=True, help='fasta file for insertion sequence looking for in reference')
     parser.add_argument('--gap', type=int, required=False, default=300, help='distance between regions to call overlapping')
 
@@ -88,6 +89,7 @@ def get_ref_positions(reference, is_query, positions_dict, orientation_dict):
     is_name = os.path.split(is_query)[1]
     ref_name = os.path.split(reference)[1]
     blast_output = os.getcwd() + '/' + is_name + '_' + ref_name + '.tmp'
+
     if not os.path.exists(reference):
         os.system('makeblastdb -in ' + reference + ' -dbtype nucl')
     blastn_cline = NcbiblastnCommandline(query=is_query, db=reference, outfmt="'6 qseqid qlen sacc pident length slen sstart send evalue bitscore qcovs'", out=blast_output)
@@ -141,7 +143,7 @@ def main():
     unpaired_hits = {}
     position_orientation = {}
 
-    list_of_positions, position_orientation, ref_name = get_ref_positions(args.reference, args.seq, list_of_positions, position_orientation)
+    list_of_positions, position_orientation, ref_name = get_ref_positions(args.reference_fasta, args.seq, list_of_positions, position_orientation)
 
     for result_file in unique_results_files:
         isolate = result_file.split('__')[0]
@@ -235,7 +237,7 @@ def main():
         #row.append('\n')
         print '\t'.join(row)
 
-    genes_before, genes_after = get_flanking_genes(args.reference, order_position_list)
+    genes_before, genes_after = get_flanking_genes(args.reference_gbk, order_position_list)
 
     row = ['flanking genes']
     for position in order_position_list:
