@@ -15,7 +15,8 @@ def parse_args():
 
     parser = ArgumentParser(description="create a table of features for the is mapping pipeline")
     parser.add_argument('--tables', nargs='+', type=str, required=True, help='tables to compile')
-    parser.add_argument('--reference', type=str, required=True, help='reference to determine positions against')
+    parser.add_argument('--reference', type=str, required=True, help='gbk file of reference to determine positions against')
+    parser.add_argument('--seq', type=str, required=True, help='fasta file for insertion sequence looking for in reference')
     parser.add_argument('--gap', type=int, required=False, default=300, help='distance between regions to call overlapping')
 
     return parser.parse_args()
@@ -82,7 +83,51 @@ def check_ranges(ranges, range_to_check, gap, orientation, unpaired = None):
            
         return False, False, False
 
-def get_ref_positions():
+def get_ref_positions(reference, is_query, positions_dict, orientation_dict):
+
+    is_name = os.path.split(is_query)[1]
+    ref_name = os.path.split(reference)[1]
+    blast_output = os.getcwd() + '/' + is_name + '_' + ref_name + '.tmp'
+    if not os.path.exists(reference):
+        os.system('makeblastdb -in ' + reference + ' -dbtype nucl')
+    blastn_cline = NcbiblastnCommandline(query=is_query, db=reference, outfmt="'6 qseqid qlen sacc pident length slen sstart send evalue bitscore qcovs'", out=blast_output)
+    stdout, stderr = blastn_cline()
+    with open(blast_output) as out:
+        for line in out:
+            info = line.strip('\n').split('\t')
+            if float(info[3]) >= 95 and float(info[4])/float(info[1]) * 100 >= 95:
+                positions_dict[(int(info[6]), int(info[7]))][ref_name] = '+'
+                if int(info[6]) > int(info[7]):
+                    orientation_dict[(int(info[6]), int(info[7]))] = "3' to 5'"
+                else:
+                    orientation_dict[(int(info[6]), int(info[7]))] = "5' to 3'"
+
+    return positions_dict, orientation_dict, ref_name
+
+def get_flanking_genes(reference, positions):
+
+    gb = SeqIO.read(reference, 'genbank')
+    pos_gene_start = {}
+    pos_gene_end = {}
+    for pos in positions:
+        x = pos[0]
+        y = pos[1]
+        distance_start = []
+        distance_end
+        for feature in gb.features:
+            if feature.type == 'CDS' or feature.type == 'tRNA':
+                distance_start.append(abs(feature.location.start - x))
+        index = distance_start.index(min(distance_start))
+        gene = gb.features[index].qualifiers['gene'][0]
+        pos_gene_start[pos] = gene
+        for feature in gb.features:
+            if feature.type == 'CDS' or feature.type == 'tRNA':
+                distance_end.append(abs(feature.location.end - y))
+        index2 = distance_end.index(min(distance_end))
+        gene2 = gb.features[index2].qualifiers['gene'][0]
+        pos_gene_end[pos] = gene2
+
+    return pos_gene_start, pos_gene_end
 
 
 def main():
@@ -96,7 +141,7 @@ def main():
     unpaired_hits = {}
     position_orientation = {}
 
-    ref_row = get_ref_positions()
+    list_of_positions, position_orientation, ref_name = get_ref_positions(args.reference, args.seq, list_of_positions, position_orientation)
 
     for result_file in unique_results_files:
         isolate = result_file.split('__')[0]
@@ -170,6 +215,14 @@ def main():
     for position in order_position_list:
         header.append(str(position[0]) + '-' + str(position[1]))
     print '\t'.join(header)
+
+    row = [ref_name]
+    for position in order_position_list:
+        if ref_name in list_of_positions[position]:
+            row.append(list_of_positions[position][ref_name])
+        else:
+            row.append('-')
+    print '\t'.join(row)
     
     # create each row
     for isolate in list_of_isolates:
@@ -181,6 +234,18 @@ def main():
                 row.append('-')
         #row.append('\n')
         print '\t'.join(row)
+
+    genes_before, genes_after = get_flanking_genes(args.reference, order_position_list)
+
+    row = ['flanking genes']
+    for position in order_position_list:
+        row.append(genes_before[position])
+    print '\t'.join(row)
+    row = ['flanking genes']
+    for position in order_position_list:
+        row.append(genes_after[position])
+    print '\t'.join(row)
+
 
 if __name__ == "__main__":
     main()
