@@ -18,6 +18,8 @@ def parse_args():
 	parser.add_argument('--genbank', type=str, required=False, help='genbank file to look for features in')
 	parser.add_argument('--insertion', type=str, required=False, help='path to insertion sequence fasta file for BLAST hits')
 	parser.add_argument('--temp', type=str, required=False, help='path to temp folder for storing temporary BLAST files if needed')
+	parser.add_argument('--blast_gap', type=float, required=False, default=300, help='number of bases between two hits to BLAST the middle and see what it is')
+	parser.add_argument('--output', type=str, required=False, help='name for output file (extension .txt already given)')
 	return parser.parse_args()
 
 def extractFeatures(genbank, feature_name):
@@ -118,7 +120,7 @@ def insertionLength(insertion):
 
 	return length
 
-def pairHits(five_ranges, three_ranges, seqLength, genbank, output_file):
+def pairHits(five_ranges, three_ranges, seqLength, genbank, blast_gap, output_file):
 
 	record = SeqIO.read(genbank, 'genbank')
 	output = open(output_file, 'w')
@@ -138,61 +140,52 @@ def pairHits(five_ranges, three_ranges, seqLength, genbank, output_file):
 				distances.append(distance)
 		if min(distances) < (2 * seqLength):
 			correct_index = distances.index(min(distances))
-			#print five_ranges[i]
-			#print three_ranges[correct_index]
 			if five_ranges[i][0] > three_ranges[correct_index][0]:
-				orientation = "3' to 5'"
-				if min(distances) < 0:
-					gap = '0'
-				else:
-					gap = str(min(distances))
-				paired_hits['region_' + str(count)] = [orientation, str(three_ranges[correct_index][0]), str(three_ranges[correct_index][1]), str(five_ranges[i][0]), str(five_ranges[i][1]), gap]
-				#if five_ranges[i] in five_ranges:
-				#	five_ranges.remove(five_ranges[i])
-				#if three_ranges[correct_index] in three_ranges:
-				#	three_ranges.remove(three_ranges[correct_index])
+				orientation = "R"
+				gap = min(distances)
+				x = min(five_ranges[i][0], three_ranges[correct_index][1])
+				y = max(five_ranges[i][0], three_ranges[correct_index][1])
+				paired_hits['region_' + str(count)] = [orientation, str(x), str(y), gap]
 			elif five_ranges[i][0] < three_ranges[correct_index][0]:
-				orientation = "5' to 3'"
-				if min(distances) < 0:
-					gap = '0'
-				else:
-					gap = str(min(distances))
-				paired_hits['region_' + str(count)] = [orientation, str(five_ranges[i][0]), str(five_ranges[i][1]), str(three_ranges[correct_index][0]), str(three_ranges[correct_index][1]), gap]
-				#if five_ranges[i] in five_ranges:
-				#	five_ranges.remove(five_ranges[i])
-				#if three_ranges[correct_index] in three_ranges:
-				#	three_ranges.remove(three_ranges[correct_index])
+				orientation = "F"
+				gap = min(distances)
+				x = min(five_ranges[i][1], three_ranges[correct_index][0])
+				y = max(five_ranges[i][1], three_ranges[correct_index][0])
+				paired_hits['region_' + str(count)] = [orientation, str(x), str(y), gap]
 			# append the 3' hit into this list so all unpaired 3's can be found later
 			found_threes.append(three_ranges[correct_index])
 			count += 1
 		else:
-			#an unpaired 5'
-			paired_hits['region_' + str(count)] = ["5' unpaired", str(five_ranges[i][0]), str(five_ranges[i][1]), '', '', '']
+			# an unpaired 5'
+			# in this case gap (z) is 0, and x is the first coord and y is the second coord
+			paired_hits['region_' + str(count)] = ["5' unpaired", str(five_ranges[i][0]), str(five_ranges[i][1]), '']
 			seq_before = record[five_ranges[i][0] - seqLength:five_ranges[i][0]]
 			seq_before = SeqRecord(Seq(str(seq_before.seq), generic_dna), id='region_' + str(count) + '_before')
 			seq_after = record[five_ranges[i][1]:five_ranges[i][1] + seqLength]
 			seq_after = SeqRecord(Seq(str(seq_after.seq), generic_dna), id='region_' + str(count) + '_after')
 			SeqIO.write(seq_before, output, 'fasta')
-			SeqIO.write(seq_before, output, 'fasta')
+			SeqIO.write(seq_after, output, 'fasta')
 			count += 1
 
 	#print paired_hits
 	for value in three_ranges:
 		if value not in found_threes:
-			paired_hits['region_' + str(count)] = ["3' unpaired", str(value[0]), str(value[1]), '', '', '']
+			# an unpaired 3'
+			# in this case gap (z) is again 0, and x is the first coord and y is the second coord
+			paired_hits['region_' + str(count)] = ["3' unpaired", str(value[0]), str(value[1]), '']
 			seq_before = record[value[0] - seqLength:value[0]]
 			seq_before = SeqRecord(Seq(str(seq_before.seq), generic_dna), id='region_' + str(count) + '_before')
 			seq_after = record[value[1]:value[1] + seqLength]
 			seq_after = SeqRecord(Seq(str(seq_after.seq), generic_dna), id='region_' + str(count) + '_after')
 			SeqIO.write(seq_before, output, 'fasta')
-			SeqIO.write(seq_before, output, 'fasta')
+			SeqIO.write(seq_after, output, 'fasta')
 			count += 1
 
 	for key in paired_hits:
-		if "3' to 5" in paired_hits[key] or "3' to 5'" in paired_hits[key]:
-			seq_between = record.seq[int(paired_hits[key][2]):int(paired_hits[key][3])]
+		if 'F' in paired_hits[key] or 'R' in paired_hits[key]:
+			seq_between = record.seq[int(paired_hits[key][1]):int(paired_hits[key][2])]
 			seq_between = SeqRecord(Seq(str(seq_between), generic_dna), id=key)
-			if len(seq_between) >= (seqLength * 0.25):
+			if len(seq_between) >= blast_gap:
 				SeqIO.write(seq_between, output, 'fasta')
 
 	return paired_hits
@@ -202,7 +195,7 @@ def unpairedHits(ranges, seqLength, genbank, output_file, orientation):
 	count = 1
 	hits = {}
 	for i in range(0, len(ranges)):
-		hits['region_' + str(count)] = [orientation, str(ranges[i][0]), str(ranges[i][1]), '', '', '']
+		hits['region_' + str(count)] = [orientation, str(ranges[i][0]), str(ranges[i][1]), '']
 		seq_before = record[ranges[i][0] - seqLength:ranges[i][1]]
 		seq_before = SeqRecord(Seq(str(seq_before.seq), generic_dna), id = 'region_' + str(count) + '_before')
 		seq_after = record[ranges[i][1]:ranges[i][1] + seqLength]
@@ -211,35 +204,47 @@ def unpairedHits(ranges, seqLength, genbank, output_file, orientation):
 		SeqIO.write(seq_after, output, 'fasta')
 		count += 1
 	return hits
-def createTable(table, blast_results, insertionSeqLength):
+def createTable(table, blast_results, insertionSeqLength, blast_gap, output):
 
 	#add the percent ID and query coverage for the blast hits to the table
+	print 'this is the table'
+	print table
+	print 'these are the blast results'
+	print blast_results
 	if blast_results != 0:
 		for i in blast_results:
-			#caclulate percent ID and coverage
+			# caclulate percent ID and coverage
 			percentID = float(blast_results[i][2])
 			queryCoverage = (float(blast_results[i][6])/float(blast_results[i][5])) * 100
 			hitLength = blast_results[i][5]
-			#this is for all the between hits
-			if i in table or i[:-4] in table:
-				table[i].append(str(percentID))
-				table[i].append(str("%.2f" % queryCoverage))
-			#this is for the unpaired hits where the before or after sequence has been taken
-			if "before" in i:
-				if percentID > 80 and queryCoverage > 60:
-					region_no = i.split('_')[1]
-					table["region_" + region_no].append(str(percentID))
-					table["region_" + region_no].append(str("%.2f" % queryCoverage))
-					table["region_" + region_no].append("before")
-			elif "after" in i:
-				if percentID > 80 and queryCoverage > 60:
-					region_no = i.split('_')[1]
-					table["region_" + region_no].append(str(percentID))
-					table["region_" + region_no].append(str("%.2f" % queryCoverage))
-					table["region_" + region_no].append("after")
+			# this is for all the between hits
+			if i in table:
+				# if the hits are right next to each other or overlapping, report as novel
+				#if int(table[i][3]) <= 0 or int(table[i][3]) <= blast_gap:
+					#table[i].extend(['Novel', '', ''])
+
+				if percentID >= 80 and queryCoverage >= 60:
+					table[i].extend(['Known', str(percentID), str('%.2f' % queryCoverage)])
+				else:
+					table[i].extend(['Unknown', '', ''])
+			# this is for the unpaired hits where the before or after sequence has been taken
+			if 'before' in i:
+				region_no = i.split('_')[1]
+				if percentID >= 80 and queryCoverage >= 60:
+					table['region_' + region_no].extend(['Known before', str(percentID), str('%.2f' % queryCoverage)])
+				else:
+					table['region_' + region_no].extend(['Unknown: positioned before BLAST hit', str(percentID), str('%.2f' % queryCoverage)])
+
+			elif 'after' in i:
+				region_no = i.split('_')[1]
+				if percentID >= 80 and queryCoverage >= 60:
+					table['region_' + region_no].extend(['Known after', str(percentID), str('%.2f' % queryCoverage)])
+				else:
+					table['region_' + region_no].extend(['Unknown: positioned after BLAST hit', str(percentID), str('%.2f' % queryCoverage)])
 			else:
 				pass
 			
+	# go through the keys and find these in table so it's printed in order
 	table_keys = []
 	for key in table:
 		table_keys.append(key)
@@ -248,14 +253,25 @@ def createTable(table, blast_results, insertionSeqLength):
 		region_indexes.append(region.split('region_')[1])
 	arr = np.vstack((table_keys, region_indexes)).transpose()
 	sorted_keys = arr[arr[:,1].astype('int').argsort()]
-	#go through the keys and find these in table so it's printed in order
-	header = ["region", "orientation", "hit start", "IS start", "IS end", "hit end", "length of IS region", "percent ID to IS", "coverage of region to IS", "call"]
+	
+	#header = ["region", "orientation", "hit start", "IS start", "IS end", "hit end", "length of IS region", "percent ID to IS", "coverage of region to IS", "call"]
+	header = ["region", "orientation", "x", "y", "gap", "call", "%id", "%cov", "left_gene", "left_strand", "left_distance", "right_gene", "right_strand", "right_distance", "functional_prediction"]
 	print "\t".join(header)
+	output.write('\t'.join(header) + '\n')
+	
 	for key in sorted_keys[:,0]:
-		if "5' unpaired" not in table[key] and "3' unpaired" not in table[key]:
+		#print key
+		#print type(key)
+		#print table[key]
+		print key + '\t' + '\t'.join(str(i) for i in table[key])
+		output.write(key + '\t' + '\t'.join(str(i) for i in table[key]) + '\n')
+
+		'''if 'F' in table[key] or 'R' in table[key]:
+			print key + '\t' + '\t'.join(table[key])
+			output.write(key + '\t' + '\t'.join(table[key]) + '\n')
 			try:
-				#if the hits are right next to each other and there is little or no sequence in between, report it as novel	
-				if float(table[key][5]) == 0 or float(table[key][5]) <= (insertionSeqLength * 0.25):
+				# if the hits are right next to each other and there is little or no sequence in between, report it as novel	
+				if float(table[key][5]) == 0 or float(table[key][5]) <= blast_gap:
 					print key + "\t", "\t".join(table[key]) + "\t \t \tNovel insertion site"
 				#if the sequence between has good ID and coverage to the IS in question, report it as known
 				elif float(table[key][6]) >= 80 and float(table[key][7]) >= 60:
@@ -265,6 +281,7 @@ def createTable(table, blast_results, insertionSeqLength):
 					print key + "\t", "\t".join(table[key]) + "\tUnknown"
 			except (KeyError, IndexError):
 				print key + "\t", "\t".join(table[key]) + "\t \t \tUnknown: no BLAST hit before or after"
+		
 		if "5' unpaired" in table[key] or "3' unpaired" in table[key]:
 			try:
 				if float(table[key][6]) >= 80 and float(table[key][7]) >= 60:
@@ -273,6 +290,7 @@ def createTable(table, blast_results, insertionSeqLength):
 					print key + "\t", "\t".join(table[key][:-1]) + "\tUnknown: positioned " + table[key][8] + " BLAST hit"
 			except IndexError:
 				print key + "\t", "\t".join(table[key][:-1]) + "\tUnknown: no BLAST hit before or after"
+			'''
 
 def doBlast(blast_input, blast_output, database):
 	#perform BLAST
@@ -292,6 +310,7 @@ def main():
 	else:
 		region_blast_fasta = args.temp + os.path.split(args.genbank)[1].split('.gbk')[0]
 
+	output_file = open(args.output + '.txt', 'w')
 	#get the features from the genbank
 	five_ranges = extractFeatures(args.genbank, '5_prime_end')
 	three_ranges = extractFeatures(args.genbank, '3_prime_end')
@@ -302,13 +321,13 @@ def main():
 		unpaired_three = unpairedHits(three_rangesNew, insertionSeqLength, args.genbank, region_blast_fasta + '_3only.fasta', "3' unpaired")
 		doBlast(region_blast_fasta + '_3only.fasta', region_blast_fasta + '_3only.txt', args.insertion)
 		blast_results = parseBLAST(region_blast_fasta + '_3only.txt')
-		createTable(unpaired_three, blast_results, insertionSeqLength)
+		createTable(unpaired_three, blast_results, insertionSeqLength, args.blast_gap, output_file)
 	elif three_ranges == [] and five_ranges != []:
 		five_rangesNew = collapseRanges(five_ranges, 400)
 		unpaired_five = unpairedHits(five_ranges, insertionSeqLength, args.genbank, region_blast_fasta + '_5only.fasta', "5' unpaired")
 		doBlast(region_blast_fasta + '_5only.fasta', region_blast_fasta + '_5only.txt', args.insertion)
 		blast_results = parseBLAST(region_blast_fasta + '_5only.txt')
-		createTable(unpaired_five, blast_results, insertionSeqLength)
+		createTable(unpaired_five, blast_results, insertionSeqLength, args.blast_gap, output_file)
 	elif five_ranges != [] and three_ranges != []:
 		five_rangesNew = collapseRanges(five_ranges, 400)
 		three_rangesNew = collapseRanges(three_ranges, 400)
@@ -316,18 +335,20 @@ def main():
 		#print len(five_rangesNew)
 		#print three_rangesNew
 		#print len(three_rangesNew)
-		#work out which hits pair together and return the correct indexes and the group that have the most number of hits (both even if all paired)
-		table = pairHits(five_rangesNew, three_rangesNew, insertionSeqLength, args.genbank, region_blast_fasta + '.fasta')
+		# work out which hits pair together and return the correct indexes and the group that have the most number of hits (both even if all paired)
+		table = pairHits(five_rangesNew, three_rangesNew, insertionSeqLength, args.genbank, args.blast_gap, region_blast_fasta + '.fasta')
 		if os.stat(region_blast_fasta + '.fasta')[6] != 0:
 			doBlast(region_blast_fasta + '.fasta', region_blast_fasta + '.txt', args.insertion)
-			#parse the BLAST output 
+			# parse the BLAST output 
 			blast_results = parseBLAST(region_blast_fasta + '.txt')
 		else:
 			blast_results = 0
-		createTable(table, blast_results, insertionSeqLength)
+		createTable(table, blast_results, insertionSeqLength, args.blast_gap, output_file)
 	else:
 		print "\t".join(["region", "orientation", "hit start", "IS start", "IS end", "hit end", "length of IS region", "percent ID to IS", "coverage of region to IS", "call"])
+		output_file.write('No hits found')
 		print "No hits found"
+	output_file.close()
 
 if __name__ == "__main__":
 	main()
