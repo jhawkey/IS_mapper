@@ -349,6 +349,7 @@ def get_other_gene(features, pos, cds_features, trna_features, rrna_features, di
                     values.append(feature.strand)
                     distance[dist] = values
                 elif dist < 0 and direction == 'upstream':
+                    dist = abs(dist)
                     values = []
                     if feature.type == 'CDS':
                         for qual in cds_features:
@@ -375,6 +376,8 @@ def get_other_gene(features, pos, cds_features, trna_features, rrna_features, di
     distance_keys = list(OrderedDict.fromkeys(distance))
     gene = distance[min(distance_keys)]
     gene_distance = min(distance_keys)
+    if direction == 'upstream':
+        gene_distance = -gene_distance
     return gene, gene_distance
 
 
@@ -521,10 +524,19 @@ def get_flanking_genes(reference, pos_x, pos_y, cds_quals, trna_quals, rrna_qual
     
     gene_left = distance_l[min(distance_lkeys)] 
     gene_right = distance_r[min(distance_rkeys)]
-    gene_left_dist = min(distance_lkeys)
-    gene_right_dist = min(distance_rkeys)
+    gene_left_distance = min(distance_lkeys)
+    gene_right_distance = min(distance_rkeys)
 
-    return gene_left, gene_left_dist, gene_right, gene_right_dist
+    # if the genes are equal, we need to fix this (as the gene is not interrupted)
+    if gene_left == gene_right:
+        # we found the correct left, but need to find the next closest right
+        if gene_left_distance < gene_right_distance:
+            gene_right, gene_right_distance = get_other_gene(gb.features, pos_y, cds_features, trna_features, rrna_features, 'downstream')
+        # we found the correct right, but need to find the next closest left
+        elif gene_left_distance > gene_right_distance:
+            gene_left, gene_left_distance = get_other_gene(gb.features, pos_x, cds_features, trna_features, rrna_features, 'upstream')
+
+    return gene_left, gene_left_distance, gene_right, gene_right_distance
 
 def doBlast(blast_input, blast_output, database):
     #perform BLAST
