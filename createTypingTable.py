@@ -138,14 +138,16 @@ def pairHits(five_ranges, three_ranges, seqLength, genbank, output_file):
 				distances.append(distance)
 		if min(distances) < (2 * seqLength):
 			correct_index = distances.index(min(distances))
-			if five_ranges[i][1] > three_ranges[correct_index][0]:
+			print five_ranges[i]
+			print three_ranges[correct_index]
+			if five_ranges[i][0] > three_ranges[correct_index][0]:
 				orientation = "3' to 5'"
 				paired_hits['region_' + str(count)] = [orientation, str(three_ranges[correct_index][0]), str(three_ranges[correct_index][1]), str(five_ranges[i][0]), str(five_ranges[i][1]), str(abs(min(distances)))]
 				#if five_ranges[i] in five_ranges:
 				#	five_ranges.remove(five_ranges[i])
 				#if three_ranges[correct_index] in three_ranges:
 				#	three_ranges.remove(three_ranges[correct_index])
-			else:
+			elif five_ranges[i][0] < three_ranges[correct_index][0]:
 				orientation = "5' to 3'"
 				paired_hits['region_' + str(count)] = [orientation, str(five_ranges[i][0]), str(five_ranges[i][1]), str(three_ranges[correct_index][0]), str(three_ranges[correct_index][1]), str(abs(min(distances)))]
 				#if five_ranges[i] in five_ranges:
@@ -166,6 +168,7 @@ def pairHits(five_ranges, three_ranges, seqLength, genbank, output_file):
 			SeqIO.write(seq_before, output, 'fasta')
 			count += 1
 
+	print paired_hits
 	for value in three_ranges:
 		if value not in found_threes:
 			paired_hits['region_' + str(count)] = ["3' unpaired", str(value[0]), str(value[1]), '', '', '']
@@ -301,6 +304,10 @@ def main():
 	elif five_ranges != [] and three_ranges != []:
 		five_rangesNew = collapseRanges(five_ranges, 400)
 		three_rangesNew = collapseRanges(three_ranges, 400)
+		print five_rangesNew
+		print len(five_rangesNew)
+		print three_rangesNew
+		print len(three_rangesNew)
 		#work out which hits pair together and return the correct indexes and the group that have the most number of hits (both even if all paired)
 		table = pairHits(five_rangesNew, three_rangesNew, insertionSeqLength, args.genbank, region_blast_fasta + '.fasta')
 		if os.stat(region_blast_fasta + '.fasta')[6] != 0:
