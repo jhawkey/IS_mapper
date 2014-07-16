@@ -294,21 +294,12 @@ def createTable(table, blast_results, insertionSeqLength, blast_gap, output, ref
             print key + '\t' + '\t'.join(str(i) for i in table[key])
             output.write(key + '\t' + '\t'.join(str(i) for i in table[key]) + '\n')
 
-def get_flanking_genes(reference, pos_x, pos_y, cds_quals, trna_quals, rrna_quals):
+def get_other_gene(features, pos, cds_features, trna_features, rrna_features, direction):
 
-    gb = SeqIO.read(reference, 'genbank')
-    distance_l = {}
-    distance_r = {}
-    cds_features = cds_quals.split(',')
-    trna_features = trna_quals.split(',')
-    rrna_features = rrna_quals.split(',')
-
-    # cycle through features in genbank
-    for feature in gb.features:
-        # only if the feature is a CDS, tRNA or rRNA do we care
+    distance = {}
+    for feature in features:
         if feature.type == 'CDS' or feature.type == 'tRNA' or feature.type == 'rRNA':
-            # if both positions inside gene, then just return this information (no other checking required)
-            if pos_x in feature.location and pos_y in feature.location:
+            if pos in feature.location:
                 values = []
                 if feature.type == 'CDS':
                     for qual in cds_features:
@@ -328,13 +319,174 @@ def get_flanking_genes(reference, pos_x, pos_y, cds_quals, trna_quals, rrna_qual
                             values.append(feature.qualifiers[qual][0])
                         except KeyError:
                             pass
+                # get the strand
+                values.append(feature.strand)
+                gene_distance = feature.location.start - pos
+                return values, gene_distance
+            else:
+                dist = feature.location.start - pos
+                if dist > 0 and direction == 'downstream':
+                    values = []
+                    if feature.type == 'CDS':
+                        for qual in cds_features:
+                            try:
+                                values.append(feature.qualifiers[qual][0])
+                            except KeyError:
+                                pass
+                    elif feature.type == 'tRNA':
+                        for qual in trna_features:
+                            try:
+                                values.append(feature.qualifiers[qual][0])
+                            except KeyError:
+                                pass
+                    elif feature.type == 'rRNA':
+                       for qual in rrna_features:
+                            try:
+                                values.append(feature.qualifiers[qual][0])
+                            except KeyError:
+                                pass
+                    # get the strand
+                    values.append(feature.strand)
+                    distance[dist] = values
+                elif dist < 0 and direction == 'upstream':
+                    values = []
+                    if feature.type == 'CDS':
+                        for qual in cds_features:
+                            try:
+                                values.append(feature.qualifiers[qual][0])
+                            except KeyError:
+                                pass
+                    elif feature.type == 'tRNA':
+                        for qual in trna_features:
+                            try:
+                                values.append(feature.qualifiers[qual][0])
+                            except KeyError:
+                                pass
+                    elif feature.type == 'rRNA':
+                       for qual in rrna_features:
+                            try:
+                                values.append(feature.qualifiers[qual][0])
+                            except KeyError:
+                                pass
+                    # get the strand
+                    values.append(feature.strand)
+                    distance[dist] = values
+
+    distance_keys = list(OrderedDict.fromkeys(distance))
+    gene = distance[min(distance_keys)]
+    gene_distance = min(distance_keys)
+    return gene, gene_distance
+
+
+
+def get_flanking_genes(reference, pos_x, pos_y, cds_quals, trna_quals, rrna_quals):
+
+    gb = SeqIO.read(reference, 'genbank')
+    distance_l = {}
+    distance_r = {}
+    cds_features = cds_quals.split(',')
+    trna_features = trna_quals.split(',')
+    rrna_features = rrna_quals.split(',')
+
+    # cycle through features in genbank
+    for feature in gb.features:
+        # only if the feature is a CDS, tRNA or rRNA do we care
+        if feature.type == 'CDS' or feature.type == 'tRNA' or feature.type == 'rRNA':
+            # if both positions inside gene, then just return this information (no other checking required)
+            if pos_x in feature.location and pos_y in feature.location:
+                values = []
+                # get qualifiers of interest for this feature
+                if feature.type == 'CDS':
+                    for qual in cds_features:
+                        try:
+                            values.append(feature.qualifiers[qual][0])
+                        except KeyError:
+                            pass
+                elif feature.type == 'tRNA':
+                    for qual in trna_features:
+                        try:
+                            values.append(feature.qualifiers[qual][0])
+                        except KeyError:
+                            pass
+                elif feature.type == 'rRNA':
+                   for qual in rrna_features:
+                        try:
+                            values.append(feature.qualifiers[qual][0])
+                        except KeyError:
+                            pass
+                # get the strand
                 values.append(feature.strand) 
                 gene_left = values
                 gene_left_distance = feature.location.start - pos_x
                 gene_right = values
                 gene_right_distance = feature.location.end - pos_y
+
+                # exit the function 
                 return gene_left, gene_left_distance, gene_right, gene_right_distance
-            # find distances from gene
+            
+            # if x inside gene but y is not, need to report gene x is in gene further down genome from y
+            elif pos_x in feature.location and pos_y not in feature.location:
+                values = []
+                if feature.type == 'CDS':
+                    for qual in cds_features:
+                        try:
+                            values.append(feature.qualifiers[qual][0])
+                        except KeyError:
+                            pass
+                elif feature.type == 'tRNA':
+                    for qual in trna_features:
+                        try:
+                            values.append(feature.qualifiers[qual][0])
+                        except KeyError:
+                            pass
+                elif feature.type == 'rRNA':
+                   for qual in rrna_features:
+                        try:
+                            values.append(feature.qualifiers[qual][0])
+                        except KeyError:
+                            pass
+                # get the strand
+                values.append(feature.strand) 
+                gene_left = values
+                gene_left_distance = feature.location.start - pos_x
+
+                # then go and find the next closest gene that y is next to
+                gene_right, gene_right_distance = get_other_gene(gb.features, pos_y, cds_features, trna_features, rrna_features, 'downstream')
+
+                # exit function
+                return gene_left, gene_left_distance, gene_right, gene_right_distance
+
+            elif pos_y in feature.location and pos_x not in feature.location:
+                values = []
+                if feature.type == 'CDS':
+                    for qual in cds_features:
+                        try:
+                            values.append(feature.qualifiers[qual][0])
+                        except KeyError:
+                            pass
+                elif feature.type == 'tRNA':
+                    for qual in trna_features:
+                        try:
+                            values.append(feature.qualifiers[qual][0])
+                        except KeyError:
+                            pass
+                elif feature.type == 'rRNA':
+                   for qual in rrna_features:
+                        try:
+                            values.append(feature.qualifiers[qual][0])
+                        except KeyError:
+                            pass
+                # get the strand
+                values.append(feature.strand)
+                gene_right = values
+                gene_right_distance = feature.location.start - pos_y
+
+                # then go and find next closest gene that x is next to
+                gene_left, gene_left_distance = get_other_gene(gb.features, pos_x, cds_features, trna_features, rrna_features, 'upstream')
+                # exit function
+                return gene_left, gene_left_distance, gene_right, gene_right_distance
+
+            # if x and y both aren't inside the gene, find distances from gene
             dist_l = abs(feature.location.start - pos_x)
             dist_r = abs(feature.location.start - pos_y)
             values = []
@@ -357,17 +509,15 @@ def get_flanking_genes(reference, pos_x, pos_y, cds_quals, trna_quals, rrna_qual
                         values.append(feature.qualifiers[qual][0])
                     except KeyError:
                         pass
-            # append to respective dictionaries
+            # get the strand
             values.append(feature.strand) 
+            # append to respective dictionaries
             distance_l[dist_l] = values
             distance_r[dist_r] = values
 
     # for each side, get the ordered list of distances
     distance_lkeys = list(OrderedDict.fromkeys(distance_l))
     distance_rkeys = list(OrderedDict.fromkeys(distance_r))
-
-    #print distance_lkeys[0:10]
-    #print distance_rkeys[0:10]
     
     gene_left = distance_l[min(distance_lkeys)] 
     gene_right = distance_r[min(distance_rkeys)]
