@@ -161,7 +161,7 @@ def pairHits(five_ranges, three_ranges, seqLength, genbank, blast_gap, output_fi
         else:
             # an unpaired 5'
             # in this case gap (z) is 0, and x is the first coord and y is the second coord
-            paired_hits['region_' + str(count)] = ["5' unpaired", str(five_ranges[i][0]), str(five_ranges[i][1]), '']
+            paired_hits['region_' + str(count)] = ["5' unpaired", str(five_ranges[i][0]), str(five_ranges[i][1]), '-']
             seq_before = record[five_ranges[i][0] - seqLength:five_ranges[i][0]]
             seq_before = SeqRecord(Seq(str(seq_before.seq), generic_dna), id='region_' + str(count) + '_before')
             seq_after = record[five_ranges[i][1]:five_ranges[i][1] + seqLength]
@@ -174,7 +174,7 @@ def pairHits(five_ranges, three_ranges, seqLength, genbank, blast_gap, output_fi
         if value not in found_threes:
             # an unpaired 3'
             # in this case gap (z) is again 0, and x is the first coord and y is the second coord
-            paired_hits['region_' + str(count)] = ["3' unpaired", str(value[0]), str(value[1]), '']
+            paired_hits['region_' + str(count)] = ["3' unpaired", str(value[0]), str(value[1]), '-']
             seq_before = record[value[0] - seqLength:value[0]]
             seq_before = SeqRecord(Seq(str(seq_before.seq), generic_dna), id='region_' + str(count) + '_before')
             seq_after = record[value[1]:value[1] + seqLength]
@@ -307,6 +307,33 @@ def get_flanking_genes(reference, pos_x, pos_y, cds_quals, trna_quals, rrna_qual
     for feature in gb.features:
         # only if the feature is a CDS, tRNA or rRNA do we care
         if feature.type == 'CDS' or feature.type == 'tRNA' or feature.type == 'rRNA':
+            # if both positions inside gene, then just return this information (no other checking required)
+            if pos_x in feature.location and pos_y in feature.location:
+                values = []
+                if feature.type == 'CDS':
+                    for qual in cds_features:
+                        try:
+                            values.append(feature.qualifiers[qual][0])
+                        except KeyError:
+                            pass
+                elif feature.type == 'tRNA':
+                    for qual in trna_features:
+                        try:
+                            values.append(feature.qualifiers[qual][0])
+                        except KeyError:
+                            pass
+                elif feature.type == 'rRNA':
+                   for qual in rrna_features:
+                        try:
+                            values.append(feature.qualifiers[qual][0])
+                        except KeyError:
+                            pass
+                values.append(feature.strand) 
+                gene_left = values
+                gene_left_distance = feature.location.start - pos_x
+                gene_right = values
+                gene_right_distance = feature.location.end - pos_y
+                return gene_left, gene_left_distance, gene_right, gene_right_distance
             # find distances from gene
             dist_l = abs(feature.location.start - pos_x)
             dist_r = abs(feature.location.start - pos_y)
