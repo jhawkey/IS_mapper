@@ -587,9 +587,11 @@ def main():
             blast_results = 0
         createTable(table, blast_results, insertionSeqLength, args.blast_gap, output_file, args.reference_genbank, args.cds, args.trna, args.rrna)
     else:
-        print "\t".join(["region", "orientation", "hit start", "IS start", "IS end", "hit end", "length of IS region", "percent ID to IS", "coverage of region to IS", "call"])
+        header = ["region", "orientation", "x", "y", "gap", "call", "%id", "%cov", "left_gene", "left_strand", "left_distance", "right_gene", "right_strand", "right_distance", "functional_prediction"]
+        print "\t".join(header)
+        output_file.write('\t'.join(header))
         output_file.write('No hits found')
-        print "No hits found"
+        print 'No hits found'
     output_file.close()
 
 if __name__ == "__main__":
