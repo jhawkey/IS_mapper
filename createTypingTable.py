@@ -206,7 +206,7 @@ def unpairedHits(ranges, seqLength, genbank, output_file, orientation):
 	return hits
 def createTable(table, blast_results, insertionSeqLength, blast_gap, output):
 
-	#add the percent ID and query coverage for the blast hits to the table
+	#add the percent ID and query coverage for the BLAST hits to the table
 	print 'this is the table'
 	print table
 	print 'these are the blast results'
@@ -223,22 +223,29 @@ def createTable(table, blast_results, insertionSeqLength, blast_gap, output):
 				#if int(table[i][3]) <= 0 or int(table[i][3]) <= blast_gap:
 					#table[i].extend(['Novel', '', ''])
 
+				# if percent ID and cov meet a certain threshold, annotate as known, otherwise annotate as unknown
 				if percentID >= 80 and queryCoverage >= 60:
 					table[i].extend(['Known', str(percentID), str('%.2f' % queryCoverage)])
 				else:
-					table[i].extend(['Unknown', '', ''])
+					table[i].extend(['Unknown', str(percentID), str('%.2f' % queryCoverage)])
 			# this is for the unpaired hits where the before or after sequence has been taken
 			if 'before' in i:
+				# get the region number
 				region_no = i.split('_')[1]
+				# if the BLAST hit is above a certain id and cov, then anntoate as known
 				if percentID >= 80 and queryCoverage >= 60:
 					table['region_' + region_no].extend(['Known before', str(percentID), str('%.2f' % queryCoverage)])
+				# otherwise unknown, but give location of lower quality BLAST hit
 				else:
 					table['region_' + region_no].extend(['Unknown: positioned before BLAST hit', str(percentID), str('%.2f' % queryCoverage)])
 
 			elif 'after' in i:
+				# get the region number
 				region_no = i.split('_')[1]
+				# if the BLAST hit meets the threshold requirements annotate as known
 				if percentID >= 80 and queryCoverage >= 60:
 					table['region_' + region_no].extend(['Known after', str(percentID), str('%.2f' % queryCoverage)])
+				# otherwise unknown, but give location of lower quality BLAST hit
 				else:
 					table['region_' + region_no].extend(['Unknown: positioned after BLAST hit', str(percentID), str('%.2f' % queryCoverage)])
 			else:
@@ -263,34 +270,23 @@ def createTable(table, blast_results, insertionSeqLength, blast_gap, output):
 		#print key
 		#print type(key)
 		#print table[key]
-		print key + '\t' + '\t'.join(str(i) for i in table[key])
-		output.write(key + '\t' + '\t'.join(str(i) for i in table[key]) + '\n')
-
-		'''if 'F' in table[key] or 'R' in table[key]:
-			print key + '\t' + '\t'.join(table[key])
-			output.write(key + '\t' + '\t'.join(table[key]) + '\n')
-			try:
-				# if the hits are right next to each other and there is little or no sequence in between, report it as novel	
-				if float(table[key][5]) == 0 or float(table[key][5]) <= blast_gap:
-					print key + "\t", "\t".join(table[key]) + "\t \t \tNovel insertion site"
-				#if the sequence between has good ID and coverage to the IS in question, report it as known
-				elif float(table[key][6]) >= 80 and float(table[key][7]) >= 60:
-					print key + "\t", "\t".join(table[key]) + "\tKnown insertion site"
-				#Otherwise report as unknown
-				else:
-					print key + "\t", "\t".join(table[key]) + "\tUnknown"
-			except (KeyError, IndexError):
-				print key + "\t", "\t".join(table[key]) + "\t \t \tUnknown: no BLAST hit before or after"
-		
-		if "5' unpaired" in table[key] or "3' unpaired" in table[key]:
-			try:
-				if float(table[key][6]) >= 80 and float(table[key][7]) >= 60:
-					print key + "\t", "\t".join(table[key][:-1]) + "\tKnown insertion site " + table[key][8]
-				else:
-					print key + "\t", "\t".join(table[key][:-1]) + "\tUnknown: positioned " + table[key][8] + " BLAST hit"
-			except IndexError:
-				print key + "\t", "\t".join(table[key][:-1]) + "\tUnknown: no BLAST hit before or after"
-			'''
+		# if region already has a call, write it out
+		if len(table[key]) > 4:
+			print key + '\t' + '\t'.join(str(i) for i in table[key])
+			output.write(key + '\t' + '\t'.join(str(i) for i in table[key]) + '\n')
+		elif  'F' in table[key] or 'R' in table[key]:
+			if table[key][3] <= blast_gap:
+				table[key].extend(['Novel', '', ''])
+				print key + '\t' + '\t'.join(str(i) for i in table[key])
+				output.write(key + '\t' + '\t'.join(str(i) for i in table[key]) + '\n')
+			else:
+				table[key].extend(['Unknown (no BLAST hit)', '', ''])
+				print key + '\t' + '\t'.join(str(i) for i in table[key])
+				output.write(key + '\t' + '\t'.join(str(i) for i in table[key]) + '\n')
+		elif "5' unpaired" in table[key] or "3' unpaired" in table[key]:
+			table[key].extend(['Unknown (no BLAST hit before or after)', '', ''])
+			print key + '\t' + '\t'.join(str(i) for i in table[key])
+			output.write(key + '\t' + '\t'.join(str(i) for i in table[key]) + '\n')
 
 def doBlast(blast_input, blast_output, database):
 	#perform BLAST
