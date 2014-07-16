@@ -211,10 +211,6 @@ def unpairedHits(ranges, seqLength, genbank, output_file, orientation):
 
 def createTable(table, blast_results, insertionSeqLength, blast_gap, output, reference, cds_quals, trna_quals, rrna_quals):
 
-    print 'this is the table'
-    print table
-    print 'these are the blast results'
-    print blast_results
     # add the percent ID and query coverage for the BLAST hits to the table
     if blast_results != 0:
         for i in blast_results:
@@ -276,29 +272,31 @@ def createTable(table, blast_results, insertionSeqLength, blast_gap, output, ref
         #print type(key)
         #print table[key]
         # if region already has a call, write it out
-        get_flanking_genes(reference, int(table[key][1]), int(table[key][2]), cds_quals, trna_quals, rrna_quals)
+        gene_left, gene_left_dist, gene_right, gene_right_dist = get_flanking_genes(reference, int(table[key][1]), int(table[key][2]), cds_quals, trna_quals, rrna_quals)
         if len(table[key]) > 4:
+            table[key].extend([gene_left[:-1], gene_left[-1], gene_left_dist, gene_right[:-1], gene_right[-1], gene_right_dist])
             print key + '\t' + '\t'.join(str(i) for i in table[key])
             output.write(key + '\t' + '\t'.join(str(i) for i in table[key]) + '\n')
         elif  'F' in table[key] or 'R' in table[key]:
             if table[key][3] <= blast_gap:
                 table[key].extend(['Novel', '', ''])
+                table[key].extend([gene_left[:-1], gene_left[-1], gene_left_dist, gene_right[:-1], gene_right[-1], gene_right_dist])
                 print key + '\t' + '\t'.join(str(i) for i in table[key])
                 output.write(key + '\t' + '\t'.join(str(i) for i in table[key]) + '\n')
             else:
                 table[key].extend(['Unknown (no BLAST hit)', '', ''])
+                table[key].extend([gene_left[:-1], gene_left[-1], gene_left_dist, gene_right[:-1], gene_right[-1], gene_right_dist])
                 print key + '\t' + '\t'.join(str(i) for i in table[key])
                 output.write(key + '\t' + '\t'.join(str(i) for i in table[key]) + '\n')
         elif "5' unpaired" in table[key] or "3' unpaired" in table[key]:
             table[key].extend(['Unknown (no BLAST hit before or after)', '', ''])
+            table[key].extend([gene_left[:-1], gene_left[-1], gene_left_dist, gene_right[:-1], gene_right[-1], gene_right_dist])
             print key + '\t' + '\t'.join(str(i) for i in table[key])
             output.write(key + '\t' + '\t'.join(str(i) for i in table[key]) + '\n')
 
 def get_flanking_genes(reference, pos_x, pos_y, cds_quals, trna_quals, rrna_quals):
 
     gb = SeqIO.read(reference, 'genbank')
-    #pos_gene_left = {}
-    #pos_gene_right = {}
     distance_l = {}
     distance_r = {}
     cds_features = cds_quals.split(',')
@@ -344,44 +342,12 @@ def get_flanking_genes(reference, pos_x, pos_y, cds_quals, trna_quals, rrna_qual
     #print distance_lkeys[0:10]
     #print distance_rkeys[0:10]
     
-    pos_gene_left = distance_l[min(distance_lkeys)] 
-    pos_gene_right = distance_r[min(distance_rkeys)]
+    gene_left = distance_l[min(distance_lkeys)] 
+    gene_right = distance_r[min(distance_rkeys)]
+    gene_left_dist = min(distance_lkeys)
+    gene_right_dist = min(distance_rkeys)
 
-    print pos_gene_left
-    print pos_gene_right
-
-
-
-
-    '''for pos in positions:
-        #print pos
-        x = pos[0]
-        y = pos[1]
-        distance_start = {}
-        distance_end = {}
-        for feature in gb.features:
-            if feature.type == 'CDS' or feature.type == 'tRNA' or feature.type == 'rRNA':
-                #print feature
-                if feature.type == 'CDS':
-                    distance_start[abs(feature.location.start - x)] = feature.qualifiers['locus_tag'][0]
-                elif feature.type == 'tRNA' or feature.type == 'rRNA':
-                    distance_start[abs(feature.location.start - x)] = feature.qualifiers['product'][0]
-        distance_skeys = list(OrderedDict.fromkeys(distance_start))
-        gene = distance_start[min(distance_skeys)]
-        pos_gene_start[pos] = gene
-        for feature in gb.features:
-            if feature.type == 'CDS' or feature.type == 'tRNA' or feature.type == 'rRNA':
-                if feature.type == 'CDS':
-                    distance_end[abs(feature.location.end - y)] = feature.qualifiers['locus_tag'][0]
-                elif feature.type == 'tRNA' or feature.type == 'rRNA':
-                    distance_end[abs(feature.location.end - y)] = feature.qualifiers['product'][0]
-        distance_ekeys = list(OrderedDict.fromkeys(distance_end))
-        gene2 = distance_end[min(distance_ekeys)]
-        pos_gene_end[pos] = gene2
-
-    pos_check = {}'''
-
-    #return pos_gene_start, pos_gene_end
+    return gene_left, gene_left_dist, gene_right, gene_right_dist
 
 def doBlast(blast_input, blast_output, database):
     #perform BLAST
