@@ -24,8 +24,8 @@ def main():
     args = parse_args()
 
     with open(args.table) as table_in:
+        header = 0
         for line in table_in:
-            header = 0
             if header == 0:
                 print line
                 header = header + 1
