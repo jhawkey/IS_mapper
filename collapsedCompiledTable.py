@@ -28,7 +28,7 @@ def collapse_row(row_dict, row_positions):
         y = position[1]
         xy_range = range(x, y)
         for position_2 in row_positions:
-            if postion_2[0] != x and position_2[1] != y:
+            if position_2[0] != x and position_2[1] != y:
                 if position_2[0] in xy_range or position_2[1] in xy_range:
                     new_x = min(position_2[0], x)
                     new_y = max(position_2[1], y)
@@ -42,28 +42,32 @@ def main():
     f_rows = {}
     r_rows = {}
 
-    with table_in as open(args.table):
+    with open(args.table) as table_in:
+        count = 0
         for line in table_in:
-            count = 0
             if count == 0:
-                header = line.split('\t')
+                header = line.strip().split('\t')
                 count += 1
             else:
-                info = line.split('\t')
+                info = line.strip().split('\t')
                 if info[0] == 'F':
                     f_rows[(int(info[1]), int(info[2]))] = info[3:]
                 elif info[0] == 'R':
                     r_rows[(int(info[1]), int(info[2]))] = info[3:]
-
+    print header
+    #print f_rows
+    #print r_rows
     order_f_rows = f_rows.keys()
     order_f_rows.sort()
     order_r_rows = r_rows.keys()
-    order_r_rwos.sort()
+    order_r_rows.sort()
 
     collapsed_f_rows = collapse_row(f_rows, order_f_rows)
     collapsed_r_rows = collapse_row(r_rows, order_r_rows)
 
     print collapsed_f_rows
+    output_file = open(args.output, 'w')
+    output_file.write('\t'.join(header) + '\n')
 
 if __name__ == "__main__":
     main()
