@@ -15,10 +15,6 @@ def parse_args():
 
     parser = ArgumentParser(description="create a table of features for the is mapping pipeline")
     parser.add_argument('--tables', nargs='+', type=str, required=True, help='tables to compile')
-    parser.add_argument('--reference_fasta', type=str, required=False, help='fasta file of reference to determine known positions')
-    parser.add_argument('--reference_gbk', type=str, required=False, help='gbk file of reference to report closest genes')
-    parser.add_argument('--seq', type=str, required=False, help='fasta file for insertion sequence looking for in reference')
-    parser.add_argument('--gap', type=int, required=False, default=400, help='distance between regions to call overlapping')
     parser.add_argument('--output', type=str, required=True, help='name of output file')
 
     return parser.parse_args()
