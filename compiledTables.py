@@ -18,7 +18,7 @@ def parse_args():
     parser.add_argument('--reference_fasta', type=str, required=True, help='fasta file of reference to determine known positions')
     parser.add_argument('--reference_gbk', type=str, required=True, help='gbk file of reference to report closest genes')
     parser.add_argument('--seq', type=str, required=True, help='fasta file for insertion sequence looking for in reference')
-    parser.add_argument('--gap', type=int, required=False, default=300, help='distance between regions to call overlapping')
+    parser.add_argument('--gap', type=int, required=False, default=400, help='distance between regions to call overlapping')
 
     return parser.parse_args()
 
@@ -34,40 +34,65 @@ def check_ranges(ranges, range_to_check, gap, orientation, unpaired = None):
         #print ranges
         #print 'this is the orientation: ' + orientation
         for i in range(0, len(ranges_list)):
-            #print 'these are the x and y values'
+         #   print 'these are the x and y values'
             x = ranges_list[i][0]
             y = ranges_list[i][1]
-            #print x, y
-            #print 'this the orientation of the range that we are currently checking against'
+            if x in range(2802000, 2804000) and y in range(2802000, 2804000):
+                print 'these are the start and stop values'
+                print start, stop
+                print 'these are the x and y values'
+                print x, y
+                print 'this is the current orientation'
+                print orientation
+                print 'this the orientation of the range that we are currently checking against'
+                checking_orientation = ranges[(ranges_list[i][0], ranges_list[i][1])]
+                print checking_orientation
             checking_orientation = ranges[(ranges_list[i][0], ranges_list[i][1])]
-            #print checking_orientation
+          #  print checking_orientation
             if orientation == checking_orientation:
-                #print 'so the orientation matches'
+           #     print 'so the orientation matches'
+            #    print 'these are the start and stop values'
+             #   print start, stop
                 #print 'these are the x and y values'
                 #print x, y
                 if orientation == "5' to 3'":
                     if start >= (x - gap) and start <= (y + 1):
-                        #print 'we are the start part'
+                        print 'we are the start part, these are the two conditions being checked'
+                        print start >= (x - gap)
+                        print start <= (y + 1)
                         new_start = min(x, start)
                         new_end = max(y, stop)
-                        #print 'this is the start and stop that were successful'
-                        #print start, stop
+                        print 'this is the start and stop that were successful'
+                        print start, stop
                         return ranges_list[i], (new_start, new_end), orientation
                     elif stop >= x and stop <= (y + gap + 1):
-                        #print 'we are in the stop part'
+                        print 'we are in the stop part, two conditions'
+                        print stop >= x
+                        print stop <= (y + gap + 1)
                         new_start = min(x, start)
                         new_end = max(y, stop)
-                        #print 'this is the start and stop that were successful'
-                        #print start, stop
+                        print 'this is the start and stop that were successful'
+                        print start, stop
                         return ranges_list[i], (new_start, new_end), orientation
                 else:
+                    print 'this is for 3 prime to 5 prime orientation'
                     if start <= (x + gap) and start > y:
+                        print 'we are at the start part, two conditions'
+                        print start <= (x + gap)
+                        print start > y
                         new_start = max(x, start)
                         new_end = min(y, stop)
+                        print 'this is the start and stop that were successful'
+                        print start, stop
                         return ranges_list[i], (new_start, new_end), orientation
                     elif stop >= (y - gap) and stop < x:
+                        print 'we are at the stop part, two conditions'
+                        print stop >= (y - gap) 
+                        print stop < x
                         new_start = max(x, start)
                         new_end = min(y, stop)
+                        print 'this is the start and stop that were successful'
+                        print start, stop
                         return ranges_list[i], (new_start, new_end), orientation
             #print 'the orientation did not match'
 
@@ -118,30 +143,68 @@ def get_flanking_genes(reference, positions):
         distance_start = {}
         distance_end = {}
         for feature in gb.features:
-            if feature.type == 'CDS' or feature.type == 'tRNA':
+            if feature.type == 'CDS' or feature.type == 'tRNA' or feature.type == 'rRNA':
                 #print feature
                 if feature.type == 'CDS':
-                    try:
-                        distance_start[abs(feature.location.start - x)] = feature.qualifiers['gene'][0]
-                    except KeyError:
-                        distance_start[abs(feature.location.start - x)] = feature.qualifiers['locus_tag'][0]
-                elif feature.type == 'tRNA':
+                    distance_start[abs(feature.location.start - x)] = feature.qualifiers['locus_tag'][0]
+                elif feature.type == 'tRNA' or feature.type == 'rRNA':
                     distance_start[abs(feature.location.start - x)] = feature.qualifiers['product'][0]
         distance_skeys = list(OrderedDict.fromkeys(distance_start))
         gene = distance_start[min(distance_skeys)]
         pos_gene_start[pos] = gene
         for feature in gb.features:
-            if feature.type == 'CDS' or feature.type == 'tRNA':
+            if feature.type == 'CDS' or feature.type == 'tRNA' or feature.type == 'rRNA':
                 if feature.type == 'CDS':
-                    try:
-                        distance_end[abs(feature.location.end - y)] = feature.qualifiers['gene'][0]
-                    except KeyError:
-                        distance_end[abs(feature.location.end - y)] = feature.qualifiers['locus_tag'][0]
-                elif feature.type == 'tRNA':
+                    distance_end[abs(feature.location.end - y)] = feature.qualifiers['locus_tag'][0]
+                elif feature.type == 'tRNA' or feature.type == 'rRNA':
                     distance_end[abs(feature.location.end - y)] = feature.qualifiers['product'][0]
         distance_ekeys = list(OrderedDict.fromkeys(distance_end))
         gene2 = distance_end[min(distance_ekeys)]
         pos_gene_end[pos] = gene2
+
+    pos_check = {}
+    '''for pos in pos_gene_start:
+        if pos_gene_start[pos] == pos_gene_end[pos]:
+            x = pos[0]
+            y = pos[1]
+            gene_test = pos_gene_start[pos]
+            if x < y:
+                for feature in gb.features:
+                    if feature.qualifiers['locus_tag'][0] == gene_test and feature.strand == 1:
+                        distance_x = abs(feature.location.start - x)
+                        distance_y = abs(eature.location.start - y)
+                        if distance_x < distance_y:
+                            pos_check[(x,y)] = 'y+20'
+                        else:
+                            pos_check[(x,y)] = 'x-20'
+                    elif feature.qualifiers['locus_tag'][0] == gene_test and feature.strand == -1:
+                        distance_x = abs(feature.location.end - x)
+                        distance_y = abs(feature.location.end - y)
+                        if distance_x < distance_y:
+                            pos_check[(x, y)] = 'y+20'
+                        else:
+                            pos_check[(x, y)] = 'x-20'
+            else:
+                for feature in gb.features:
+                    if features.qualifiers['locus_tag'][0] == gene_test and feature.strand == 1:
+                        distance_x = abs(feature.location.start - x)
+                        distance_y = abs(eature.location.start - y)
+                        if distance_y < distance_x:
+                            pos_check[(x,y)] = 'x+20'
+                        else:
+                            pos_check[(x,y)] = 'y-20'
+                    elif feature.qualifiers['locus_tag'][0] == gene_test and feature.strand == -1:
+                        distance_x = abs(feature.location.end - x)
+                        distance_y = abs(feature.location.end - y)
+                        if distance_y < distance_x:
+                            pos_check[(x, y)] = 'x+20'
+                        else:
+                            pos_check[(x, y)] = 'y-20'
+
+    # gotta fix this!
+    for position in pos_check:
+        if pos_check[position] == 'y+20':
+            pass'''
 
     return pos_gene_start, pos_gene_end
 
@@ -170,15 +233,16 @@ def main():
                 elif 'No hits found' not in line and line != '':
                     #print isolate
                     info = line.strip('\n').split('\t')
+                    #print info
                     orientation = info[1]
-                    is_start = int(info[3])
+                    is_start = int(info[2])
                     #print is_start
                     if info[4] != '':
-                        is_end = int(info[4])
+                        is_end = int(info[5])
                         #print is_end
                     else:
                         #print 'this is not a paired hit'
-                        is_end = info[4]
+                        is_end = info[5]
                         if isolate not in unpaired_hits:
                             #print 'adding it to the unpaired hits'
                             unpaired_hits[isolate] = [is_start]
