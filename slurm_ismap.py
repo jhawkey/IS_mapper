@@ -146,6 +146,8 @@ def main():
         cmd += "\nmodule load samtools-gcc/0.1.19"
         cmd += "\nmodule load blast+-gcc/2.2.25"
         cmd += "\nmodule load velvetoptimiser/2.2.5"
+        cmd += "\nmodule load bamtools-intel/2.3.0"
+        cmd += "\nmodule load spades-gcc/3.0.0"
         cmd += "\npython " + args.script
         cmd += " --runtype " + args.runtype + " --reads " + file_path + "/" + sample + "*.fastq.gz"
         if args.forward != "_1":
