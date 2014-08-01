@@ -371,6 +371,8 @@ def main():
         output_sam = temp_folder + sample + '.sam'
         five_bam = temp_folder + sample + '_5.bam'
         three_bam = temp_folder + sample + '_3.bam'
+        five_reads = temp_folder + sample + '_5.fastq'
+        three_reads = temp_folder + sample + '_3.fastq'
         VOdir_five = temp_folder + sample + '_VO_5'
         VOdir_three = temp_folder + sample + '_VO_3'
         VO_fiveout = VOdir_five + "/out/"
@@ -393,9 +395,17 @@ def main():
         run_command(['samtools view', '-Sb', '-f 36', output_sam, '>', five_bam], shell=True)
         run_command(['samtools view', '-Sb', '-f 4', '-F 40', output_sam, '>', three_bam], shell=True)
 
+        #turn bams to reads for SPAdes
+        run_command(['bamtools', 'convert', '-in', five_bam, '-out', five_reads], shell=True)
+        run_command(['bamtools', 'convert', '-in', three_bam, '-out', three_reads], shell=True)
+
         # assemble ends
-        run_command([args.path + 'velvetshell.sh', VOdir_five, str(sKmer), str(eKmer), five_bam, VO_fiveout, current_dir + five_assembly], shell=True)
-        run_command([args.path + 'velvetshell.sh', VOdir_three, str(sKmer), str(eKmer), three_bam, VO_threeout, current_dir + three_assembly], shell=True)
+        run_command(['spades.py', '-s', five_reads, '-o', VOdir_five, '-k 25,31,55,65,75,85,95'], shell=True)
+        run_command(['spades.py', '-s', three_reads, '-o', VOdir_three, '-k 25,33,55,65,75,85,95'], shell=True)
+        run_command(['mv', VOdir_five + '/contigs.fasta', five_assembly], shell=True)
+        run_command(['mv', VOdir_three + '/contigs.fasta', three_assembly], shell=True)
+        #run_command([args.path + 'velvetshell.sh', VOdir_five, str(sKmer), str(eKmer), five_bam, VO_fiveout, current_dir + five_assembly], shell=True)
+        #run_command([args.path + 'velvetshell.sh', VOdir_three, str(sKmer), str(eKmer), three_bam, VO_threeout, current_dir + three_assembly], shell=True)
 
         if args.runtype == "improvement":
 
