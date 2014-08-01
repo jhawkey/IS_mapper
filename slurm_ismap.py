@@ -144,7 +144,7 @@ def main():
         cmd += "\nmodule load python-gcc/2.7.5"
         cmd += "\nmodule load bwa-intel/0.7.5a"
         cmd += "\nmodule load samtools-gcc/0.1.19"
-        cmd += "\nmodule load blast+-intel/2.2.28"
+        cmd += "\nmodule load blast+-gcc/2.2.25"
         cmd += "\nmodule load velvetoptimiser/2.2.5"
         cmd += "\npython " + args.script
         cmd += " --runtype " + args.runtype + " --reads " + file_path + "/" + sample + "*.fastq.gz"
