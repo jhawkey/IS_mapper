@@ -396,8 +396,8 @@ def main():
         run_command(['samtools view', '-Sb', '-f 4', '-F 40', output_sam, '>', three_bam], shell=True)
 
         #turn bams to reads for SPAdes
-        run_command(['bamtools', 'convert', '-in', five_bam, '-out', five_reads], shell=True)
-        run_command(['bamtools', 'convert', '-in', three_bam, '-out', three_reads], shell=True)
+        run_command(['bamtools', 'convert', '-format fastq', '-in', five_bam, '-out', five_reads], shell=True)
+        run_command(['bamtools', 'convert', '-format fastq', '-in', three_bam, '-out', three_reads], shell=True)
 
         # assemble ends
         run_command(['spades.py', '-s', five_reads, '-o', VOdir_five, '-k 25,31,55,65,75,85,95'], shell=True)
