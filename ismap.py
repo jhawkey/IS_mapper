@@ -400,8 +400,8 @@ def main():
         run_command(['bamtools', 'convert', '-format fastq', '-in', three_bam, '-out', three_reads], shell=True)
 
         # assemble ends
-        run_command(['spades.py', '-s', five_reads, '-o', VOdir_five, '-k 25,31,55,65,75,85,95'], shell=True)
-        run_command(['spades.py', '-s', three_reads, '-o', VOdir_three, '-k 25,33,55,65,75,85,95'], shell=True)
+        run_command(['spades.py', '-s', five_reads, '-o', VOdir_five, '-k 25,31,55,65,75'], shell=True)
+        run_command(['spades.py', '-s', three_reads, '-o', VOdir_three, '-k 25,33,55,65,75'], shell=True)
         run_command(['mv', VOdir_five + '/contigs.fasta', five_assembly], shell=True)
         run_command(['mv', VOdir_three + '/contigs.fasta', three_assembly], shell=True)
         #run_command([args.path + 'velvetshell.sh', VOdir_five, str(sKmer), str(eKmer), five_bam, VO_fiveout, current_dir + five_assembly], shell=True)
