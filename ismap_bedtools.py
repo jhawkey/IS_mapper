@@ -322,6 +322,15 @@ def make_directories(dir_list):
         else:
             logging.info('Cannot make diretory {}'.format(directory))
 
+def filter_on_depth(cov_file, out_bed):
+    output = file(out_bed, 'w')
+    with open(cov_file) as depth_info:
+        for line in depth_info:
+            if int(line.strip().split('\t')[3]) >= 4:
+                output.write(line)
+    output.close()
+
+
 def main():
 
     args = parse_args()
@@ -460,6 +469,10 @@ def main():
             three_bam_sorted = sample + '_3_' + typingName + '.sorted'
             five_raw_bed = sample + '_5_' + typingName + '.sorted.bed'
             three_raw_bed = sample + '_3_' + typingName + '.sorted.bed'
+            five_cov_bed = sample + '_5_' + typingName + '_cov.bed'
+            three_cov_bed = sample + '_3_' + typingName + '_cov.bed'
+            five_final_cov = sample + '_5_' + typingName + '_finalcov.bed'
+            three_final_cov = sample + '_3_' + typingName + '_finalcov.bed'
             five_merged_bed = sample + '_5_' + typingName + '_merged.sorted.bed'
             three_merged_bed = sample + '_3_' + typingName + '_merged.sorted.bed'
             bed_intersect = sample + '_' + typingName + '_intersect.bed'
@@ -479,11 +492,15 @@ def main():
             run_command(['samtools', 'sort', five_to_ref_bam, five_bam_sorted], shell=True)
             run_command(['samtools', 'sort', three_to_ref_bam, three_bam_sorted], shell=True)
 
-            #create raw and merged BED files
-            run_command(['bedtools', 'bamtobed', '-i', five_bam_sorted + '.bam', '>', five_raw_bed], shell=True)
-            run_command(['bedtools', 'bamtobed', '-i', three_bam_sorted + '.bam', '>', three_raw_bed], shell=True)
-            run_command(['bedtools', 'merge', '-i', five_raw_bed, '>', five_merged_bed], shell=True)
-            run_command(['bedtools', 'merge', '-i', three_raw_bed, '>', three_merged_bed], shell=True)
+            #create BED file with coverage information
+            run_command(['bedtools', 'genomecov', '-ibam', five_bam_sorted, '-bg', '>', five_cov_bed], shell=True)
+            run_command(['bedtools', 'genomecov', '-ibam', three_bam_sorted, '-bg', '>', three_cov_bed], shell=True)
+            filter_on_depth(five_cov_bed, five_final_cov)
+            filter_on_depth(three_cov_bed, three_final_cov)
+            #run_command(['bedtools', 'bamtobed', '-i', five_bam_sorted + '.bam', '>', five_raw_bed], shell=True)
+            #run_command(['bedtools', 'bamtobed', '-i', three_bam_sorted + '.bam', '>', three_raw_bed], shell=True)
+            run_command(['bedtools', 'merge', '-i', five_final_cov, '>', five_merged_bed], shell=True)
+            run_command(['bedtools', 'merge', '-i', three_final_cov, '>', three_merged_bed], shell=True)
 
             #find intersection of regions
             run_command(['bedtools', 'intersect', '-a', five_merged_bed, '-b', three_merged_bed, '-wo', '>', bed_intersect], shell=True)
