@@ -474,8 +474,8 @@ def main():
             #map reads to reference, sort
             run_command(['bwa', 'mem', args.typingRefFasta, five_reads, '>', five_to_ref_sam], shell=True)
             run_command(['bwa', 'mem', args.typingRefFasta, three_reads, '>', three_to_ref_sam], shell=True)
-            run_command(['samtools', 'view', '-Sb', five_to_ref_sam, five_to_ref_bam], shell=True)
-            run_command(['samtools', 'view', '-Sb', three_to_ref_sam, three_to_ref_bam], shell=True)
+            run_command(['samtools', 'view', '-Sb', five_to_ref_sam, '>', five_to_ref_bam], shell=True)
+            run_command(['samtools', 'view', '-Sb', three_to_ref_sam, '>', three_to_ref_bam], shell=True)
             run_command(['samtools', 'sort', five_to_ref_bam, five_bam_sorted], shell=True)
             run_command(['samtools', 'sort', three_to_ref_bam, three_bam_sorted], shell=True)
 
