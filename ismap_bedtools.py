@@ -47,6 +47,7 @@ def parse_args():
     parser.add_argument('--assemblyid', type=str, required=False, help='Identifier for assemblies eg: sampleName_contigs (specify _contigs) or sampleName_assembly (specify _assembly). Do not specify extension.')
     parser.add_argument('--extension', type=str, required=False, help='Extension for assemblies (.fasta or .gbk, default is .fasta)', default='.fasta')
     parser.add_argument('--typingRef', type=str, required=False, help='Reference genome for typing against')
+    parser.add_argument('--typingRefFasta', type=str, required=False, help='Reference genome in fasta format')
     parser.add_argument('--type', type=str, required=False, default='fasta', help='Indicator for contig assembly type, genbank or fasta (default fasta)')
     parser.add_argument('--path', type=str, required=True, default='', help='Path to folder where scripts are.')
 
@@ -467,9 +468,12 @@ def main():
             final_genbankSingle = sample + '_annotatedAllSingle.gbk'
             table_output = sample + '_table.txt'
 
+            #create bwa index file if one doesn't already exist
+            '''NEED TO ADD THIS FUNCTION'''
+
             #map reads to reference, sort
-            run_command(['bwa', 'mem', args.reference, five_reads, '>', five_to_ref_sam], shell=True)
-            run_command(['bwa', 'mem', args.reference, three_reads, '>', three_to_ref_sam], shell=True)
+            run_command(['bwa', 'mem', args.typingRefFasta, five_reads, '>', five_to_ref_sam], shell=True)
+            run_command(['bwa', 'mem', args.typingRefFasta, three_reads, '>', three_to_ref_sam], shell=True)
             run_command(['samtools', 'view', '-Sb', five_to_ref_sam, five_to_ref_bam], shell=True)
             run_command(['samtools', 'view', '-Sb', three_to_ref_sam, three_to_ref_bam], shell=True)
             run_command(['samtools', 'sort', five_to_ref_bam, five_bam_sorted], shell=True)
@@ -485,9 +489,6 @@ def main():
             run_command(['bedtools', 'intersect', '-a', five_merged_bed, '-b', three_merged_bed, '-wo', '>', bed_intersect], shell=True)
 
             '''
-            #turn typingRef into a fasta
-            run_command(['python', args.path + 'gbkToFasta.py', '-i', args.typingRef, '-o', typingRefFasta], shell=True)
-            
             #check database for reference genome and create if it doesn't exist
             check_blast_database(typingRefFasta)
 
