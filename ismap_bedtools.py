@@ -493,8 +493,8 @@ def main():
             run_command(['samtools', 'sort', three_to_ref_bam, three_bam_sorted], shell=True)
 
             #create BED file with coverage information
-            run_command(['bedtools', 'genomecov', '-ibam', five_bam_sorted, '-bg', '>', five_cov_bed], shell=True)
-            run_command(['bedtools', 'genomecov', '-ibam', three_bam_sorted, '-bg', '>', three_cov_bed], shell=True)
+            run_command(['bedtools', 'genomecov', '-ibam', five_bam_sorted + '.bam', '-bg', '>', five_cov_bed], shell=True)
+            run_command(['bedtools', 'genomecov', '-ibam', three_bam_sorted + '.bam', '-bg', '>', three_cov_bed], shell=True)
             filter_on_depth(five_cov_bed, five_final_cov)
             filter_on_depth(three_cov_bed, three_final_cov)
             #run_command(['bedtools', 'bamtobed', '-i', five_bam_sorted + '.bam', '>', five_raw_bed], shell=True)
