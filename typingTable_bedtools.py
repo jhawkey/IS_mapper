@@ -266,6 +266,8 @@ def get_other_gene(features, pos, cds_features, trna_features, rrna_features, di
 
 def main():
 
+    args = parse_args()
+
     results = {}
     removed_results = {}
     region = 1
@@ -273,19 +275,31 @@ def main():
     header = ["region", "orientation", "x", "y", "gap", "left_gene", "left_strand", "left_distance", "right_gene", "right_strand", "right_distance", "functional_prediction"]
     with open(args.input) as bed_merged:
         for line in bed_merged:
-            info = line.strip.split('\t')
-            #col 2 is x, col3 is y, col6 is the gap
+            info = line.strip().split('\t')
+            #set up coordinates for checking: L is the left end of the IS (5') and R is the right end of the IS (3')
+            #eg x_L and y_L are the x and y coordinates of the bed block that matches to the region which is flanking the left end or 5' of the IS
+            x_L = int(info[1])
+            y_L = int(info[2])
+            x_R = int(info[4])
+            y_R = int(info[5])
             #check to see if the gap is reasonable
             if int(info[6]) <= 15:
-                if int(info[4]) > int(info[2]):
+                if x_L < x_R and y_L < y_R:
                     orient = 'F'
-                else:
+                    x = x_R
+                    y = y_L
+                elif x_L > x_R and y_L > y_R:
                     orient = 'R'
-                gene_left, gene_left_dist, gene_right, gene_right_dist = get_flanking_genes(args.reference, int(info[2]), int(info[4]), args.cds, args.trna, args.rrna)
-                results['region_' + str(region)] = [orient, info[2], info[4], info[6], gene_left[:-1], gene_left[-1], gene_left_dist, gene_right[:-1], gene_right[-1], gene_right_dist]
+                    x = x_L
+                    y = y_R
+                else:
+                    print 'neither if statement were correct'
+
+                gene_left, gene_left_dist, gene_right, gene_right_dist = get_flanking_genes(args.reference_genbank, x, y, args.cds, args.trna, args.rrna)
+                results['region_' + str(region)] = [orient, str(x), str(y), info[6], gene_left[:-1], gene_left[-1], gene_left_dist, gene_right[:-1], gene_right[-1], gene_right_dist]
+                region += 1
             else:
                 removed_results['region_' + str(region)] = line
-            region += 1
             lines += 1
     
     #sort regions into the correct order
@@ -306,10 +320,10 @@ def main():
 
     output_removed = open(args.output + '_removedHits.txt', 'w')
     for region in removed_results:
-        output_removed.write('\t'.join(removed_results[region]) + '\n')
+        output_removed.write(removed_results[region])
     output_removed.close()
 
-    return(lines, len(removed_results))
+    #return(lines, len(removed_results))
 
 if __name__ == "__main__":
     main()
