@@ -449,9 +449,9 @@ def main():
         if args.runtype == "typing":
 
             #get prefix for output filenames
-            (file_path, file_name) = os.path.split(args.typingRef)
+            (file_path, file_name) = os.path.split(args.typingRefFasta)
             typingName = file_name.split('.g')[0]
-            typingRefFasta = temp_folder + typingName + '.fasta'
+            #typingRefFasta = temp_folder + typingName + '.fasta'
             five_to_ref_sam = sample + '_5_' + typingName + '.sam'
             three_to_ref_sam = sample + '_3_' + typingName + '.sam'
             five_to_ref_bam = sample + '_5_' + typingName + '.bam'
