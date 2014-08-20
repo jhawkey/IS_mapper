@@ -397,10 +397,11 @@ def main():
     output.close()
 
     #write out hits that were removed for whatever reason to file
-    output_removed = open(args.output + '_removedHits.txt', 'w')
-    for region in removed_results:
-        output_removed.write(removed_results[region])
-    output_removed.close()
+        if len(remove_results) != 0:
+        output_removed = open(args.output + '_removedHits.txt', 'w')
+        for region in removed_results:
+            output_removed.write(removed_results[region])
+        output_removed.close()
 
     #return(lines, len(removed_results))
 
