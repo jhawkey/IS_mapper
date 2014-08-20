@@ -383,20 +383,6 @@ def main():
         three_bam = temp_folder + sample + '_3.bam'
         five_reads = temp_folder + sample + '_5.fastq'
         three_reads = temp_folder + sample + '_3.fastq'
-        VOdir_five = temp_folder + sample + '_VO_5'
-        VOdir_three = temp_folder + sample + '_VO_3'
-        VO_fiveout = VOdir_five + "/out/"
-        VO_threeout = VOdir_three + "/out/"  
-        five_assembly = sample + "_5_contigs.fasta"
-        three_assembly = sample + "_3_contigs.fasta"
-        five_contigHits = sample + "_5_contigHits.txt"
-        three_contigHits = sample + "_3_contigHits.txt"
-
-        # get Velvet kmer range
-        sKmer, eKmer = get_kmer_size(forward_read)
-
-        # create all required directories
-        make_directories([VOdir_five, VOdir_three])
 
         # map to IS reference
         run_command(['bwa', 'mem', args.reference, forward_read, reverse_read, '>', output_sam], shell=True)
@@ -506,6 +492,7 @@ def main():
             run_command(['bedtools', 'intersect', '-a', five_merged_bed, '-b', three_merged_bed, '-wo', '>', bed_intersect], shell=True)
 
             run_command(['python', 'typingTable_bedtools.py', '--input', bed_intersect, '--reference_genbank', args.typingRef, '--output', table_output], shell=True)
+            run_command(['python', 'annotate_genbank_from_bed.py', '--bed', bed_intersect, '--genbank', args.typingRef, '--newfile', final_genbank], shell=True)
 
             '''
             #check database for reference genome and create if it doesn't exist

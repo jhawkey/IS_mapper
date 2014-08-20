@@ -23,6 +23,7 @@ def createFeature(hits):
     y_L = hits[1]
     x_R = hits[2]
     y_R = hits[3]
+    quals = {}
 
     left_location = SeqFeature.FeatureLocation(x_L, y_L)
     right_location = SeqFeature.FeatureLocation(x_R, y_R)
@@ -46,7 +47,7 @@ def parse_bed(bed_file):
     with open(bed_file) as summary:
         for line in summary:
             info = line.strip().split('\t')
-            hits['hit_' + str(hit_no)] = [int(info[1]), int(info[2]), int(info[3]), int(info[4])]
+            hits['hit_' + str(hit_no)] = [int(info[1]), int(info[2]), int(info[4]), int(info[5])]
             hit_no += 1
     return hits
 
@@ -61,7 +62,7 @@ def main():
     for region in blocks:
         left_end, right_end = createFeature(blocks[region])
         genbank.features.append(left_end)
-        genbank.feature.append(right_end)
+        genbank.features.append(right_end)
         feature_count += 2
 
     SeqIO.write(genbank, args.newfile, 'genbank')
