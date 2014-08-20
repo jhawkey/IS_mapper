@@ -278,9 +278,11 @@ def doBlast(blast_input, blast_output, database):
     blastn_cline = NcbiblastnCommandline(query=blast_input, db=database, outfmt="'6 qseqid qlen sacc pident length slen sstart send evalue bitscore qcovs'", out=blast_output)
     stdout, stderr = blastn_cline()
 
-def check_seq_between(genbank, insertion, start, end):
+def check_seq_between(gb, insertion, start, end):
 
-    genbank = SeqIO.read(args.reference_genbank, 'genbank')
+    genbank = SeqIO.read(gb, 'genbank')
+    print 'this is start ' + str(start)
+    print 'this is end ' + str(end)
     seq_between = genbank.seq[start:end]
     seq_between = SeqRecord(Seq(str(seq_between), generic_dna), id='temp')
     SeqIO.write(seq_between, 'temp.fasta', 'fasta')
@@ -294,6 +296,7 @@ def check_seq_between(genbank, insertion, start, end):
                 hit = [info[3], coverage]
                 first_result += 1
     os.system('rm temp.fasta temp_out.txt')
+    print 'successfully completed'
     return hit
 
 def main():
@@ -305,74 +308,75 @@ def main():
     region = 1
     lines = 0
     header = ["region", "orientation", "x", "y", "gap", "call", "%ID", "%Cov", "left_gene", "left_strand", "left_distance", "right_gene", "right_strand", "right_distance", "functional_prediction"]
-    with open(args.intersect_bed) as bed_merged:
-        for line in bed_merged:
-            info = line.strip().split('\t')
-            #set up coordinates for checking: L is the left end of the IS (5') and R is the right end of the IS (3')
-            #eg x_L and y_L are the x and y coordinates of the bed block that matches to the region which is flanking the left end or 5' of the IS
-            x_L = int(info[1])
-            y_L = int(info[2])
-            x_R = int(info[4])
-            y_R = int(info[5])
-            #check to see if the gap is reasonable
-            if int(info[6]) <= 15:
-                if x_L < x_R and y_L < y_R:
-                    orient = 'F'
-                    x = x_R
-                    y = y_L
-                elif x_L > x_R and y_L > y_R:
-                    orient = 'R'
-                    x = x_L
-                    y = y_R
-                else:
-                    print 'neither if statement were correct'
+    if os.stat(args.intersect_bed) != 0:
+        with open(args.intersect_bed) as bed_merged:
+            for line in bed_merged:
+                info = line.strip().split('\t')
+                #set up coordinates for checking: L is the left end of the IS (5') and R is the right end of the IS (3')
+                #eg x_L and y_L are the x and y coordinates of the bed block that matches to the region which is flanking the left end or 5' of the IS
+                x_L = int(info[1])
+                y_L = int(info[2])
+                x_R = int(info[4])
+                y_R = int(info[5])
+                #check to see if the gap is reasonable
+                if int(info[6]) <= 15:
+                    if x_L < x_R and y_L < y_R:
+                        orient = 'F'
+                        x = x_R
+                        y = y_L
+                    elif x_L > x_R and y_L > y_R:
+                        orient = 'R'
+                        x = x_L
+                        y = y_R
+                    else:
+                        print 'neither if statement were correct'
 
-                gene_left, gene_left_dist, gene_right, gene_right_dist = get_flanking_genes(args.reference_genbank, x, y, args.cds, args.trna, args.rrna)
-                if gene_left[:-1] == gene_right[:-1]:
-                    funct_pred = 'Gene interrupted'
+                    gene_left, gene_left_dist, gene_right, gene_right_dist = get_flanking_genes(args.reference_genbank, x, y, args.cds, args.trna, args.rrna)
+                    if gene_left[:-1] == gene_right[:-1]:
+                        funct_pred = 'Gene interrupted'
+                    else:
+                        funct_pred = ''
+                    results['region_' + str(region)] = [orient, str(x), str(y), info[6], 'Novel', '', '', gene_left[:-1], gene_left[-1], gene_left_dist, gene_right[:-1], gene_right[-1], gene_right_dist, funct_pred]
+                    region += 1
                 else:
-                    funct_pred = ''
-                results['region_' + str(region)] = [orient, str(x), str(y), info[6], 'Novel', '', '', gene_left[:-1], gene_left[-1], gene_left_dist, gene_right[:-1], gene_right[-1], gene_right_dist, funct_pred]
-                region += 1
-            else:
-                removed_results['region_' + str(lines)] = line
-            lines += 1
+                    removed_results['region_' + str(lines)] = line.strip() + '\tintersect.bed\n'
+                lines += 1
     
     is_length = insertion_length(args.insertion_seq)
-    record = SeqIO.read(args.reference_genbank, 'genbank')
+    print results.keys()
     with open(args.closest_bed) as bed_closest:
         for line in bed_closest:
             info = line.strip().split('\t')
             if int(info[6]) == 0:
                 #this is an overlap, so will be in the intersect file
                 pass
-            elif float(info[6]) / is_length >= 0.8:
+            elif float(info[6]) / is_length >= 0.8 and float(info[6]) / is_length <= 1.5:
                 #this is probably a known hit, but need to check with BLAST
-                x_L = int(info[1])
                 y_L = int(info[2])
                 x_R = int(info[4])
-                y_R = int(info[5])
-                if x_L < x_R and y_L < y_R:
+                if y_L < x_R:
+                    start = y_L
+                    end = x_R
+                    orient = 'F'
+                else:
                     start = x_R
                     end = y_L
-                    orient = 'F'
-                elif x_L > x_R and y_L > y_R:
-                    start = x_L
-                    end = y_R
                     orient = 'R'
-                results = check_seq_between(args.reference_genbank, args.insertion_seq, start, end)
-                if results[0] >= 80 and results[1] >= 80:
+                print orient
+                seq_results = check_seq_between(args.reference_genbank, args.insertion_seq, start, end)
+                if seq_results[0] >= 80 and seq_results[1] >= 80:
                     #then this is definitely a known site
                     gene_left, gene_left_dist, gene_right, gene_right_dist = get_flanking_genes(args.reference_genbank, start, end, args.cds, args.trna, args.rrna)
-                    results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Known', str(results[0]), str(results[1]), gene_left[:-1], gene_left[-1], gene_left_dist, gene_right[:-1], gene_right[-1], gene_right_dist]
+                    results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Known', str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[:-1], gene_left[-1], gene_left_dist, gene_right[:-1], gene_right[-1], gene_right_dist]
                 else:
                    #then I'm not sure what this is
+                   'not sure'
                    gene_left, gene_left_dist, gene_right, gene_right_dist = get_flanking_genes(args.reference_genbank, start, end, args.cds, args.trna, args.rrna)
-                   results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Unknown', str(results[0]), str(results[1]), gene_left[:-1], gene_left[-1], gene_left_dist, gene_right[:-1], gene_right[-1], gene_right_dist]
+                   results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Unknown', str(results[0]), str('%.2f' % results[1]), gene_left[:-1], gene_left[-1], gene_left_dist, gene_right[:-1], gene_right[-1], gene_right_dist]
                 region += 1
             else:
                 #this is something else altogether - either the gap is really large or something, place it in removed_results
-                removed_results['region_' + str(region)] = line
+                removed_results['region_' + str(region)] = line.strip() + '\tclosest.bed\n'
                 region += 1
 
     #sort regions into the correct order
