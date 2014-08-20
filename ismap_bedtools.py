@@ -505,6 +505,8 @@ def main():
             #find intersection of regions
             run_command(['bedtools', 'intersect', '-a', five_merged_bed, '-b', three_merged_bed, '-wo', '>', bed_intersect], shell=True)
 
+            run_command(['python', 'typingTable_bedtools.py', '--input', bed_intersect, '--reference_genbank', args.typingRef, '--output', table_output], shell=True)
+
             '''
             #check database for reference genome and create if it doesn't exist
             check_blast_database(typingRefFasta)
