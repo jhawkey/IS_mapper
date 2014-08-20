@@ -14,8 +14,10 @@ from collections import OrderedDict
 def parse_args():
 
     parser = ArgumentParser(description="create a table of features for the is mapping pipeline")
-    parser.add_argument('--input', type=str, required=True, help='')
+    parser.add_argument('--intersect_bed', type=str, required=True, help='intersection bed file')
+    parser.add_argument('--closest_bed', type=str, required=True, help='closestBed bed file')
     parser.add_argument('--reference_genbank', type=str, required=True, help='reference genbank file to find flanking genes of regions')
+    parser.add_argument('--insertion_seq', type=str, required=True, help='insertion sequence reference in fasta format')
     parser.add_argument('--cds', type=str, required=False, default='locus_tag,gene,product', help='qualifiers to look for in reference genbank for CDS features')
     parser.add_argument('--trna', type=str, required=False, default='locus_tag,product', help='qualifiers to look for in reference genbank for tRNA features')
     parser.add_argument('--rrna', type=str, required=False, default='locus_tag,product', help='qualifiers to look for in reference genbank for rRNA features')
@@ -264,6 +266,36 @@ def get_other_gene(features, pos, cds_features, trna_features, rrna_features, di
         gene_distance = -gene_distance
     return gene, gene_distance
 
+def insertion_length(insertion):
+
+    sequence = SeqIO.read(insertion, "fasta")
+    length = len(sequence.seq)
+
+    return length
+
+def doBlast(blast_input, blast_output, database):
+    #perform BLAST
+    blastn_cline = NcbiblastnCommandline(query=blast_input, db=database, outfmt="'6 qseqid qlen sacc pident length slen sstart send evalue bitscore qcovs'", out=blast_output)
+    stdout, stderr = blastn_cline()
+
+def check_seq_between(genbank, insertion, start, end):
+
+    genbank = SeqIO.read(args.reference_genbank, 'genbank')
+    seq_between = genbank.seq[start:end]
+    seq_between = SeqRecord(Seq(str(seq_between), generic_dna), id='temp')
+    SeqIO.write(seq_between, 'temp.fasta', 'fasta')
+    doBlast('temp.fasta', 'temp_out.txt', insertion)
+    first_result = 0
+    with open('temp_out.txt') as summary:
+        for line in summary:
+            if first_result == 0:
+                info = line.strip().split('\t')
+                coverage = (float(info[1])/float(info[4])) * 100
+                hit = [info[3], coverage]
+                first_result += 1
+    os.system('rm temp.fasta temp_out.txt')
+    return hit
+
 def main():
 
     args = parse_args()
@@ -272,8 +304,8 @@ def main():
     removed_results = {}
     region = 1
     lines = 0
-    header = ["region", "orientation", "x", "y", "gap", "left_gene", "left_strand", "left_distance", "right_gene", "right_strand", "right_distance", "functional_prediction"]
-    with open(args.input) as bed_merged:
+    header = ["region", "orientation", "x", "y", "gap", "call", "%ID", "%Cov", "left_gene", "left_strand", "left_distance", "right_gene", "right_strand", "right_distance", "functional_prediction"]
+    with open(args.intersect_bed) as bed_merged:
         for line in bed_merged:
             info = line.strip().split('\t')
             #set up coordinates for checking: L is the left end of the IS (5') and R is the right end of the IS (3')
@@ -300,12 +332,49 @@ def main():
                     funct_pred = 'Gene interrupted'
                 else:
                     funct_pred = ''
-                results['region_' + str(region)] = [orient, str(x), str(y), info[6], gene_left[:-1], gene_left[-1], gene_left_dist, gene_right[:-1], gene_right[-1], gene_right_dist, funct_pred]
+                results['region_' + str(region)] = [orient, str(x), str(y), info[6], 'Novel', '', '', gene_left[:-1], gene_left[-1], gene_left_dist, gene_right[:-1], gene_right[-1], gene_right_dist, funct_pred]
                 region += 1
             else:
                 removed_results['region_' + str(lines)] = line
             lines += 1
     
+    is_length = insertion_length(args.insertion_seq)
+    record = SeqIO.read(args.reference_genbank, 'genbank')
+    with open(args.closest_bed) as bed_closest:
+        for line in bed_closest:
+            info = line.strip().split('\t')
+            if int(info[6]) == 0:
+                #this is an overlap, so will be in the intersect file
+                pass
+            elif float(info[6]) / is_length >= 0.8:
+                #this is probably a known hit, but need to check with BLAST
+                x_L = int(info[1])
+                y_L = int(info[2])
+                x_R = int(info[4])
+                y_R = int(info[5])
+                if x_L < x_R and y_L < y_R:
+                    start = x_R
+                    end = y_L
+                    orient = 'F'
+                elif x_L > x_R and y_L > y_R:
+                    start = x_L
+                    end = y_R
+                    orient = 'R'
+                results = check_seq_between(args.reference_genbank, args.insertion_seq, start, end)
+                if results[0] >= 80 and results[1] >= 80:
+                    #then this is definitely a known site
+                    gene_left, gene_left_dist, gene_right, gene_right_dist = get_flanking_genes(args.reference_genbank, start, end, args.cds, args.trna, args.rrna)
+                    results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Known', str(results[0]), str(results[1]), gene_left[:-1], gene_left[-1], gene_left_dist, gene_right[:-1], gene_right[-1], gene_right_dist]
+                else:
+                   #then I'm not sure what this is
+                   gene_left, gene_left_dist, gene_right, gene_right_dist = get_flanking_genes(args.reference_genbank, start, end, args.cds, args.trna, args.rrna)
+                   results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Unknown', str(results[0]), str(results[1]), gene_left[:-1], gene_left[-1], gene_left_dist, gene_right[:-1], gene_right[-1], gene_right_dist]
+                region += 1
+            else:
+                #this is something else altogether - either the gap is really large or something, place it in removed_results
+                removed_results['region_' + str(region)] = line
+                region += 1
+
     #sort regions into the correct order
     table_keys = []
     for key in results:
@@ -316,12 +385,14 @@ def main():
     arr = np.vstack((table_keys, region_indexes)).transpose()
     sorted_keys = arr[arr[:,1].astype('int').argsort()]
 
+    #write out the found hits to file
     output = open(args.output, 'w')
     output.write('\t'.join(header) + '\n')
     for key in sorted_keys[:,0]:
         output.write(key + '\t' + '\t'.join(str(i) for i in results[key]) + '\n')
     output.close()
 
+    #write out hits that were removed for whatever reason to file
     output_removed = open(args.output + '_removedHits.txt', 'w')
     for region in removed_results:
         output_removed.write(removed_results[region])
