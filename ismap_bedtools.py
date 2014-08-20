@@ -462,6 +462,7 @@ def main():
             five_merged_bed = sample + '_5_' + typingName + '_merged.sorted.bed'
             three_merged_bed = sample + '_3_' + typingName + '_merged.sorted.bed'
             bed_intersect = sample + '_' + typingName + '_intersect.bed'
+            bed_closest = sample + '_' + typingName + '_closest.bed'
             genbank_output = temp_folder + sample + '_annotated.gbk'
             final_genbank = sample + '_annotatedAll.gbk'
             final_genbankSingle = sample + '_annotatedAllSingle.gbk'
@@ -490,8 +491,9 @@ def main():
 
             #find intersection of regions
             run_command(['bedtools', 'intersect', '-a', five_merged_bed, '-b', three_merged_bed, '-wo', '>', bed_intersect], shell=True)
+            run_command(['closestBed', '-a', five_merged_bed, '-b', three_merged_bed, '-d', '>', bed_closest], shell=True)
 
-            run_command(['python', 'typingTable_bedtools.py', '--input', bed_intersect, '--reference_genbank', args.typingRef, '--output', table_output], shell=True)
+            run_command(['python', 'typingTable_bedtools.py', '--intersect_bed', bed_intersect, '--closest_bed', bed_closest, '--insertion_seq', args.reference, '--reference_genbank', args.typingRef, '--output', table_output], shell=True)
             run_command(['python', 'annotate_genbank_from_bed.py', '--bed', bed_intersect, '--genbank', args.typingRef, '--newfile', final_genbank], shell=True)
 
             '''
