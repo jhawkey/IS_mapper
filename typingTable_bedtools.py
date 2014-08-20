@@ -296,10 +296,14 @@ def main():
                     print 'neither if statement were correct'
 
                 gene_left, gene_left_dist, gene_right, gene_right_dist = get_flanking_genes(args.reference_genbank, x, y, args.cds, args.trna, args.rrna)
-                results['region_' + str(region)] = [orient, str(x), str(y), info[6], gene_left[:-1], gene_left[-1], gene_left_dist, gene_right[:-1], gene_right[-1], gene_right_dist]
+                if gene_left[:-1] == gene_right[:-1]:
+                    funct_pred = 'Gene interrupted'
+                else:
+                    funct_pred = ''
+                results['region_' + str(region)] = [orient, str(x), str(y), info[6], gene_left[:-1], gene_left[-1], gene_left_dist, gene_right[:-1], gene_right[-1], gene_right_dist, funct_pred]
                 region += 1
             else:
-                removed_results['region_' + str(region)] = line
+                removed_results['region_' + str(lines)] = line
             lines += 1
     
     #sort regions into the correct order
