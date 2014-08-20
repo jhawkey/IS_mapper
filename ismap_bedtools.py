@@ -326,7 +326,7 @@ def filter_on_depth(cov_file, out_bed):
     output = file(out_bed, 'w')
     with open(cov_file) as depth_info:
         for line in depth_info:
-            if int(line.strip().split('\t')[3]) >= 4:
+            if int(line.strip().split('\t')[3]) >= 10:
                 output.write(line)
     output.close()
 
