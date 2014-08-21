@@ -224,7 +224,14 @@ def main():
     region = 1
     lines = 0
     header = ["region", "orientation", "x", "y", "gap", "call", "%ID", "%Cov", "left_gene", "left_strand", "left_distance", "right_gene", "right_strand", "right_distance", "functional_prediction"]
-    if os.stat(args.intersect_bed) != 0:
+    if os.stat(args.intersect_bed)[6] == 0 and os.stat(args.closest_bed)[6] == 0:
+        output = open(args.output, 'w')
+        output.write('\t'.join(header) + '\n')
+        output.write('No hits found')
+        output.close()
+        sys.exit()
+
+    if os.stat(args.intersect_bed)[6] != 0:
         with open(args.intersect_bed) as bed_merged:
             for line in bed_merged:
                 info = line.strip().split('\t')
