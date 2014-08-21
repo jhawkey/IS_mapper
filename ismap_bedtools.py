@@ -46,8 +46,7 @@ def parse_args():
     parser.add_argument('--assemblies', nargs = '+', type=str, required=False, help='Contig assemblies, one for each read set')
     parser.add_argument('--assemblyid', type=str, required=False, help='Identifier for assemblies eg: sampleName_contigs (specify _contigs) or sampleName_assembly (specify _assembly). Do not specify extension.')
     parser.add_argument('--extension', type=str, required=False, help='Extension for assemblies (.fasta or .gbk, default is .fasta)', default='.fasta')
-    parser.add_argument('--typingRef', type=str, required=False, help='Reference genome for typing against')
-    parser.add_argument('--typingRefFasta', type=str, required=False, help='Reference genome in fasta format')
+    parser.add_argument('--typingRef', type=str, required=False, help='Reference genome for typing against in genbank format')
     parser.add_argument('--type', type=str, required=False, default='fasta', help='Indicator for contig assembly type, genbank or fasta (default fasta)')
     parser.add_argument('--path', type=str, required=True, default='', help='Path to folder where scripts are.')
 
@@ -445,7 +444,7 @@ def main():
         if args.runtype == "typing":
 
             #get prefix for output filenames
-            (file_path, file_name) = os.path.split(args.typingRefFasta)
+            (file_path, file_name) = os.path.split(args.typingRef)
             typingName = file_name.split('.g')[0]
             typingRefFasta = temp_folder + typingName + '.fasta'
             five_to_ref_sam = sample + '_5_' + typingName + '.sam'
@@ -469,11 +468,10 @@ def main():
             final_genbankSingle = sample + '_annotatedAllSingle.gbk'
             table_output = sample + '_table.txt'
 
-            #create bwa index file if one doesn't already exist
-            bwa_index(typingRefFasta)
-
             #create reference fasta instead of genbank
             run_command(['python', args.path + 'gbkToFasta.py', '-i', args.typingRef, '-o', typingRefFasta], shell=True)
+            #create bwa index file if one doesn't already exist
+            bwa_index(typingRefFasta)
             #map reads to reference, sort
             run_command(['bwa', 'mem', typingRefFasta, five_reads, '>', five_to_ref_sam], shell=True)
             run_command(['bwa', 'mem', typingRefFasta, three_reads, '>', three_to_ref_sam], shell=True)
