@@ -330,7 +330,6 @@ def filter_on_depth(cov_file, out_bed):
                 output.write(line)
     output.close()
 
-
 def main():
 
     args = parse_args()
@@ -448,7 +447,7 @@ def main():
             #get prefix for output filenames
             (file_path, file_name) = os.path.split(args.typingRefFasta)
             typingName = file_name.split('.g')[0]
-            #typingRefFasta = temp_folder + typingName + '.fasta'
+            typingRefFasta = temp_folder + typingName + '.fasta'
             five_to_ref_sam = sample + '_5_' + typingName + '.sam'
             three_to_ref_sam = sample + '_3_' + typingName + '.sam'
             five_to_ref_bam = sample + '_5_' + typingName + '.bam'
@@ -473,9 +472,11 @@ def main():
             #create bwa index file if one doesn't already exist
             '''NEED TO ADD THIS FUNCTION'''
 
+            #create reference fasta instead of genbank
+            run_command(['python', args.path + 'gbkToFasta.py', '-i', args.typingRef, '-o', typingRefFasta], shell=True)
             #map reads to reference, sort
-            run_command(['bwa', 'mem', args.typingRefFasta, five_reads, '>', five_to_ref_sam], shell=True)
-            run_command(['bwa', 'mem', args.typingRefFasta, three_reads, '>', three_to_ref_sam], shell=True)
+            run_command(['bwa', 'mem', typingRefFasta, five_reads, '>', five_to_ref_sam], shell=True)
+            run_command(['bwa', 'mem', typingRefFasta, three_reads, '>', three_to_ref_sam], shell=True)
             run_command(['samtools', 'view', '-Sb', five_to_ref_sam, '>', five_to_ref_bam], shell=True)
             run_command(['samtools', 'view', '-Sb', three_to_ref_sam, '>', three_to_ref_bam], shell=True)
             run_command(['samtools', 'sort', five_to_ref_bam, five_bam_sorted], shell=True)
@@ -495,8 +496,8 @@ def main():
             run_command(['bedtools', 'intersect', '-a', five_merged_bed, '-b', three_merged_bed, '-wo', '>', bed_intersect], shell=True)
             run_command(['closestBed', '-a', five_merged_bed, '-b', three_merged_bed, '-d', '>', bed_closest], shell=True)
 
-            run_command(['python', 'typingTable_bedtools.py', '--intersect_bed', bed_intersect, '--closest_bed', bed_closest, '--insertion_seq', args.reference, '--reference_genbank', args.typingRef, '--output', table_output], shell=True)
-            run_command(['python', 'annotate_genbank_from_bed.py', '--bed', bed_intersect, '--genbank', args.typingRef, '--newfile', final_genbank], shell=True)
+            run_command(['python', args.path + 'typingTable_bedtools.py', '--intersect_bed', bed_intersect, '--closest_bed', bed_closest, '--insertion_seq', args.reference, '--reference_genbank', args.typingRef, '--output', table_output], shell=True)
+            run_command(['python', args.path + 'annotate_genbank_from_bed.py', '--bed', bed_intersect, '--genbank', args.typingRef, '--newfile', final_genbank], shell=True)
 
             '''
             #check database for reference genome and create if it doesn't exist
