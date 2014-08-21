@@ -68,7 +68,7 @@ def get_flanking_genes(reference, pos_x, pos_y, cds_quals, trna_quals, rrna_qual
             # if x inside gene but y is not, need to report gene x is in gene further down genome from y
             elif pos_x in feature.location and pos_y not in feature.location:
                 if feature.type == 'CDS':
-                    values = get_qualifiers(cds_feature, feature)
+                    values = get_qualifiers(cds_features, feature)
                 elif feature.type == 'tRNA':
                     values = get_qualifiers(trna_features, feature)
                 elif feature.type == 'rRNA':
