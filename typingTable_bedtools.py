@@ -262,6 +262,27 @@ def main():
             if int(info[6]) == 0:
                 #this is an overlap, so will be in the intersect file
                 pass
+            elif int(info[6]) <= 10:
+                #this is probably a novel hit where there was no overlap detected
+                x_L = int(info[1])
+                y_L = int(info[2])
+                x_R = int(info[4])
+                y_R = int(info[5])
+                if x_L < x_R and y_L < y_R:
+                    orient = 'F'
+                    x = x_R
+                    y = y_L
+                elif x_L > x_R and y_L > y_R:
+                    orient = 'R'
+                    x = x_L
+                    y = y_R
+                gene_left, gene_left_dist, gene_right, gene_right_dist = get_flanking_genes(args.reference_genbank, x, y, args.cds, args.trna, args.rrna)
+                if gene_left[:-1] == gene_right[:-1]:
+                    funct_pred = 'Gene interrupted'
+                else:
+                    funct_pred = ''
+                results['region_' + str(region)] = [orient, str(x), str(y), info[6], 'Novel', '', '', gene_left[:-1], gene_left[-1], gene_left_dist, gene_right[:-1], gene_right[-1], gene_right_dist, funct_pred]
+                region += 1
             elif float(info[6]) / is_length >= 0.8 and float(info[6]) / is_length <= 1.5:
                 #this is probably a known hit, but need to check with BLAST
                 y_L = int(info[2])
