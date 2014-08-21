@@ -512,8 +512,9 @@ def main():
             check_blast_database(args.reference)
             run_command(['python', args.path +'createTypingTable.py', '--genbank', final_genbankSingle, '--insertion', args.reference, '--temp', temp_folder, '--reference_genbank', args.typingRef, '--output', table_output], shell=True)
 
+        '''
         if args.temp == False:
-            run_command(['rm', '-rf', temp_folder], shell=True)'''
+            run_command(['rm', '-rf', temp_folder], shell=True)
 
 
 if __name__ == '__main__':
