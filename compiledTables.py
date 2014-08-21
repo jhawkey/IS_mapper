@@ -34,23 +34,23 @@ def check_ranges(ranges, range_to_check, gap, orientation):
             x = range_list[i][0]
             y = range_list[i][1]
             if orientation == 'F':
-                if x in range(start - gap, start) or x in range(stop, stop + gap):
+                if x in range(start - gap, stop + 1) or x in range(start, stop + gap + 1):
                     #these ranges overlap
                     new_start = min(x, start)
                     new_end = max(y, stop)
                     return range_list[i], (new_start, new_end), orientation
-                elif y in range(start - gap, start) or y in range(stop, stop + gap):
+                elif y in range(start - gap, stop + 1) or y in range(start, stop + gap + 1):
                     #these ranges also overlap
                     new_start = min(x, start)
                     new_end = min(y, stop)
                     return range_list[i], (new_start, new_end), orientation
             elif orientation == 'R':
-                if x in range(start - gap, start) or x in range(stop, stop + gap):
+                if x in range(start - gap, stop + 1) or x in range(start, stop + gap + 1):
                     #these ranges overlap
                     new_start = min(x, start)
                     new_end = max(y, stop)
                     return range_list[i], (new_start, new_end), orientation
-                elif y in range(start - gap, start) or y in range(stop, stop + gap):
+                elif y in range(start - gap, stop + 1) or y in range(start, stop + gap + 1):
                     #these ranges also overlap
                     new_start = min(x, start)
                     new_end = min(y, stop)
