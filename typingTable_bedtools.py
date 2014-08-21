@@ -209,8 +209,11 @@ def check_seq_between(gb, insertion, start, end):
                 coverage = (float(info[1])/float(info[4])) * 100
                 hit = [info[3], coverage]
                 first_result += 1
+            os.system('rm temp.fasta temp_out.txt')
+            return hit
     os.system('rm temp.fasta temp_out.txt')
-    return hit
+    hit = []
+    return []
 
 def main():
 
