@@ -236,11 +236,11 @@ def main():
                 y_R = int(info[5])
                 #check to see if the gap is reasonable
                 if int(info[6]) <= 15:
-                    if x_L < x_R and y_L < y_R:
+                    if x_L < x_R or y_L < y_R:
                         orient = 'F'
                         x = x_R
                         y = y_L
-                    elif x_L > x_R and y_L > y_R:
+                    elif x_L > x_R or y_L > y_R:
                         orient = 'R'
                         x = x_L
                         y = y_R
@@ -300,7 +300,7 @@ def main():
                     orient = 'R'
                 print orient
                 seq_results = check_seq_between(args.reference_genbank, args.insertion_seq, start, end)
-                if seq_results[0] >= 80 and seq_results[1] >= 80:
+                if len(seq_results) != 0 and seq_results[0] >= 80 and seq_results[1] >= 80:
                     #then this is definitely a known site
                     gene_left, gene_left_dist, gene_right, gene_right_dist = get_flanking_genes(args.reference_genbank, start, end, args.cds, args.trna, args.rrna)
                     results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Known', str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[:-1], gene_left[-1], gene_left_dist, gene_right[:-1], gene_right[-1], gene_right_dist]
