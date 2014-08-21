@@ -306,9 +306,12 @@ def main():
                     results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Known', str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[:-1], gene_left[-1], gene_left_dist, gene_right[:-1], gene_right[-1], gene_right_dist]
                 else:
                    #then I'm not sure what this is
-                   'not sure'
+                   print 'not sure'
                    gene_left, gene_left_dist, gene_right, gene_right_dist = get_flanking_genes(args.reference_genbank, start, end, args.cds, args.trna, args.rrna)
-                   results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Unknown', str(results[0]), str('%.2f' % results[1]), gene_left[:-1], gene_left[-1], gene_left_dist, gene_right[:-1], gene_right[-1], gene_right_dist]
+                   if len(seq_results) !=0:
+                        results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Unknown', str(results[0]), str('%.2f' % results[1]), gene_left[:-1], gene_left[-1], gene_left_dist, gene_right[:-1], gene_right[-1], gene_right_dist]
+                    else:
+                        results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Unknown', 'no hit', 'no hit', gene_left[:-1], gene_left[-1], gene_left_dist, gene_right[:-1], gene_right[-1], gene_right_dist]
                 region += 1
             else:
                 #this is something else altogether - either the gap is really large or something, place it in removed_results
