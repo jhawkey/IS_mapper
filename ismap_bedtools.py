@@ -384,7 +384,7 @@ def main():
         five_reads = temp_folder + sample + '_5.fastq'
         three_reads = temp_folder + sample + '_3.fastq'
 
-        make_directories(temp_folder)
+        make_directories([temp_folder])
 
         # map to IS reference
         run_command(['bwa', 'mem', args.reference, forward_read, reverse_read, '>', output_sam], shell=True)
