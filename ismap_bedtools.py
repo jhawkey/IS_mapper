@@ -470,7 +470,7 @@ def main():
             table_output = sample + '_table.txt'
 
             #create bwa index file if one doesn't already exist
-            '''NEED TO ADD THIS FUNCTION'''
+            bwa_index(typingRefFasta)
 
             #create reference fasta instead of genbank
             run_command(['python', args.path + 'gbkToFasta.py', '-i', args.typingRef, '-o', typingRefFasta], shell=True)
