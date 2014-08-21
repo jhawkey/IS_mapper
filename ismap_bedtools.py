@@ -95,7 +95,7 @@ def bwa_index(fasta):
         logging.info('Index for {} is already built...'.format(fasta))
     else:
         logging.info('Building bwa index for {}...'.format(fasta))
-        run_command(['bwa', 'index', fasta])
+        run_command(['bwa', 'index', fasta], shell=True)
 
 def check_command_version(command_list, version_identifier, command_name, required_version):
     '''
