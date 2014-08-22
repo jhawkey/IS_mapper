@@ -30,9 +30,11 @@ def createFeature(hits):
     if x_L < x_R and y_L < y_R:
         #then in forward orientation, set colour to be red
         quals['colour'] = '2'
+        quals['orientation'] = 'forward'
     elif x_L > x_R and y_L > y_R:
         #then in reverse orientation, set colour to be yellow
         quals['colour'] = '7'
+        quals['orientation'] = 'reverse'
 
     left_feature = SeqFeature.SeqFeature(left_location, type='left_end', qualifiers=quals)
     right_feature = SeqFeature.SeqFeature(right_location, type='right_end', qualifiers=quals)
