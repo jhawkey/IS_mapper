@@ -50,14 +50,13 @@ def parse_args():
     parser.add_argument('--path', type=str, required=True, default='', help='Path to folder where scripts are.')
 
     # Cutoffs for annotation
-    parser.add_argument('--coverage', type=float, required=False, default=90.0, help='Minimum coverage for hit to be annotated (default 90.0)')
+    parser.add_argument('--cutoff', type=int, required=False, default=6, help='Minimum depth for mapped region to be kept in bed file (default 6)')
     parser.add_argument('--percentid', type=float, required=False, default=90.0, help='Minimum percent ID for hit to be annotated (default 90.0')
     
     # Reporting options
     parser.add_argument('--log', action="store_true", required=False, help='Switch on logging to file (otherwise log to stdout')
     parser.add_argument('--output', type=str, required=True, help='prefix for output files')
     parser.add_argument('--temp', action="store_true", required=False, help='Switch on keeping the temp folder instead of deleting it at the end of the program')
-
 
     return parser.parse_args()
 
@@ -272,11 +271,11 @@ def make_directories(dir_list):
         else:
             logging.info('Cannot make diretory {}'.format(directory))
 
-def filter_on_depth(cov_file, out_bed):
+def filter_on_depth(cov_file, out_bed, cov_cutoff):
     output = file(out_bed, 'w')
     with open(cov_file) as depth_info:
         for line in depth_info:
-            if int(line.strip().split('\t')[3]) >= 6:
+            if int(line.strip().split('\t')[3]) >= cov_cutoff:
                 output.write(line)
     output.close()
 
@@ -348,35 +347,35 @@ def main():
 
         if args.runtype == "improvement":
 
-
             # get prefix for output filenames
-            five_to_ref_sam = sample + '_5_' + '.sam'
-            three_to_ref_sam = sample + '_3_' + '.sam'
-            five_to_ref_bam = sample + '_5_' + '.bam'
-            three_to_ref_bam = sample + '_3_' + '.bam'
-            five_bam_sorted = sample + '_5_' + '.sorted'
-            three_bam_sorted = sample + '_3_' + '.sorted'
-            five_raw_bed = sample + '_5_' + '.sorted.bed'
-            three_raw_bed = sample + '_3_' + '.sorted.bed'
-            five_cov_bed = sample + '_5_' + '_cov.bed'
-            three_cov_bed = sample + '_3_' + '_cov.bed'
-            five_final_cov = sample + '_5_' + '_finalcov.bed'
-            three_final_cov = sample + '_3_' + '_finalcov.bed'
-            five_merged_bed = sample + '_5_' + '_merged.sorted.bed'
-            three_merged_bed = sample + '_3_' + '_merged.sorted.bed'
-            genbank_output = temp_folder + sample + "_annotated.gbk"
+            five_header = sample + '_5_assembly'
+            three_header = sample + '_3_assembly'
+            five_to_ref_sam = temp_folder + five_header + '.sam'
+            three_to_ref_sam = temp_folder + three_header + '.sam'
+            five_to_ref_bam = temp_folder + five_header + '.bam'
+            three_to_ref_bam = temp_folder + three_header + '.bam'
+            five_bam_sorted = five_header + '.sorted'
+            three_bam_sorted = three_header + '.sorted'
+            five_raw_bed = temp_folder + five_header + '.sorted.bed'
+            three_raw_bed = temp_folder + three_header + '.sorted.bed'
+            five_cov_bed = temp_folder + five_header + '_cov.bed'
+            three_cov_bed = temp_folder + three_header + '_cov.bed'
+            five_final_cov = five_header + '_finalcov.bed'
+            three_final_cov = three_header + '_finalcov.bed'
+            five_merged_bed = five_header + '_merged.sorted.bed'
+            three_merged_bed = three_header + '_merged.sorted.bed'
             final_genbank = sample + "_annotatedAll.gbk"
             final_genbankSingle = sample + "_annotatedAllSingle.gbk"
             table_output = sample + "_table.txt"
 
-            #create fasta file from genbank if required
+            # create fasta file from genbank if required
             if args.extension == '.gbk':
                 assembly_gbk = assembly
                 (file_path, file_name_before_ext, full_ext) = get_readFile_components(assembly_gbk)
                 assembly_fasta = os.path.join(temp_folder, file_name_before_ext) + '.fasta'
                 run_command(['python', args.path + 'gbkToFasta.py', '-i', assembly, '-o', assembly_fasta], shell=True)
                 assembly = assembly_fasta
-            #map ends back to contigs
+            # map ends back to contigs
             bwa_index(assembly)
             run_command(['bwa', 'mem', assembly, five_reads, '>', five_to_ref_sam], shell=True)
             run_command(['bwa', 'mem', assembly, three_reads, '>', three_to_ref_sam], shell=True)
@@ -385,77 +384,79 @@ def main():
             run_command(['samtools', 'sort', five_to_ref_bam, five_bam_sorted], shell=True)
             run_command(['samtools', 'sort', three_to_ref_bam, three_bam_sorted], shell=True)
 
-            #create BED file with coverage information
+            # create BED file with coverage information
             run_command(['bedtools', 'genomecov', '-ibam', five_bam_sorted + '.bam', '-bg', '>', five_cov_bed], shell=True)
             run_command(['bedtools', 'genomecov', '-ibam', three_bam_sorted + '.bam', '-bg', '>', three_cov_bed], shell=True)
-            filter_on_depth(five_cov_bed, five_final_cov)
-            filter_on_depth(three_cov_bed, three_final_cov)
+            filter_on_depth(five_cov_bed, five_final_cov, args.cutoff)
+            filter_on_depth(three_cov_bed, three_final_cov, args.cutoff)
             run_command(['bedtools', 'merge', '-i', five_final_cov, '>', five_merged_bed], shell=True)
             run_command(['bedtools', 'merge', '-i', three_final_cov, '>', three_merged_bed], shell=True)
             
-            #create table
+            # create table
             run_command(['python', args.path + 'createTableImprovement.py', '--genbank', final_genbankSingle, '--output', table_output], shell=True)
-            #annotate assembly with hits
+            # annotate assembly with hits
 
         if args.runtype == "typing":
 
-            #get prefix for output filenames
+            # get prefix of typing reference for output filenames
             (file_path, file_name) = os.path.split(args.typingRef)
             typingName = file_name.split('.g')[0]
             typingRefFasta = temp_folder + typingName + '.fasta'
-            five_to_ref_sam = sample + '_5_' + typingName + '.sam'
-            three_to_ref_sam = sample + '_3_' + typingName + '.sam'
-            five_to_ref_bam = sample + '_5_' + typingName + '.bam'
-            three_to_ref_bam = sample + '_3_' + typingName + '.bam'
-            five_bam_sorted = sample + '_5_' + typingName + '.sorted'
-            three_bam_sorted = sample + '_3_' + typingName + '.sorted'
-            five_raw_bed = sample + '_5_' + typingName + '.sorted.bed'
-            three_raw_bed = sample + '_3_' + typingName + '.sorted.bed'
-            five_cov_bed = sample + '_5_' + typingName + '_cov.bed'
-            three_cov_bed = sample + '_3_' + typingName + '_cov.bed'
-            five_final_cov = sample + '_5_' + typingName + '_finalcov.bed'
-            three_final_cov = sample + '_3_' + typingName + '_finalcov.bed'
-            five_merged_bed = sample + '_5_' + typingName + '_merged.sorted.bed'
-            three_merged_bed = sample + '_3_' + typingName + '_merged.sorted.bed'
+            # create reference fasta from genbank
+            run_command(['python', args.path + 'gbkToFasta.py', '-i', args.typingRef, '-o', typingRefFasta], shell=True) 
+            # create bwa index file for typing reference
+            bwa_index(typingRefFasta)         
+            
+            five_header = sample + '_5_' + typingName
+            three_header = sample + '_3_' + typingName
+            five_to_ref_sam = temp_folder + five_header + '.sam'
+            three_to_ref_sam = temp_folder + three_header + '.sam'
+            five_to_ref_bam = temp_folder + five_header + '.bam'
+            three_to_ref_bam = temp_folder + three_header + '.bam'
+            five_bam_sorted = five_header + '.sorted'
+            three_bam_sorted = three_header + '.sorted'
+            five_raw_bed = temp_folder + five_header + '.sorted.bed'
+            three_raw_bed = temp_folder + three_header + '.sorted.bed'
+            five_cov_bed = temp_folder + five_header + '_cov.bed'
+            three_cov_bed = temp_folder + three_header + '_cov.bed'
+            five_final_cov = five_header + '_finalcov.bed'
+            three_final_cov = three_header + '_finalcov.bed'
+            five_merged_bed = five_header + '_merged.sorted.bed'
+            three_merged_bed = three_header + '_merged.sorted.bed'
             bed_intersect = sample + '_' + typingName + '_intersect.bed'
             bed_closest = sample + '_' + typingName + '_closest.bed'
-            genbank_output = temp_folder + sample + '_annotated.gbk'
-            final_genbank = sample + '_annotatedAll.gbk'
-            final_genbankSingle = sample + '_annotatedAllSingle.gbk'
+            final_genbank = sample + '_annotated.gbk'
             table_output = sample + '_table.txt'
 
-            #create reference fasta instead of genbank
-            run_command(['python', args.path + 'gbkToFasta.py', '-i', args.typingRef, '-o', typingRefFasta], shell=True)
-            #create bwa index file if one doesn't already exist
-            bwa_index(typingRefFasta)
-            #map reads to reference, sort
+            # map reads to reference, sort
             run_command(['bwa', 'mem', typingRefFasta, five_reads, '>', five_to_ref_sam], shell=True)
             run_command(['bwa', 'mem', typingRefFasta, three_reads, '>', three_to_ref_sam], shell=True)
             run_command(['samtools', 'view', '-Sb', five_to_ref_sam, '>', five_to_ref_bam], shell=True)
             run_command(['samtools', 'view', '-Sb', three_to_ref_sam, '>', three_to_ref_bam], shell=True)
             run_command(['samtools', 'sort', five_to_ref_bam, five_bam_sorted], shell=True)
             run_command(['samtools', 'sort', three_to_ref_bam, three_bam_sorted], shell=True)
+            run_command(['samtools', 'index', five_bam_sorted], shell=True)
+            run_command(['samtools', 'index', three_bam_sorted], shell=True)
 
-            #create BED file with coverage information
+            # create BED files with coverage information
             run_command(['bedtools', 'genomecov', '-ibam', five_bam_sorted + '.bam', '-bg', '>', five_cov_bed], shell=True)
             run_command(['bedtools', 'genomecov', '-ibam', three_bam_sorted + '.bam', '-bg', '>', three_cov_bed], shell=True)
-            filter_on_depth(five_cov_bed, five_final_cov)
-            filter_on_depth(three_cov_bed, three_final_cov)
-            #run_command(['bedtools', 'bamtobed', '-i', five_bam_sorted + '.bam', '>', five_raw_bed], shell=True)
-            #run_command(['bedtools', 'bamtobed', '-i', three_bam_sorted + '.bam', '>', three_raw_bed], shell=True)
+            filter_on_depth(five_cov_bed, five_final_cov, args.cutoff)
+            filter_on_depth(three_cov_bed, three_final_cov, args.cutoff)
             run_command(['bedtools', 'merge', '-i', five_final_cov, '>', five_merged_bed], shell=True)
             run_command(['bedtools', 'merge', '-i', three_final_cov, '>', three_merged_bed], shell=True)
 
-            #find intersection of regions
+            # find intersects and closest points of regions
             run_command(['bedtools', 'intersect', '-a', five_merged_bed, '-b', three_merged_bed, '-wo', '>', bed_intersect], shell=True)
             run_command(['closestBed', '-a', five_merged_bed, '-b', three_merged_bed, '-d', '>', bed_closest], shell=True)
 
+            # create table and annotate genbank with hits
             run_command(['python', args.path + 'typingTable_bedtools.py', '--intersect_bed', bed_intersect, '--closest_bed', bed_closest, '--insertion_seq', args.reference, '--reference_genbank', args.typingRef, '--output', table_output], shell=True)
             run_command(['python', args.path + 'annotate_genbank_from_bed.py', '--bed', bed_intersect, '--genbank', args.typingRef, '--newfile', final_genbank], shell=True)
 
+        # remove temp folder if required
         if args.temp == False:
             run_command(['rm', '-rf', temp_folder], shell=True)
-
 
 if __name__ == '__main__':
     main()
