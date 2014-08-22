@@ -9,10 +9,9 @@
 #
 # Dependencies:
 '''need to add websites and versions'''
-#   bwa
+#   BWA
 #   Samtools
-#   Velvet
-#   VelvetOptimiser
+#   Bedtools
 #   BioPython
 #   BLAST
 #
@@ -254,54 +253,6 @@ def read_file_sets(args):
 
     return fileSets
 
-def get_kmer_size(read):
-    '''
-    Takes a read file and calculates the correct kmer range
-    for VelvetOptimiser.
-    Takes the first 100 reads to get an average read size,
-    then the lower kmer is one third of the average and the upper kmer
-    is two thirds of the average.
-    Returns the lower and upper kmer values as integers.
-    '''
-
-    cmd = "gunzip -c " + read + " | head -n 400"
-    info = os.popen(cmd)
-    seqs = []
-    count = 1
-
-    for line in info:
-        if count % 4 == 2:
-            seqs.append(line)
-            count = count + 1
-        else:
-            count = count + 1
-
-    lens = []
-    total = 0
-    for i in seqs:
-        lens.append(len(i.split('\n')[0]))
-    for i in lens:
-        total = total + i
-    total = total / 100
-    sKmer = total / 3
-    eKmer = total / 3 * 2
-
-    return sKmer, eKmer
-
-def check_blast_database(fasta):
-    '''
-    Checks to make sure the BLAST database exists, and creates it
-    if it does not.
-    '''
-
-    database_path = fasta + ".nin"
-
-    if os.path.exists(database_path):
-        logging.info('Index for {} is already built...'.format(fasta))
-    else:
-        logging.info('Building blast index for {}...'.format(fasta))
-        run_command(['makeblastdb -in', fasta, '-dbtype nucl'], shell=True)
-
 def make_directories(dir_list):
     '''
     Makes the directories specified in the list.
@@ -397,49 +348,54 @@ def main():
 
         if args.runtype == "improvement":
 
+
             # get prefix for output filenames
+            five_to_ref_sam = sample + '_5_' + '.sam'
+            three_to_ref_sam = sample + '_3_' + '.sam'
+            five_to_ref_bam = sample + '_5_' + '.bam'
+            three_to_ref_bam = sample + '_3_' + '.bam'
+            five_bam_sorted = sample + '_5_' + '.sorted'
+            three_bam_sorted = sample + '_3_' + '.sorted'
+            five_raw_bed = sample + '_5_' + '.sorted.bed'
+            three_raw_bed = sample + '_3_' + '.sorted.bed'
+            five_cov_bed = sample + '_5_' + '_cov.bed'
+            three_cov_bed = sample + '_3_' + '_cov.bed'
+            five_final_cov = sample + '_5_' + '_finalcov.bed'
+            three_final_cov = sample + '_3_' + '_finalcov.bed'
+            five_merged_bed = sample + '_5_' + '_merged.sorted.bed'
+            three_merged_bed = sample + '_3_' + '_merged.sorted.bed'
             genbank_output = temp_folder + sample + "_annotated.gbk"
             final_genbank = sample + "_annotatedAll.gbk"
             final_genbankSingle = sample + "_annotatedAllSingle.gbk"
             table_output = sample + "_table.txt"
 
-            # assemble ends
-            run_command(['spades.py', '-s', five_reads, '-o', VOdir_five, '-k 25,31,55,65,75'], shell=True)
-            run_command(['spades.py', '-s', three_reads, '-o', VOdir_three, '-k 25,33,55,65,75'], shell=True)
-            run_command(['mv', VOdir_five + '/contigs.fasta', five_assembly], shell=True)
-            run_command(['mv', VOdir_three + '/contigs.fasta', three_assembly], shell=True)
-            #run_command([args.path + 'velvetshell.sh', VOdir_five, str(sKmer), str(eKmer), five_bam, VO_fiveout, current_dir + five_assembly], shell=True)
-            #run_command([args.path + 'velvetshell.sh', VOdir_three, str(sKmer), str(eKmer), three_bam, VO_threeout, current_dir + three_assembly], shell=True)
-
+            #create fasta file from genbank if required
             if args.extension == '.gbk':
                 assembly_gbk = assembly
                 (file_path, file_name_before_ext, full_ext) = get_readFile_components(assembly_gbk)
                 assembly_fasta = os.path.join(temp_folder, file_name_before_ext) + '.fasta'
                 run_command(['python', args.path + 'gbkToFasta.py', '-i', assembly, '-o', assembly_fasta], shell=True)
                 assembly = assembly_fasta
+            #map ends back to contigs
+            bwa_index(assembly)
+            run_command(['bwa', 'mem', assembly, five_reads, '>', five_to_ref_sam], shell=True)
+            run_command(['bwa', 'mem', assembly, three_reads, '>', three_to_ref_sam], shell=True)
+            run_command(['samtools', 'view', '-Sb', five_to_ref_sam, '>', five_to_ref_bam], shell=True)
+            run_command(['samtools', 'view', '-Sb', three_to_ref_sam, '>', three_to_ref_bam], shell=True)
+            run_command(['samtools', 'sort', five_to_ref_bam, five_bam_sorted], shell=True)
+            run_command(['samtools', 'sort', three_to_ref_bam, three_bam_sorted], shell=True)
 
-            # check database for assemblies and create one if it doesn't already exist
-            check_blast_database(assembly)
-
-            # blast ends against assemblies
-            run_command(['blastn', '-db', assembly, '-query', five_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", five_contigHits], shell=True)
-            run_command(['blastn', '-db', assembly, '-query', three_assembly, "-max_target_seqs 1 -outfmt '6 qseqid qlen sacc pident length slen sstart send evalue bitscore' >", three_contigHits], shell=True)
-
-            # annotate hits to genbank
-            if args.extension == '.gbk':
-                if len(sample) > 10:
-                    sample = sample[0:9]
-                run_command(['python', args.path + 'annotateMultiGenbank.py', '-s', five_contigHits, '-g', assembly_gbk, '-p', str(args.percentid), '-c', str(args.coverage), '-i', sample, '-n', genbank_output ], shell=True)
-                run_command(['python', args.path + 'annotateMultiGenbank.py', '-s', three_contigHits, '-g', genbank_output, '-n', final_genbank, '-p', str(args.percentid), '-c', str(args.coverage)], shell=True)
-            else:
-                if len(sample) > 10:
-                    sample = sample[0:9]
-                run_command(['python', args.path + 'annotateMultiGenbank.py', '-s', five_contigHits, '-f', assembly, '-p', str(args.percentid), '-c', str(args.coverage), '-i', sample, '-n', genbank_output ], shell=True)
-                run_command(['python', args.path + 'annotateMultiGenbank.py', '-s', three_contigHits, '-g', genbank_output, '-n', final_genbank, '-p', str(args.percentid), '-c', str(args.coverage)], shell=True)
-
-            # create single genbank and output table
-            run_command(['python', args.path + 'multiGenbankToSingle.py', '-i', final_genbank, '-n', sample, '-o', final_genbankSingle], shell=True)
+            #create BED file with coverage information
+            run_command(['bedtools', 'genomecov', '-ibam', five_bam_sorted + '.bam', '-bg', '>', five_cov_bed], shell=True)
+            run_command(['bedtools', 'genomecov', '-ibam', three_bam_sorted + '.bam', '-bg', '>', three_cov_bed], shell=True)
+            filter_on_depth(five_cov_bed, five_final_cov)
+            filter_on_depth(three_cov_bed, three_final_cov)
+            run_command(['bedtools', 'merge', '-i', five_final_cov, '>', five_merged_bed], shell=True)
+            run_command(['bedtools', 'merge', '-i', three_final_cov, '>', three_merged_bed], shell=True)
+            
+            #create table
             run_command(['python', args.path + 'createTableImprovement.py', '--genbank', final_genbankSingle, '--output', table_output], shell=True)
+            #annotate assembly with hits
 
         if args.runtype == "typing":
 
@@ -497,22 +453,6 @@ def main():
             run_command(['python', args.path + 'typingTable_bedtools.py', '--intersect_bed', bed_intersect, '--closest_bed', bed_closest, '--insertion_seq', args.reference, '--reference_genbank', args.typingRef, '--output', table_output], shell=True)
             run_command(['python', args.path + 'annotate_genbank_from_bed.py', '--bed', bed_intersect, '--genbank', args.typingRef, '--newfile', final_genbank], shell=True)
 
-            '''
-            #check database for reference genome and create if it doesn't exist
-            check_blast_database(typingRefFasta)
-
-            #annotate hits to a genbank
-            if len(sample) > 10:
-                sample = sample[0:9]
-            run_command(['python', args.path + 'annotateMultiGenbank.py', '-s', five_contigHits, '-g', args.typingRef, '-p', str(args.percentid), '-c', str(args.coverage), '-n', genbank_output, '-i', sample], shell=True)
-            run_command(['python', args.path + 'annotateMultiGenbank.py', '-s', three_contigHits, '-g', genbank_output, '-n', final_genbank, '-p', str(args.percentid), '-c', str(args.coverage)], shell=True)
-            run_command(['python', args.path + 'multiGenbankToSingle.py', '-i', final_genbank, '-n', sample, '-o', final_genbankSingle], shell=True)
-
-            #create output table
-            check_blast_database(args.reference)
-            run_command(['python', args.path +'createTypingTable.py', '--genbank', final_genbankSingle, '--insertion', args.reference, '--temp', temp_folder, '--reference_genbank', args.typingRef, '--output', table_output], shell=True)
-
-        '''
         if args.temp == False:
             run_command(['rm', '-rf', temp_folder], shell=True)
 
