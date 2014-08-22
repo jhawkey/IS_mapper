@@ -14,3 +14,4 @@ reads_contigs.fasta
 *.log
 
 *.gz
+ismap_bedtools.py
