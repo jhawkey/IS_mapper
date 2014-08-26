@@ -52,8 +52,8 @@ def parse_bed(bed_file, file_type):
             info = line.strip().split('\t')
             if file_type == 'closest':
                 if int(info[6]) == 0:
-                #this is an overlap, so will be in the intersect file
-                pass
+                    #this is an overlap, so will be in the intersect file
+                    pass
             elif int(info[6]) <= 10:
                 hits['hit_' + str(hit_no)] = [int(info[1]), int(info[2]), int(info[4]), int(info[5])]
                 hit_no += 1
