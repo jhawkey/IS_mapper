@@ -97,7 +97,7 @@ def main():
                 new_feature = create_feature(result, 'three')
                 record.features.append(new_feature)
                 feature_count += 1
-                new_record_list.apend(record)
+                new_record_list.append(record)
             else:
                 new_record_list.append(record)
     SeqIO.write(new_record_list, args.output + '_annotated.gbk', 'genbank')
