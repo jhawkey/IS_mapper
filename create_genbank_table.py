@@ -31,7 +31,7 @@ def create_feature(hit, end):
         quals['colour'] = '2'
         quals['end'] = 'left_end'
         feat_type = 'left end'
-    elif end == 'three'
+    elif end == 'three':
         quals['colour'] = '7'
         quals['end'] = 'right end'
         feat_type = 'right_end'
