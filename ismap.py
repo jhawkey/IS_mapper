@@ -392,9 +392,13 @@ def main():
             run_command(['bedtools', 'merge', '-i', five_final_cov, '>', five_merged_bed], shell=True)
             run_command(['bedtools', 'merge', '-i', three_final_cov, '>', three_merged_bed], shell=True)
             
-            # create table
-            run_command(['python', args.path + 'createTableImprovement.py', '--genbank', final_genbankSingle, '--output', table_output], shell=True)
-            # annotate assembly with hits
+            # create table and genbank
+            if args.extension == '.fasta':
+                run_command(['python', args.path + 'create_genbank_table.py', '--five_bed', five_merged_bed, '--three_bed', three_merged_bed, '--assembly', assembly, '--type fasta', '--output', sample], shell=True)
+            elif args.extenion == '.gbk':
+                run_command(['python', args.path + 'create_genbank_table.py', '--five_bed', five_merged_bed, '--three_bed', three_merged_bed, '--assembly', assembly, '--type genbank', '--output', sample], shell=True)
+            if args.temp == False:
+            run_command(['rm', '-rf', temp_folder], shell=True)
 
         if args.runtype == "typing":
 
