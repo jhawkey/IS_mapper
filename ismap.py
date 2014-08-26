@@ -364,9 +364,7 @@ def main():
             three_final_cov = three_header + '_finalcov.bed'
             five_merged_bed = five_header + '_merged.sorted.bed'
             three_merged_bed = three_header + '_merged.sorted.bed'
-            final_genbank = sample + "_annotatedAll.gbk"
-            final_genbankSingle = sample + "_annotatedAllSingle.gbk"
-            table_output = sample + "_table.txt"
+            final_genbankSingle = sample + '_annotatedAllSingle.gbk'
 
             # create fasta file from genbank if required
             if args.extension == '.gbk':
@@ -397,8 +395,9 @@ def main():
                 run_command(['python', args.path + 'create_genbank_table.py', '--five_bed', five_merged_bed, '--three_bed', three_merged_bed, '--assembly', assembly, '--type fasta', '--output', sample], shell=True)
             elif args.extenion == '.gbk':
                 run_command(['python', args.path + 'create_genbank_table.py', '--five_bed', five_merged_bed, '--three_bed', three_merged_bed, '--assembly', assembly, '--type genbank', '--output', sample], shell=True)
+            run_command(['python', args.path + 'multiGenbankToSingle.py', '-i', sample + '_annotated.gbk', '-n', sample, '-o', final_genbankSingle], shell=True)
             if args.temp == False:
-            run_command(['rm', '-rf', temp_folder], shell=True)
+                run_command(['rm', '-rf', temp_folder], shell=True)
 
         if args.runtype == "typing":
 
