@@ -15,9 +15,9 @@
 #   BioPython
 #   BLAST
 #
-# Git repository: 
-# README:
-# Questions or feature requests:
+# Git repository: https://github.com/jhawkey/IS_mapper
+# README: https://github.com/jhawkey/IS_mapper/blob/master/README.txt
+# Questions or feature requests: https://github.com/jhawkey/IS_mapper/issues
 
 import logging
 import sys, re, os
@@ -364,7 +364,7 @@ def main():
             three_final_cov = three_header + '_finalcov.bed'
             five_merged_bed = five_header + '_merged.sorted.bed'
             three_merged_bed = three_header + '_merged.sorted.bed'
-            final_genbankSingle = sample + '_annotatedAllSingle.gbk'
+            final_genbankSingle = sample + '_annotatedSingle.gbk'
 
             # create fasta file from genbank if required
             if args.extension == '.gbk':
