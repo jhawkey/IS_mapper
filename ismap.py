@@ -387,8 +387,8 @@ def main():
             run_command(['bedtools', 'genomecov', '-ibam', three_bam_sorted + '.bam', '-bg', '>', three_cov_bed], shell=True)
             filter_on_depth(five_cov_bed, five_final_cov, args.cutoff)
             filter_on_depth(three_cov_bed, three_final_cov, args.cutoff)
-            run_command(['bedtools', 'merge', '-i', five_final_cov, '>', five_merged_bed], shell=True)
-            run_command(['bedtools', 'merge', '-i', three_final_cov, '>', three_merged_bed], shell=True)
+            run_command(['bedtools', 'merge', '-i', five_final_cov, '-d 100', '>', five_merged_bed], shell=True)
+            run_command(['bedtools', 'merge', '-i', three_final_cov, '-d 100', '>', three_merged_bed], shell=True)
             
             # create table and genbank
             if args.extension == '.fasta':
