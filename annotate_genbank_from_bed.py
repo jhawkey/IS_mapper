@@ -67,14 +67,14 @@ def main():
     feature_count = 0
 
     if os.stat(args.intersect_bed)[6] != 0:
-        blocks_intersect = parse_bed(args.intersect_bed)
+        blocks_intersect = parse_bed(args.intersect_bed, 'intersect')
         for region in blocks_intersect:
             left_end, right_end = createFeature(blocks_intersect[region])
             genbank.features.append(left_end)
             genbank.features.append(right_end)
             feature_count += 2
     if os.stat(args.closest_bed)[6] != 0:
-        blocks_closest = parse_bed(args.closest_bed)
+        blocks_closest = parse_bed(args.closest_bed, 'closest')
         for region in blocks_closest:
             left_end, right_end = createFeature(blocks_closest[region])
             genbank.features.append(left_end)
