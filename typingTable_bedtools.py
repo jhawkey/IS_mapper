@@ -25,6 +25,12 @@ def parse_args():
     return parser.parse_args()
 
 def get_qualifiers(qualifier_list, feature):
+    '''
+    Takes a list of possible qualifier IDs and attempts
+    to find them in the feature given.
+    If the qualifier is present, appends to a list, otherwise
+    just keeps going.
+    '''
     
     return_quals = []
     for qual in qualifier_list:
@@ -35,6 +41,9 @@ def get_qualifiers(qualifier_list, feature):
     return return_quals
 
 def get_flanking_genes(reference, pos_x, pos_y, cds_quals, trna_quals, rrna_quals):
+    '''
+    
+    '''
 
     gb = SeqIO.read(reference, 'genbank')
     distance_l = {}
