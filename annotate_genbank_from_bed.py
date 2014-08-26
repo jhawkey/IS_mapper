@@ -5,6 +5,7 @@ from Bio import SeqFeature
 from Bio.Alphabet import generic_dna
 from Bio.SeqRecord import SeqRecord
 from argparse import (ArgumentParser, FileType)
+import os
 
 def parse_args():
 
