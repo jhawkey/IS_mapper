@@ -14,6 +14,7 @@ def parse_args():
     # required qsub options
     parser.add_argument('--intersect_bed', type=str, required=False, help='intersect bed file where blocks will be use to annotate.')
     parser.add_argument('--closest_bed', type=str, required=True, help='closest bed file where blocks will be used to annotate.')
+    parser.add_argument('--insertion_seq', type=str, required=True, help='insertion sequence reference in fasta format')
     parser.add_argument('--genbank', type=str, required=False, help='original genbank file that features are going to be added to.')
     parser.add_argument('--newfile', type=str, required=True, help='new filename for genbank having features added to.')
 
@@ -43,38 +44,49 @@ def createFeature(hits):
     
     return left_feature, right_feature
 
-def parse_bed(bed_file, file_type):
+def parse_bed(bed_file, file_type, seq_length):
 
     line = 0
     hit_no = 1
     hits = {}
     with open(bed_file) as summary:
         for line in summary:
+            print line
             info = line.strip().split('\t')
             if file_type == 'closest':
                 if int(info[6]) == 0:
                     #this is an overlap, so will be in the intersect file
                     pass
-            elif int(info[6]) <= 10:
-                hits['hit_' + str(hit_no)] = [int(info[1]), int(info[2]), int(info[4]), int(info[5])]
-                hit_no += 1
+                elif int(info[6]) <= 10 or float(info[6]) / seq_length >= 0.8:
+                    hits['hit_' + str(hit_no)] = [int(info[1]), int(info[2]), int(info[4]), int(info[5])]
+                    hit_no += 1
     return hits
+
+def insertion_length(insertion):
+
+    sequence = SeqIO.read(insertion, "fasta")
+    length = len(sequence.seq)
+
+    return length
 
 def main():
 
     args = parse_args()
     genbank = SeqIO.read(args.genbank, 'genbank')
     feature_count = 0
+    length_insertion = insertion_length(args.insertion_seq)
 
     if os.stat(args.intersect_bed)[6] != 0:
-        blocks_intersect = parse_bed(args.intersect_bed, 'intersect')
+        blocks_intersect = parse_bed(args.intersect_bed, 'intersect', length_insertion)
+        print blocks_intersect
         for region in blocks_intersect:
             left_end, right_end = createFeature(blocks_intersect[region])
             genbank.features.append(left_end)
             genbank.features.append(right_end)
             feature_count += 2
     if os.stat(args.closest_bed)[6] != 0:
-        blocks_closest = parse_bed(args.closest_bed, 'closest')
+        blocks_closest = parse_bed(args.closest_bed, 'closest', length_insertion)
+        print blocks_closest
         for region in blocks_closest:
             left_end, right_end = createFeature(blocks_closest[region])
             genbank.features.append(left_end)
