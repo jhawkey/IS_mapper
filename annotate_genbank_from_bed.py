@@ -11,7 +11,8 @@ def parse_args():
     parser = ArgumentParser(description="annotate a genbank with either BLAST or BED hits")
 
     # required qsub options
-    parser.add_argument('--bed', type=str, required=False, help='intersect bed file where blocks will be use to annotate.')
+    parser.add_argument('--intersect_bed', type=str, required=False, help='intersect bed file where blocks will be use to annotate.')
+    parser.add_argument('--closest_bed', type=str, required=True, help='closest bed file where blocks will be used to annotate.')
     parser.add_argument('--genbank', type=str, required=False, help='original genbank file that features are going to be added to.')
     parser.add_argument('--newfile', type=str, required=True, help='new filename for genbank having features added to.')
 
@@ -41,7 +42,7 @@ def createFeature(hits):
     
     return left_feature, right_feature
 
-def parse_bed(bed_file):
+def parse_bed(bed_file, file_type):
 
     line = 0
     hit_no = 1
@@ -49,23 +50,35 @@ def parse_bed(bed_file):
     with open(bed_file) as summary:
         for line in summary:
             info = line.strip().split('\t')
-            hits['hit_' + str(hit_no)] = [int(info[1]), int(info[2]), int(info[4]), int(info[5])]
-            hit_no += 1
+            if file_type == 'closest':
+                if int(info[6]) == 0:
+                #this is an overlap, so will be in the intersect file
+                pass
+            elif int(info[6]) <= 10:
+                hits['hit_' + str(hit_no)] = [int(info[1]), int(info[2]), int(info[4]), int(info[5])]
+                hit_no += 1
     return hits
 
 def main():
 
     args = parse_args()
-
-    blocks = parse_bed(args.bed)
+    genbank = SeqIO.read(args.genbank, 'genbank')
     feature_count = 0
 
-    genbank = SeqIO.read(args.genbank, 'genbank')
-    for region in blocks:
-        left_end, right_end = createFeature(blocks[region])
-        genbank.features.append(left_end)
-        genbank.features.append(right_end)
-        feature_count += 2
+    if os.stat(args.intersect_bed)[6] != 0:
+        blocks_intersect = parse_bed(args.intersect_bed)
+        for region in blocks_intersect:
+            left_end, right_end = createFeature(blocks_intersect[region])
+            genbank.features.append(left_end)
+            genbank.features.append(right_end)
+            feature_count += 2
+    if os.stat(args.closest_bed)[6] != 0:
+        blocks_closest = parse_bed(args.closest_bed)
+        for region in blocks_closest:
+            left_end, right_end = createFeature(blocks_closest[region])
+            genbank.features.append(left_end)
+            genbank.features.append(right_end)
+            feature_count += 2
 
     SeqIO.write(genbank, args.newfile, 'genbank')
     print("Added " + str(feature_count) + " features to " + args.newfile)
