@@ -394,7 +394,7 @@ def main():
             if args.extension == '.fasta':
                 run_command(['python', args.path + 'create_genbank_table.py', '--five_bed', five_merged_bed, '--three_bed', three_merged_bed, '--assembly', assembly, '--type fasta', '--output', sample], shell=True)
             elif args.extension == '.gbk':
-                run_command(['python', args.path + 'create_genbank_table.py', '--five_bed', five_merged_bed, '--three_bed', three_merged_bed, '--assembly', assembly, '--type genbank', '--output', sample], shell=True)
+                run_command(['python', args.path + 'create_genbank_table.py', '--five_bed', five_merged_bed, '--three_bed', three_merged_bed, '--assembly', assembly_gbk, '--type genbank', '--output', sample], shell=True)
             run_command(['python', args.path + 'multiGenbankToSingle.py', '-i', sample + '_annotated.gbk', '-n', sample, '-o', final_genbankSingle], shell=True)
 
         if args.runtype == "typing":
