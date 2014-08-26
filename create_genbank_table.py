@@ -101,7 +101,7 @@ def main():
             else:
                 new_record_list.append(record)
     SeqIO.write(new_record_list, args.output + '_annotated.gbk', 'genbank')
-    print('Added ' + str(feature_count) + ' features to ' + arsg.output + '_annotated.gbk')
+    print('Added ' + str(feature_count) + ' features to ' + args.output + '_annotated.gbk')
 
     output = open(args.output + '_table.txt', 'w')
     output.write('\t'.join(header + '\n'))
