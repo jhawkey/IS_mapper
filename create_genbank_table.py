@@ -45,8 +45,7 @@ def main():
     args = parse_args()
 
     header = ['contig', 'end', 'x', 'y']
-    results_five = []
-    results_three = []
+    results = collections.defaultdict(dict)
     if os.stat(args.five_bed)[6] == 0 and os.stat(args.three_bed)[6] == 0:
         output = open(args.output + '_table.txt', 'w')
         output.write('\t'.join(header) + '\n')
@@ -54,27 +53,32 @@ def main():
         output.close()
         sys.exit()
 
+    hit_no = 1
     if os.stat(args.five_bed)[6] != 0:
         with open(args.five_bed) as five_bed:
             for line in five_bed:
                 info = line.strip().split('\t')
-                results_five.append([info[0], info[1], info[2]])
+                results[info[0]]['hit_' + str(hit_no)] = ['five', info[1], info[2]]
+                hit_no += 1
     if os.stat(args.three_bed)[6] != 0:
         with open(args.three_bed) as three_bed:
             for line in three_bed:
                 info = line.strip().split('\t')
-                results_three.append([info[0], info[1], info[2]])
+                results[info[0]]['hit_' + str(hit_no)] = ['three', info[1], info[2]]
+                hit_no += 1
+    print results
+    # open up table for writing output into
+    output = open(args.output + '_table.txt', 'w')
+    output.write('\t'.join(header) + '\n')
     if args.type == 'fasta':
         # convert the assembly to a genbank file first
         print('Creating multi entry genbank for annotation...')
         count = SeqIO.convert(args.assembly, 'fasta', args.output + '.gbk', 'genbank', generic_dna)
         print('Successfully converted %i records' % count)
-        # open file to write
-        annotated_genbank = args.output + '_annotated.gbk'
-        handle = open(annotated_genbank, 'w')
         # read in file
         record_list = SeqIO.parse(args.output + '.gbk', 'genbank')
     elif args.type == 'genbank':
+        # read in the genbank
         record_list = SeqIO.parse(args.assembly, 'genbank')
     # initalise a list where any edited contigs will go
     new_record_list = []
@@ -82,33 +86,18 @@ def main():
     feature_count = 0
     # go through each record and see if there is a five or three end hit
     for record in record_list:
-        for result in results_five:
-            if result[0] == record.id:
+        if record.id in results:
+            for hit in results[record.id]:
                 # then we need to annotate this hit
-                new_feature = create_feature(result, 'five')
+                new_feature = create_feature(results[record.id][hit], results[record.id][hit][0])
                 record.features.append(new_feature)
                 feature_count += 1
-                new_record_list.append(record)
-            else:
-                new_record_list.append(record)
-        for result in results_three:
-            if result[0] == record.id:
-                # then we need to annotate this hit
-                new_feature = create_feature(result, 'three')
-                record.features.append(new_feature)
-                feature_count += 1
-                new_record_list.append(record)
-            else:
-                new_record_list.append(record)
+                output.write(record.id + '\t' + '\t'.join(results[record.id][hit]) + '\n')
+            new_record_list.append(record)
+        else:
+            new_record_list.append(record)
     SeqIO.write(new_record_list, args.output + '_annotated.gbk', 'genbank')
     print('Added ' + str(feature_count) + ' features to ' + args.output + '_annotated.gbk')
-
-    output = open(args.output + '_table.txt', 'w')
-    output.write('\t'.join(header) + '\n')
-    for result in results_five:
-        output.write(result[0] + '\tfive\t' + result[1] + '\t' + result[2] + '\n')
-    for result in results_three:
-        output.write(result[0] + '\tthree\t' + result[1] + '\t' + result[2] + '\n')
     output.close()
 
 if __name__ == '__main__':
