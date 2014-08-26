@@ -49,7 +49,7 @@ def main():
     results_three = []
     if os.stat(args.five_bed)[6] == 0 and os.stat(args.three_bed)[6] == 0:
         output = open(args.output + '_table.txt', 'w')
-        output.write('\t'.join(header + '\n'))
+        output.write('\t'.join(header) + '\n')
         output.write('No hits found')
         output.close()
         sys.exit()
@@ -104,7 +104,7 @@ def main():
     print('Added ' + str(feature_count) + ' features to ' + args.output + '_annotated.gbk')
 
     output = open(args.output + '_table.txt', 'w')
-    output.write('\t'.join(header + '\n'))
+    output.write('\t'.join(header) + '\n')
     for result in results_five:
         output.write(result[0] + '\tfive\t' + result[1] + '\t' + result[2] + '\n')
     for result in results_three:
