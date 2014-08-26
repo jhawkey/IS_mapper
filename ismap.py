@@ -279,6 +279,20 @@ def filter_on_depth(cov_file, out_bed, cov_cutoff):
                 output.write(line)
     output.close()
 
+def check_blast_database(fasta):
+    '''
+    Checks to make sure the BLAST database exists, and creates it
+    if it does not.
+    '''
+
+    database_path = fasta + ".nin"
+
+    if os.path.exists(database_path):
+        logging.info('Index for {} is already built...'.format(fasta))
+    else:
+        logging.info('Building blast index for {}...'.format(fasta))
+        run_command(['makeblastdb -in', fasta, '-dbtype nucl'], shell=True)
+
 def main():
 
     args = parse_args()
@@ -344,6 +358,9 @@ def main():
         #turn bams to reads for SPAdes or mapping
         run_command(['bedtools', 'bamtofastq', '-i', five_bam, '-fq', five_reads], shell=True)
         run_command(['bedtools', 'bamtofastq', '-i', three_bam, '-fq', three_reads], shell=True)
+
+        # create BLAST database for IS reference
+        check_blast_database(args.reference)
 
         if args.runtype == "improvement":
 
