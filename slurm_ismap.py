@@ -10,14 +10,13 @@ def parse_args():
     parser.add_argument('--rundir', type=str, required=False, help='Directory to run in. Default is current directory')
 
     parser.add_argument('--script', type=str, required=True, help='Location of ISMapper script, ismap.py')
+    parser.add_argument('--reference', type=str, required=True, help='Path to IS reference.')
     parser.add_argument('--reads', nargs='+', type=str, required=True, help='Paired end read files in fastq.gz format')
-    parser.add_argument('--forward', type = str, required=False, default = '_1', help = 'Identifier for forward reads if not in MiSeq format (default _1)')
-    parser.add_argument('--reverse', type=str, required=False, default='_2', help='Identifier for reverse reads if not in MiSeq format (default _2)')
     parser.add_argument('--assemblies', nargs='+', type=str, required=False, help='Contig assemblies, one for each read set (If using improvement option)')
     parser.add_argument('--assemblyid', type=str, required=False, help='Identifier for assemblies eg: sampleName_contigs (specify _contigs) or sampleName_assembly (specify _assembly). Do not specify extension.')
     parser.add_argument('--runtype', type=str, required=True, help='Runtype for the program, either improvement or typing')
     parser.add_argument('--logprefix', type=str, required=False, help='Creates a prefix for the log file (default is just sample name)', default='')
-    parser.add_argument('--other_args', type=str, required=True, help='String containing all other arguments to pass to ISMapper')
+    parser.add_argument('--other_args', type=str, required=False, help='String containing all other arguments to pass to ISMapper')
 
     return parser.parse_args()
 
@@ -132,8 +131,6 @@ def main():
 
     for sample in fileSets:
 
-        (file_path,file_name_before_ext,full_ext) = get_readFile_components(fileSets[sample][0])
-
         cmd = "#!/bin/bash"
         cmd += "\n#SBATCH -p main"
         cmd += "\n#SBATCH --job-name=ismapper" + sample
@@ -150,13 +147,11 @@ def main():
         cmd += "\nmodule load spades-gcc/3.0.0"
         cmd += "\nmodule load bedtools-intel/2.20.1"
         cmd += "\npython " + args.script
-        cmd += " --runtype " + args.runtype + " --reads " + file_path + "/" + sample + "*.fastq.gz"
-        if args.forward != "_1":
-            cmd += " --forward " + args.forward
-        if args.reverse != "_2":
-            cmd += " --reverse " + args.reverse
-        if args.assemblies:
-            cmd += " --assemblies " + fileSets[sample][2]
+        cmd += " --reference " + args.reference
+        if args.runtype == 'typing':
+            cmd += " --runtype typing --reads " + fileSets[sample][0] + " " + fileSets[sample][1]
+        elif args.runtype == 'improvement':
+            cmd += " --runtype improvement --reads " + fileSets[sample][0] + " " + fileSets[sample][1] + " --assemblies " + fileSets[sample][2]
         if args.assemblyid:
             cmd += " --assemblyid " + args.assemblyid
         if args.logprefix == '':
