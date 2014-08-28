@@ -203,24 +203,24 @@ def doBlast(blast_input, blast_output, database):
     blastn_cline = NcbiblastnCommandline(query=blast_input, db=database, outfmt="'6 qseqid qlen sacc pident length slen sstart send evalue bitscore qcovs'", out=blast_output)
     stdout, stderr = blastn_cline()
 
-def check_seq_between(gb, insertion, start, end):
+def check_seq_between(gb, insertion, start, end, name):
 
     genbank = SeqIO.read(gb, 'genbank')
     seq_between = genbank.seq[start:end]
-    seq_between = SeqRecord(Seq(str(seq_between), generic_dna), id='temp')
-    SeqIO.write(seq_between, 'temp.fasta', 'fasta')
-    doBlast('temp.fasta', 'temp_out.txt', insertion)
+    seq_between = SeqRecord(Seq(str(seq_between), generic_dna), id=name)
+    SeqIO.write(seq_between, name + '.fasta', 'fasta')
+    doBlast(name + '.fasta', name + '_out.txt', insertion)
     first_result = 0
-    with open('temp_out.txt') as summary:
+    with open(name + '_out.txt') as summary:
         for line in summary:
             if first_result == 0:
                 info = line.strip().split('\t')
                 coverage = (float(info[1])/float(info[4])) * 100
                 hit = [info[3], coverage]
                 first_result += 1
-            os.system('rm temp.fasta temp_out.txt')
+            os.system('rm ' + name + '.fasta ' + name + '_out.txt')
             return hit
-    os.system('rm temp.fasta temp_out.txt')
+    os.system('rm ' + name + '.fasta ' + name + '_out.txt')
     hit = []
     return []
 
@@ -315,7 +315,7 @@ def main():
                     end = y_L
                     orient = 'R'
                 print orient
-                seq_results = check_seq_between(args.reference_genbank, args.insertion_seq, start, end)
+                seq_results = check_seq_between(args.reference_genbank, args.insertion_seq, start, end, 'region_' + str(region))
                 if len(seq_results) != 0 and seq_results[0] >= 80 and seq_results[1] >= 80:
                     #then this is definitely a known site
                     gene_left, gene_left_dist, gene_right, gene_right_dist = get_flanking_genes(args.reference_genbank, start, end, args.cds, args.trna, args.rrna)
