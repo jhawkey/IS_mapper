@@ -12,6 +12,8 @@ def parse_args():
     parser.add_argument('--script', type=str, required=True, help='Location of ISMapper script, ismap.py')
     parser.add_argument('--reference', type=str, required=True, help='Path to IS reference.')
     parser.add_argument('--reads', nargs='+', type=str, required=True, help='Paired end read files in fastq.gz format')
+    parser.add_argument('--forward', type = str, required=False, default = '_1', help = 'Identifier for forward reads if not in MiSeq format (default _1)')
+    parser.add_argument('--reverse', type=str, required=False, default='_2', help='Identifier for reverse reads if not in MiSeq format (default _2)')
     parser.add_argument('--assemblies', nargs='+', type=str, required=False, help='Contig assemblies, one for each read set (If using improvement option)')
     parser.add_argument('--assemblyid', type=str, required=False, help='Identifier for assemblies eg: sampleName_contigs (specify _contigs) or sampleName_assembly (specify _assembly). Do not specify extension.')
     parser.add_argument('--runtype', type=str, required=True, help='Runtype for the program, either improvement or typing')
