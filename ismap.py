@@ -21,14 +21,12 @@
 
 import logging
 import sys, re, os
-from argparse import (ArgumentParser, FileType)
-import subprocess
+from argparse import ArgumentParser
 from subprocess import call, check_output, CalledProcessError, STDOUT
-from Bio.Blast.Applications import NcbiblastnCommandline
-try:
-    from version import ismap_version
-except:
-    ismap_version = 'version unknown'
+#try:
+#    from version import ismap_version
+#except:
+#    ismap_version = 'version unknown'
 
 def parse_args():
     '''
@@ -40,11 +38,11 @@ def parse_args():
     parser.add_argument("--version", action='version', version='v1.0')
     # Inputs
     parser.add_argument('--runtype', type=str, required=True, help='"typing" or "improvement"')
-    parser.add_argument('--reads', nargs = '+', type = str, required=False, help='Paired end reads for analysing (can be gzipped)')
-    parser.add_argument('--forward', type = str, required=False, default = '_1', help = 'Identifier for forward reads if not in MiSeq format (default _1)')
+    parser.add_argument('--reads', nargs='+', type=str, required=False, help='Paired end reads for analysing (can be gzipped)')
+    parser.add_argument('--forward', type=str, required=False, default='_1', help='Identifier for forward reads if not in MiSeq format (default _1)')
     parser.add_argument('--reverse', type=str, required=False, default='_2', help='Identifier for reverse reads if not in MiSeq format (default _2)')
-    parser.add_argument('--reference', type = str, required=True, help='Fasta file for reference gene (eg: insertion sequence) that will be mapped to')
-    parser.add_argument('--assemblies', nargs = '+', type=str, required=False, help='Contig assemblies, one for each read set')
+    parser.add_argument('--reference', type=str, required=True, help='Fasta file for reference gene (eg: insertion sequence) that will be mapped to')
+    parser.add_argument('--assemblies', nargs='+', type=str, required=False, help='Contig assemblies, one for each read set')
     parser.add_argument('--assemblyid', type=str, required=False, help='Identifier for assemblies eg: sampleName_contigs (specify _contigs) or sampleName_assembly (specify _assembly). Do not specify extension.')
     parser.add_argument('--extension', type=str, required=False, help='Extension for assemblies (.fasta or .gbk, default is .fasta)', default='.fasta')
     parser.add_argument('--typingRef', type=str, required=False, help='Reference genome for typing against in genbank format')
@@ -52,7 +50,7 @@ def parse_args():
     parser.add_argument('--path', type=str, required=True, default='', help='Path to folder where scripts are.')
     # Cutoffs for annotation
     parser.add_argument('--cutoff', type=int, required=False, default=6, help='Minimum depth for mapped region to be kept in bed file (default 6)')
-    parser.add_argument('--percentid', type=float, required=False, default=90.0, help='Minimum percent ID for hit to be annotated (default 90.0')    
+    parser.add_argument('--percentid', type=float, required=False, default=90.0, help='Minimum percent ID for hit to be annotated (default 90.0')
     # Reporting options
     parser.add_argument('--log', action="store_true", required=False, help='Switch on logging to file (otherwise log to stdout')
     parser.add_argument('--output', type=str, required=True, help='prefix for output files')
@@ -64,21 +62,21 @@ def parse_args():
 class CommandError(Exception):
     pass
 
-def run_command(command, **kwargs): 
-    ''' 
-    Execute a shell command and check the exit status and any O/S exceptions. 
-    ''' 
+def run_command(command, **kwargs):
+    '''
+    Execute a shell command and check the exit status and any O/S exceptions.
+    '''
 
-    command_str = ' '.join(command) 
-    logging.info('Running: {}'.format(command_str)) 
-    try: 
-        exit_status = call(command_str, **kwargs) 
-    except OSError as e: 
-        message = "Command '{}' failed due to O/S error: {}".format(command_str, str(e)) 
-        raise CommandError({"message": message})  
-    if exit_status != 0: 
-        message = "Command '{}' failed with non-zero exit status: {}".format(command_str, exit_status) 
-        raise CommandError({"message": message}) 
+    command_str = ' '.join(command)
+    logging.info('Running: {}'.format(command_str))
+    try:
+        exit_status = call(command_str, **kwargs)
+    except OSError as e:
+        message = "Command '{}' failed due to O/S error: {}".format(command_str, str(e))
+        raise CommandError({"message": message})
+    if exit_status != 0:
+        message = "Command '{}' failed with non-zero exit status: {}".format(command_str, exit_status)
+        raise CommandError({"message": message})
 
 def bwa_index(fasta):
     '''
@@ -149,17 +147,17 @@ def get_readFile_components(full_file_path):
     Returns the file path, the file name and the file extension.
     '''
 
-    (file_path,file_name) = os.path.split(full_file_path)
-    m1 = re.match("(.*).gz",file_name)
-    ext = ""
+    (file_path, file_name) = os.path.split(full_file_path)
+    m1 = re.match('(.*).gz', file_name)
+    ext = ''
     if m1 != None:
         # gzipped
-        ext = ".gz"
+        ext = '.gz'
         file_name = m1.groups()[0]
-    (file_name_before_ext,ext2) = os.path.splitext(file_name)
+    (file_name_before_ext, ext2) = os.path.splitext(file_name)
     full_ext = ext2+ext
 
-    return(file_path,file_name_before_ext,full_ext)
+    return(file_path, file_name_before_ext, full_ext)
 
 def read_file_sets(args):
     '''
@@ -168,7 +166,7 @@ def read_file_sets(args):
     respecitive assemblies puts each set together.
     Returns a dictionary where the key is the id fo the sample, and the value
     is a list of files that belong to that sample.
-    '''   
+    '''
 
     fileSets = {} # key = id, value = list of files for that sample
     num_paired_readsets = 0
@@ -182,38 +180,38 @@ def read_file_sets(args):
     num_assemblies = 0
 
     for fastq in args.reads:
-        (file_path,file_name_before_ext,full_ext) = get_readFile_components(fastq)
+        (file_path, file_name_before_ext, full_ext) = get_readFile_components(fastq)
         # try to match to MiSeq format:
-        m = re.match("(.*)(_S.*)(_L.*)(_R.*)(_.*)", file_name_before_ext)
+        m = re.match('(.*)(_S.*)(_L.*)(_R.*)(_.*)', file_name_before_ext)
         if m == None:
             # not default Illumina file naming format, expect simple/ENA format
-            m = re.match("(.*)(" + args.forward + ")$",file_name_before_ext)
+            m = re.match('(.*)(' + args.forward + ')$', file_name_before_ext)
             if m != None:
                 # store as forward read
-                (baseName,read) = m.groups()
+                (baseName, read) = m.groups()
                 forward_reads[baseName] = fastq
             else:
-                m = re.match("(.*)(" + args.reverse + ")$",file_name_before_ext)
+                m = re.match('(.*)(' + args.reverse + ')$', file_name_before_ext)
                 if m != None:
                 # store as reverse read
-                    (baseName,read) = m.groups()
+                    (baseName, read) = m.groups()
                     reverse_reads[baseName] = fastq
                 else:
-                    print "Could not determine forward/reverse read status for input file " + fastq
+                    print 'Could not determine forward/reverse read status for input file ' + fastq
         else:
             # matches default Illumina file naming format, e.g. m.groups() = ('samplename', '_S1', '_L001', '_R1', '_001')
-            baseName, read  = m.groups()[0], m.groups()[3]
-            if read == "_R1":
+            baseName, read = m.groups()[0], m.groups()[3]
+            if read == '_R1':
                 forward_reads[baseName] = fastq
-            elif read == "_R2":
+            elif read == '_R2':
                 reverse_reads[baseName] = fastq
             else:
-                print "Could not determine forward/reverse read status for input file " + fastq
-                print "  this file appears to match the MiSeq file naming convention (samplename_S1_L001_[R1]_001), but we were expecting [R1] or [R2] to designate read as forward or reverse?"
+                print 'Could not determine forward/reverse read status for input file ' + fastq
+                print '  this file appears to match the MiSeq file naming convention (samplename_S1_L001_[R1]_001), but we were expecting [R1] or [R2] to designate read as forward or reverse?'
                 fileSets[file_name_before_ext] = fastq
                 num_single_readsets += 1
 
-    if args.runtype == "improvement":
+    if args.runtype == 'improvement':
         for assembly in args.assemblies:
             (file_path, file_name_before_ext, full_ext) = get_readFile_components(assembly)
             identifier = file_name_before_ext.split(args.assemblyid)[0]
@@ -244,7 +242,7 @@ def read_file_sets(args):
             logging.info('Warning, could not find reads for assembly:' + assemblies[sample])
 
     if num_paired_readsets > 0:
-        logging.info('Total paired readsets found:' + str(num_paired_readsets)) 
+        logging.info('Total paired readsets found:' + str(num_paired_readsets))
     if num_single_readsets > 0:
         logging.info('Total single reads found:' + str(num_single_readsets))
     if num_assemblies > 0:
@@ -296,7 +294,6 @@ def main():
 
     if args.path[-1] != "/":
         args.path = args.path + "/"
-    
     # Set up logfile
     if args.log is True:
         logfile = args.output + ".log"
@@ -371,8 +368,8 @@ def main():
             three_to_ref_bam = temp_folder + three_header + '.bam'
             five_bam_sorted = five_header + '.sorted'
             three_bam_sorted = three_header + '.sorted'
-            five_raw_bed = temp_folder + five_header + '.sorted.bed'
-            three_raw_bed = temp_folder + three_header + '.sorted.bed'
+            #five_raw_bed = temp_folder + five_header + '.sorted.bed'
+            #three_raw_bed = temp_folder + three_header + '.sorted.bed'
             five_cov_bed = temp_folder + five_header + '_cov.bed'
             three_cov_bed = temp_folder + three_header + '_cov.bed'
             five_final_cov = five_header + '_finalcov.bed'
@@ -429,8 +426,8 @@ def main():
             three_to_ref_bam = temp_folder + three_header + '.bam'
             five_bam_sorted = five_header + '.sorted'
             three_bam_sorted = three_header + '.sorted'
-            five_raw_bed = temp_folder + five_header + '.sorted.bed'
-            three_raw_bed = temp_folder + three_header + '.sorted.bed'
+            #five_raw_bed = temp_folder + five_header + '.sorted.bed'
+            #three_raw_bed = temp_folder + three_header + '.sorted.bed'
             five_cov_bed = temp_folder + five_header + '_cov.bed'
             three_cov_bed = temp_folder + three_header + '_cov.bed'
             five_final_cov = five_header + '_finalcov.bed'
