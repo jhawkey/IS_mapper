@@ -25,6 +25,10 @@ from argparse import (ArgumentParser, FileType)
 import subprocess
 from subprocess import call, check_output, CalledProcessError, STDOUT
 from Bio.Blast.Applications import NcbiblastnCommandline
+try:
+    from version import ismap_version
+except:
+    ismap_version = 'version unknown'
 
 def parse_args():
     '''
@@ -33,9 +37,7 @@ def parse_args():
 
     parser = ArgumentParser(description='IS mapper')
 
-    # need to add verison info later
-    #parser.add_argument("--version", action='version', ...)
-
+    parser.add_argument("--version", action='version', 'v1.0')
     # Inputs
     parser.add_argument('--runtype', type=str, required=True, help='"typing" or "improvement"')
     parser.add_argument('--reads', nargs = '+', type = str, required=False, help='Paired end reads for analysing (can be gzipped)')
@@ -48,11 +50,9 @@ def parse_args():
     parser.add_argument('--typingRef', type=str, required=False, help='Reference genome for typing against in genbank format')
     parser.add_argument('--type', type=str, required=False, default='fasta', help='Indicator for contig assembly type, genbank or fasta (default fasta)')
     parser.add_argument('--path', type=str, required=True, default='', help='Path to folder where scripts are.')
-
     # Cutoffs for annotation
     parser.add_argument('--cutoff', type=int, required=False, default=6, help='Minimum depth for mapped region to be kept in bed file (default 6)')
-    parser.add_argument('--percentid', type=float, required=False, default=90.0, help='Minimum percent ID for hit to be annotated (default 90.0')
-    
+    parser.add_argument('--percentid', type=float, required=False, default=90.0, help='Minimum percent ID for hit to be annotated (default 90.0')    
     # Reporting options
     parser.add_argument('--log', action="store_true", required=False, help='Switch on logging to file (otherwise log to stdout')
     parser.add_argument('--output', type=str, required=True, help='prefix for output files')
@@ -260,18 +260,17 @@ def make_directories(dir_list):
     as this will cause Velvet to give an error.
     '''
     for directory in dir_list:
-        if "VO" not in directory:
-            run_command(['mkdir', '-p', directory], shell=True)
-        elif "VO" in directory:
-            if os.path.exists(directory):
-                run_command(['rm', '-rf', directory], shell=True)
-                run_command(['mkdir', '-p', directory], shell=True)
-            else:
-                run_command(['mkdir', '-p', directory], shell=True)
+        run_command(['mkdir', '-p', directory], shell=True)
         else:
             logging.info('Cannot make diretory {}'.format(directory))
 
 def filter_on_depth(cov_file, out_bed, cov_cutoff):
+    '''
+    Takes a bed coverage file and removes lines that
+    do not meet the coverage cutoff.
+    Saves output to a new file.
+    '''
+
     output = file(out_bed, 'w')
     with open(cov_file) as depth_info:
         for line in depth_info:
@@ -300,7 +299,7 @@ def main():
     if args.path[-1] != "/":
         args.path = args.path + "/"
     
-    #set up logfile
+    # Set up logfile
     if args.log is True:
         logfile = args.output + ".log"
     else:
@@ -314,22 +313,25 @@ def main():
     logging.info('program started')
     logging.info('command line: {0}'.format(' '.join(sys.argv)))
 
+    # Checks that the correct programs are installed
     check_command(['bwa'], 'bwa')
     check_command(['samtools'], 'samtools')
-    check_command(['VelvetOptimiser.pl', '--version'], 'VelvetOptimiser')
     check_command(['makeblastdb'], 'blast')
+    check_command(['bedtools'], 'bedtools')
 
-    # checks to make sure the runtype is valid and provides an error
-    # if it's not.
+    # Checks to make sure the runtype is valid and provides an error
+    # if it's not
     if args.runtype != "improvement" and args.runtype != "typing":
         logging.info('Invalid runtype selected: {}'.format(args.runtype))
         logging.info('Runtype should be improvement or typing (see instructions for further details)')
         exit(-1)
 
+    # Gather together the reads in pairs with their corresponding
+    # assemblies (if required)
     fileSets = read_file_sets(args)
-
+    # Index the IS reference for BWA
     bwa_index(args.reference)
-
+    # Start analysing each read set specified
     for sample in fileSets:
         forward_read = fileSets[sample][0]
         reverse_read = fileSets[sample][1]
@@ -338,6 +340,8 @@ def main():
         except IndexError:
             pass
 
+        # Create the output file and folder names,
+        # make the folders where necessary
         current_dir = os.getcwd() + '/'
         temp_folder = current_dir + sample + '_temp/'
         output_sam = temp_folder + sample + '.sam'
@@ -345,26 +349,22 @@ def main():
         three_bam = temp_folder + sample + '_3.bam'
         five_reads = temp_folder + sample + '_5.fastq'
         three_reads = temp_folder + sample + '_3.fastq'
-
         make_directories([temp_folder])
 
-        # map to IS reference
+        # Map to IS reference
         run_command(['bwa', 'mem', args.reference, forward_read, reverse_read, '>', output_sam], shell=True)
-
-        # pull unmapped reads flanking IS
+        # Pull unmapped reads flanking IS
         run_command(['samtools view', '-Sb', '-f 36', output_sam, '>', five_bam], shell=True)
         run_command(['samtools view', '-Sb', '-f 4', '-F 40', output_sam, '>', three_bam], shell=True)
-
-        #turn bams to reads for SPAdes or mapping
+        # Turn bams to reads for mapping
         run_command(['bedtools', 'bamtofastq', '-i', five_bam, '-fq', five_reads], shell=True)
         run_command(['bedtools', 'bamtofastq', '-i', three_bam, '-fq', three_reads], shell=True)
-
-        # create BLAST database for IS reference
+        # Create BLAST database for IS reference
         check_blast_database(args.reference)
 
         if args.runtype == "improvement":
 
-            # get prefix for output filenames
+            # Get prefix for output filenames
             five_header = sample + '_5_assembly'
             three_header = sample + '_3_assembly'
             five_to_ref_sam = temp_folder + five_header + '.sam'
@@ -390,7 +390,7 @@ def main():
                 assembly_fasta = os.path.join(temp_folder, file_name_before_ext) + '.fasta'
                 run_command(['python', args.path + 'gbkToFasta.py', '-i', assembly, '-o', assembly_fasta], shell=True)
                 assembly = assembly_fasta
-            # map ends back to contigs
+            # Map ends back to contigs
             bwa_index(assembly)
             run_command(['bwa', 'mem', assembly, five_reads, '>', five_to_ref_sam], shell=True)
             run_command(['bwa', 'mem', assembly, three_reads, '>', three_to_ref_sam], shell=True)
@@ -398,16 +398,14 @@ def main():
             run_command(['samtools', 'view', '-Sb', three_to_ref_sam, '>', three_to_ref_bam], shell=True)
             run_command(['samtools', 'sort', five_to_ref_bam, five_bam_sorted], shell=True)
             run_command(['samtools', 'sort', three_to_ref_bam, three_bam_sorted], shell=True)
-
-            # create BED file with coverage information
+            # Create BED file with coverage information
             run_command(['bedtools', 'genomecov', '-ibam', five_bam_sorted + '.bam', '-bg', '>', five_cov_bed], shell=True)
             run_command(['bedtools', 'genomecov', '-ibam', three_bam_sorted + '.bam', '-bg', '>', three_cov_bed], shell=True)
             filter_on_depth(five_cov_bed, five_final_cov, args.cutoff)
             filter_on_depth(three_cov_bed, three_final_cov, args.cutoff)
             run_command(['bedtools', 'merge', '-i', five_final_cov, '-d 100', '>', five_merged_bed], shell=True)
-            run_command(['bedtools', 'merge', '-i', three_final_cov, '-d 100', '>', three_merged_bed], shell=True)
-            
-            # create table and genbank
+            run_command(['bedtools', 'merge', '-i', three_final_cov, '-d 100', '>', three_merged_bed], shell=True)       
+            # Create table and genbank
             if args.extension == '.fasta':
                 run_command(['python', args.path + 'create_genbank_table.py', '--five_bed', five_merged_bed, '--three_bed', three_merged_bed, '--assembly', assembly, '--type fasta', '--output', sample], shell=True)
             elif args.extension == '.gbk':
@@ -416,15 +414,15 @@ def main():
 
         if args.runtype == "typing":
 
-            # get prefix of typing reference for output filenames
+            # Get prefix of typing reference for output filenames
             (file_path, file_name) = os.path.split(args.typingRef)
             typingName = file_name.split('.g')[0]
             typingRefFasta = temp_folder + typingName + '.fasta'
-            # create reference fasta from genbank
+            # Create reference fasta from genbank
             run_command(['python', args.path + 'gbkToFasta.py', '-i', args.typingRef, '-o', typingRefFasta], shell=True) 
-            # create bwa index file for typing reference
+            # Create bwa index file for typing reference
             bwa_index(typingRefFasta)         
-            
+            # Set up file names for output files
             five_header = sample + '_5_' + typingName
             three_header = sample + '_3_' + typingName
             five_to_ref_sam = temp_folder + five_header + '.sam'
@@ -446,7 +444,7 @@ def main():
             final_genbank = sample + '_annotated.gbk'
             table_output = sample + '_table.txt'
 
-            # map reads to reference, sort
+            # Map reads to reference, sort
             run_command(['bwa', 'mem', typingRefFasta, five_reads, '>', five_to_ref_sam], shell=True)
             run_command(['bwa', 'mem', typingRefFasta, three_reads, '>', three_to_ref_sam], shell=True)
             run_command(['samtools', 'view', '-Sb', five_to_ref_sam, '>', five_to_ref_bam], shell=True)
@@ -455,20 +453,19 @@ def main():
             run_command(['samtools', 'sort', three_to_ref_bam, three_bam_sorted], shell=True)
             run_command(['samtools', 'index', five_bam_sorted], shell=True)
             run_command(['samtools', 'index', three_bam_sorted], shell=True)
-
-            # create BED files with coverage information
+            # Create BED files with coverage information
             run_command(['bedtools', 'genomecov', '-ibam', five_bam_sorted + '.bam', '-bg', '>', five_cov_bed], shell=True)
             run_command(['bedtools', 'genomecov', '-ibam', three_bam_sorted + '.bam', '-bg', '>', three_cov_bed], shell=True)
+            # Filter coveraged BED files on coverage cutoff (so only take 
+            # high coverage regions for further analysis)
             filter_on_depth(five_cov_bed, five_final_cov, args.cutoff)
             filter_on_depth(three_cov_bed, three_final_cov, args.cutoff)
             run_command(['bedtools', 'merge', '-i', five_final_cov, '>', five_merged_bed], shell=True)
             run_command(['bedtools', 'merge', '-i', three_final_cov, '>', three_merged_bed], shell=True)
-
-            # find intersects and closest points of regions
+            # Find intersects and closest points of regions
             run_command(['bedtools', 'intersect', '-a', five_merged_bed, '-b', three_merged_bed, '-wo', '>', bed_intersect], shell=True)
             run_command(['closestBed', '-a', five_merged_bed, '-b', three_merged_bed, '-d', '>', bed_closest], shell=True)
-
-            # create table and annotate genbank with hits
+            # Create table and annotate genbank with hits
             run_command(['python', args.path + 'typingTable_bedtools.py', '--intersect_bed', bed_intersect, '--closest_bed', bed_closest, '--insertion_seq', args.reference, '--reference_genbank', args.typingRef, '--output', table_output], shell=True)
             run_command(['python', args.path + 'annotate_genbank_from_bed.py', '--intersect_bed', bed_intersect, '--closest_bed', bed_closest, '--insertion_seq', args.reference, '--genbank', args.typingRef, '--newfile', final_genbank], shell=True)
 
