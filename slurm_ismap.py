@@ -1,7 +1,12 @@
-import sys, re, os
-from argparse import (ArgumentParser, FileType)
+#!/usr/bin/env python
+
+import re, os
+from argparse import ArgumentParser
 
 def parse_args():
+    '''
+    Takes arguments from the command line.
+    '''
 
     parser = ArgumentParser(description="Submit ISMapper jobs to SLURM")
     # SLURM options
@@ -12,7 +17,7 @@ def parse_args():
     parser.add_argument('--script', type=str, required=True, help='Location of ISMapper script, ismap.py')
     parser.add_argument('--reference', type=str, required=True, help='Path to IS reference.')
     parser.add_argument('--reads', nargs='+', type=str, required=True, help='Paired end read files in fastq.gz format')
-    parser.add_argument('--forward', type = str, required=False, default = '_1', help = 'Identifier for forward reads if not in MiSeq format (default _1)')
+    parser.add_argument('--forward', type=str, required=False, default='_1', help='Identifier for forward reads if not in MiSeq format (default _1)')
     parser.add_argument('--reverse', type=str, required=False, default='_2', help='Identifier for reverse reads if not in MiSeq format (default _2)')
     parser.add_argument('--assemblies', nargs='+', type=str, required=False, help='Contig assemblies, one for each read set (If using improvement option)')
     parser.add_argument('--assemblyid', type=str, required=False, help='Identifier for assemblies eg: sampleName_contigs (specify _contigs) or sampleName_assembly (specify _assembly). Do not specify extension.')
@@ -29,7 +34,7 @@ def get_readFile_components(full_file_path):
     Returns the file path, the file name and the file extension.
     '''
 
-    (file_path,file_name) = os.path.split(full_file_path)
+    (file_path, file_name) = os.path.split(full_file_path)
     m1 = re.match('(.*).gz', file_name)
     ext = ''
     if m1 != None:
@@ -48,7 +53,7 @@ def read_file_sets(args):
     respecitive assemblies puts each set together.
     Returns a dictionary where the key is the id fo the sample, and the value
     is a list of files that belong to that sample.
-    '''  
+    '''
 
     fileSets = {} # key = id, value = list of files for that sample
     num_paired_readsets = 0
@@ -82,7 +87,7 @@ def read_file_sets(args):
                     print 'Could not determine forward/reverse read status for input file ' + fastq
         else:
             # matches default Illumina file naming format, e.g. m.groups() = ('samplename', '_S1', '_L001', '_R1', '_001')
-            baseName, read  = m.groups()[0], m.groups()[3]
+            baseName, read = m.groups()[0], m.groups()[3]
             if read == '_R1':
                 forward_reads[baseName] = fastq
             elif read == '_R2':
@@ -102,7 +107,7 @@ def read_file_sets(args):
     # store in pairs with assemblies
     for sample in forward_reads:
         if sample in reverse_reads and sample in assemblies:
-            fileSets[sample] = [forward_reads[sample],reverse_reads[sample], assemblies[sample]] # store pair and assembly
+            fileSets[sample] = [forward_reads[sample], reverse_reads[sample], assemblies[sample]] # store pair and assembly
             num_paired_readsets += 1
             num_assemblies += 1
         elif sample in reverse_reads:
@@ -111,24 +116,24 @@ def read_file_sets(args):
         else:
             fileSets[sample] = [forward_reads[sample]] # no reverse found
             num_single_readsets += 1
-            print('Warning, could not find pair for read:' + forward_reads[sample])
+            print 'Warning, could not find pair for read:' + forward_reads[sample]
     for sample in reverse_reads:
         if sample not in fileSets:
             fileSets[sample] = reverse_reads[sample] # no forward found
             num_single_readsets += 1
-            print('Warning, could not find pair for read:' + reverse_reads[sample])
+            print 'Warning, could not find pair for read:' + reverse_reads[sample]
     for sample in assemblies:
         if sample not in fileSets:
             fileSets[sample] = assemblies[sample]
             num_assemblies += 1
-            print('Warning, could not find reads for assembly:' + assemblies[sample])
+            print 'Warning, could not find reads for assembly:' + assemblies[sample]
 
     if num_paired_readsets > 0:
-        print('Total paired readsets found:' + str(num_paired_readsets)) 
+        print 'Total paired readsets found:' + str(num_paired_readsets)
     if num_single_readsets > 0:
-        print('Total single reads found:' + str(num_single_readsets))
+        print 'Total single reads found:' + str(num_single_readsets)
     if num_assemblies > 0:
-        print('Total number of assemblies found:' + str(num_assemblies))
+        print 'Total number of assemblies found:' + str(num_assemblies)
 
     return fileSets
 
@@ -176,4 +181,4 @@ def main():
         os.system('echo "' + cmd + '" | sbatch')
 
 if __name__ == '__main__':
-    main() 
+    main()

@@ -16,3 +16,4 @@ reads_contigs.fasta
 *.gz
 ismap_bedtools.py
 ismap.txt
+slurm_ismap.txt
