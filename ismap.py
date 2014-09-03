@@ -37,7 +37,7 @@ def parse_args():
 
     parser = ArgumentParser(description='IS mapper')
 
-    parser.add_argument("--version", action='version', 'v1.0')
+    parser.add_argument("--version", action='version', version='v1.0')
     # Inputs
     parser.add_argument('--runtype', type=str, required=True, help='"typing" or "improvement"')
     parser.add_argument('--reads', nargs = '+', type = str, required=False, help='Paired end reads for analysing (can be gzipped)')
@@ -261,8 +261,6 @@ def make_directories(dir_list):
     '''
     for directory in dir_list:
         run_command(['mkdir', '-p', directory], shell=True)
-        else:
-            logging.info('Cannot make diretory {}'.format(directory))
 
 def filter_on_depth(cov_file, out_bed, cov_cutoff):
     '''
