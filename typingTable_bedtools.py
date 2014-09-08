@@ -279,7 +279,14 @@ def main():
     with open(args.closest_bed) as bed_closest:
         for line in bed_closest:
             info = line.strip().split('\t')
-            if int(info[6]) == 0:
+            if int(info[3]) == -1:
+                # then there are no closest regions, this is a dud file
+                output = open(args.output, 'w')
+                output.write('\t'.join(header) + '\n')
+                output.write('No hits found')
+                output.close()
+                sys.exit()
+            elif int(info[6]) == 0:
                 #this is an overlap, so will be in the intersect file
                 pass
             elif int(info[6]) <= 10:

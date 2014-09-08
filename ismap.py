@@ -356,6 +356,9 @@ def main():
         run_command(['bedtools', 'bamtofastq', '-i', three_bam, '-fq', three_reads], shell=True)
         # Create BLAST database for IS reference
         check_blast_database(args.reference)
+        if os.stat(five_reads)[6] == 0 or os.stat(three_reads)[6] == 0:
+            logging.info('One or both read files are empty. This is probably due to no copies of the IS of interest being present in this sample. Program quitting.')
+            sys.exit()
 
         if args.runtype == "improvement":
 
