@@ -279,7 +279,7 @@ def main():
     with open(args.closest_bed) as bed_closest:
         for line in bed_closest:
             info = line.strip().split('\t')
-            if int(info[3]) == -1:
+            if info[3] == '-1':
                 # then there are no closest regions, this is a dud file
                 output = open(args.output, 'w')
                 output.write('\t'.join(header) + '\n')
