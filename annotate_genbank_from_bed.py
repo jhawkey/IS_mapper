@@ -45,6 +45,10 @@ def createFeature(hits):
     return left_feature, right_feature
 
 def parse_bed(bed_file, file_type, seq_length):
+    '''
+    Parses's bed file
+    '''
+
 
     line = 0
     hit_no = 1
