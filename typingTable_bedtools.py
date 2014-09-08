@@ -349,16 +349,18 @@ def main():
     region_indexes = []
     for region in table_keys:
         region_indexes.append(region.split('region_')[1])
-    arr = np.vstack((table_keys, region_indexes)).transpose()
-    print arr
-    print removed_results
-    sorted_keys = arr[arr[:,1].astype('int').argsort()]
+    if arr != 0:
+        arr = np.vstack((table_keys, region_indexes)).transpose()
+        sorted_keys = arr[arr[:,1].astype('int').argsort()]
 
     #write out the found hits to file
     output = open(args.output, 'w')
     output.write('\t'.join(header) + '\n')
-    for key in sorted_keys[:,0]:
-        output.write(key + '\t' + '\t'.join(str(i) for i in results[key]) + '\n')
+    if arr != 0:
+        for key in sorted_keys[:,0]:
+            output.write(key + '\t' + '\t'.join(str(i) for i in results[key]) + '\n')
+        else:
+            output.write('No hits found.')
     output.close()
 
     #write out hits that were removed for whatever reason to file
