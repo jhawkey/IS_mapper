@@ -351,6 +351,7 @@ def main():
         region_indexes.append(region.split('region_')[1])
     arr = np.vstack((table_keys, region_indexes)).transpose()
     print arr
+    print removed_results
     sorted_keys = arr[arr[:,1].astype('int').argsort()]
 
     #write out the found hits to file
