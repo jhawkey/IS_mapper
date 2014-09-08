@@ -54,7 +54,9 @@ def parse_bed(bed_file, file_type, seq_length):
             print line
             info = line.strip().split('\t')
             if file_type == 'closest':
-                if int(info[6]) == 0:
+                if info[3] == -1:
+                    pass
+                elif int(info[6]) == 0:
                     #this is an overlap, so will be in the intersect file
                     pass
                 elif int(info[6]) <= 10 or float(info[6]) / seq_length >= 0.8:
