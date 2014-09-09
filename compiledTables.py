@@ -167,7 +167,6 @@ def main():
     position_orientation = {}
 
     list_of_positions, position_orientation, ref_name = get_ref_positions(args.reference_fasta, args.seq, list_of_positions, position_orientation)
-    print position_orientation
 
     for result_file in unique_results_files:
         isolate = result_file.split('__')[0]
