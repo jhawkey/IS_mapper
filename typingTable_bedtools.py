@@ -359,8 +359,8 @@ def main():
     if arr != 0:
         for key in sorted_keys[:,0]:
             output.write(key + '\t' + '\t'.join(str(i) for i in results[key]) + '\n')
-        else:
-            output.write('No hits found.')
+    else:
+        output.write('No hits found.')
     output.close()
 
     #write out hits that were removed for whatever reason to file
