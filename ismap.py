@@ -344,6 +344,7 @@ def main():
         three_bam = temp_folder + sample + '_3.bam'
         five_reads = temp_folder + sample + '_5.fastq'
         three_reads = temp_folder + sample + '_3.fastq'
+        no_hits_table = sample + '_table.txt'
         make_directories([temp_folder])
 
         # Map to IS reference
@@ -358,6 +359,13 @@ def main():
         check_blast_database(args.reference)
         if os.stat(five_reads)[6] == 0 or os.stat(three_reads)[6] == 0:
             logging.info('One or both read files are empty. This is probably due to no copies of the IS of interest being present in this sample. Program quitting.')
+            with open(no_hits_table, 'w') as f:
+                if args.runtype == 'typing':
+                    header = ["region", "orientation", "x", "y", "gap", "call", "%ID", "%Cov", "left_gene", "left_strand", "left_distance", "right_gene", "right_strand", "right_distance", "functional_prediction"]
+                    f.write('\t'.join(header) + '\nNo hits found')
+                else:
+                    header = ['contig', 'end', 'x', 'y']
+                    f.write('\t'.join(header) + '\nNo hits found')
             sys.exit()
 
         if args.runtype == "improvement":
