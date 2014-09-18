@@ -70,7 +70,7 @@ def get_ref_positions(reference, is_query, positions_dict, orientation_dict):
     with open(blast_output) as out:
         for line in out:
             info = line.strip('\n').split('\t')
-            if float(info[3]) >= 95 and float(info[4])/float(info[1]) * 100 >= 95:
+            if float(info[3]) >= 90 and float(info[4])/float(info[1]) * 100 >= 95:
                 positions_dict[(int(info[6]), int(info[7]))][ref_name] = '+'
                 if int(info[6]) > int(info[7]):
                     orientation_dict[(int(info[6]), int(info[7]))] = 'R'
