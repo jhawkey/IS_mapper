@@ -16,6 +16,7 @@ def parse_args():
     parser = ArgumentParser(description="create a binary table from the compiled table for IS mapper")
     parser.add_argument('--table', type=str, required=True, help='input table')
     parser.add_argument('--output', type=str, required=True, help='output binary table')
+    parser.add_argument('--delimiter', type=str, required=False, default=',', help='delimiter for output file (default is , can also be t for tab)')
 
     return parser.parse_args()
 
@@ -25,11 +26,19 @@ def main():
 
     out_file = open(args.output, 'w')
 
+    if args.delimiter != ',' and args.delimiter != 't':
+        print 'Delimiter type unknown. Must be , or t.'
+        sys.exit()
+
     with open(args.table) as table_in:
         header = 0
         for line in table_in:
             if header == 0:
-                out_file.write(line)
+                if args.delimiter == 't':
+                    out_file.write(line)
+                elif args.delimiter == ',':
+                    info = line.strip().split('\t')
+                    out_file.write(','.join(info) + '\n')
                 header += 1
             elif 'flanking genes' in line:
                 pass
@@ -49,7 +58,10 @@ def main():
                     else:
                         print element
                         DoError('unknown value in line')
-                out_file.write('\t'.join(row) + '\n')
+                if args.delimiter == 't':
+                    out_file.write('\t'.join(row) + '\n')
+                elif args.delimiter == ',':
+                    out_file.write(','.join(row) + '\n')
     out_file.close()
 if __name__ == "__main__":
     main()
