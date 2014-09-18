@@ -23,30 +23,33 @@ def main():
 
     args = parse_args()
 
+    out_file = open(args.output, 'w')
+
     with open(args.table) as table_in:
         header = 0
         for line in table_in:
             if header == 0:
-                print line
-                header = header + 1
+                out_file.write(line)
+                header += 1
             elif 'flanking genes' in line:
                 pass
             else:
-                info = line.split('\t')
+                info = line.strip().split('\t')
                 name = info[0]
                 if '.fasta' in name:
                     name = name.split('.fasta')[0]
                 else:
                     name = name.split('_table.txt')[0]
                 row = [name]
-                for element in info:
-                    if element != '+':
-                        row.append(element)
+                for element in info[1:]:
+                    if element == '+':
+                        row.append('1')
                     elif element == '-':
                         row.append('0')
                     else:
-                        DoError('unknown value in line: ' + element)
-                print '\t'.join(row)
-
+                        print element
+                        DoError('unknown value in line')
+                out_file.write('\t'.join(row) + '\n')
+    out_file.close()
 if __name__ == "__main__":
     main()
