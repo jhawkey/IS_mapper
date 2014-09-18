@@ -33,18 +33,17 @@ def main():
                 pass
             else:
                 info = line.split('\t')
-                row = []
+                name = info[0]
+                if '.fasta' in name:
+                    name = name.split('.fasta')[0]
+                else:
+                    name = name.split('_table.txt')[0]
+                row = [name]
                 for element in info:
-                    if element != '+' and element != '+*' and element != '-' and element != '+?':
+                    if element != '+':
                         row.append(element)
                     elif element == '-':
                         row.append('0')
-                    elif element == '+':
-                        row.append('1')
-                    elif element == '+*':
-                        row.append('2')
-                    elif element == '+?':
-                        row.append('3')
                     else:
                         DoError('unknown value in line: ' + element)
                 print '\t'.join(row)
