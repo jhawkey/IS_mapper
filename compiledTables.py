@@ -19,6 +19,7 @@ def parse_args():
     parser.add_argument('--reference_gbk', type=str, required=True, help='gbk file of reference to report closest genes')
     parser.add_argument('--seq', type=str, required=True, help='fasta file for insertion sequence looking for in reference')
     parser.add_argument('--gap', type=int, required=False, default=400, help='distance between regions to call overlapping')
+    parser.add_argument('--output', type=str, required=True, help='name of output file')
 
     return parser.parse_args()
 
@@ -219,40 +220,46 @@ def main():
     #print order_position_list
 
     # create header of table
-    header = ['isolate']
-    for position in order_position_list:
-        header.append(str(position[0]) + '-' + str(position[1]))
-    print '\t'.join(header)
-
-    row = [ref_name]
-    for position in order_position_list:
-        if ref_name in list_of_positions[position]:
-            row.append(list_of_positions[position][ref_name])
-        else:
-            row.append('-')
-    print '\t'.join(row)
-    
-    # create each row
-    for isolate in list_of_isolates:
-        row = [isolate]
+    with open(args.output, 'w') as out:
+        header = ['isolate']
         for position in order_position_list:
-            if isolate in list_of_positions[position]:
-                row.append(list_of_positions[position][isolate])
+            header.append(str(position[0]) + '-' + str(position[1]))
+        #print '\t'.join(header)
+        out.write('\t'.join(header) + '\n')
+
+        row = [ref_name]
+        for position in order_position_list:
+            if ref_name in list_of_positions[position]:
+                row.append(list_of_positions[position][ref_name])
             else:
                 row.append('-')
-        #row.append('\n')
-        print '\t'.join(row)
+        #print '\t'.join(row)
+        out.write('\t'.join(row) + '\n')
+        
+        # create each row
+        for isolate in list_of_isolates:
+            row = [isolate]
+            for position in order_position_list:
+                if isolate in list_of_positions[position]:
+                    row.append(list_of_positions[position][isolate])
+                else:
+                    row.append('-')
+            #row.append('\n')
+            #print '\t'.join(row)
+            out.write('\t'.join(row) + '\n')
 
-    genes_before, genes_after = get_flanking_genes(args.reference_gbk, order_position_list)
+        genes_before, genes_after = get_flanking_genes(args.reference_gbk, order_position_list)
 
-    row = ['flanking genes']
-    for position in order_position_list:
-        row.append(genes_before[position])
-    print '\t'.join(row)
-    row = ['flanking genes']
-    for position in order_position_list:
-        row.append(genes_after[position])
-    print '\t'.join(row)
+        row = ['flanking genes']
+        for position in order_position_list:
+            row.append(genes_before[position])
+        #print '\t'.join(row)
+        out.write('\t'.join(row) + '\n')
+        row = ['flanking genes']
+        for position in order_position_list:
+            row.append(genes_after[position])
+        #print '\t'.join(row)
+        out.write('\t'.join(row) + '\n')
 
 
 if __name__ == "__main__":
