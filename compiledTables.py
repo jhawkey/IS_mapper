@@ -156,6 +156,11 @@ def get_flanking_genes(reference, positions):
 
     return pos_gene_start, pos_gene_end
 
+def blast_db(fasta):
+    
+    if not os.path.exists(fasta + '.nin'):
+        os.system('makeblastdb -in ' + fasta + ' -dbtype nucl')
+
 def main():
 
     args = parse_args()
@@ -165,6 +170,8 @@ def main():
 
     list_of_positions = collections.defaultdict(dict) # key1 = pos, key2 = isolate, value = +/-
     position_orientation = {}
+
+    blast_db(args.reference_fasta)
 
     list_of_positions, position_orientation, ref_name = get_ref_positions(args.reference_fasta, args.seq, list_of_positions, position_orientation)
 
