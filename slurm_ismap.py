@@ -147,6 +147,7 @@ def main():
     # if required
     fileSets = read_file_sets(args)
     print fileSets
+    unused_fileSets = []
     # For each read set, launch a job
     for sample in fileSets:
 
@@ -162,23 +163,33 @@ def main():
         cmd += '\nmodule load samtools-gcc/0.1.19'
         cmd += '\nmodule load blast+-gcc/2.2.25'
         cmd += '\nmodule load bedtools-intel/2.20.1'
+        
         cmd += '\npython ' + args.script
         cmd += ' --reference ' + args.reference
         if args.runtype == 'typing':
             cmd += ' --runtype typing --reads ' + fileSets[sample][0] + ' ' + fileSets[sample][1]
-        elif args.runtype == 'improvement':
-            cmd += ' --runtype improvement --reads ' + fileSets[sample][0] + ' ' + fileSets[sample][1] + ' --assemblies ' + fileSets[sample][2]
         if args.assemblyid:
             cmd += ' --assemblyid ' + args.assemblyid
         if args.logprefix == '':
             cmd += ' --log --output ' + sample
         elif args.logprefix != '':
             cmd += ' --log --output ' + args.logprefix + '_' + sample
+        
         cmd += ' ' + args.other_args
 
-        print cmd
-
-        os.system('echo "' + cmd + '" | sbatch')
+        if args.runtype == 'typing':
+            print cmd
+            os.system('echo "' + cmd + '" | sbatch')
+        
+        elif args.runtype == 'improvement':
+            try:
+                cmd += ' --runtype improvement --reads ' + fileSets[sample][0] + ' ' + fileSets[sample][1] + ' --assemblies ' + fileSets[sample][2]
+                print cmd
+                os.system('echo "' + cmd + '" | sbatch')     
+            except IndexError:
+                unused_fileSets.append(sample)
+    print 'Unable to run the following samples:'
+    print ' '.join(unused_fileSets)
 
 if __name__ == '__main__':
     main()
