@@ -134,7 +134,7 @@ def get_flanking_genes(reference, left, right, cds_quals, trna_quals, rrna_quals
                     dist = '-' + str(feature.location.start - left)
                 else:
                     dist = '+' + str(abs(feature.location.start - left))
-                closest_to_left_gene = [cds_features[0][0], dist, values]
+                closest_to_left_gene = [feature.qualifiers[cds_features[0]][0], dist, values]
                 pos_gene_left = closest_to_left_gene
                 other_gene = get_other_gene(reference, right, "right", cds_features, trna_features, rrna_features)
                 pos_gene_right = other_gene
@@ -319,8 +319,8 @@ def main():
 
         for position in order_position_list:
             genes_before, genes_after = get_flanking_genes(args.reference_gbk, position[0], position[1], args.cds, args.trna, args.rrna)
-            print genes_before
-            print genes_after
+            #print genes_before
+            #print genes_after
             row_l_locus.append(genes_before[0])
             row_r_locus.append(genes_after[0])
             if genes_before[0] == genes_after[0]:
