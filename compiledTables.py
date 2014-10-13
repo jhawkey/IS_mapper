@@ -10,12 +10,12 @@ from Bio.Blast.Applications import NcbiblastnCommandline
 from operator import itemgetter
 import os, sys, re, collections, operator
 from collections import OrderedDict
+from gbkToFasta import gbk_to_fasta
 
 def parse_args():
 
     parser = ArgumentParser(description="create a table of features for the is mapping pipeline")
     parser.add_argument('--tables', nargs='+', type=str, required=True, help='tables to compile')
-    parser.add_argument('--reference_fasta', type=str, required=True, help='fasta file of reference to determine known positions')
     parser.add_argument('--reference_gbk', type=str, required=True, help='gbk file of reference to report closest genes')
     parser.add_argument('--seq', type=str, required=True, help='fasta file for insertion sequence looking for in reference')
     parser.add_argument('--gap', type=int, required=False, default=0, help='distance between regions to call overlapping')
@@ -231,9 +231,12 @@ def main():
     list_of_positions = collections.defaultdict(dict) # key1 = pos, key2 = isolate, value = +/-
     position_orientation = {}
 
-    blast_db(args.reference_fasta)
+    reference_fasta = args.reference_gbk.split('.g')[0]
+    gbk_to_fasta(args.genbank, reference_fasta)
 
-    list_of_positions, position_orientation, ref_name = get_ref_positions(args.reference_fasta, args.seq, list_of_positions, position_orientation)
+    blast_db(reference_fasta)
+
+    list_of_positions, position_orientation, ref_name = get_ref_positions(reference_fasta, args.seq, list_of_positions, position_orientation)
 
     for result_file in unique_results_files:
         isolate = result_file.split('__')[0]

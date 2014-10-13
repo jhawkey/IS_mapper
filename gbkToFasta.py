@@ -14,6 +14,11 @@ def main():
 	
 	return parser.parse_args()
 
+def gbk_to_fasta(genbank, fasta):
+
+	sequences = SeqIO.parse(genbank, "genbank")
+	SeqIO.write(sequences, fasta, "fasta")
+
 
 if __name__ == "__main__":
 
