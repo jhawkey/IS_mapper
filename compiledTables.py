@@ -232,7 +232,7 @@ def main():
     position_orientation = {}
 
     reference_fasta = args.reference_gbk.split('.g')[0]
-    gbk_to_fasta(args.genbank, reference_fasta)
+    gbk_to_fasta(args.reference_gbk, reference_fasta)
 
     blast_db(reference_fasta)
 
