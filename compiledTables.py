@@ -18,7 +18,7 @@ def parse_args():
     parser.add_argument('--reference_fasta', type=str, required=True, help='fasta file of reference to determine known positions')
     parser.add_argument('--reference_gbk', type=str, required=True, help='gbk file of reference to report closest genes')
     parser.add_argument('--seq', type=str, required=True, help='fasta file for insertion sequence looking for in reference')
-    parser.add_argument('--gap', type=int, required=False, default=400, help='distance between regions to call overlapping')
+    parser.add_argument('--gap', type=int, required=False, default=0, help='distance between regions to call overlapping')
     parser.add_argument('--output', type=str, required=True, help='name of output file')
 
     return parser.parse_args()
@@ -80,82 +80,93 @@ def get_ref_positions(reference, is_query, positions_dict, orientation_dict):
 
     return positions_dict, orientation_dict, ref_name
 
-def get_flanking_genes(reference, positions):
+def get_flanking_genes(reference, left, right):
 
     gb = SeqIO.read(reference, 'genbank')
-    pos_gene_start = {}
-    pos_gene_end = {}
-    for pos in positions:
-        #print pos
-        x = pos[0]
-        y = pos[1]
-        distance_start = {}
-        distance_end = {}
-        for feature in gb.features:
-            if feature.type == 'CDS' or feature.type == 'tRNA' or feature.type == 'rRNA':
-                #print feature
-                if feature.type == 'CDS':
-                    distance_start[abs(feature.location.start - x)] = feature.qualifiers['locus_tag'][0]
-                elif feature.type == 'tRNA' or feature.type == 'rRNA':
-                    distance_start[abs(feature.location.start - x)] = feature.qualifiers['product'][0]
-        distance_skeys = list(OrderedDict.fromkeys(distance_start))
-        gene = distance_start[min(distance_skeys)]
-        pos_gene_start[pos] = gene
-        for feature in gb.features:
-            if feature.type == 'CDS' or feature.type == 'tRNA' or feature.type == 'rRNA':
-                if feature.type == 'CDS':
-                    distance_end[abs(feature.location.end - y)] = feature.qualifiers['locus_tag'][0]
-                elif feature.type == 'tRNA' or feature.type == 'rRNA':
-                    distance_end[abs(feature.location.end - y)] = feature.qualifiers['product'][0]
-        distance_ekeys = list(OrderedDict.fromkeys(distance_end))
-        gene2 = distance_end[min(distance_ekeys)]
-        pos_gene_end[pos] = gene2
-
-    pos_check = {}
-    '''for pos in pos_gene_start:
-        if pos_gene_start[pos] == pos_gene_end[pos]:
-            x = pos[0]
-            y = pos[1]
-            gene_test = pos_gene_start[pos]
-            if x < y:
-                for feature in gb.features:
-                    if feature.qualifiers['locus_tag'][0] == gene_test and feature.strand == 1:
-                        distance_x = abs(feature.location.start - x)
-                        distance_y = abs(eature.location.start - y)
-                        if distance_x < distance_y:
-                            pos_check[(x,y)] = 'y+20'
-                        else:
-                            pos_check[(x,y)] = 'x-20'
-                    elif feature.qualifiers['locus_tag'][0] == gene_test and feature.strand == -1:
-                        distance_x = abs(feature.location.end - x)
-                        distance_y = abs(feature.location.end - y)
-                        if distance_x < distance_y:
-                            pos_check[(x, y)] = 'y+20'
-                        else:
-                            pos_check[(x, y)] = 'x-20'
+    pos_gene_left = []
+    pos_gene_right = []
+    distance_with_left = {}
+    distance_with_right = {}
+    for feature in gb.features:
+        if feature.type == 'CDS' or feature.type == 'tRNA' or feature.type == 'rRNA':
+            #first check to see if both coordinates fit into the feature
+            if left in feature.location and right in feature.location:
+                #we want the absolute value because a value with no sign in the compiled table
+                #indicates that the gene is interrupted
+                gene = [feature.qualifiers['locus_tag'][0], abs(feature.location.start - left),
+                        feature.qualifiers['product'][0]]
+                pos_gene_left = gene
+                pos_gene_right = gene
+                return pos_gene_left, pos_gene_right
+            elif left in feature.location and right not in feature.location:
+                closest_to_left_gene = [feature.qualifiers['locus_tag'][0], feature.location.start - left,
+                                        feature.qualifiers['product'][0]]
+                pos_gene_left = closest_to_left_gene
+                other_gene = get_other_gene(reference, right, "right")
+                pos_gene_right = other_gene
+                return pos_gene_left, pos_gene_right
+            elif left not in feature.location and right in feature.location:
+                closest_to_right_gene = [feature.qualifiers['locus_tag'][0], feature.location.start - right,
+                                        feature.qualifiers['product'][0]]
+                pos_gene_right = closest_to_right_gene
+                other_gene = get_other_gene(reference, left, "left")
+                pos_gene_left = other_gene
+                return pos_gene_left, pos_gene_right
             else:
-                for feature in gb.features:
-                    if features.qualifiers['locus_tag'][0] == gene_test and feature.strand == 1:
-                        distance_x = abs(feature.location.start - x)
-                        distance_y = abs(eature.location.start - y)
-                        if distance_y < distance_x:
-                            pos_check[(x,y)] = 'x+20'
-                        else:
-                            pos_check[(x,y)] = 'y-20'
-                    elif feature.qualifiers['locus_tag'][0] == gene_test and feature.strand == -1:
-                        distance_x = abs(feature.location.end - x)
-                        distance_y = abs(feature.location.end - y)
-                        if distance_y < distance_x:
-                            pos_check[(x, y)] = 'x+20'
-                        else:
-                            pos_check[(x, y)] = 'y-20'
+                #the positions aren't in the middle of gene, so now need to see how close we are
+                #to the current feature
+                distance_with_left[abs(feature.location.start - left)] = [feature.qualifiers['locus_tag'][0], 
+                                                                      feature.location.start - left, 
+                                                                      feature.qualifiers['product'][0]]
+                distance_with_right[abs(feature.location.start - right)] = [feature.qualifiers['locus_tag'][0],
+                                                               feature.location.start - right,
+                                                               feature.qualifiers['product'][0]]
+            
+    #we never broke out of the function, so it must mean that the insertion site
+    #is intergenic                                                          
+    distance_lkeys = list(OrderedDict.fromkeys(distance_with_left))
+    closest_to_left_gene = distance_with_left[min(distance_lkeys)]
+    pos_gene_left = closest_to_left_gene
+    distance_rkeys = list(OrderedDict.fromkeys(distance_with_right))
+    closest_to_right_gene = distance_with_right[min(distance_rkeys)]
+    pos_gene_right = closest_to_right_gene
+    #we already know that the gene isn't interrupted
+    if closest_to_left_gene[0] == closest_to_right_gene[0]:
+        if closest_to_left_gene[1] > closest_to_right_gene[1]:
+            direction = "left"
+            other_gene = get_other_gene(reference, left, direction)
+            return other_gene, pos_gene_right
+        elif closest_to_right_gene > closest_to_left_gene:
+            direction = "right"
+            other_gene = get_other_gene(reference, right, direction)
+            return pos_gene_left, other_gene
+    return pos_gene_left, pos_gene_right
 
-    # gotta fix this!
-    for position in pos_check:
-        if pos_check[position] == 'y+20':
-            pass'''
-
-    return pos_gene_start, pos_gene_end
+def get_other_gene(reference, pos, direction):
+    gb = SeqIO.read(reference, "genbank")
+    distance = {}
+    for feature in gb.features:
+        #only want to look for genes that are to the left of the gene that has
+        #already been found
+        if feature.type == "CDS" or feature.type == "tRNA" or feature.type == "rRNA":
+            if direction == "left":
+                #for this to be true, the position we're looking at must be
+                #larger than the gene start and end (if the position is not
+                #in the gene)
+                if pos >= feature.location.start and feature.location.end:
+                    #always want to refer to the start codon
+                    distance[abs(feature.location.start - pos)] = [feature.qualifiers['locus_tag'][0], 
+                                                                      feature.location.start - pos, 
+                                                                      feature.qualifiers['product'][0]]
+            elif direction == "right":
+                if pos <= feature.location.start and feature.location.end:
+                    distance[abs(feature.location.start - pos)] = [feature.qualifiers['locus_tag'][0], 
+                                                                      feature.location.start - pos, 
+                                                                      feature.qualifiers['product'][0]]
+                    
+    distance_keys = list(OrderedDict.fromkeys(distance))
+    closest_gene = distance[min(distance_keys)]
+    return closest_gene
 
 def blast_db(fasta):
     
@@ -248,19 +259,36 @@ def main():
             #print '\t'.join(row)
             out.write('\t'.join(row) + '\n')
 
-        genes_before, genes_after = get_flanking_genes(args.reference_gbk, order_position_list)
+        row_l_locus = ['left locus tag']
+        row_r_locus = ['right locus tag']
+        row_l_dist = ['left distance']
+        row_r_dist = ['right distance']
+        row_l_prod = ['left product']
+        row_r_prod = ['right product']
 
-        row = ['flanking genes']
         for position in order_position_list:
-            row.append(genes_before[position])
-        #print '\t'.join(row)
-        out.write('\t'.join(row) + '\n')
-        row = ['flanking genes']
-        for position in order_position_list:
-            row.append(genes_after[position])
-        #print '\t'.join(row)
-        out.write('\t'.join(row) + '\n')
-
+            genes_before, genes_after = get_flanking_genes(args.reference_gbk, position[0], position[1])
+            row_l_locus.append(genes_before[0])
+            row_r_locus.append(genes_after[0])
+            if genes_before[0] == genes_after[0]:
+                row_l_dist.append(str(genes_before[1]))
+                row_r_dist.append(str(genes_before[1]))
+            elif genes_before[1] < 0:
+                row_l_dist.append('+' + str(abs(genes_before[1])))
+            elif genes_before[1] > 0:
+                row_l_dist.append('-' + str(abs(genes_before[1])))
+            elif genes_after[1] < 0:
+                row_r_dist.append('+' + str(abs(genes_after[1])))
+            elif genes_after[1] > 0:
+                row_r_dist.append('-' + str(abs(genes_after[1])))
+            row_l_prod.append(genes_before[2])
+            row_r_prod.append(genes_after[2])
+        out.write('\t'.join(row_l_locus) + '\n')
+        out.write('\t'.join(row_l_dist) + '\n')
+        out.write('\t.'.join(row_l_prod) + '\n')
+        out.write('\t'.join(row_r_locus) + '\n')
+        out.write('\t'.join(row_r_dist) + '\n')
+        out.write('\t'.join(row_r_prod) + '\n')
 
 if __name__ == "__main__":
     main()
