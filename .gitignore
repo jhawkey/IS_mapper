@@ -17,3 +17,4 @@ reads_contigs.fasta
 ismap_bedtools.py
 ismap.txt
 slurm_ismap.txt
+compiledTables.pyc
