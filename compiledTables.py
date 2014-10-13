@@ -19,9 +19,9 @@ def parse_args():
     parser.add_argument('--reference_gbk', type=str, required=True, help='gbk file of reference to report closest genes')
     parser.add_argument('--seq', type=str, required=True, help='fasta file for insertion sequence looking for in reference')
     parser.add_argument('--gap', type=int, required=False, default=0, help='distance between regions to call overlapping')
-    parser.add_argument('--cds', type=str, required=False, default='locus_tag,gene,product', help='qualifiers to look for in reference genbank for CDS features')
-    parser.add_argument('--trna', type=str, required=False, default='locus_tag,product', help='qualifiers to look for in reference genbank for tRNA features')
-    parser.add_argument('--rrna', type=str, required=False, default='locus_tag,product', help='qualifiers to look for in reference genbank for rRNA features')
+    parser.add_argument('--cds', type=str, required=False, default='gene,product', help='qualifiers to look for in reference genbank for CDS features')
+    parser.add_argument('--trna', type=str, required=False, default='product', help='qualifiers to look for in reference genbank for tRNA features')
+    parser.add_argument('--rrna', type=str, required=False, default='product', help='qualifiers to look for in reference genbank for rRNA features')
     parser.add_argument('--output', type=str, required=True, help='name of output file')
 
     return parser.parse_args()
@@ -120,6 +120,7 @@ def get_flanking_genes(reference, left, right, cds_quals, trna_quals, rrna_quals
     for feature in gb.features:
         if feature.type == 'CDS' or feature.type == 'tRNA' or feature.type == 'rRNA':
             values = get_qualifiers(cds_features, trna_features, rrna_features, feature)
+            values.append(feature.strand)
             #first check to see if both coordinates fit into the feature
             if left in feature.location and right in feature.location:
                 #we want the absolute value because a value with no sign in the compiled table
@@ -190,6 +191,7 @@ def get_other_gene(reference, pos, direction, cds_features, trna_features, rrna_
         #already been found
         if feature.type == "CDS" or feature.type == "tRNA" or feature.type == "rRNA":
             values = get_qualifiers(cds_features, trna_features, rrna_features, feature)
+            values.append(feature.strand)
             if direction == "left":
                 #for this to be true, the position we're looking at must be
                 #larger than the gene start and end (if the position is not
@@ -324,8 +326,8 @@ def main():
             else:
                 row_l_dist.append(genes_before[1])
                 row_r_dist.append(genes_after[1])
-            row_l_prod.append(genes_before[2])
-            row_r_prod.append(genes_after[2])
+            row_l_prod.append(genes_before[2][:-1])
+            row_r_prod.append(genes_after[2][:-1])
         out.write('\t'.join(row_l_locus) + '\n')
         out.write('\t'.join(row_l_dist) + '\n')
         out.write('\t.'.join(str(i) for i in row_l_prod) + '\n')
