@@ -51,15 +51,16 @@ def parse_args():
     # Cutoffs for annotation
     parser.add_argument('--cutoff', type=int, required=False, default=6, help='Minimum depth for mapped region to be kept in bed file (default 6)')
     parser.add_argument('--percentid', type=float, required=False, default=90.0, help='Minimum percent ID for hit to be annotated (default 90.0')
+    parser.add_argument('--a', action='store_true', required=False, help='Switch on all alignment reporting for bwa')
     parser.add_argument('--T', type=str, required=False, default=30, help='Mapping quality score for bwa')
     # Options for table output (typing)
     parser.add_argument('--cds', type=str, required=False, default='locus_tag,gene,product', help='qualifiers to look for in reference genbank for CDS features')
     parser.add_argument('--trna', type=str, required=False, default='locus_tag,product', help='qualifiers to look for in reference genbank for tRNA features')
     parser.add_argument('--rrna', type=str, required=False, default='locus_tag,product', help='qualifiers to look for in reference genbank for rRNA features')
     # Reporting options
-    parser.add_argument('--log', action="store_true", required=False, help='Switch on logging to file (otherwise log to stdout')
+    parser.add_argument('--log', action='store_true', required=False, help='Switch on logging to file (otherwise log to stdout')
     parser.add_argument('--output', type=str, required=True, help='prefix for output files')
-    parser.add_argument('--temp', action="store_true", required=False, help='Switch on keeping the temp folder instead of deleting it at the end of the program')
+    parser.add_argument('--temp', action='store_true', required=False, help='Switch on keeping the temp folder instead of deleting it at the end of the program')
 
     return parser.parse_args()
 
@@ -401,8 +402,13 @@ def main():
                 assembly = assembly_fasta
             # Map ends back to contigs
             bwa_index(assembly)
-            run_command(['bwa', 'mem', assembly, five_reads, '>', five_to_ref_sam], shell=True)
-            run_command(['bwa', 'mem', assembly, three_reads, '>', three_to_ref_sam], shell=True)
+            if args.a == True:
+                run_command(['bwa', 'mem', 'a', '-T', args.T, assembly, five_reads, '>', five_to_ref_sam], shell=True)
+                run_command(['bwa', 'mem', 'a', '-T', args.T, assembly, three_reads, '>', three_to_ref_sam], shell=True)
+            else:
+                run_command(['bwa', 'mem', assembly, five_reads, '>', five_to_ref_sam], shell=True)
+                run_command(['bwa', 'mem', assembly, three_reads, '>', three_to_ref_sam], shell=True)
+            
             run_command(['samtools', 'view', '-Sb', five_to_ref_sam, '>', five_to_ref_bam], shell=True)
             run_command(['samtools', 'view', '-Sb', three_to_ref_sam, '>', three_to_ref_bam], shell=True)
             run_command(['samtools', 'sort', five_to_ref_bam, five_bam_sorted], shell=True)
@@ -452,8 +458,13 @@ def main():
             table_output = sample + '_table.txt'
 
             # Map reads to reference, sort
-            run_command(['bwa', 'mem', '-a', '-T', args.T, typingRefFasta, five_reads, '>', five_to_ref_sam], shell=True)
-            run_command(['bwa', 'mem', '-a', '-T', args.T, typingRefFasta, three_reads, '>', three_to_ref_sam], shell=True)
+            if args.a == True:
+                run_command(['bwa', 'mem', '-a', '-T', args.T, typingRefFasta, five_reads, '>', five_to_ref_sam], shell=True)
+                run_command(['bwa', 'mem', '-a', '-T', args.T, typingRefFasta, three_reads, '>', three_to_ref_sam], shell=True)
+            else:
+                run_command(['bwa', 'mem', typingRefFasta, five_reads, '>', five_to_ref_sam], shell=True)
+                run_command(['bwa', 'mem', typingRefFasta, three_reads, '>', three_to_ref_sam], shell=True)
+
             run_command(['samtools', 'view', '-Sb', five_to_ref_sam, '>', five_to_ref_bam], shell=True)
             run_command(['samtools', 'view', '-Sb', three_to_ref_sam, '>', three_to_ref_bam], shell=True)
             run_command(['samtools', 'sort', five_to_ref_bam, five_bam_sorted], shell=True)
