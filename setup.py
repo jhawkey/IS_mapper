@@ -32,6 +32,6 @@ setup(
         # themselves.
         #"numpy >= 1.7.1",
         #"scipy >= 0.12.0",
-        #"biopython =0 1.63",
+        #"biopython == 1.63",
     ],
 )
