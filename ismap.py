@@ -294,6 +294,11 @@ def check_blast_database(fasta):
         logging.info('Building blast index for {}...'.format(fasta))
         run_command(['makeblastdb -in', fasta, '-dbtype nucl'], shell=True)
 
+def gbk_to_fasta(genbank, fasta):
+
+    sequences = SeqIO.parse(genbank, "genbank")
+    SeqIO.write(sequences, fasta, "fasta")
+
 def main():
 
     args = parse_args()
@@ -398,7 +403,7 @@ def main():
                 assembly_gbk = assembly
                 (file_path, file_name_before_ext, full_ext) = get_readFile_components(assembly_gbk)
                 assembly_fasta = os.path.join(temp_folder, file_name_before_ext) + '.fasta'
-                run_command(['python', args.path + 'gbkToFasta.py', '-i', assembly, '-o', assembly_fasta], shell=True)
+                gbk_to_fasta(assembly, assembly_fasta)
                 assembly = assembly_fasta
             # Map ends back to contigs
             bwa_index(assembly)
@@ -434,7 +439,7 @@ def main():
             typingName = file_name.split('.g')[0]
             typingRefFasta = temp_folder + typingName + '.fasta'
             # Create reference fasta from genbank
-            run_command(['python', args.path + 'gbkToFasta.py', '-i', args.typingRef, '-o', typingRefFasta], shell=True) 
+            gbk_to_fasta(args.typingRef, typingRefFasta)
             # Create bwa index file for typing reference
             bwa_index(typingRefFasta)         
             # Set up file names for output files

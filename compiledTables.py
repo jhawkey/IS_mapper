@@ -10,7 +10,7 @@ from Bio.Blast.Applications import NcbiblastnCommandline
 from operator import itemgetter
 import os, sys, re, collections, operator
 from collections import OrderedDict
-from gbkToFasta import gbk_to_fasta
+from ismap import gbk_to_fasta
 
 def parse_args():
 
