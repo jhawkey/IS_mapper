@@ -51,6 +51,7 @@ def parse_args():
     # Cutoffs for annotation
     parser.add_argument('--cutoff', type=int, required=False, default=6, help='Minimum depth for mapped region to be kept in bed file (default 6)')
     parser.add_argument('--percentid', type=float, required=False, default=90.0, help='Minimum percent ID for hit to be annotated (default 90.0')
+    parser.add_argument('--T', type=int, required=False, default=30, help='Mapping quality score for bwa')
     # Options for table output (typing)
     parser.add_argument('--cds', type=str, required=False, default='locus_tag,gene,product', help='qualifiers to look for in reference genbank for CDS features')
     parser.add_argument('--trna', type=str, required=False, default='locus_tag,product', help='qualifiers to look for in reference genbank for tRNA features')
@@ -451,8 +452,8 @@ def main():
             table_output = sample + '_table.txt'
 
             # Map reads to reference, sort
-            run_command(['bwa', 'mem', typingRefFasta, five_reads, '>', five_to_ref_sam], shell=True)
-            run_command(['bwa', 'mem', typingRefFasta, three_reads, '>', three_to_ref_sam], shell=True)
+            run_command(['bwa', 'mem', '-a', '-T', args.T typingRefFasta, five_reads, '>', five_to_ref_sam], shell=True)
+            run_command(['bwa', 'mem', '-a', '-T', args.T, typingRefFasta, three_reads, '>', three_to_ref_sam], shell=True)
             run_command(['samtools', 'view', '-Sb', five_to_ref_sam, '>', five_to_ref_bam], shell=True)
             run_command(['samtools', 'view', '-Sb', three_to_ref_sam, '>', three_to_ref_bam], shell=True)
             run_command(['samtools', 'sort', five_to_ref_bam, five_bam_sorted], shell=True)
