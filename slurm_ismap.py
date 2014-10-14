@@ -15,7 +15,7 @@ def parse_args():
     parser.add_argument('--rundir', type=str, required=False, help='Directory to run in. Default is current directory')
     # ISmapper options
     parser.add_argument('--script', type=str, required=True, help='Location of ISMapper script, ismap.py')
-    parser.add_argument('--reference', type=str, required=True, help='Path to IS reference.')
+    parser.add_argument('--query', type=str, required=True, help='Path to IS query.')
     parser.add_argument('--reads', nargs='+', type=str, required=True, help='Paired end read files in fastq.gz format')
     parser.add_argument('--forward', type=str, required=False, default='_1', help='Identifier for forward reads if not in MiSeq format (default _1)')
     parser.add_argument('--reverse', type=str, required=False, default='_2', help='Identifier for reverse reads if not in MiSeq format (default _2)')
@@ -165,7 +165,7 @@ def main():
         cmd += '\nmodule load bedtools-intel/2.20.1'
         
         cmd += '\npython ' + args.script
-        cmd += ' --reference ' + args.reference
+        cmd += ' --query ' + args.query
         if args.runtype == 'typing':
             cmd += ' --runtype typing --reads ' + fileSets[sample][0] + ' ' + fileSets[sample][1]
         if args.assemblyid:
