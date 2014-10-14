@@ -452,7 +452,7 @@ def main():
             table_output = sample + '_table.txt'
 
             # Map reads to reference, sort
-            run_command(['bwa', 'mem', '-a', '-T', args.T typingRefFasta, five_reads, '>', five_to_ref_sam], shell=True)
+            run_command(['bwa', 'mem', '-a', '-T', args.T, typingRefFasta, five_reads, '>', five_to_ref_sam], shell=True)
             run_command(['bwa', 'mem', '-a', '-T', args.T, typingRefFasta, three_reads, '>', three_to_ref_sam], shell=True)
             run_command(['samtools', 'view', '-Sb', five_to_ref_sam, '>', five_to_ref_bam], shell=True)
             run_command(['samtools', 'view', '-Sb', three_to_ref_sam, '>', three_to_ref_bam], shell=True)
