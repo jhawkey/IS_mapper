@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from Bio import SeqIO
 from Bio import SeqRecord
 from Bio.SeqFeature import SeqFeature, FeatureLocation

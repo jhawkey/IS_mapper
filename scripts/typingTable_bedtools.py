@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 # read in genbank file, print out coordinates & strand of features
 from argparse import (ArgumentParser, FileType)
 from Bio import SeqIO

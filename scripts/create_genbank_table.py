@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from argparse import (ArgumentParser, FileType)
 from Bio import SeqIO
 from Bio import SeqFeature
