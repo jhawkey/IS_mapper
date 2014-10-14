@@ -12,7 +12,7 @@ setup(
             'scripts/compiledTables.py', 'scripts/create_genbank_table.py', 'scripts/gbkToFasta.py',
             'scripts/multiGenbankToSingle.py', 'scripts/slurm_ismap.py', 'scripts/typingTable_bedtools.py'],
     entry_points={
-        'console_scripts': ['ismap = ismap:main']
+        'console_scripts': ['ismap = ismap.ismap:main']
     },
     package_dir = {'ISMapper': 'scripts'},
     #package_data={'srst2': ['data/resistance.*']},
