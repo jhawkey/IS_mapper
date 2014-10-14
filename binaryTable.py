@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import string, re
 import os, sys
 from argparse import (ArgumentParser, FileType)
