@@ -4,4 +4,4 @@
 
 import pkg_resources  # part of setuptools
 
-srst2_version = pkg_resources.require("ISMapper")[0].version
+ismap_version = pkg_resources.require("ISMapper")[0].version

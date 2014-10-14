@@ -23,10 +23,10 @@ import logging
 import sys, re, os
 from argparse import ArgumentParser
 from subprocess import call, check_output, CalledProcessError, STDOUT
-#try:
-#    from version import ismap_version
-#except:
-#    ismap_version = 'version unknown'
+try:
+    from version import ismap_version
+except:
+    ismap_version = 'version unknown'
 
 def parse_args():
     '''
