@@ -23,6 +23,7 @@ import logging
 import sys, re, os
 from argparse import ArgumentParser
 from subprocess import call, check_output, CalledProcessError, STDOUT
+from Bio import SeqIO
 try:
     from version import ismap_version
 except:
