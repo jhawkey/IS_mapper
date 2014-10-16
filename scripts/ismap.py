@@ -8,12 +8,11 @@
 # see LICENSE.txt for the license
 #
 # Dependencies:
-'''need to add websites and versions'''
-#   BWA
-#   Samtools
-#   Bedtools
-#   BioPython
-#   BLAST
+#   BWA v0.7.5a - http://bio-bwa.sourceforge.net/
+#   Samtools v0.1.19 - http://samtools.sourceforge.net/
+#   Bedtools v2.20.1 - http://bedtools.readthedocs.org/en/latest/content/installation.html
+#   BioPython v1.63 - http://biopython.org/wiki/Main_Page
+#   BLAST+ v2.2.28 - ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/
 #
 # Git repository: https://github.com/jhawkey/IS_mapper
 # README: https://github.com/jhawkey/IS_mapper/blob/master/README.txt
