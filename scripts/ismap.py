@@ -459,8 +459,6 @@ def main():
             three_merged_bed = three_header + '_merged.sorted.bed'
             bed_intersect = sample + '_' + typingName + '_intersect.bed'
             bed_closest = sample + '_' + typingName + '_closest.bed'
-            final_genbank = sample + '_annotated.gbk'
-            table_output = sample + '_table.txt'
 
             # Map reads to reference, sort
             if args.a == True:
@@ -489,8 +487,8 @@ def main():
             run_command(['bedtools', 'intersect', '-a', five_merged_bed, '-b', three_merged_bed, '-wo', '>', bed_intersect], shell=True)
             run_command(['closestBed', '-a', five_merged_bed, '-b', three_merged_bed, '-d', '>', bed_closest], shell=True)
             # Create table and annotate genbank with hits
-            run_command(['python', args.path + 'typingTable_bedtools.py', '--intersect_bed', bed_intersect, '--closest_bed', bed_closest, '--insertion_seq', args.query, '--reference_genbank', args.typingRef, '--temp_folder', temp_folder, '--cds', args.cds, '--trna', args.trna, '--rrna', args.rrna, '--output', table_output], shell=True)
-            run_command(['python', args.path + 'annotate_genbank_from_bed.py', '--intersect_bed', bed_intersect, '--closest_bed', bed_closest, '--insertion_seq', args.query, '--genbank', args.typingRef, '--newfile', final_genbank], shell=True)
+            run_command(['python', args.path + 'typingTable_bedtools.py', '--intersect_bed', bed_intersect, '--closest_bed', bed_closest, '--insertion_seq', args.query, '--reference_genbank', args.typingRef, '--temp_folder', temp_folder, '--cds', args.cds, '--trna', args.trna, '--rrna', args.rrna, '--output', sample], shell=True)
+            #run_command(['python', args.path + 'annotate_genbank_from_bed.py', '--intersect_bed', bed_intersect, '--closest_bed', bed_closest, '--insertion_seq', args.query, '--genbank', args.typingRef, '--newfile', final_genbank], shell=True)
 
         # remove temp folder if required
         if args.temp == False:

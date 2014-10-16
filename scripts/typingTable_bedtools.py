@@ -61,6 +61,30 @@ def check_seq_between(gb, insertion, start, end, name, temp):
     hit = []
     return []
 
+def createFeature(coords, orientation):
+
+    x_L = hits[0]
+    y_L = hits[1]
+    x_R = hits[2]
+    y_R = hits[3]
+    quals = {}
+
+    left_location = SeqFeature.FeatureLocation(x_L, y_L)
+    right_location = SeqFeature.FeatureLocation(x_R, y_R)
+    if orient == 'F':
+        #then in forward orientation, set colour to be red
+        quals['colour'] = '2'
+        quals['orientation'] = 'forward'
+    elif orient == 'R':
+        #then in reverse orientation, set colour to be yellow
+        quals['colour'] = '7'
+        quals['orientation'] = 'reverse'
+
+    left_feature = SeqFeature.SeqFeature(left_location, type='left_end', qualifiers=quals)
+    right_feature = SeqFeature.SeqFeature(right_location, type='right_end', qualifiers=quals)
+
+    return left_feature, right_feature
+
 def main():
 
     args = parse_args()
@@ -76,6 +100,9 @@ def main():
         output.write('No hits found')
         output.close()
         sys.exit()
+
+    genbank = SeqIO.read(args.genbank, 'genbank')
+    feature_count = 0
 
     if os.stat(args.intersect_bed)[6] != 0:
         with open(args.intersect_bed) as bed_merged:
@@ -99,6 +126,11 @@ def main():
                         y = y_R
                     else:
                         print 'neither if statement were correct'
+
+                    left_feature, right_feature = createFeature([x_L, y_L, x_R, y_R], orient)
+                    genbank.features.append(left_feature)
+                    genbank.features.append(right_feature)
+                    feature_cout += 2
 
                     gene_left, gene_right = get_flanking_genes(args.reference_genbank, x, y, args.cds, args.trna, args.rrna)
                     if gene_left[1] == gene_right[1]:
@@ -139,6 +171,12 @@ def main():
                     orient = 'R'
                     x = x_L
                     y = y_R
+
+                left_feature, right_feature = createFeature([x_L, y_L, x_R, y_R], orient)
+                genbank.features.append(left_feature)
+                genbank.features.append(right_feature)
+                feature_count += 2
+                
                 gene_left, gene_right = get_flanking_genes(args.reference_genbank, x, y, args.cds, args.trna, args.rrna)
                 if gene_left[:-1] == gene_right[:-1]:
                     funct_pred = 'Gene interrupted'
@@ -148,8 +186,11 @@ def main():
                 region += 1
             elif float(info[6]) / is_length >= 0.8 and float(info[6]) / is_length <= 1.5:
                 #this is probably a known hit, but need to check with BLAST
+                x_L = int(info[1])
                 y_L = int(info[2])
                 x_R = int(info[4])
+                y_R = int(info[5])
+                
                 if y_L < x_R:
                     start = y_L
                     end = x_R
@@ -158,7 +199,12 @@ def main():
                     start = x_R
                     end = y_L
                     orient = 'R'
-                print orient
+                
+                left_feature, right_feature = createFeature([x_L, y_L, x_R, y_R], orient)
+                genbank.features.append(left_feature)
+                genbank.features.append(right_feature)
+                feature_count += 2
+
                 seq_results = check_seq_between(args.reference_genbank, args.insertion_seq, start, end, 'region_' + str(region), args.temp_folder)
                 if len(seq_results) != 0 and seq_results[0] >= 80 and seq_results[1] >= 80:
                     #then this is definitely a known site
@@ -190,7 +236,7 @@ def main():
         sorted_keys = arr[arr[:,1].astype('int').argsort()]
 
     #write out the found hits to file
-    output = open(args.output, 'w')
+    output = open(args.output + '_table.txt', 'w')
     output.write('\t'.join(header) + '\n')
     if arr != 0:
         for key in sorted_keys[:,0]:
@@ -205,6 +251,9 @@ def main():
         for region in removed_results:
             output_removed.write(removed_results[region])
         output_removed.close()
+
+    SeqIO.write(genbank, args.output + '_annotated.gbk', 'genbank')
+    print('Added ' + str(feature_count) + ' features to ' + args.output + '_annotated.gbk')
 
     #return(lines, len(removed_results))
 
