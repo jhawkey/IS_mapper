@@ -7,14 +7,14 @@ setup(
     version='0.1.0',
     author='Jane Hawkey',
     author_email='hawkey.jane@gmail.com',
-    packages=['ISMapper'],
+    packages=['ismap'],
     scripts=['scripts/annotate_genbank_from_bed.py', 'scripts/annotateMultiGenbank.py', 'scripts/binaryTable.py',
             'scripts/compiledTables.py', 'scripts/create_genbank_table.py', 'scripts/gbkToFasta.py',
             'scripts/multiGenbankToSingle.py', 'scripts/slurm_ismap.py', 'scripts/typingTable_bedtools.py'],
     entry_points={
         'console_scripts': ['ismap = ismap.ismap:main']
     },
-    package_dir = {'ISMapper': 'scripts'},
+    package_dir = {'ismap': 'scripts'},
     #package_data={'srst2': ['data/resistance.*']},
     url='http://jhawkey.github.io/IS_mapper/',
     license='LICENSE.txt',
