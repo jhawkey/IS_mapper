@@ -61,7 +61,7 @@ def check_seq_between(gb, insertion, start, end, name, temp):
     hit = []
     return []
 
-def createFeature(coords, orientation):
+def createFeature(hits, orient):
 
     x_L = hits[0]
     y_L = hits[1]
@@ -130,7 +130,7 @@ def main():
                     left_feature, right_feature = createFeature([x_L, y_L, x_R, y_R], orient)
                     genbank.features.append(left_feature)
                     genbank.features.append(right_feature)
-                    feature_cout += 2
+                    feature_count += 2
 
                     gene_left, gene_right = get_flanking_genes(args.reference_genbank, x, y, args.cds, args.trna, args.rrna)
                     if gene_left[1] == gene_right[1]:
