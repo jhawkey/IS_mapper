@@ -8,9 +8,8 @@ setup(
     author='Jane Hawkey',
     author_email='hawkey.jane@gmail.com',
     packages=['ismap'],
-    scripts=['scripts/annotate_genbank_from_bed.py', 'scripts/annotateMultiGenbank.py', 'scripts/binaryTable.py',
-            'scripts/compiledTables.py', 'scripts/create_genbank_table.py', 'scripts/gbkToFasta.py',
-            'scripts/multiGenbankToSingle.py', 'scripts/slurm_ismap.py', 'scripts/typingTable_bedtools.py'],
+    scripts=['scripts/binaryTable.py', 'scripts/compiled_table.py', 'scripts/create_genbank_table.py',
+            'scripts/slurm_ismap.py', 'scripts/create_typing_out.py'],
     entry_points={
         'console_scripts': ['ismap = ismap.ismap:main']
     },
