@@ -12,7 +12,7 @@ from operator import itemgetter
 import os, sys, re, collections, operator
 import numpy as np
 from collections import OrderedDict
-from compiledTables import get_flanking_genes, get_other_gene, get_qualifiers
+from compiled_table import get_flanking_genes, get_other_gene, get_qualifiers
 
 def parse_args():
 

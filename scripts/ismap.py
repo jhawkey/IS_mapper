@@ -299,6 +299,45 @@ def gbk_to_fasta(genbank, fasta):
     sequences = SeqIO.parse(genbank, "genbank")
     SeqIO.write(sequences, fasta, "fasta")
 
+def multi_to_single(genbank, name, output):
+    total = 0 # total bases
+
+    handle = open(genbank, "rU")
+    records = list(SeqIO.parse(handle, "genbank"))
+    feature_count = 0
+    colour_count = 0
+
+    #make header genbank format friendly
+    if len(name) >= 10:
+        name = name[:9]
+    for r in records:
+        length = len(r)
+        id = r.name
+        seq = r.seq
+        seq.alphabet=generic_dna
+        if total > 0:
+            newrecord.seq = newrecord.seq + seq
+        else:
+            # first sequence, initialise seqrecord
+            newrecord = SeqRecord(seq=r.seq,name=options.name,id=options.name)
+            newrecord.seq.alphabet=generic_dna
+        # create feature for contig
+        if colour_count % 2 == 0:
+            newrecord.features.append(SeqFeature(FeatureLocation(total, total + length), type="fasta_record", qualifiers = {'note' : [r.name], 'colour':'11'}))
+            colour_count = colour_count + 1
+        else:
+            newrecord.features.append(SeqFeature(FeatureLocation(total, total + length), type="fasta_record", qualifiers = {'note' : [r.name], 'colour':'10'}))
+            colour_count = colour_count + 1
+        # copy CDS features
+        for f in r.features:
+            feature_count += 1
+            f.qualifiers["locus_tag"] = str(feature_count)
+            newrecord.features.append(SeqFeature(FeatureLocation(f.location.nofuzzy_start + total, f.location.nofuzzy_end + total), strand = f.strand, type=f.type, qualifiers = f.qualifiers))
+        total += length
+    handle.close()
+    #write out new single entry genbank
+    SeqIO.write(newrecord, output, "genbank")
+
 def main():
 
     args = parse_args()
@@ -430,7 +469,8 @@ def main():
                 run_command(['python', args.path + 'create_genbank_table.py', '--five_bed', five_merged_bed, '--three_bed', three_merged_bed, '--assembly', assembly, '--type fasta', '--output', sample], shell=True)
             elif args.extension == '.gbk':
                 run_command(['python', args.path + 'create_genbank_table.py', '--five_bed', five_merged_bed, '--three_bed', three_merged_bed, '--assembly', assembly_gbk, '--type genbank', '--output', sample], shell=True)
-            run_command(['python', args.path + 'multiGenbankToSingle.py', '-i', sample + '_annotated.gbk', '-n', sample, '-o', final_genbankSingle], shell=True)
+            #create single entry genbank
+            multi_to_single(sample + '_annotated.gbk', sample, final_genbankSingle)
 
         if args.runtype == "typing":
 
@@ -487,8 +527,7 @@ def main():
             run_command(['bedtools', 'intersect', '-a', five_merged_bed, '-b', three_merged_bed, '-wo', '>', bed_intersect], shell=True)
             run_command(['closestBed', '-a', five_merged_bed, '-b', three_merged_bed, '-d', '>', bed_closest], shell=True)
             # Create table and annotate genbank with hits
-            run_command(['python', args.path + 'typingTable_bedtools.py', '--intersect_bed', bed_intersect, '--closest_bed', bed_closest, '--insertion_seq', args.query, '--reference_genbank', args.typingRef, '--temp_folder', temp_folder, '--cds', args.cds, '--trna', args.trna, '--rrna', args.rrna, '--output', sample], shell=True)
-            #run_command(['python', args.path + 'annotate_genbank_from_bed.py', '--intersect_bed', bed_intersect, '--closest_bed', bed_closest, '--insertion_seq', args.query, '--genbank', args.typingRef, '--newfile', final_genbank], shell=True)
+            run_command(['python', args.path + 'create_typing_out.py', '--intersect_bed', bed_intersect, '--closest_bed', bed_closest, '--insertion_seq', args.query, '--reference_genbank', args.typingRef, '--temp_folder', temp_folder, '--cds', args.cds, '--trna', args.trna, '--rrna', args.rrna, '--output', sample], shell=True)
 
         # remove temp folder if required
         if args.temp == False:
