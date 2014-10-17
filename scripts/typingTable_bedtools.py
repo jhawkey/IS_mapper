@@ -101,7 +101,7 @@ def main():
         output.close()
         sys.exit()
 
-    genbank = SeqIO.read(args.genbank, 'genbank')
+    genbank = SeqIO.read(args.reference_genbank, 'genbank')
     feature_count = 0
 
     if os.stat(args.intersect_bed)[6] != 0:
