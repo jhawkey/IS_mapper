@@ -21,9 +21,9 @@ def parse_args():
     parser.add_argument('--closest_bed', type=str, required=True, help='closestBed bed file')
     parser.add_argument('--reference_genbank', type=str, required=True, help='reference genbank file to find flanking genes of regions')
     parser.add_argument('--insertion_seq', type=str, required=True, help='insertion sequence reference in fasta format')
-    parser.add_argument('--cds', type=str, required=False, default='locus_tag,gene,product', help='qualifiers to look for in reference genbank for CDS features')
-    parser.add_argument('--trna', type=str, required=False, default='locus_tag,product', help='qualifiers to look for in reference genbank for tRNA features')
-    parser.add_argument('--rrna', type=str, required=False, default='locus_tag,product', help='qualifiers to look for in reference genbank for rRNA features')
+    parser.add_argument('--cds', nargs='+', type=str, required=False, default='locus_tag gene product', help='qualifiers to look for in reference genbank for CDS features')
+    parser.add_argument('--trna', nargs='+', type=str, required=False, default='locus_tag product', help='qualifiers to look for in reference genbank for tRNA features')
+    parser.add_argument('--rrna', nargs='+', type=str, required=False, default='locus_tag product', help='qualifiers to look for in reference genbank for rRNA features')
     parser.add_argument('--temp_folder', type=str, required=True, help='location of temp folder to place intermediate blast files in')
     parser.add_argument('--output', type=str, required=True, help='name for output file')
     return parser.parse_args()
@@ -208,7 +208,9 @@ def main():
                 seq_results = check_seq_between(args.reference_genbank, args.insertion_seq, start, end, 'region_' + str(region), args.temp_folder)
                 if len(seq_results) != 0 and seq_results[0] >= 80 and seq_results[1] >= 80:
                     #then this is definitely a known site
-                    gene_left, gene_right = get_flanking_genes(args.reference_genbank, start, end, args.cds, args.trna, args.rrna)
+                    gene_left = get_other_gene(args.reference_genbank, min(start, end), "left", args.cds, args.trna, args.rrna)
+                    gene_right = get_other_gene(args.reference_genbank, max(start, end), "right", args.cds, args.trna, args.rrna)
+                    #gene_left, gene_right = get_flanking_genes(args.reference_genbank, start, end, args.cds, args.trna, args.rrna)
                     results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Known', str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1]]
                 else:
                    #then I'm not sure what this is

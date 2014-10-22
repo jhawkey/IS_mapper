@@ -21,9 +21,9 @@ def parse_args():
     parser.add_argument('--reference_gbk', type=str, required=True, help='gbk file of reference to report closest genes')
     parser.add_argument('--seq', type=str, required=True, help='fasta file for insertion sequence looking for in reference')
     parser.add_argument('--gap', type=int, required=False, default=0, help='distance between regions to call overlapping')
-    parser.add_argument('--cds', type=str, required=False, default='gene,product', help='qualifiers to look for in reference genbank for CDS features')
-    parser.add_argument('--trna', type=str, required=False, default='product', help='qualifiers to look for in reference genbank for tRNA features')
-    parser.add_argument('--rrna', type=str, required=False, default='product', help='qualifiers to look for in reference genbank for rRNA features')
+    parser.add_argument('--cds', nargs='+', type=str, required=False, default='gene product', help='qualifiers to look for in reference genbank for CDS features')
+    parser.add_argument('--trna', nargs='+', type=str, required=False, default='product', help='qualifiers to look for in reference genbank for tRNA features')
+    parser.add_argument('--rrna', nargs='+', type=str, required=False, default='product', help='qualifiers to look for in reference genbank for rRNA features')
     parser.add_argument('--output', type=str, required=True, help='name of output file')
 
     return parser.parse_args()
@@ -116,7 +116,7 @@ def get_main_gene_id(qualifier_list, feature):
         except KeyError:
             pass
 
-def get_flanking_genes(reference, left, right, cds_quals, trna_quals, rrna_quals):
+def get_flanking_genes(reference, left, right, cds_features, trna_features, rrna_features):
 
     gb = SeqIO.read(reference, 'genbank')
     pos_gene_left = []
@@ -124,9 +124,9 @@ def get_flanking_genes(reference, left, right, cds_quals, trna_quals, rrna_quals
     distance_with_left = {}
     distance_with_right = {}
 
-    cds_features = cds_quals.split(',')
-    trna_features = trna_quals.split(',')
-    rrna_features = rrna_quals.split(',')
+    #cds_features = cds_quals.split(',')
+    #trna_features = trna_quals.split(',')
+    #rrna_features = rrna_quals.split(',')
 
     for feature in gb.features:
         if feature.type == 'CDS' or feature.type == 'tRNA' or feature.type == 'rRNA':
@@ -201,6 +201,9 @@ def get_flanking_genes(reference, left, right, cds_quals, trna_quals, rrna_quals
 def get_other_gene(reference, pos, direction, cds_features, trna_features, rrna_features):
     gb = SeqIO.read(reference, "genbank")
     distance = {}
+    #cds_features = cds_features.split(',')
+    #trna_features = trna_features.split(',')
+    #rrna_features = rrna_features.split(',')
     for feature in gb.features:
         #only want to look for genes that are to the left of the gene that has
         #already been found
@@ -211,7 +214,7 @@ def get_other_gene(reference, pos, direction, cds_features, trna_features, rrna_
                 #for this to be true, the position we're looking at must be
                 #larger than the gene start and end (if the position is not
                 #in the gene)
-                if pos >= feature.location.start and feature.location.end:
+                if pos > feature.location.start and feature.location.end:
                     gene_id = get_main_gene_id(cds_features, feature)
                     #always want to refer to the start codon
                     if feature.location.start - pos > 0:
@@ -221,7 +224,7 @@ def get_other_gene(reference, pos, direction, cds_features, trna_features, rrna_
 
                     distance[abs(feature.location.start - pos)] = [gene_id, dist, values]
             elif direction == "right":
-                if pos <= feature.location.start and feature.location.end:
+                if pos < feature.location.start and feature.location.end:
                     gene_id = get_main_gene_id(cds_features, feature)
                     if feature.location.start - pos > 0:
                         dist = '-' + str(feature.location.start - pos)
@@ -246,6 +249,7 @@ def main():
     list_of_isolates = []
 
     list_of_positions = collections.defaultdict(dict) # key1 = pos, key2 = isolate, value = +/-
+    list_of_ref_positions = collections.defaultdict(dict)
     position_orientation = {}
 
     reference_fasta = args.reference_gbk.split('.g')[0]
@@ -253,7 +257,7 @@ def main():
 
     blast_db(reference_fasta)
 
-    list_of_positions, position_orientation, ref_name = get_ref_positions(reference_fasta, args.seq, list_of_positions, position_orientation)
+    list_of_ref_positions, ref_position_orientation, ref_name = get_ref_positions(reference_fasta, args.seq, list_of_ref_positions, position_orientation)
 
     for result_file in unique_results_files:
         isolate = result_file.split('__')[0]
@@ -264,18 +268,30 @@ def main():
                 if header == 0:
                     header += 1
                 elif 'No hits found' not in line and line != '':
-                    #print isolate
                     info = line.strip('\n').split('\t')
-                    #print info
                     orientation = info[1]
                     is_start = int(info[2])
-                    #print is_start
                     is_end = int(info[3])
-                    #print is_end
-                    if (is_start, is_end) not in list_of_positions:
+                    call = info[5]
+                    #If the position is one that's in the reference, just do this compared to the reference to make flanking gene
+                    #calls a little easier
+                    if call == 'Known':
+                        if (is_start, is_end) not in list_of_ref_positions:
+                            old_range, new_range, new_orientation = check_ranges(ref_position_orientation, (is_start, is_end), 100, orientation)
+                            if old_range != False:
+                                store_values = list_of_ref_positions[old_range]
+                                del list_of_ref_positions[old_range]
+                                list_of_ref_positions[new_range] = store_values
+                                list_of_ref_positions[new_range][isolate] = '+'
+                                del ref_position_orientation[old_range]
+                                ref_position_orientation[new_range] = new_orientation
+                            else:
+                                list_of_positions[(is_start, is_end)][isolate] = '+'
+                                position_orientation[(is_start, is_end)] = orientation
+                    #Otherwise try and merge with positions that are novel
+                    elif (is_start, is_end) not in list_of_positions:
                         if list_of_positions.keys() != []:
                             old_range, new_range, new_orientation = check_ranges(position_orientation, (is_start, is_end), args.gap, orientation)
-                            #print old_range, new_range, new_orientation
                             if old_range != False:
                                 store_values = list_of_positions[old_range]
                                 del list_of_positions[old_range]
@@ -291,40 +307,55 @@ def main():
                             position_orientation[(is_start, is_end)] = orientation
                     elif (is_start, is_end) in list_of_positions:
                         list_of_positions[(is_start, is_end)][isolate] = '+'
-                    #print position_orientation
+
+    print list_of_ref_positions
+    print list_of_positions
+    #get the flanking genes for the reference positions
+    position_genes = {}
+    for position in list_of_ref_positions.keys():
+        left_pos = min(position[0], position[1])
+        right_pos = max(position[0], position[1])
+        flanking_left = get_other_gene(args.reference_gbk, left_pos, "left", args.cds, args.trna, args.rrna)
+        flanking_right = get_other_gene(args.reference_gbk, right_pos, "right", args.cds, args.trna, args.rrna)
+        position_genes[(position[0], position[1])] = [flanking_left, flanking_right]
+    for position in list_of_positions.keys():
+        genes_before, genes_after = get_flanking_genes(args.reference_gbk, position[0], position[1], args.cds, args.trna, args.rrna)
+        position_genes[(position[0], position[1])] = [genes_before, genes_after]
 
     # ordering positions from smallest to largest for final table output
-    order_position_list = list(OrderedDict.fromkeys(list_of_positions.keys()))
+    order_position_list = list(OrderedDict.fromkeys(list_of_positions.keys())) + list(OrderedDict.fromkeys(list_of_ref_positions.keys()))
     order_position_list.sort()
-    #print order_position_list
 
     # create header of table
     with open(args.output, 'w') as out:
         header = ['isolate']
         for position in order_position_list:
             header.append(str(position[0]) + '-' + str(position[1]))
-        #print '\t'.join(header)
         out.write('\t'.join(header) + '\n')
 
         row = [ref_name]
         for position in order_position_list:
-            if ref_name in list_of_positions[position]:
-                row.append(list_of_positions[position][ref_name])
+            if position in list_of_ref_positions:
+                row.append(list_of_ref_positions[position][ref_name])
             else:
                 row.append('-')
-        #print '\t'.join(row)
+        print row
         out.write('\t'.join(row) + '\n')
         
         # create each row
         for isolate in list_of_isolates:
             row = [isolate]
             for position in order_position_list:
-                if isolate in list_of_positions[position]:
-                    row.append(list_of_positions[position][isolate])
-                else:
-                    row.append('-')
-            #row.append('\n')
-            #print '\t'.join(row)
+                if position in list_of_ref_positions:
+                    if isolate in (list_of_ref_positions[position]):
+                        row.append(list_of_ref_positions[position][isolate])
+                    else:
+                        row.append('-')
+                elif position in list_of_positions:
+                    if isolate in list_of_positions[position]:
+                        row.append(list_of_positions[position][isolate])
+                    else:
+                        row.append('-')
             out.write('\t'.join(row) + '\n')
 
         row_l_locus = ['left locus tag']
@@ -335,19 +366,16 @@ def main():
         row_r_prod = ['right product']
 
         for position in order_position_list:
-            genes_before, genes_after = get_flanking_genes(args.reference_gbk, position[0], position[1], args.cds, args.trna, args.rrna)
-            #print genes_before
-            #print genes_after
-            row_l_locus.append(genes_before[0])
-            row_r_locus.append(genes_after[0])
-            if genes_before[0] == genes_after[0]:
-                row_l_dist.append(genes_before[1])
-                row_r_dist.append(genes_before[1])
-            else:
-                row_l_dist.append(genes_before[1])
-                row_r_dist.append(genes_after[1])
-            row_l_prod.append(genes_before[2][:-1])
-            row_r_prod.append(genes_after[2][:-1])
+            print position
+            #   genes_before, genes_after = get_flanking_genes(args.reference_gbk, position[0], position[1], args.cds, args.trna, args.rrna)
+            if position in position_genes:
+                print position
+                row_l_locus.append(position_genes[position][0][0])
+                row_r_locus.append(position_genes[position][1][0])
+                row_l_dist.append(position_genes[position][0][1])
+                row_r_dist.append(position_genes[position][1][1])
+                row_l_prod.append(position_genes[position][0][2][:-1])
+                row_r_prod.append(position_genes[position][1][2][:-1])
         out.write('\t'.join(row_l_locus) + '\n')
         out.write('\t'.join(row_l_dist) + '\n')
         out.write('\t.'.join(str(i) for i in row_l_prod) + '\n')
