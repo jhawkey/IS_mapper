@@ -334,7 +334,8 @@ def main():
         row = [ref_name]
         for position in order_position_list:
             if position in list_of_ref_positions:
-                row.append(list_of_ref_positions[position][ref_name])
+                if ref_name in list_of_ref_positions[position]: 
+                    row.append(list_of_ref_positions[position][ref_name])
             else:
                 row.append('-')
         out.write('\t'.join(row) + '\n')
