@@ -308,8 +308,6 @@ def main():
                     elif (is_start, is_end) in list_of_positions:
                         list_of_positions[(is_start, is_end)][isolate] = '+'
 
-    print list_of_ref_positions
-    print list_of_positions
     #get the flanking genes for the reference positions
     position_genes = {}
     for position in list_of_ref_positions.keys():
@@ -339,7 +337,6 @@ def main():
                 row.append(list_of_ref_positions[position][ref_name])
             else:
                 row.append('-')
-        print row
         out.write('\t'.join(row) + '\n')
         
         # create each row
@@ -366,10 +363,8 @@ def main():
         row_r_prod = ['right product']
 
         for position in order_position_list:
-            print position
             #   genes_before, genes_after = get_flanking_genes(args.reference_gbk, position[0], position[1], args.cds, args.trna, args.rrna)
             if position in position_genes:
-                print position
                 row_l_locus.append(position_genes[position][0][0])
                 row_r_locus.append(position_genes[position][1][0])
                 row_l_dist.append(position_genes[position][0][1])
