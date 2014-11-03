@@ -45,6 +45,8 @@ def check_seq_between(gb, insertion, start, end, name, temp):
     genbank = SeqIO.read(gb, 'genbank')
     seq_between = genbank.seq[start:end]
     seq_between = SeqRecord(Seq(str(seq_between), generic_dna), id=name)
+    print name
+    print len(seq_between)
     SeqIO.write(seq_between, temp + name + '.fasta', 'fasta')
     doBlast(temp + name + '.fasta', temp + name + '_out.txt', insertion)
     first_result = 0
@@ -52,7 +54,7 @@ def check_seq_between(gb, insertion, start, end, name, temp):
         for line in summary:
             if first_result == 0:
                 info = line.strip().split('\t')
-                coverage = (float(info[1])/float(info[4])) * 100
+                coverage = info[-1]
                 hit = [info[3], coverage]
                 first_result += 1
             #os.system('rm ' + name + '.fasta ' + name + '_out.txt')
@@ -196,8 +198,8 @@ def main():
                     end = x_R
                     orient = 'F'
                 else:
-                    start = x_R
-                    end = y_L
+                    start = y_R
+                    end = x_L
                     orient = 'R'
                 
                 left_feature, right_feature = createFeature([x_L, y_L, x_R, y_R], orient)
@@ -211,13 +213,13 @@ def main():
                     gene_left = get_other_gene(args.reference_genbank, min(start, end), "left", args.cds, args.trna, args.rrna)
                     gene_right = get_other_gene(args.reference_genbank, max(start, end), "right", args.cds, args.trna, args.rrna)
                     #gene_left, gene_right = get_flanking_genes(args.reference_genbank, start, end, args.cds, args.trna, args.rrna)
-                    results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Known', str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1]]
+                    results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Known', str(seq_results[0]), str(seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1]]
                 else:
                    #then I'm not sure what this is
                    print 'not sure'
                    gene_left, gene_right = get_flanking_genes(args.reference_genbank, start, end, args.cds, args.trna, args.rrna)
                    if len(seq_results) !=0:
-                       results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Unknown', str(results[0]), str('%.2f' % results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1]]
+                       results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Unknown', str(seq_results[0]), str(seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1]]
                    else:
                        results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Unknown', 'no hit', 'no hit', gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1]]
                 region += 1

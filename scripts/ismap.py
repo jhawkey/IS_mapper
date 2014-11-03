@@ -51,6 +51,7 @@ def parse_args():
     # Cutoffs for annotation
     parser.add_argument('--cutoff', type=int, required=False, default=6, help='Minimum depth for mapped region to be kept in bed file (default 6)')
     parser.add_argument('--percentid', type=float, required=False, default=90.0, help='Minimum percent ID for hit to be annotated (default 90.0')
+    parser.add_argument('--merging', type=str, required=False, default='100', help='Value for merging left and right hits in bed files together to simply calculation of closest and intersecting regions (default 100).')
     parser.add_argument('--a', action='store_true', required=False, help='Switch on all alignment reporting for bwa')
     parser.add_argument('--T', type=str, required=False, default=30, help='Mapping quality score for bwa')
     # Options for table output (typing)
@@ -462,8 +463,8 @@ def main():
             run_command(['bedtools', 'genomecov', '-ibam', three_bam_sorted + '.bam', '-bg', '>', three_cov_bed], shell=True)
             filter_on_depth(five_cov_bed, five_final_cov, args.cutoff)
             filter_on_depth(three_cov_bed, three_final_cov, args.cutoff)
-            run_command(['bedtools', 'merge', '-i', five_final_cov, '-d 100', '>', five_merged_bed], shell=True)
-            run_command(['bedtools', 'merge', '-i', three_final_cov, '-d 100', '>', three_merged_bed], shell=True)       
+            run_command(['bedtools', 'merge', '-i', five_final_cov, '-d', args.merging, '>', five_merged_bed], shell=True)
+            run_command(['bedtools', 'merge', '-i', three_final_cov, '-d', args.merging, '>', three_merged_bed], shell=True)       
             # Create table and genbank
             if args.extension == '.fasta':
                 run_command(['python', args.path + 'create_genbank_table.py', '--five_bed', five_merged_bed, '--three_bed', three_merged_bed, '--assembly', assembly, '--type fasta', '--output', sample], shell=True)
@@ -521,8 +522,8 @@ def main():
             # high coverage regions for further analysis)
             filter_on_depth(five_cov_bed, five_final_cov, args.cutoff)
             filter_on_depth(three_cov_bed, three_final_cov, args.cutoff)
-            run_command(['bedtools', 'merge', '-i', five_final_cov, '>', five_merged_bed], shell=True)
-            run_command(['bedtools', 'merge', '-i', three_final_cov, '>', three_merged_bed], shell=True)
+            run_command(['bedtools', 'merge', '-d', args.merging, '-i', five_final_cov, '>', five_merged_bed], shell=True)
+            run_command(['bedtools', 'merge', '-d', args.merging, '-i', three_final_cov, '>', three_merged_bed], shell=True)
             # Find intersects and closest points of regions
             run_command(['bedtools', 'intersect', '-a', five_merged_bed, '-b', three_merged_bed, '-wo', '>', bed_intersect], shell=True)
             run_command(['closestBed', '-a', five_merged_bed, '-b', three_merged_bed, '-d', '>', bed_closest], shell=True)
