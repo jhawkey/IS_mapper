@@ -1,6 +1,7 @@
 # ISMapper
 
 This program takes paired end Illumina short read sequence data, an IS query of interest and a reference genome or assembly and reports the locations of the IS query in the reference genome or the assembly.
+For a more in depth description of how the program works, see 'Method' below.
 
 ## Dependencies
 * Python v2.7.5
@@ -31,6 +32,22 @@ ismap --version
 compiled_table.py -h
 ```
 
+## Method
+
+ISMapper finds locations of an IS query in short read data using a series of mapping steps.
+
+First, all reads for an isolate are mapped to the IS query using BWA. The reads we are interested in are the ones whose pairs have mapped, but are unmapped themselves (so therefore must be flanking the IS query). These reads are selected using SamTools.
+
+These unmapped pairs are selected and placed into two groups - left end (flanking the left end of the IS query) and right end (flanking the right end of the IS query).
+Each of these groups are indpendently mapped (with BWA) to either a) the reference genome, which may or may not have a particular IS query location present or b) an assembly of the isolate in question.
+From this mapping, Bedtools is used to find the depth at each position in the reference genome. We are looking for large peaks of left end and right end reads that indicate a possibly IS query location. Positions where the depth falls below 6 are eliminated from further analysis, as these may be incorrect alignments. (This threshold can be changed using the --cutoff flag, see 'Advanced options for ismap'.)
+
+Overlapping or close regions are merged using the Bedtools merge function to prevent multiple hits representing the same region in the final output file. (These defaults can be changed, see 'Advanced options for ismap'.)
+
+Once peaks have been selected, Bedtools is used to find regions which intersect (indicating a new position that is not present in the reference) and which regions are closest (indicating a position that is probably known in the reference).
+
+These positions are then further analysed and tabulated into the _table.txt file if they are considered to be accurate. Any hits which do not make it into the _table.txt file are moved to _removedHits.txt, showing their position and which bed file they come from (intersect or closest) so they can be investigated further if required.
+
 ## Usage
 
 There are two possible options for running ISMapper, depending on what reference genome you would like to compare to. The typing option looks for your IS query locations in your short read data, and compares these locations to a reference genome (which may or may not have that particular location in it).
@@ -52,11 +69,36 @@ ismap --reads [isolateA_1.fastq.gz] [isolateA_2.fastq.gz] [isolateB_1.fastq.gz] 
 ```
 
 Once ISMapper has finished running, for each isolate there will be multiple output files, the most interesting of which is the *_table.txt file, showing each location in the reference genome where there is a copy of your IS query in your isolate.
-These files can be compiled together to generate one large table showing all possible IS query locations in all isolates as well as the reference genome by using the compiled_table script.
+
+Output files:
+The final _table.txt file contains the following columns:
+region - region name
+orientation - directon of IS in this location (F = forward, R = reverse)
+x - left most position in the genome where the IS is located (does not indicate orientation)
+y - right most position in the genome where the IS is located (does not indicate orientation)
+gap - distance between x and y (small gaps usually indicate the overlap of the left and right ends and usually represent the DR the IS makes when it inserts)
+call - either Known (in the reference) or Novel (not in the reference) or Unknown (not a known position in the reference but not novel either - warrants closer investigation)
+%ID - percent match of the sequence between x and y to the IS query if a Known position
+%Cov - percent coverage of the sequence between x and y to the IS query if a Known position
+left_gene - information about the left most feature to the IS location (default is locus_tag, gene, product for CDS features or locus_tag and product for tRNA and rRNA features)
+left_strand - directon of the left most feature to the IS location
+left_distance - distance of the IS location from the start codon of the left most feature
+right_gene - information about the right most feature to the IS location (default is locus_tag, gene, product for CDS features or locus_tag and product for tRNA and rRNA features)
+right_strand - direction of the right most feature to the IS location
+right_distance - distance of the IS location from the start codon of the right most feature 
+functional_prediction - UNDER CONSTRUCTION (will contain some functional information about this IS location and its context)
+
+
+The individual _table.txt files for each isolate can be compiled together to generate one large table showing all possible IS query locations in all isolates as well as the reference genome by using the compiled_table script.
 
 ```
 compiled_table.py --tables *_table.txt --reference_gbk reference_genome.gbk --seq IS_query.fasta --output compiled_table_out.txt
 ```
+
+This final compiled table has a list of isolates compiled together in the first column, with a header showing the different IS locations.
+The top row will always be the reference genome (the same one used in the original analysis).
+A - sign indicates that this particular position is not present in the isolate, while a + sign indicates that it is.
+The final 6 rows show you the locus tag for the left most feature to this IS location, the distance from the start codon of this feature and the product that it encodes, and then the same for the right most feature for this IS location.
 
 ### Improvement
 
