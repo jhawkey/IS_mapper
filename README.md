@@ -71,22 +71,22 @@ ismap --reads [isolateA_1.fastq.gz] [isolateA_2.fastq.gz] [isolateB_1.fastq.gz] 
 Once ISMapper has finished running, for each isolate there will be multiple output files, the most interesting of which is the *_table.txt file, showing each location in the reference genome where there is a copy of your IS query in your isolate.
 
 Output files:
-The final _table.txt file contains the following columns:
-region - region name
-orientation - directon of IS in this location (F = forward, R = reverse)
-x - left most position in the genome where the IS is located (does not indicate orientation)
-y - right most position in the genome where the IS is located (does not indicate orientation)
-gap - distance between x and y (small gaps usually indicate the overlap of the left and right ends and usually represent the DR the IS makes when it inserts)
-call - either Known (in the reference) or Novel (not in the reference) or Unknown (not a known position in the reference but not novel either - warrants closer investigation)
-%ID - percent match of the sequence between x and y to the IS query if a Known position
-%Cov - percent coverage of the sequence between x and y to the IS query if a Known position
-left_gene - information about the left most feature to the IS location (default is locus_tag, gene, product for CDS features or locus_tag and product for tRNA and rRNA features)
-left_strand - directon of the left most feature to the IS location
-left_distance - distance of the IS location from the start codon of the left most feature
-right_gene - information about the right most feature to the IS location (default is locus_tag, gene, product for CDS features or locus_tag and product for tRNA and rRNA features)
-right_strand - direction of the right most feature to the IS location
-right_distance - distance of the IS location from the start codon of the right most feature 
-functional_prediction - UNDER CONSTRUCTION (will contain some functional information about this IS location and its context)
+The final _table.txt file contains the following columns:  
+region - region name  
+orientation - directon of IS in this location (F = forward, R = reverse)  
+x - left most position in the genome where the IS is located (does not indicate orientation)  
+y - right most position in the genome where the IS is located (does not indicate orientation)  
+gap - distance between x and y (small gaps usually indicate the overlap of the left and right ends and usually represent the DR the IS makes when it inserts)  
+call - either Known (in the reference) or Novel (not in the reference) or Unknown (not a known position in the reference but not novel either - warrants closer investigation)  
+%ID - percent match of the sequence between x and y to the IS query if a Known position  
+%Cov - percent coverage of the sequence between x and y to the IS query if a Known position  
+left_gene - information about the left most feature to the IS location (default is locus_tag, gene, product for CDS features or locus_tag and product for tRNA and rRNA features)  
+left_strand - directon of the left most feature to the IS location  
+left_distance - distance of the IS location from the start codon of the left most feature  
+right_gene - information about the right most feature to the IS location (default is locus_tag, gene, product for CDS features or locus_tag and product for tRNA and rRNA features)  
+right_strand - direction of the right most feature to the IS location  
+right_distance - distance of the IS location from the start codon of the right most feature   
+functional_prediction - UNDER CONSTRUCTION (will contain some functional information about this IS location and its context)  
 
 
 The individual _table.txt files for each isolate can be compiled together to generate one large table showing all possible IS query locations in all isolates as well as the reference genome by using the compiled_table script.
