@@ -54,7 +54,8 @@ def check_seq_between(gb, insertion, start, end, name, temp):
         for line in summary:
             if first_result == 0:
                 info = line.strip().split('\t')
-                coverage = info[-1]
+                coverage = float(info[4]) / float(info[5]) * 100
+                #coverage = info[-1]
                 hit = [info[3], coverage]
                 first_result += 1
             #os.system('rm ' + name + '.fasta ' + name + '_out.txt')
@@ -213,13 +214,13 @@ def main():
                     gene_left = get_other_gene(args.reference_genbank, min(start, end), "left", args.cds, args.trna, args.rrna)
                     gene_right = get_other_gene(args.reference_genbank, max(start, end), "right", args.cds, args.trna, args.rrna)
                     #gene_left, gene_right = get_flanking_genes(args.reference_genbank, start, end, args.cds, args.trna, args.rrna)
-                    results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Known', str(seq_results[0]), str(seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1]]
+                    results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Known', str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1]]
                 else:
                    #then I'm not sure what this is
                    print 'not sure'
                    gene_left, gene_right = get_flanking_genes(args.reference_genbank, start, end, args.cds, args.trna, args.rrna)
                    if len(seq_results) !=0:
-                       results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Unknown', str(seq_results[0]), str(seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1]]
+                       results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Unknown', str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1]]
                    else:
                        results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Unknown', 'no hit', 'no hit', gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1]]
                 region += 1
