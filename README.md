@@ -129,6 +129,8 @@ Once ISMapper has finished running, multiple output files will be generated, the
 
 `--cutoff` is used to determine the read depth at a position that will be called as a 'true' peak, and thus make it to the next round of analysis. Default is currently 6 - if you're having issues detecting locations that you feel like should be there, lowering this cutoff may assist in finding them.
 
+`--merging` is the distance between two blocks that will be merged by Bedtools. The default is 100. This setting helps remove duplicate peaks in the same region that are not overlapping, but still belong to the same IS query location/
+
 `--a` and `--T` are flags that are passed to BWA. --a will turn on all alignment reporting in BWA, and --T is used to give an integer mapping score to BWA to determine what alignments are kept. These options may be useful in finding IS query positions that are next to repeated elements as BWA will report all hits for the read not just the best random hit. However, using these options may cause noise and confusion in the final output files.
 
 `--cds`, `--trna` and `--rrna` are used to specify what qualifiers will be looked for in the reference genbank when determining genes flanking the IS query location. Defaults are locus_tag and product.
