@@ -3,6 +3,8 @@
 This program takes paired end Illumina short read sequence data, an IS query of interest and a reference genome or assembly and reports the locations of the IS query in the reference genome or the assembly.
 For a more in depth description of how the program works, see 'Method' below.
 
+For support, add an issue to GitHubs issue tracker, or you can email the author at hawkey dot jane at gmail dot com.
+
 ## Dependencies
 * Python v2.7.5
 * BioPython v1.63 - http://biopython.org/wiki/Main_Page
