@@ -28,7 +28,10 @@ def create_feature(hit, end):
     stop = int(hit[2])
     quals = {}
 
+    print start
+    print stop
     location = SeqFeature.FeatureLocation(start, stop)
+    print location
     if end == 'five':
         quals['colour'] = '2'
         quals['end'] = 'left_end'
@@ -87,14 +90,15 @@ def main():
     # intialise number of features added
     feature_count = 0
     # go through each record and see if there is a five or three end hit
+    print record_list
     for record in record_list:
-        if record.id in results:
-            for hit in results[record.id]:
+        if record.name in results:
+            for hit in results[record.name]:
                 # then we need to annotate this hit
-                new_feature = create_feature(results[record.id][hit], results[record.id][hit][0])
+                new_feature = create_feature(results[record.name][hit], results[record.name][hit][0])
                 record.features.append(new_feature)
                 feature_count += 1
-                output.write(record.id + '\t' + '\t'.join(results[record.id][hit]) + '\n')
+                output.write(record.name + '\t' + '\t'.join(results[record.name][hit]) + '\n')
             new_record_list.append(record)
         else:
             new_record_list.append(record)
