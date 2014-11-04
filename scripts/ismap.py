@@ -452,8 +452,8 @@ def main():
             # Map ends back to contigs
             bwa_index(assembly)
             if args.a == True:
-                run_command(['bwa', 'mem', 'a', '-T', args.T, assembly, five_reads, '>', five_to_ref_sam], shell=True)
-                run_command(['bwa', 'mem', 'a', '-T', args.T, assembly, three_reads, '>', three_to_ref_sam], shell=True)
+                run_command(['bwa', 'mem', '-a', '-T', args.T, assembly, five_reads, '>', five_to_ref_sam], shell=True)
+                run_command(['bwa', 'mem', '-a', '-T', args.T, assembly, three_reads, '>', three_to_ref_sam], shell=True)
             else:
                 run_command(['bwa', 'mem', assembly, five_reads, '>', five_to_ref_sam], shell=True)
                 run_command(['bwa', 'mem', assembly, three_reads, '>', three_to_ref_sam], shell=True)
