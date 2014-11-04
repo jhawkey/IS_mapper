@@ -47,7 +47,7 @@ def parse_args():
     parser.add_argument('--extension', type=str, required=False, help='Extension for assemblies (.fasta or .gbk, default is .fasta)', default='.fasta')
     parser.add_argument('--typingRef', type=str, required=False, help='Reference genome for typing against in genbank format')
     parser.add_argument('--type', type=str, required=False, default='fasta', help='Indicator for contig assembly type, genbank or fasta (default fasta)')
-    parser.add_argument('--path', type=str, required=True, default='', help='Path to folder where scripts are.')
+    parser.add_argument('--path', type=str, required=False, default='', help='Path to folder where scripts are (only required for development).')
     # Cutoffs for annotation
     parser.add_argument('--cutoff', type=int, required=False, default=6, help='Minimum depth for mapped region to be kept in bed file (default 6)')
     parser.add_argument('--percentid', type=float, required=False, default=90.0, help='Minimum percent ID for hit to be annotated (default 90.0')
