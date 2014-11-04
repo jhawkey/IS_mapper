@@ -92,6 +92,7 @@ def main():
     # intialise number of features added
     feature_count = 0
     # go through each record and see if there is a five or three end hit
+    print record_list
     for record in record_list:
         if record.id in results:
             for hit in results[record.id]:
