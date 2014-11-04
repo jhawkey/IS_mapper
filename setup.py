@@ -8,7 +8,7 @@ setup(
     author='Jane Hawkey',
     author_email='hawkey.jane@gmail.com',
     packages=['ismap'],
-    scripts=['scripts/binaryTable.py', 'scripts/compiled_table.py', 'scripts/create_genbank_table.py',
+    scripts=['scripts/binary_table.py', 'scripts/compiled_table.py', 'scripts/create_genbank_table.py',
             'scripts/slurm_ismap.py', 'scripts/create_typing_out.py'],
     entry_points={
         'console_scripts': ['ismap = ismap.ismap:main']
