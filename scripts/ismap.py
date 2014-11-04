@@ -347,7 +347,7 @@ def main():
 
     args = parse_args()
 
-    if args.path[-1] != "/":
+    if args.path != '' and args.path[-1] != '/':
         args.path = args.path + "/"
     # Set up logfile
     if args.log is True:
