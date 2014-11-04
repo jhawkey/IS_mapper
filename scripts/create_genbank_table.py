@@ -28,7 +28,10 @@ def create_feature(hit, end):
     stop = int(hit[2])
     quals = {}
 
+    print start
+    print stop
     location = SeqFeature.FeatureLocation(start, stop)
+    print location
     if end == 'five':
         quals['colour'] = '2'
         quals['end'] = 'left_end'
@@ -37,6 +40,8 @@ def create_feature(hit, end):
         quals['colour'] = '7'
         quals['end'] = 'right end'
         feat_type = 'right_end'
+
+    print feature
 
     feature = SeqFeature.SeqFeature(location, type=feat_type, qualifiers=quals)
     
