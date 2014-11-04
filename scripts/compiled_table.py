@@ -12,7 +12,6 @@ from Bio.Blast.Applications import NcbiblastnCommandline
 from operator import itemgetter
 import os, sys, re, collections, operator
 from collections import OrderedDict
-from ismap import gbk_to_fasta
 
 def parse_args():
 
@@ -27,6 +26,11 @@ def parse_args():
     parser.add_argument('--output', type=str, required=True, help='name of output file')
 
     return parser.parse_args()
+
+def gbk_to_fasta(genbank, fasta):
+
+    sequences = SeqIO.parse(genbank, "genbank")
+    SeqIO.write(sequences, fasta, "fasta")
 
 def check_ranges(ranges, range_to_check, gap, orientation):
 
