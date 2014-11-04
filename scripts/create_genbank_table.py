@@ -41,8 +41,6 @@ def create_feature(hit, end):
         quals['end'] = 'right end'
         feat_type = 'right_end'
 
-    print feature
-
     feature = SeqFeature.SeqFeature(location, type=feat_type, qualifiers=quals)
     
     return feature
