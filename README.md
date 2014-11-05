@@ -111,11 +111,12 @@ Input files:
 
 Basic usage:
 
-When supplying assemblies for each isolate, it is vital that they all share the same file name structure, with only the isolate name differentiating them.
-Eg:
+When supplying assemblies for each isolate, it is vital that they all share the same file name structure, with only the isolate name differentiating them.  
+
+Eg:  
 isolateA_assembly.fasta matches to isolateA_1.fastq.gz and isolateA_2.fastq.gz  
 isolateB_assembly.fasta matches to isolateB_1.fastq.gz and isolateB_2.fastq.gz  
-NOT
+NOT  
 isolateA_assembly.fasta matches to isolateA_1.fastq.gz and isolateA_2.fastq.gz  
 isoalteB_contigs.fasta matches to isolateB_1.fastq.gz and isolateB_2.fastq.gz  
 
