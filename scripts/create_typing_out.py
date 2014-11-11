@@ -98,7 +98,7 @@ def main():
     lines = 0
     header = ["region", "orientation", "x", "y", "gap", "call", "%ID", "%Cov", "left_gene", "left_strand", "left_distance", "right_gene", "right_strand", "right_distance", "functional_prediction"]
     if os.stat(args.intersect_bed)[6] == 0 and os.stat(args.closest_bed)[6] == 0:
-        output = open(args.output, 'w')
+        output = open(args.output + '_table.txt', 'w')
         output.write('\t'.join(header) + '\n')
         output.write('No hits found')
         output.close()
