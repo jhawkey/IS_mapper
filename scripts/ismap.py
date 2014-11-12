@@ -45,7 +45,7 @@ def parse_args():
     parser.add_argument('--reads', nargs='+', type=str, required=False, help='Paired end reads for analysing (can be gzipped)')
     parser.add_argument('--forward', type=str, required=False, default='_1', help='Identifier for forward reads if not in MiSeq format (default _1)')
     parser.add_argument('--reverse', type=str, required=False, default='_2', help='Identifier for reverse reads if not in MiSeq format (default _2)')
-    parser.add_argument('--queries', nargs='+' type=str, required=True, help='Fasta files for query genes (eg: insertion sequence) that will be mapped to')
+    parser.add_argument('--queries', nargs='+', type=str, required=True, help='Fasta files for query genes (eg: insertion sequence) that will be mapped to')
     parser.add_argument('--assemblies', nargs='+', type=str, required=False, help='Contig assemblies, one for each read set')
     parser.add_argument('--assemblyid', type=str, required=False, help='Identifier for assemblies eg: sampleName_contigs (specify _contigs) or sampleName_assembly (specify _assembly). Do not specify extension.')
     parser.add_argument('--extension', type=str, required=False, help='Extension for assemblies (eg: .fasta, .fa, .gbk, default is .fasta)', default='.fasta')
@@ -379,8 +379,6 @@ def main():
     # Gather together the reads in pairs with their corresponding
     # assemblies (if required)
     fileSets = read_file_sets(args)
-    # Index the IS query for BWA
-    bwa_index(args.query)
     # Start analysing each read set specified
     for sample in fileSets:
         forward_read = fileSets[sample][0]
@@ -393,6 +391,8 @@ def main():
         # Cycle through each query on its own before moving onto the next one
         for query in args.queries:
 
+            # Index the IS query for BWA
+            bwa_index(query)
             # Get query name
             query_name = os.path.split(query)[1].split('.f')[0]
 
@@ -417,7 +417,7 @@ def main():
             run_command(['bedtools', 'bamtofastq', '-i', five_bam, '-fq', five_reads], shell=True)
             run_command(['bedtools', 'bamtofastq', '-i', three_bam, '-fq', three_reads], shell=True)
             # Create BLAST database for IS query
-            check_blast_database(args.query)
+            check_blast_database(query)
             if os.stat(five_reads)[6] == 0 or os.stat(three_reads)[6] == 0:
                 logging.info('One or both read files are empty. This is probably due to no copies of the IS of interest being present in this sample. Program quitting.')
                 with open(no_hits_table, 'w') as f:
@@ -538,7 +538,7 @@ def main():
                 run_command(['bedtools', 'intersect', '-a', five_merged_bed, '-b', three_merged_bed, '-wo', '>', bed_intersect], shell=True)
                 run_command(['closestBed', '-a', five_merged_bed, '-b', three_merged_bed, '-d', '>', bed_closest], shell=True)
                 # Create table and annotate genbank with hits
-                run_command([args.path + 'create_typing_out.py', '--intersect_bed', bed_intersect, '--closest_bed', bed_closest, '--insertion_seq', args.query, '--reference_genbank', args.typingRef, '--temp_folder', temp_folder, '--cds', args.cds, '--trna', args.trna, '--rrna', args.rrna, '--output', sample + '_' + query_name], shell=True)
+                run_command([args.path + 'create_typing_out.py', '--intersect_bed', bed_intersect, '--closest_bed', bed_closest, '--insertion_seq', query, '--reference_genbank', args.typingRef, '--temp_folder', temp_folder, '--cds', args.cds, '--trna', args.trna, '--rrna', args.rrna, '--output', sample + '_' + query_name], shell=True)
 
         # remove temp folder if required
         if args.temp == False:
