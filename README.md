@@ -59,7 +59,7 @@ Alternately, ISMapper can also be used for assembly improvement if the improveme
 
 Input files:
 * short read data in fastq format (can be gzipped)
-* IS query of interest in fasta format
+* IS query/queries of interest in fasta format
 * reference genome to compare to in genbank format
 
 Basic usage for ISMapper:
@@ -106,7 +106,7 @@ The final 6 rows show you the locus tag for the left most feature to this IS loc
 
 Input files:
 * short read sequence data in fastq format (can be gzipped)
-* IS query of interest in fasta format
+* IS query/queries of interest in fasta format
 * assemblies for each of your isolates, either in fasta or genbank format
 
 Basic usage:
@@ -121,7 +121,7 @@ isolateA_assembly.fasta matches to isolateA_1.fastq.gz and isolateA_2.fastq.gz
 isoalteB_contigs.fasta matches to isolateB_1.fastq.gz and isolateB_2.fastq.gz  
 
 ```
-ismap --reads [isolateA_1.fastq.gz] [isolateA_2.fastq.gz] [isolateB_1.fastq.gz] [isolateB_2.fastq.gz] --query IS_query.fasta --assemblies [isolateA_assembly.fasta] [isolateB_assembly.fasta] --assemblyid _assembly --extension .fasta --type fasta --runtype improvement --output prefix_out
+ismap --reads [isolateA_1.fastq.gz] [isolateA_2.fastq.gz] [isolateB_1.fastq.gz] [isolateB_2.fastq.gz] --query IS_query1.fasta IS_query2.fasta --assemblies [isolateA_assembly.fasta] [isolateB_assembly.fasta] --assemblyid _assembly --extension .fasta --type fasta --runtype improvement --output prefix_out
 ```
 
 Once ISMapper has finished running, multiple output files will be generated, the most interesting of which will be the *_table.txt file. The table file contains the names of contigs that have either a left or a right end in them.
@@ -169,7 +169,7 @@ optional arguments:
   --memory MEMORY       Amount of memory (in MB). Default is 16gb
   --rundir RUNDIR       Directory to run in. Default is current directory
   --script SCRIPT       Location of ISMapper script, ismap.py
-  --query QUERY         Path to IS query.
+  --queries QUERIES         Path to IS queries.
   --reads READS [READS ...]
                         Paired end read files in fastq.gz format
   --forward FORWARD     Identifier for forward reads if not in MiSeq format
