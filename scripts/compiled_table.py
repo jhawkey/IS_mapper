@@ -264,7 +264,7 @@ def main():
     list_of_ref_positions, ref_position_orientation, ref_name = get_ref_positions(reference_fasta, args.seq, list_of_ref_positions, position_orientation)
 
     for result_file in unique_results_files:
-        isolate = result_file.split('__')[0]
+        isolate = result_file.split('_table.txt')[0]
         list_of_isolates.append(isolate)
         header = 0
         with open(result_file) as file_open:
