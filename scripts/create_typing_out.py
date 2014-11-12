@@ -21,9 +21,9 @@ def parse_args():
     parser.add_argument('--closest_bed', type=str, required=True, help='closestBed bed file')
     parser.add_argument('--reference_genbank', type=str, required=True, help='reference genbank file to find flanking genes of regions')
     parser.add_argument('--insertion_seq', type=str, required=True, help='insertion sequence reference in fasta format')
-    parser.add_argument('--cds', nargs='+', type=str, required=False, default='locus_tag gene product', help='qualifiers to look for in reference genbank for CDS features')
-    parser.add_argument('--trna', nargs='+', type=str, required=False, default='locus_tag product', help='qualifiers to look for in reference genbank for tRNA features')
-    parser.add_argument('--rrna', nargs='+', type=str, required=False, default='locus_tag product', help='qualifiers to look for in reference genbank for rRNA features')
+    parser.add_argument('--cds', nargs='+', type=str, required=False, default=['locus_tag', 'gene', 'product'], help='qualifiers to look for in reference genbank for CDS features (default locus_tag gene product)')
+    parser.add_argument('--trna', nargs='+', type=str, required=False, default=['locus_tag', 'product'], help='qualifiers to look for in reference genbank for tRNA features (default locus_tag product)')
+    parser.add_argument('--rrna', nargs='+', type=str, required=False, default=['locus_tag', 'product'], help='qualifiers to look for in reference genbank for rRNA features (default locus_tag product)')
     parser.add_argument('--temp_folder', type=str, required=True, help='location of temp folder to place intermediate blast files in')
     parser.add_argument('--output', type=str, required=True, help='name for output file')
     return parser.parse_args()
@@ -98,7 +98,7 @@ def main():
     lines = 0
     header = ["region", "orientation", "x", "y", "gap", "call", "%ID", "%Cov", "left_gene", "left_strand", "left_distance", "right_gene", "right_strand", "right_distance", "functional_prediction"]
     if os.stat(args.intersect_bed)[6] == 0 and os.stat(args.closest_bed)[6] == 0:
-        output = open(args.output, 'w')
+        output = open(args.output + '_table.txt', 'w')
         output.write('\t'.join(header) + '\n')
         output.write('No hits found')
         output.close()

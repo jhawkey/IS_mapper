@@ -111,13 +111,14 @@ Input files:
 
 Basic usage:
 
-When supplying assemblies for each isolate, it is vital that they all share the same file name structure, with only the isolate name differentiating them.
-Eg:
-isolateA_assembly.fasta matches to isolateA_1.fastq.gz and isolateA_2.fastq.gz
-isolateB_assembly.fasta matches to isolateB_1.fastq.gz and isolateB_2.fastq.gz
-NOT
-isolateA_assembly.fasta matches to isolateA_1.fastq.gz and isolateA_2.fastq.gz
-isoalteB_contigs.fasta matches to isolateB_1.fastq.gz and isolateB_2.fastq.gz
+When supplying assemblies for each isolate, it is vital that they all share the same file name structure, with only the isolate name differentiating them.  
+
+Eg:  
+isolateA_assembly.fasta matches to isolateA_1.fastq.gz and isolateA_2.fastq.gz  
+isolateB_assembly.fasta matches to isolateB_1.fastq.gz and isolateB_2.fastq.gz  
+NOT  
+isolateA_assembly.fasta matches to isolateA_1.fastq.gz and isolateA_2.fastq.gz  
+isoalteB_contigs.fasta matches to isolateB_1.fastq.gz and isolateB_2.fastq.gz  
 
 ```
 ismap --reads [isolateA_1.fastq.gz] [isolateA_2.fastq.gz] [isolateB_1.fastq.gz] [isolateB_2.fastq.gz] --query IS_query.fasta --assemblies [isolateA_assembly.fasta] [isolateB_assembly.fasta] --assemblyid _assembly --extension .fasta --type fasta --runtype improvement --output prefix_out

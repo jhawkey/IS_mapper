@@ -28,10 +28,10 @@ def create_feature(hit, end):
     stop = int(hit[2])
     quals = {}
 
-    print start
-    print stop
+    #print start
+    #print stop
     location = SeqFeature.FeatureLocation(start, stop)
-    print location
+    #print location
     if end == 'five':
         quals['colour'] = '2'
         quals['end'] = 'left_end'
@@ -71,7 +71,7 @@ def main():
                 info = line.strip().split('\t')
                 results[info[0]]['hit_' + str(hit_no)] = ['three', info[1], info[2]]
                 hit_no += 1
-    print results
+    #print results
     # open up table for writing output into
     output = open(args.output + '_table.txt', 'w')
     output.write('\t'.join(header) + '\n')
@@ -90,7 +90,7 @@ def main():
     # intialise number of features added
     feature_count = 0
     # go through each record and see if there is a five or three end hit
-    print record_list
+    #print record_list
     for record in record_list:
         if record.name in results:
             for hit in results[record.name]:
