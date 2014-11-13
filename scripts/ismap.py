@@ -432,7 +432,7 @@ def main():
                     else:
                         header = ['contig', 'end', 'x', 'y']
                         f.write('\t'.join(header) + '\nNo hits found')
-                sys.exit()
+                continue
 
             if args.runtype == "improvement":
 
