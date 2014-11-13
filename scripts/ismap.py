@@ -545,9 +545,9 @@ def main():
                 # Create table and annotate genbank with hits
                 run_command([args.path + 'create_typing_out.py', '--intersect_bed', bed_intersect, '--closest_bed', bed_closest, '--insertion_seq', query, '--reference_genbank', args.typingRef, '--temp_folder', temp_folder, '--cds', args.cds, '--trna', args.trna, '--rrna', args.rrna, '--output', sample + '_' + query_name], shell=True)
 
-        # remove temp folder if required
-        if args.temp == False:
-            run_command(['rm', '-rf', temp_folder], shell=True)
+            # remove temp folder if required
+            if args.temp == False:
+                run_command(['rm', '-rf', temp_folder], shell=True)
 
 if __name__ == '__main__':
     main()
