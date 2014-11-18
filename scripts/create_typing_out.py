@@ -17,18 +17,20 @@ from compiled_table import get_flanking_genes, get_other_gene, get_qualifiers
 def parse_args():
 
     parser = ArgumentParser(description="create a table of features for ISMapper")
-    parser.add_argument('--intersect_bed', type=str, required=True, help='intersection bed file')
-    parser.add_argument('--closest_bed', type=str, required=True, help='closestBed bed file')
+    parser.add_argument('--intersect', type=str, required=True, help='intersection bed file')
+    parser.add_argument('--closest', type=str, required=True, help='closest bed file')
     parser.add_argument('--left_bed', type=str, required=True, help='merged bed file for left end (5)')
     parser.add_argument('--right_bed', type=str, required=True, help='merged bed file for right end (3)')
-    parser.add_argument('--reference_genbank', type=str, required=True, help='reference genbank file to find flanking genes of regions')
-    parser.add_argument('--insertion_seq', type=str, required=True, help='insertion sequence reference in fasta format')
+    parser.add_argument('--left_unpaired', type=str, required=True, help='closest bed file where left end is full coverage')
+    parser.add_argument('--right_unpaired', type=str, required=True, help='closest bed file where right end is full coverage')
+    parser.add_argument('--ref', type=str, required=True, help='reference genbank file to find flanking genes of regions')
+    parser.add_argument('--seq', type=str, required=True, help='insertion sequence reference in fasta format')
     parser.add_argument('--cds', nargs='+', type=str, required=False, default=['locus_tag', 'gene', 'product'], help='qualifiers to look for in reference genbank for CDS features (default locus_tag gene product)')
     parser.add_argument('--trna', nargs='+', type=str, required=False, default=['locus_tag', 'product'], help='qualifiers to look for in reference genbank for tRNA features (default locus_tag product)')
     parser.add_argument('--rrna', nargs='+', type=str, required=False, default=['locus_tag', 'product'], help='qualifiers to look for in reference genbank for rRNA features (default locus_tag product)')
     parser.add_argument('--min_range', type=float, required=False, default=0.5, help='Minimum percent size of the gap to be called a known hit (default 0.5, or 50 percent)')
     parser.add_argument('--max_range', type=float, required=False, default=1.5, help='Maximum percent size of the gap to be called a known hit (default 1.5, or 150 percent)')
-    parser.add_argument('--temp_folder', type=str, required=True, help='location of temp folder to place intermediate blast files in')
+    parser.add_argument('--temp', type=str, required=True, help='location of temp folder to place intermediate blast files in')
     parser.add_argument('--output', type=str, required=True, help='name for output file')
     return parser.parse_args()
 
@@ -49,6 +51,8 @@ def check_seq_between(gb, insertion, start, end, name, temp):
     genbank = SeqIO.read(gb, 'genbank')
     seq_between = genbank.seq[start:end]
     seq_between = SeqRecord(Seq(str(seq_between), generic_dna), id=name)
+    print start
+    print end
     print name
     print len(seq_between)
     SeqIO.write(seq_between, temp + name + '.fasta', 'fasta')
@@ -101,24 +105,27 @@ def main():
     region = 1
     lines = 0
     header = ["region", "orientation", "x", "y", "gap", "call", "%ID", "%Cov", "left_gene", "left_strand", "left_distance", "right_gene", "right_strand", "right_distance", "functional_prediction"]
-    if os.stat(args.intersect_bed)[6] == 0 and os.stat(args.closest_bed)[6] == 0:
+    if os.stat(args.intersect)[6] == 0 and os.stat(args.closest)[6] == 0:
         output = open(args.output + '_table.txt', 'w')
         output.write('\t'.join(header) + '\n')
         output.write('No hits found')
         output.close()
         sys.exit()
 
-    genbank = SeqIO.read(args.reference_genbank, 'genbank')
+    genbank = SeqIO.read(args.ref, 'genbank')
     feature_count = 0
 
-    intersect_bed_lines = []
-    closest_bed_lines = []
+    intersect_left = []
+    intersect_right = []
+    closest_left = []
+    closest_right = []
 
-    if os.stat(args.intersect_bed)[6] != 0:
-        with open(args.intersect_bed) as bed_merged:
+    if os.stat(args.intersect)[6] != 0:
+        with open(args.intersect) as bed_merged:
             for line in bed_merged:
-                intersect_bed_lines.append(line)
                 info = line.strip().split('\t')
+                intersect_left.append(info[0:3])
+                intersect_right.append(info[3:6])
                 
                 #set up coordinates for checking: L is the left end of the IS (5') and R is the right end of the IS (3')
                 #eg x_L and y_L are the x and y coordinates of the bed block that matches to the region which is flanking the left end or 5' of the IS
@@ -145,7 +152,7 @@ def main():
                     genbank.features.append(right_feature)
                     feature_count += 2
 
-                    gene_left, gene_right = get_flanking_genes(args.reference_genbank, x, y, args.cds, args.trna, args.rrna)
+                    gene_left, gene_right = get_flanking_genes(args.ref, x, y, args.cds, args.trna, args.rrna)
                     if gene_left[1] == gene_right[1]:
                         funct_pred = 'Gene interrupted'
                     else:
@@ -156,11 +163,12 @@ def main():
                     removed_results['region_' + str(lines)] = line.strip() + '\tintersect.bed\n'
                 lines += 1
     
-    is_length = insertion_length(args.insertion_seq)
-    with open(args.closest_bed) as bed_closest:
+    is_length = insertion_length(args.seq)
+    with open(args.closest) as bed_closest:
         for line in bed_closest:
-            closest_bed_lines.append(line)
             info = line.strip().split('\t')
+            closest_left.append(info[0:3])
+            closest_right.append(info[3:6])
             
             # then there are no closest regions, this is a dud file
             if info[3] == '-1':
@@ -193,7 +201,7 @@ def main():
                 genbank.features.append(right_feature)
                 feature_count += 2
                 
-                gene_left, gene_right = get_flanking_genes(args.reference_genbank, x, y, args.cds, args.trna, args.rrna)
+                gene_left, gene_right = get_flanking_genes(args.ref, x, y, args.cds, args.trna, args.rrna)
                 if gene_left[:-1] == gene_right[:-1]:
                     funct_pred = 'Gene interrupted'
                 else:
@@ -202,28 +210,36 @@ def main():
                 region += 1
             #this is probably a known hit, but need to check with BLAST
             elif float(info[6]) / is_length >= args.min_range and float(info[6]) / is_length <= args.max_range:
+
+                if y_L < x_R:
+                    start = y_L
+                    end = x_R
+                    orient = 'F'
+                else:
+                    start = y_R
+                    end = x_L
+                    orient = 'R'
                 
                 left_feature, right_feature = createFeature([x_L, y_L, x_R, y_R], orient)
                 genbank.features.append(left_feature)
                 genbank.features.append(right_feature)
                 feature_count += 2
 
-                seq_results = check_seq_between(args.reference_genbank, args.insertion_seq, start, end, 'region_' + str(region), args.temp_folder)
+                seq_results = check_seq_between(args.ref, args.seq, start, end, 'region_' + str(region), args.temp)
                 if len(seq_results) != 0 and seq_results[0] >= 80 and seq_results[1] >= 80:
                     #then this is definitely a known site
-                    gene_left = get_other_gene(args.reference_genbank, min(start, end), "left", args.cds, args.trna, args.rrna)
-                    gene_right = get_other_gene(args.reference_genbank, max(start, end), "right", args.cds, args.trna, args.rrna)
-                    #gene_left, gene_right = get_flanking_genes(args.reference_genbank, start, end, args.cds, args.trna, args.rrna)
+                    gene_left = get_other_gene(args.ref, min(start, end), "left", args.cds, args.trna, args.rrna)
+                    gene_right = get_other_gene(args.ref, max(start, end), "right", args.cds, args.trna, args.rrna)
                     results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Known', str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1]]
                 else:
                    #then I'm not sure what this is
                    print 'not sure'
-                   gene_left, gene_right = get_flanking_genes(args.reference_genbank, start, end, args.cds, args.trna, args.rrna)
+                   gene_left, gene_right = get_flanking_genes(args.ref, start, end, args.cds, args.trna, args.rrna)
                    if len(seq_results) !=0:
                        results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Possible related IS', str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1]]
                    else:
                         removed_results['region_' + str(region)] = line.strip() + '\tclosest.bed\n'                
-                        region += 1
+                region += 1
             #could possibly be a novel hit but the gap size is too large
             elif float(info[6]) / is_length <= args.min_range and float(info[6]) / is_length < args.max_range:
 
@@ -232,7 +248,7 @@ def main():
                 genbank.features.append(right_feature)
                 feature_count += 2
 
-                gene_left, gene_right = get_flanking_genes(args.reference_genbank, x, y, args.cds, args.trna, args.rrna)
+                gene_left, gene_right = get_flanking_genes(args.ref, x, y, args.cds, args.trna, args.rrna)
                 if gene_left[:-1] == gene_right[:-1]:
                     funct_pred = 'Gene interrupted'
                 else:
@@ -246,7 +262,17 @@ def main():
 
     #looking for unpaired hits which are not in the merged/closest bed files
     #possibly unpaired due to a repeat on one end of the IS
-
+    with open(args.left_bed) as left_bed:
+        print 'left bed file'
+        for line in left_bed:
+            if line.strip().split('\t') not in intersect_left and line.strip().split('\t') not in closest_left:
+                print line
+    with open(args.right_bed) as right_bed:
+        print 'right bed file'
+        for line in right_bed:
+            if line.strip().split('\t') not in intersect_right and line.strip().split('\t') not in closest_right:
+                line_check = line
+                print line
 
     #sort regions into the correct order
     table_keys = []
