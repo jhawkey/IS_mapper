@@ -263,16 +263,83 @@ def main():
     #looking for unpaired hits which are not in the merged/closest bed files
     #possibly unpaired due to a repeat on one end of the IS
     with open(args.left_bed) as left_bed:
+        line_check = []
         print 'left bed file'
         for line in left_bed:
             if line.strip().split('\t') not in intersect_left and line.strip().split('\t') not in closest_left:
-                print line
+                line_check.append(line.strip().split('\t'))
     with open(args.right_bed) as right_bed:
         print 'right bed file'
+        line_check = []
         for line in right_bed:
             if line.strip().split('\t') not in intersect_right and line.strip().split('\t') not in closest_right:
-                line_check = line
-                print line
+                line_check.append(line.strip().split('\t'))
+            with open(args.right_unpaired) as right_unpaired:
+                for line in right_unpaired:
+                    info = line.strip().split('\t')
+                    if line.strip().split('\t')[3:6] in line_check:
+                        x_L = int(info[1])
+                        y_L = int(info[2])
+                        x_R = int(info[4])
+                        y_R = int(info[5])
+                        if x_L < x_R and y_L < y_R:
+                            orient = 'F'
+                            x = x_R
+                            y = y_L
+                        elif x_L > x_R and y_L > y_R:
+                            orient = 'R'
+                            x = x_L
+                            y = y_R
+                        if float(info[6]) / is_length >= args.min_range and float(info[6]) / is_length <= args.max_range:
+                            if y_L < x_R:
+                                start = y_L
+                                end = x_R
+                                orient = 'F'
+                            else:
+                                start = y_R
+                                end = x_L
+                                orient = 'R'
+                            
+                            left_feature, right_feature = createFeature([x_L, y_L, x_R, y_R], orient)
+                            genbank.features.append(left_feature)
+                            genbank.features.append(right_feature)
+                            feature_count += 2
+
+                            seq_results = check_seq_between(args.ref, args.seq, start, end, 'region_' + str(region), args.temp)
+                            if len(seq_results) != 0 and seq_results[0] >= 80 and seq_results[1] >= 80:
+                                #then this is definitely a known site
+                                gene_left = get_other_gene(args.ref, min(start, end), "left", args.cds, args.trna, args.rrna)
+                                gene_right = get_other_gene(args.ref, max(start, end), "right", args.cds, args.trna, args.rrna)
+                                results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Known', str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1]]
+                            else:
+                               #then I'm not sure what this is
+                               print 'not sure'
+                               gene_left, gene_right = get_flanking_genes(args.ref, start, end, args.cds, args.trna, args.rrna)
+                               if len(seq_results) !=0:
+                                   results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Possible related IS', str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1]]
+                               else:
+                                    removed_results['region_' + str(region)] = line.strip() + '\tclosest.bed\n'                
+                            region += 1
+                        #could possibly be a novel hit but the gap size is too large
+                        elif float(info[6]) / is_length <= args.min_range and float(info[6]) / is_length < args.max_range:
+
+                            left_feature, right_feature = createFeature([x_L, y_L, x_R, y_R], orient)
+                            genbank.features.append(left_feature)
+                            genbank.features.append(right_feature)
+                            feature_count += 2
+
+                            gene_left, gene_right = get_flanking_genes(args.ref, x, y, args.cds, args.trna, args.rrna)
+                            if gene_left[:-1] == gene_right[:-1]:
+                                funct_pred = 'Gene interrupted'
+                            else:
+                                funct_pred = ''
+                            results['region_' + str(region)] = [orient, str(x), str(y), info[6], 'Novel*', '', '', gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1], funct_pred]
+                            region +=1
+                        #this is something else altogether - either the gap is really large or something, place it in removed_results
+                        else:
+                            removed_results['region_' + str(region)] = line.strip() + '\tclosest.bed\n'
+                            region += 1
+
 
     #sort regions into the correct order
     table_keys = []
