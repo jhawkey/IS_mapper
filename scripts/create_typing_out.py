@@ -24,6 +24,8 @@ def parse_args():
     parser.add_argument('--cds', nargs='+', type=str, required=False, default=['locus_tag', 'gene', 'product'], help='qualifiers to look for in reference genbank for CDS features (default locus_tag gene product)')
     parser.add_argument('--trna', nargs='+', type=str, required=False, default=['locus_tag', 'product'], help='qualifiers to look for in reference genbank for tRNA features (default locus_tag product)')
     parser.add_argument('--rrna', nargs='+', type=str, required=False, default=['locus_tag', 'product'], help='qualifiers to look for in reference genbank for rRNA features (default locus_tag product)')
+    parser.add_argument('--min_range', type=float, required=False, default=0.5, help='Minimum percent size of the gap to be called a known hit (default 0.5, or 50%)')
+    parser.add_argument('--max_range', type=float, required=False, default=1.5, help='Maximum percent size of the gap to be called a known hit (default 1.5, or 150%)')
     parser.add_argument('--temp_folder', type=str, required=True, help='location of temp folder to place intermediate blast files in')
     parser.add_argument('--output', type=str, required=True, help='name for output file')
     return parser.parse_args()
@@ -187,7 +189,7 @@ def main():
                     funct_pred = ''
                 results['region_' + str(region)] = [orient, str(x), str(y), info[6], 'Novel', '', '', gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1], funct_pred]
                 region += 1
-            elif float(info[6]) / is_length >= 0.8 and float(info[6]) / is_length <= 1.5:
+            elif float(info[6]) / is_length >= args.min_range and float(info[6]) / is_length <= args.max_range:
                 #this is probably a known hit, but need to check with BLAST
                 x_L = int(info[1])
                 y_L = int(info[2])
@@ -220,10 +222,10 @@ def main():
                    print 'not sure'
                    gene_left, gene_right = get_flanking_genes(args.reference_genbank, start, end, args.cds, args.trna, args.rrna)
                    if len(seq_results) !=0:
-                       results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Unknown', str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1]]
+                       results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Possible related IS', str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1]]
                    else:
-                       results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Unknown', 'no hit', 'no hit', gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1]]
-                region += 1
+                        removed_results['region_' + str(region)] = line.strip() + '\tclosest.bed\n'                
+                        region += 1
             else:
                 #this is something else altogether - either the gap is really large or something, place it in removed_results
                 removed_results['region_' + str(region)] = line.strip() + '\tclosest.bed\n'
