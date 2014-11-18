@@ -51,10 +51,6 @@ def check_seq_between(gb, insertion, start, end, name, temp):
     genbank = SeqIO.read(gb, 'genbank')
     seq_between = genbank.seq[start:end]
     seq_between = SeqRecord(Seq(str(seq_between), generic_dna), id=name)
-    print start
-    print end
-    print name
-    print len(seq_between)
     SeqIO.write(seq_between, temp + name + '.fasta', 'fasta')
     doBlast(temp + name + '.fasta', temp + name + '_out.txt', insertion)
     first_result = 0
