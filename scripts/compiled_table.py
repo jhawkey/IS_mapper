@@ -279,18 +279,24 @@ def main():
                     call = info[5]
                     #If the position is one that's in the reference, just do this compared to the reference to make flanking gene
                     #calls a little easier
-                    if call == 'Known':
+                    if call == 'Known' or call == 'Known?':
                         if (is_start, is_end) not in list_of_ref_positions:
                             old_range, new_range, new_orientation = check_ranges(ref_position_orientation, (is_start, is_end), 100, orientation)
                             if old_range != False:
                                 store_values = list_of_ref_positions[old_range]
                                 del list_of_ref_positions[old_range]
                                 list_of_ref_positions[new_range] = store_values
-                                list_of_ref_positions[new_range][isolate] = '+'
+                                if '?' in call:
+                                    list_of_ref_positions[new_range][isolate] = '?'
+                                else:
+                                    list_of_ref_positions[new_range][isolate] = '+'
                                 del ref_position_orientation[old_range]
                                 ref_position_orientation[new_range] = new_orientation
                             else:
-                                list_of_positions[(is_start, is_end)][isolate] = '+'
+                                if '?' in call:
+                                    list_of_positions[(is_start, is_end)][isolate] = '?'
+                                else:
+                                    list_of_ref_positions[new_range][isolate] = '+'
                                 position_orientation[(is_start, is_end)] = orientation
                     #Otherwise try and merge with positions that are novel
                     elif (is_start, is_end) not in list_of_positions:
@@ -300,17 +306,37 @@ def main():
                                 store_values = list_of_positions[old_range]
                                 del list_of_positions[old_range]
                                 list_of_positions[new_range] = store_values
-                                list_of_positions[new_range][isolate] = '+'
+                                if '?' in call:
+                                    list_of_positions[new_range][isolate] = '?'
+                                elif '*' in call:
+                                    list_of_positions[new_range][isolate] = '*'
+                                else:
+                                    list_of_positions[new_range][isolate] = '+'
                                 del position_orientation[old_range]
                                 position_orientation[new_range] = new_orientation
                             else:
-                                list_of_positions[(is_start, is_end)][isolate] = '+'
+                                if '?' in call:
+                                    list_of_positions[new_range][isolate] = '?'
+                                elif '*' in call:
+                                    list_of_positions[new_range][isolate] = '*'
+                                else:
+                                    list_of_positions[new_range][isolate] = '+'
                                 position_orientation[(is_start, is_end)] = orientation
                         else:
-                            list_of_positions[(is_start, is_end)][isolate] = '+'
+                            if '?' in call:
+                                    list_of_positions[new_range][isolate] = '?'
+                                elif '*' in call:
+                                    list_of_positions[new_range][isolate] = '*'
+                                else:
+                                    list_of_positions[new_range][isolate] = '+'
                             position_orientation[(is_start, is_end)] = orientation
                     elif (is_start, is_end) in list_of_positions:
-                        list_of_positions[(is_start, is_end)][isolate] = '+'
+                        if '?' in call:
+                            list_of_positions[new_range][isolate] = '?'
+                        elif '*' in call:
+                            list_of_positions[new_range][isolate] = '*'
+                        else:
+                            list_of_positions[new_range][isolate] = '+'
 
     #get the flanking genes for the reference positions
     position_genes = {}
