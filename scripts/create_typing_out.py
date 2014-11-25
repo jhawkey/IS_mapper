@@ -193,8 +193,8 @@ def main():
             y_R = int(info[5])
             if x_L < x_R and y_L < y_R:
                 orient = 'F'
-                x = x_R
-                y = y_L
+                x = y_L
+                y = x_R
             elif x_L > x_R and y_L > y_R:
                 orient = 'R'
                 x = x_L
