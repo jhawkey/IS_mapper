@@ -550,7 +550,7 @@ def main():
                 run_command(['closestBed', '-a', five_merged_bed, '-b', three_merged_bed, '-d', '>', bed_closest], shell=True)
                 # Create all possible closest bed files for checking unpaired hits
                 run_command(['closestBed', '-a', five_merged_bed, '-b', three_cov_merged, '-d', '>', bed_unpaired_five], shell=True)
-                run_command(['closestBed', '-a', five_cov_merged, '-b', three_merged_bed, '-d', '>' bed_unpaired_three], shell=True)
+                run_command(['closestBed', '-a', five_cov_merged, '-b', three_merged_bed, '-d', '>', bed_unpaired_three], shell=True)
                 # Create table and annotate genbank with hits
                 run_command([args.path + 'create_typing_out.py', '--intersect', bed_intersect, '--closest', bed_closest, '--left_bed', five_merged_bed, '--right_bed', three_merged_bed, '--left_unpaired', bed_unpaired_five, '--right_unpaired', bed_unpaired_three, '--seq', query, '--ref', args.typingRef, '--temp', temp_folder, '--cds', args.cds, '--trna', args.trna, '--rrna', args.rrna, '--output', sample + '_' + query_name], shell=True)
 

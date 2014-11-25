@@ -92,7 +92,7 @@ def createFeature(hits, orient):
 
     return left_feature, right_feature
 
-def novel_hit(x_L, y_L, x_R, y_R, x, y, ref, cds, trna, rrna, gap, orient, unpaired=False, star=False):
+def novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, ref, cds, trna, rrna, gap, orient, feature_count, region, results, unpaired=False, star=False):
     
     left_feature, right_feature = createFeature([x_L, y_L, x_R, y_R], orient)
     genbank.features.append(left_feature)
@@ -100,7 +100,9 @@ def novel_hit(x_L, y_L, x_R, y_R, x, y, ref, cds, trna, rrna, gap, orient, unpai
     feature_count += 2
     
     gene_left, gene_right = get_flanking_genes(ref, x, y, cds, trna, rrna)
-    if gene_left[:-1] == gene_right[:-1]:
+    print gene_left
+    print gene_right
+    if gene_left[-1] == gene_right[-1]:
         funct_pred = 'Gene interrupted'
     else:
         funct_pred = ''
@@ -164,7 +166,7 @@ def main():
                     else:
                         print 'neither if statement were correct'
 
-                    novel_hit(x_L, y_L, x_R, y_R, x, y, args.ref, args.cds, args.trna, args.rrna, info[6], orient, unpaired=False)
+                    novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, unpaired=False)
                     region += 1
                 else:
                     removed_results['region_' + str(lines)] = line.strip() + '\tintersect.bed\n'
@@ -202,7 +204,7 @@ def main():
                 pass
             #this is probably a novel hit where there was no overlap detected
             elif int(info[6]) <= 10:
-                novel_hit(x_L, y_L, x_R, y_R, x, y, args.ref, args.cds, args.trna, args.rrna, info[6], orient, unpaired=False)
+                novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, unpaired=False)
                 region += 1
             #this is probably a known hit, but need to check with BLAST
             elif float(info[6]) / is_length >= args.min_range and float(info[6]) / is_length <= args.max_range:
@@ -237,7 +239,7 @@ def main():
                 region += 1
             #could possibly be a novel hit but the gap size is too large
             elif float(info[6]) / is_length <= args.min_range and float(info[6]) / is_length < args.max_range:
-                novel_hit(x_L, y_L, x_R, y_R, x, y, args.ref, args.cds, args.trna, args.rrna, info[6], orient, unpaired=False,star=True)
+                novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, unpaired=False,star=True)
                 region +=1
             #this is something else altogether - either the gap is really large or something, place it in removed_results
             else:
@@ -273,7 +275,7 @@ def main():
                         y = y_R
                     #a novel hit
                     if float(info[6]) <= 10:
-                        novel_hit(x_L, y_L, x_R, y_R, x, y, args.ref, args.cds, args.trna, args.rrna, info[6], orient, unpaired=True)
+                        novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, unpaired=True)
                         region += 1
                     #a known hit
                     elif float(info[6]) / is_length >= args.min_range and float(info[6]) / is_length <= args.max_range:
@@ -302,14 +304,14 @@ def main():
                            print 'not sure'
                            gene_left, gene_right = get_flanking_genes(args.ref, start, end, args.cds, args.trna, args.rrna)
                            if len(seq_results) !=0:
-                               results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Possible related IS', str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1]]
+                               results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Possible related IS?', str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1]]
                            else:
                                 removed_results['region_' + str(region)] = line.strip() + '\tleft_unpaired.bed\n'                
                         region += 1
                     #could possibly be a novel hit but the gap size is too large
                     elif float(info[6]) / is_length <= args.min_range and float(info[6]) / is_length < args.max_range:
 
-                        novel_hit(x_L, y_L, x_R, y_R, x, y, args.ref, args.cds, args.trna, args.rrna, info[6], orient, unpaired=True)
+                        novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, unpaired=True)
                         region +=1
                     #this is something else altogether - either the gap is really large or something, place it in removed_results
                     else:
@@ -342,7 +344,7 @@ def main():
                         y = y_R
                     #a novel hit
                     if float(info[6]) <= 10:
-                        novel_hit(x_L, y_L, x_R, y_R, x, y, args.ref, args.cds, args.trna, args.rrna, info[6], orient, unpaired=True)
+                        novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, unpaired=True)
                         region += 1
                     #a known hit
                     elif float(info[6]) / is_length >= args.min_range and float(info[6]) / is_length <= args.max_range:
@@ -371,14 +373,14 @@ def main():
                            print 'not sure'
                            gene_left, gene_right = get_flanking_genes(args.ref, start, end, args.cds, args.trna, args.rrna)
                            if len(seq_results) !=0:
-                               results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Possible related IS', str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1]]
+                               results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Possible related IS?', str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1]]
                            else:
                                 removed_results['region_' + str(region)] = line.strip() + '\tright_unpaired.bed\n'                
                         region += 1
                     #could possibly be a novel hit but the gap size is too large
                     elif float(info[6]) / is_length <= args.min_range and float(info[6]) / is_length < args.max_range:
 
-                        novel_hit(x_L, y_L, x_R, y_R, x, y, args.ref, args.cds, args.trna, args.rrna, info[6], orient, unpaired=True)
+                        novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, unpaired=True)
                         region +=1
                     #this is something else altogether - either the gap is really large or something, place it in removed_results
                     else:

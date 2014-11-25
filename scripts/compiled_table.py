@@ -325,10 +325,10 @@ def main():
                         else:
                             if '?' in call:
                                     list_of_positions[new_range][isolate] = '?'
-                                elif '*' in call:
-                                    list_of_positions[new_range][isolate] = '*'
-                                else:
-                                    list_of_positions[new_range][isolate] = '+'
+                            elif '*' in call:
+                                list_of_positions[new_range][isolate] = '*'
+                            else:
+                                list_of_positions[new_range][isolate] = '+'
                             position_orientation[(is_start, is_end)] = orientation
                     elif (is_start, is_end) in list_of_positions:
                         if '?' in call:
