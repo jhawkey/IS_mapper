@@ -103,9 +103,9 @@ def novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, ref, cds, trna, rrna, gap, orie
     print gene_left
     print gene_right
     if gene_left[-1] == gene_right[-1]:
-        funct_pred = 'Gene interrupted'
+        func_pred = 'Gene interrupted'
     else:
-        funct_pred = ''
+        func_pred = functional_prediction(gene_left, gene_right)
     if unpaired == False:
         call = 'Novel'
     elif unpaired == True:
@@ -113,7 +113,23 @@ def novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, ref, cds, trna, rrna, gap, orie
     if star == True:
         call = 'Novel*'
     
-    results['region_' + str(region)] = [orient, str(x), str(y), gap, call, '', '', gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1], funct_pred]
+    results['region_' + str(region)] = [orient, str(x), str(y), gap, call, '', '', gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1], func_pred]
+
+def functional_prediction(gene_left, gene_right):
+
+    bases = gene_left[1][1:]
+    if '+' in gene_left[1]:
+        prediction = 'Upstream of ' + gene_left[-1][1] + ' by ' + bases + ','
+    elif '-' in gene_left[1]:
+        prediction = 'Downstream of ' + gene_left[-1][1] + ' by ' + bases + ','
+
+    bases = gene_right[1][1:]
+    if '+' in gene_right[1]:
+        prediction += 'upstream of ' + gene_right[-1][1] + ' by ' + bases
+    elif '-' in gene_right[1]:
+        prediction += 'downstream of ' + gene_right[-1][1] + ' by ' + bases
+
+    return prediction
 
 def main():
 
@@ -225,15 +241,18 @@ def main():
                 seq_results = check_seq_between(args.ref, args.seq, start, end, 'region_' + str(region), args.temp)
                 if len(seq_results) != 0 and seq_results[0] >= 80 and seq_results[1] >= 80:
                     #then this is definitely a known site
-                    gene_left = get_other_gene(args.ref, min(start, end), "left", args.cds, args.trna, args.rrna)
-                    gene_right = get_other_gene(args.ref, max(start, end), "right", args.cds, args.trna, args.rrna)
-                    results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Known', str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1]]
+                    #taking all four coordinates and finding min and max to avoid coordinates that overlap the actual IS (don't want to return those in gene calls)
+                    gene_left = get_other_gene(args.ref, min(y_L, y_R, x_R, x_L), "left", args.cds, args.trna, args.rrna)
+                    gene_right = get_other_gene(args.ref, max(y_L, y_R, x_R, x_L), "right", args.cds, args.trna, args.rrna)
+                    func_pred = functional_prediction(gene_left, gene_right)
+                    results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Known', str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1], func_pred]
                 else:
                    #then I'm not sure what this is
                    print 'not sure'
                    gene_left, gene_right = get_flanking_genes(args.ref, start, end, args.cds, args.trna, args.rrna)
+                   funct_pred = functional_prediction(gene_left, gene_right)
                    if len(seq_results) !=0:
-                       results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Possible related IS', str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1]]
+                       results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Possible related IS', str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1], func_pred]
                    else:
                         removed_results['region_' + str(region)] = line.strip() + '\tclosest.bed\n'                
                 region += 1
@@ -298,19 +317,20 @@ def main():
                             #then this is definitely a known site
                             gene_left = get_other_gene(args.ref, min(start, end), "left", args.cds, args.trna, args.rrna)
                             gene_right = get_other_gene(args.ref, max(start, end), "right", args.cds, args.trna, args.rrna)
-                            results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Known?', str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1]]
+                            func_pred = functional_prediction(gene_left, gene_right)
+                            results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Known?', str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1], func_pred]
                         else:
                            #then I'm not sure what this is
                            print 'not sure'
                            gene_left, gene_right = get_flanking_genes(args.ref, start, end, args.cds, args.trna, args.rrna)
+                           func_pred = functional_prediction(gene_left, gene_right)
                            if len(seq_results) !=0:
-                               results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Possible related IS?', str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1]]
+                               results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Possible related IS?', str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1], func_pred]
                            else:
                                 removed_results['region_' + str(region)] = line.strip() + '\tleft_unpaired.bed\n'                
                         region += 1
                     #could possibly be a novel hit but the gap size is too large
                     elif float(info[6]) / is_length <= args.min_range and float(info[6]) / is_length < args.max_range:
-
                         novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, unpaired=True)
                         region +=1
                     #this is something else altogether - either the gap is really large or something, place it in removed_results
@@ -367,19 +387,20 @@ def main():
                             #then this is definitely a known site
                             gene_left = get_other_gene(args.ref, min(start, end), "left", args.cds, args.trna, args.rrna)
                             gene_right = get_other_gene(args.ref, max(start, end), "right", args.cds, args.trna, args.rrna)
-                            results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Known?', str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1]]
+                            func_pred = functional_prediction(gene_left, gene_right)
+                            results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Known?', str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1], func_pred]
                         else:
                            #then I'm not sure what this is
                            print 'not sure'
                            gene_left, gene_right = get_flanking_genes(args.ref, start, end, args.cds, args.trna, args.rrna)
+                           func_pred = functional_prediction(gene_left, gene_right)
                            if len(seq_results) !=0:
-                               results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Possible related IS?', str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1]]
+                               results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Possible related IS?', str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1], func_pred]
                            else:
                                 removed_results['region_' + str(region)] = line.strip() + '\tright_unpaired.bed\n'                
                         region += 1
                     #could possibly be a novel hit but the gap size is too large
                     elif float(info[6]) / is_length <= args.min_range and float(info[6]) / is_length < args.max_range:
-
                         novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, unpaired=True)
                         region +=1
                     #this is something else altogether - either the gap is really large or something, place it in removed_results
