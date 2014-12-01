@@ -119,15 +119,15 @@ def functional_prediction(gene_left, gene_right):
 
     bases = gene_left[1][1:]
     if '+' in gene_left[1]:
-        prediction = 'Upstream of ' + gene_left[-1][1] + ' by ' + bases + ','
+        prediction = 'Upstream of ' + gene_left[-1][0] + ' by ' + bases + 'bp, '
     elif '-' in gene_left[1]:
-        prediction = 'Downstream of ' + gene_left[-1][1] + ' by ' + bases + ','
+        prediction = 'Downstream of ' + gene_left[-1][0] + ' by ' + bases + 'bp ,'
 
     bases = gene_right[1][1:]
     if '+' in gene_right[1]:
-        prediction += 'upstream of ' + gene_right[-1][1] + ' by ' + bases
+        prediction += 'upstream of ' + gene_right[-1][0] + ' by ' + bases + 'bp'
     elif '-' in gene_right[1]:
-        prediction += 'downstream of ' + gene_right[-1][1] + ' by ' + bases
+        prediction += 'downstream of ' + gene_right[-1][0] + ' by ' + bases + 'bp'
 
     return prediction
 
