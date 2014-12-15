@@ -250,7 +250,7 @@ def main():
                    #then I'm not sure what this is
                    print 'not sure'
                    gene_left, gene_right = get_flanking_genes(args.ref, start, end, args.cds, args.trna, args.rrna)
-                   funct_pred = functional_prediction(gene_left, gene_right)
+                   func_pred = functional_prediction(gene_left, gene_right)
                    if len(seq_results) !=0:
                        results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Possible related IS', str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1], func_pred]
                    else:
