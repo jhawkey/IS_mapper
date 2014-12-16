@@ -509,12 +509,16 @@ def main():
                 three_bam_sorted = three_header + '.sorted'
                 five_cov_bed = temp_folder + five_header + '_' + query_name + '_cov.bed'
                 three_cov_bed = temp_folder + three_header + '_' + query_name + '_cov.bed'
+                five_cov_merged = temp_folder + five_header + '_' + query_name + '_cov_merged.sorted.bed'
+                three_cov_merged = temp_folder + three_header + '_' + query_name + '_cov_merged.sorted.bed'
                 five_final_cov = five_header + '_' + query_name + '_finalcov.bed'
                 three_final_cov = three_header + '_' + query_name + '_finalcov.bed'
                 five_merged_bed = five_header + '_' + query_name + '_merged.sorted.bed'
                 three_merged_bed = three_header + '_' + query_name + '_merged.sorted.bed'
                 bed_intersect = sample + '_' + typingName + '_' + query_name + '_intersect.bed'
                 bed_closest = sample + '_' + typingName + '_' + query_name + '_closest.bed'
+                bed_unpaired_five = sample + '_' + typingName + '_' + query_name + '_left_unpaired.bed'
+                bed_unpaired_three = sample + '_' + typingName + '_' + query_name + '_right_unpaired.bed'
 
                 # Map reads to reference, sort
                 if args.a == True:
@@ -533,6 +537,8 @@ def main():
                 # Create BED files with coverage information
                 run_command(['bedtools', 'genomecov', '-ibam', five_bam_sorted + '.bam', '-bg', '>', five_cov_bed], shell=True)
                 run_command(['bedtools', 'genomecov', '-ibam', three_bam_sorted + '.bam', '-bg', '>', three_cov_bed], shell=True)
+                run_command(['bedtools', 'merge', '-d', args.merging, '-i', five_cov_bed, '>', five_cov_merged], shell=True)
+                run_command(['bedtools', 'merge', '-d', args.merging, '-i', three_cov_bed, '>', three_cov_merged], shell=True)
                 # Filter coveraged BED files on coverage cutoff (so only take 
                 # high coverage regions for further analysis)
                 filter_on_depth(five_cov_bed, five_final_cov, args.cutoff)
@@ -542,8 +548,11 @@ def main():
                 # Find intersects and closest points of regions
                 run_command(['bedtools', 'intersect', '-a', five_merged_bed, '-b', three_merged_bed, '-wo', '>', bed_intersect], shell=True)
                 run_command(['closestBed', '-a', five_merged_bed, '-b', three_merged_bed, '-d', '>', bed_closest], shell=True)
+                # Create all possible closest bed files for checking unpaired hits
+                run_command(['closestBed', '-a', five_merged_bed, '-b', three_cov_merged, '-d', '>', bed_unpaired_five], shell=True)
+                run_command(['closestBed', '-a', five_cov_merged, '-b', three_merged_bed, '-d', '>', bed_unpaired_three], shell=True)
                 # Create table and annotate genbank with hits
-                run_command([args.path + 'create_typing_out.py', '--intersect_bed', bed_intersect, '--closest_bed', bed_closest, '--insertion_seq', query, '--reference_genbank', args.typingRef, '--temp_folder', temp_folder, '--cds', args.cds, '--trna', args.trna, '--rrna', args.rrna, '--output', sample + '_' + query_name], shell=True)
+                run_command([args.path + 'create_typing_out.py', '--intersect', bed_intersect, '--closest', bed_closest, '--left_bed', five_merged_bed, '--right_bed', three_merged_bed, '--left_unpaired', bed_unpaired_five, '--right_unpaired', bed_unpaired_three, '--seq', query, '--ref', args.typingRef, '--temp', temp_folder, '--cds', args.cds, '--trna', args.trna, '--rrna', args.rrna, '--output', sample + '_' + query_name], shell=True)
 
             # remove temp folder if required
             if args.temp == False:
