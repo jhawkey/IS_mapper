@@ -164,7 +164,7 @@ def main():
         cmd += '\nmodule load bwa-intel/0.7.12'
         cmd += '\nmodule load samtools-intel/1.1'
         cmd += '\nmodule load blast+-gcc/2.2.25'
-        cmd += '\nmodule load bedtools-intel/2.22.1'
+        cmd += '\nmodule load bedtools-intel/2.20.1'
         
         cmd += '\npython ' + args.script
         cmd += ' --queries ' + args.queries
