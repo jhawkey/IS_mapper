@@ -79,9 +79,9 @@ Basic usage for ISMapper:
 Multiple read sets can be supplied one after the other, separated by spaces, after --reads. ISMapper will pair the reads together.  
 Multiple IS queries can also be supplied, seperated by spaces, after --queries. ISMapper will run queries sequentially in the same output folder.  
 
-```
+`
 ismap --reads [isolateA_1.fastq.gz] [isolateA_2.fastq.gz] [isolateB_1.fastq.gz] [isolateB_2.fastq.gz] --queries IS_query.fasta --typingRef reference_genome.gbk --runtype typing --output prefix_out
-```
+`
 
 Once ISMapper has finished running, for each isolate there will be multiple output files, the most interesting of which is the *_table.txt file, showing each location in the reference genome where there is a copy of your IS query in your isolate.
 
@@ -106,9 +106,9 @@ The final _table.txt file contains the following columns:
 
 The individual _table.txt files for each isolate can be compiled together to generate one large table showing all possible IS query locations in all isolates as well as the reference genome by using the compiled_table script.
 
-```
+`
 compiled_table.py --tables *_table.txt --reference_gbk reference_genome.gbk --seq IS_query.fasta --output compiled_table_out.txt
-```
+`
 
 This final compiled table has a list of isolates compiled together in the first column, with a header showing the different IS locations.
 The top row will always be the reference genome (the same one used in the original analysis).
@@ -136,9 +136,9 @@ isoalteB_contigs.fasta matches to isolateB_1.fastq.gz and isolateB_2.fastq.gz
 Multiple read sets can be supplied one after the other, separated by spaces, after --reads. ISMapper will pair the reads together.  
 Multiple IS queries can also be supplied, seperated by spaces, after --queries. ISMapper will run queries sequentially in the same output folder.
 
-```
+`
 ismap --reads [isolateA_1.fastq.gz] [isolateA_2.fastq.gz] [isolateB_1.fastq.gz] [isolateB_2.fastq.gz] --queries IS_query1.fasta IS_query2.fasta --assemblies [isolateA_assembly.fasta] [isolateB_assembly.fasta] --assemblyid _assembly --extension .fasta --type fasta --runtype improvement --output prefix_out
-```
+`
 
 Once ISMapper has finished running, multiple output files will be generated, the most interesting of which will be the *_table.txt file. The table file contains the names of contigs that have either a left or a right end in them.
 
