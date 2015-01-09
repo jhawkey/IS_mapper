@@ -50,6 +50,18 @@ Once peaks have been selected, Bedtools is used to find regions which intersect 
 
 These positions are then further analysed and tabulated into the _table.txt file if they are considered to be accurate. Any hits which do not make it into the _table.txt file are moved to _removedHits.txt, showing their position and which bed file they come from (intersect or closest) so they can be investigated further if required.
 
+## Running ISMapper without installing  
+
+ISMapper can be run directly from its directory without installing it via pip. To do so, ismap.py needs the path to the folder that contains all the scripts supplied to the argument `--path`. 
+
+eg:  
+`ismap.py --reads x_1.fastq.gz x_2.fastq.gz --queries is_query.fasta --path /path/to/IS_mapper/scripts/`
+
+If using the slurm_ismap.py script, `--path` can be supplied inside `--other_args`, but slurm_ismap.py also requires the path to the actual ismap.py script as well.
+
+eg:  
+`slurm_ismap.py --reads x_2.fastq.gz x_2.fastq.gz --queries is_query.fasta --script /path/to/IS_mapper/scripts/ismap.py --other_args "--path /path/to/IS_mapper/scripts"`  
+
 ## Usage
 
 There are two possible options for running ISMapper, depending on what reference genome you would like to compare to. The typing option looks for your IS query locations in your short read data, and compares these locations to a reference genome (which may or may not have that particular location in it).
@@ -64,10 +76,11 @@ Input files:
 
 Basic usage for ISMapper:
 
-Multiple read sets can be supplied one after the other, separated by spaces, after --reads. ISMapper will pair the reads together.
+Multiple read sets can be supplied one after the other, separated by spaces, after --reads. ISMapper will pair the reads together.  
+Multiple IS queries can also be supplied, seperated by spaces, after --queries. ISMapper will run queries sequentially in the same output folder.  
 
 ```
-ismap --reads [isolateA_1.fastq.gz] [isolateA_2.fastq.gz] [isolateB_1.fastq.gz] [isolateB_2.fastq.gz] --query IS_query.fasta --typingRef reference_genome.gbk --runtype typing --output prefix_out
+ismap --reads [isolateA_1.fastq.gz] [isolateA_2.fastq.gz] [isolateB_1.fastq.gz] [isolateB_2.fastq.gz] --queries IS_query.fasta --typingRef reference_genome.gbk --runtype typing --output prefix_out
 ```
 
 Once ISMapper has finished running, for each isolate there will be multiple output files, the most interesting of which is the *_table.txt file, showing each location in the reference genome where there is a copy of your IS query in your isolate.
@@ -120,8 +133,11 @@ NOT
 isolateA_assembly.fasta matches to isolateA_1.fastq.gz and isolateA_2.fastq.gz  
 isoalteB_contigs.fasta matches to isolateB_1.fastq.gz and isolateB_2.fastq.gz  
 
+Multiple read sets can be supplied one after the other, separated by spaces, after --reads. ISMapper will pair the reads together.  
+Multiple IS queries can also be supplied, seperated by spaces, after --queries. ISMapper will run queries sequentially in the same output folder.
+
 ```
-ismap --reads [isolateA_1.fastq.gz] [isolateA_2.fastq.gz] [isolateB_1.fastq.gz] [isolateB_2.fastq.gz] --query IS_query1.fasta IS_query2.fasta --assemblies [isolateA_assembly.fasta] [isolateB_assembly.fasta] --assemblyid _assembly --extension .fasta --type fasta --runtype improvement --output prefix_out
+ismap --reads [isolateA_1.fastq.gz] [isolateA_2.fastq.gz] [isolateB_1.fastq.gz] [isolateB_2.fastq.gz] --queries IS_query1.fasta IS_query2.fasta --assemblies [isolateA_assembly.fasta] [isolateB_assembly.fasta] --assemblyid _assembly --extension .fasta --type fasta --runtype improvement --output prefix_out
 ```
 
 Once ISMapper has finished running, multiple output files will be generated, the most interesting of which will be the *_table.txt file. The table file contains the names of contigs that have either a left or a right end in them.
