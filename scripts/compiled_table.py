@@ -154,9 +154,6 @@ def get_flanking_genes(reference, left, right, cds_features, trna_features, rrna
     distance_with_left = {}
     distance_with_right = {}
 
-    #cds_features = cds_quals.split(',')
-    #trna_features = trna_quals.split(',')
-    #rrna_features = rrna_quals.split(',')
     print 'this is the left coordinate (closest to left gene)'
     print left
     print 'this is the right coordinate (closest to right gene)'
