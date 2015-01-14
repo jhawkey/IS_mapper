@@ -15,73 +15,96 @@ from collections import OrderedDict
 
 def parse_args():
 
-    parser = ArgumentParser(description="create a table of features for the is mapping pipeline")
+    parser = ArgumentParser(description="Create a table of IS hits in all isolates for ISMapper")
+    # Inputs
     parser.add_argument('--tables', nargs='+', type=str, required=True, help='tables to compile')
     parser.add_argument('--reference_gbk', type=str, required=True, help='gbk file of reference to report closest genes')
     parser.add_argument('--seq', type=str, required=True, help='fasta file for insertion sequence looking for in reference')
+    # Parameters for hits
     parser.add_argument('--gap', type=int, required=False, default=0, help='distance between regions to call overlapping')
     parser.add_argument('--cds', nargs='+', type=str, required=False, default='locus_tag gene product', help='qualifiers to look for in reference genbank for CDS features')
     parser.add_argument('--trna', nargs='+', type=str, required=False, default='locus_tag product', help='qualifiers to look for in reference genbank for tRNA features')
     parser.add_argument('--rrna', nargs='+', type=str, required=False, default='locus_tag product', help='qualifiers to look for in reference genbank for rRNA features')
+    # Output parameters
     parser.add_argument('--output', type=str, required=True, help='name of output file')
 
     return parser.parse_args()
 
 def gbk_to_fasta(genbank, fasta):
+    '''
+    Turns a genbank file into a fasta file.
+    '''
 
     sequences = SeqIO.parse(genbank, "genbank")
     SeqIO.write(sequences, fasta, "fasta")
 
 def check_ranges(ranges, range_to_check, gap, orientation):
-
+    '''
+    See if two hits overlap. If they do, merge them.
+    Otherwise keep them separate.
+    '''
+    # Get start and end coordinates
     start = range_to_check[0]
     stop = range_to_check[1]
-
+    # Get current list of ranges
     range_list = ranges.keys()
 
+    # For every range, check the orientation
     for i in range(0, len(range_list)):
+        # Only merge hits that have the same orientation
         if orientation == ranges[(range_list[i][0], range_list[i][1])]:
             x = range_list[i][0]
             y = range_list[i][1]
+            # Forward orientations have certain rules
             if orientation == 'F':
                 if x in range(start - gap, stop + 1) or x in range(start, stop + gap + 1):
-                    #these ranges overlap
+                    # These ranges overlap
                     new_start = min(x, start)
                     new_end = max(y, stop)
                     return range_list[i], (new_start, new_end), orientation
                 elif y in range(start - gap, stop + 1) or y in range(start, stop + gap + 1):
-                    #these ranges also overlap
+                    # These ranges also overlap
                     new_start = min(x, start)
                     new_end = min(y, stop)
                     return range_list[i], (new_start, new_end), orientation
+            # Reverse orientations have certain rules
             elif orientation == 'R':
                 if x in range(start - gap, stop + 1) or x in range(start, stop + gap + 1):
-                    #these ranges overlap
+                    # These ranges overlap
                     new_start = min(x, start)
                     new_end = max(y, stop)
                     return range_list[i], (new_start, new_end), orientation
                 elif y in range(start - gap, stop + 1) or y in range(start, stop + gap + 1):
-                    #these ranges also overlap
+                    # These ranges also overlap
                     new_start = min(x, start)
                     new_end = min(y, stop)
                     return range_list[i], (new_start, new_end), orientation
     return False, False, False
 
 def get_ref_positions(reference, is_query, positions_dict, orientation_dict):
-
+    '''
+    Get the coordinates of known IS sites in the reference.
+    '''
+    # Get the name of the IS query to create temp file
     is_name = os.path.split(is_query)[1]
     ref_name = os.path.split(reference)[1]
     blast_output = os.getcwd() + '/' + is_name + '_' + ref_name + '.tmp'
 
+    # Create a BLAST database of the reference if there isn't one already
+    # Should probably use this function - blast_db(reference)
     if not os.path.exists(reference):
         os.system('makeblastdb -in ' + reference + ' -dbtype nucl')
+    # Do the BLAST
     blastn_cline = NcbiblastnCommandline(query=is_query, db=reference, outfmt="'6 qseqid qlen sacc pident length slen sstart send evalue bitscore qcovs'", out=blast_output)
     stdout, stderr = blastn_cline()
+    # Open the BLAST output and get IS query sites
     with open(blast_output) as out:
         for line in out:
             info = line.strip('\n').split('\t')
+            # To be a known site, hast to match query at least 90% with coverage of 95
             if float(info[3]) >= 90 and float(info[4])/float(info[1]) * 100 >= 95:
                 positions_dict[(int(info[6]), int(info[7]))][ref_name] = '+'
+                # Get orientation of known site for merging purposes
                 if int(info[6]) > int(info[7]):
                     orientation_dict[(int(info[6]), int(info[7]))] = 'R'
                 else:
@@ -121,6 +144,9 @@ def get_main_gene_id(qualifier_list, feature):
             pass
 
 def get_flanking_genes(reference, left, right, cds_features, trna_features, rrna_features):
+    '''
+    Get the genes flanking a left and right hit.
+    '''
 
     gb = SeqIO.read(reference, 'genbank')
     pos_gene_left = []
@@ -217,6 +243,10 @@ def get_flanking_genes(reference, left, right, cds_features, trna_features, rrna
     return pos_gene_left, pos_gene_right
 
 def get_other_gene(reference, pos, direction, cds_features, trna_features, rrna_features):
+    '''
+    Get the other gene
+    '''
+
     gb = SeqIO.read(reference, "genbank")
     distance = {}
     #cds_features = cds_features.split(',')
@@ -261,6 +291,9 @@ def get_other_gene(reference, pos, direction, cds_features, trna_features, rrna_
     return closest_gene
 
 def blast_db(fasta):
+    '''
+    Create a BLAST database if one doesn't exist already.
+    '''
     
     if not os.path.exists(fasta + '.nin'):
         os.system('makeblastdb -in ' + fasta + ' -dbtype nucl')

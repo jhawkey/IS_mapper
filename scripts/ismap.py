@@ -54,7 +54,6 @@ def parse_args():
     parser.add_argument('--path', type=str, required=False, default='', help='Path to folder where scripts are (only required for development).')
     # Cutoffs for annotation
     parser.add_argument('--cutoff', type=int, required=False, default=6, help='Minimum depth for mapped region to be kept in bed file (default 6)')
-    parser.add_argument('--percentid', type=float, required=False, default=90.0, help='Minimum percent ID for hit to be annotated (default 90.0')
     parser.add_argument('--merging', type=str, required=False, default='100', help='Value for merging left and right hits in bed files together to simply calculation of closest and intersecting regions (default 100).')
     parser.add_argument('--a', action='store_true', required=False, help='Switch on all alignment reporting for bwa')
     parser.add_argument('--T', type=str, required=False, default='30', help='Mapping quality score for bwa')
@@ -265,8 +264,6 @@ def make_directories(dir_list):
     '''
     Makes the directories specified in the list.
     Checks to make sure they exist first.
-    If the directory is a VO directory, REMOVE IT before making it again,
-    as this will cause Velvet to give an error.
     '''
     for directory in dir_list:
         run_command(['mkdir', '-p', directory], shell=True)
@@ -300,19 +297,28 @@ def check_blast_database(fasta):
         run_command(['makeblastdb -in', fasta, '-dbtype nucl'], shell=True)
 
 def gbk_to_fasta(genbank, fasta):
+    '''
+    Converts a genbank to a fasta using BioPython
+    '''
 
     sequences = SeqIO.parse(genbank, "genbank")
     SeqIO.write(sequences, fasta, "fasta")
 
 def multi_to_single(genbank, name, output):
-    total = 0 # total bases
+    '''
+    Converts a multi entry genbank (where each entry is a contig)
+    into a single entry genbank, preserving all annotations.
+    '''
+
+    # total bases
+    total = 0
 
     handle = open(genbank, "rU")
     records = list(SeqIO.parse(handle, "genbank"))
     feature_count = 0
     colour_count = 0
 
-    #make header genbank format friendly
+    # make header genbank format friendly
     if len(name) >= 10:
         name = name[:9]
     for r in records:
@@ -347,8 +353,10 @@ def main():
 
     args = parse_args()
 
+    # Checks to see if path argument contains final /, adds it if not
     if args.path != '' and args.path[-1] != '/':
         args.path = args.path + "/"
+    
     # Set up logfile
     if args.log is True:
         logfile = args.output + ".log"
@@ -369,8 +377,7 @@ def main():
     check_command(['makeblastdb'], 'blast')
     check_command(['bedtools'], 'bedtools')
 
-    # Checks to make sure the runtype is valid and provides an error
-    # if it's not
+    # Checks to make sure the runtype is valid and provides an error if not
     if args.runtype != "improvement" and args.runtype != "typing":
         logging.info('Invalid runtype selected: {}'.format(args.runtype))
         logging.info('Runtype should be improvement or typing (see instructions for further details)')
@@ -434,6 +441,7 @@ def main():
                         f.write('\t'.join(header) + '\nNo hits found')
                 continue
 
+            # Improvement mode
             if args.runtype == "improvement":
 
                 # Get prefix for output filenames
@@ -488,6 +496,7 @@ def main():
                 #create single entry genbank
                 multi_to_single(sample + '_' + query_name + '_annotated.gbk', sample, final_genbankSingle)
 
+            # Typing mode
             if args.runtype == "typing":
 
                 # Get prefix of typing reference for output filenames
@@ -527,7 +536,6 @@ def main():
                 else:
                     run_command(['bwa', 'mem', typingRefFasta, five_reads, '>', five_to_ref_sam], shell=True)
                     run_command(['bwa', 'mem', typingRefFasta, three_reads, '>', three_to_ref_sam], shell=True)
-
                 run_command(['samtools', 'view', '-Sb', five_to_ref_sam, '>', five_to_ref_bam], shell=True)
                 run_command(['samtools', 'view', '-Sb', three_to_ref_sam, '>', three_to_ref_bam], shell=True)
                 run_command(['samtools', 'sort', five_to_ref_bam, five_bam_sorted], shell=True)
