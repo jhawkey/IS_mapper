@@ -153,10 +153,7 @@ def get_flanking_genes(reference, left, right, cds_features, trna_features, rrna
     pos_gene_right = []
     distance_with_left = {}
     distance_with_right = {}
-
-    print 'this is the left coordinate (closest to left gene)'
     print left
-    print 'this is the right coordinate (closest to right gene)'
     print right
 
     for feature in gb.features:
@@ -167,10 +164,10 @@ def get_flanking_genes(reference, left, right, cds_features, trna_features, rrna
                 pos = feature.location.start
             else:
                 pos = feature.location.end
-            #first check to see if both coordinates fit into the feature
+            # First check to see if both coordinates fit into the feature
             if left in feature.location and right in feature.location:
-                #we want the absolute value because a value with no sign in the compiled table
-                #indicates that the gene is interrupted
+                # We want the absolute value because a value with no sign in the final table
+                # indicates that the gene is interrupted
                 gene_id = get_main_gene_id(cds_features, feature)
                 gene = [gene_id, str(abs(pos - left)), values]
                 pos_gene_left = gene
@@ -221,72 +218,112 @@ def get_flanking_genes(reference, left, right, cds_features, trna_features, rrna
     distance_rkeys = list(OrderedDict.fromkeys(distance_with_right))
     closest_to_right_gene = distance_with_right[min(distance_rkeys)]
     pos_gene_right = closest_to_right_gene
-    print closest_to_left_gene
-    print closest_to_right_gene
+    #print closest_to_left_gene
+    #print closest_to_right_gene
 
     #we already know that the gene isn't interrupted
     if closest_to_left_gene[0] == closest_to_right_gene[0]:
-        print 'same gene'
+        #print 'same gene'
         if closest_to_left_gene[1] > closest_to_right_gene[1]:
-            print 'we look left'
+            #print 'we look left'
             direction = "left"
             other_gene = get_other_gene(reference, left, direction, cds_features, trna_features, rrna_features)
             return other_gene, pos_gene_right
         elif closest_to_left_gene[1] < closest_to_right_gene[1]:
-            print 'we look right'
+            #print 'we look right'
             direction = "right"
             other_gene = get_other_gene(reference, right, direction, cds_features, trna_features, rrna_features)
             return pos_gene_left, other_gene
     return pos_gene_left, pos_gene_right
 
-def get_other_gene(reference, pos, direction, cds_features, trna_features, rrna_features):
+def get_other_gene(reference, pos, direction, cds_features, trna_features, rrna_features, known=False):
     '''
-    Get the other gene
+    Distance reference is to the start codon of the feature
+    (could be feature.location.start or .end depending on strand)
+    - value before the distance indicates we are downstream
+    + value before the distance indicates we are upstream
     '''
 
     gb = SeqIO.read(reference, "genbank")
     distance = {}
-    #cds_features = cds_features.split(',')
-    #trna_features = trna_features.split(',')
-    #rrna_features = rrna_features.split(',')
+    print 'this is pos'
+    print pos
+    print 'this is direction'
+    print direction
+
     for feature in gb.features:
-        #only want to look for genes that are to the left of the gene that has
-        #already been found
+        # Only want to look for genes that are to the left of the gene that has
+        # already been found
         if feature.type == "CDS" or feature.type == "tRNA" or feature.type == "rRNA":
             values = get_qualifiers(cds_features, trna_features, rrna_features, feature)
             values.append(feature.strand)
             if feature.strand == 1:
+                # Foward strand, so start and end are simple
                 feature_start = feature.location.start
                 feature_end = feature.location.end
             else:
+                # Reverse strand, so start of gene is actually
+                # the end of the location for the feature
                 feature_start = feature.location.end
                 feature_end = feature.location.start
             if direction == "left":
-                #for this to be true, the position we're looking at must be
-                #larger than the gene start and end (if the position is not
-                #in the gene)
-                if pos > feature_start and feature_end:
+                # For this to be true, the position we're looking at must be
+                # larger than the gene start and end (if the position is not
+                # in the gene)
+                if pos in range(min(feature_start, feature_end), max(feature_start, feature_end)) and known == True:
+                    # We're inside a gene, and this is a known hit, so the 
+                    # flanking region could be inside the gene, but the gene
+                    # is not necessarily interrupted by the known site.
+                    print 'we are inside a gene'
                     gene_id = get_main_gene_id(cds_features, feature)
-                    #always want to refer to the start codon
                     if feature_start - pos > 0:
                         dist = '-' + str(feature_start - pos)
                     else:
                         dist = '+' + str(abs(feature_start - pos))
-
+                    closest_gene = [gene_id, dist, values]
+                    # Return this gene as it must be the answer if we're inside
+                    # this feature
+                    return closest_gene
+                elif pos > feature_start and feature_end:
+                    # Otherwise just check to see how close the
+                    # pos is to this gene
+                    gene_id = get_main_gene_id(cds_features, feature)
+                    # Always want to refer to the start codon
+                    if feature_start - pos > 0:
+                        dist = '-' + str(feature_start - pos)
+                    else:
+                        dist = '+' + str(abs(feature_start - pos))
                     distance[abs(feature_start - pos)] = [gene_id, dist, values]
             elif direction == "right":
-                if pos < feature_start and feature_end:
+                if pos in range(min(feature_start, feature_end), max(feature_start, feature_end)) and known == True:
+                    # We're inside a gene, and this is a known hit, so the 
+                    # flanking region could be inside the gene, but the gene
+                    # is not necessarily interrupted by the known site.
                     gene_id = get_main_gene_id(cds_features, feature)
+                    if feature_start - pos > 0:
+                        dist = '-' + str(feature_start - pos)
+                    else:
+                        dist = '+' + str(abs(feature_start - pos))
+                    closest_gene = [gene_id, dist, values]
+                    # Return this gene as it must be the answer if we're inside
+                    # this feature
+                    return closest_gene
+                elif pos < feature_start and feature_end:
+                    # Otherwise just check to see how close the
+                    # pos is to this gene
+                    gene_id = get_main_gene_id(cds_features, feature)
+                    # Always want to refer to the start codon
                     if feature_start - pos > 0:
                         dist = '-' + str(feature_start - pos)
                     else:
                         dist = '+' + str(abs(feature_start - pos))
                     distance[abs(feature_start - pos)] = [gene_id, dist, values]
                     
+    # Get all the distances and order them
     distance_keys = list(OrderedDict.fromkeys(distance))
+    # The closest gene is the one with the smallest distance
     closest_gene = distance[min(distance_keys)]
     return closest_gene
-
 def blast_db(fasta):
     '''
     Create a BLAST database if one doesn't exist already.
