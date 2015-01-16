@@ -178,7 +178,7 @@ def functional_prediction(gene_left, gene_right):
 
     return prediction
 
-def add_known(x_L, x_R, y_L, y_R, gap, genbank, ref, seq, temp, cds, trna, rrna, region, feature_count, results, removed_results, file_loc):
+def add_known(x_L, x_R, y_L, y_R, gap, genbank, ref, seq, temp, cds, trna, rrna, region, feature_count, results, removed_results, line, file_loc):
     '''
     Adds a value to the table that is a known hit
     '''
@@ -346,7 +346,7 @@ def main():
             # Only a known hit if we're in the a range between (default 0.5 and 1.5) the size
             # of the IS query
             elif float(info[6]) / is_length >= args.min_range and float(info[6]) / is_length <= args.max_range:
-                add_known(x_L, x_R, y_L, y_R, info[6], genbank, args.ref, args.seq, args.temp, args.cds, args.trna, args.rrna, region, feature_count, results, removed_results, 'closest.bed')
+                add_known(x_L, x_R, y_L, y_R, info[6], genbank, args.ref, args.seq, args.temp, args.cds, args.trna, args.rrna, region, feature_count, results, removed_results, line, 'closest.bed')
                 region += 1
             # Could possibly be a novel hit but the gap size is too large
             elif float(info[6]) / is_length <= args.min_range and float(info[6]) / is_length < args.max_range:
@@ -392,7 +392,7 @@ def main():
                         region += 1
                     # This is a known hit
                     elif float(info[6]) / is_length >= args.min_range and float(info[6]) / is_length <= args.max_range:
-                        add_known(x_L, x_R, y_L, y_R, info[6], genbank, args.ref, args.seq, args.temp, args.cds, args.trna, args.rrna, region, feature_count, results, removed_results, 'left_unpaired.bed')
+                        add_known(x_L, x_R, y_L, y_R, info[6], genbank, args.ref, args.seq, args.temp, args.cds, args.trna, args.rrna, region, feature_count, results, removed_results, line, 'left_unpaired.bed')
                         region += 1
                     # Could possibly be a novel hit but the gap size is too large
                     elif float(info[6]) / is_length <= args.min_range and float(info[6]) / is_length < args.max_range:
@@ -435,7 +435,7 @@ def main():
                         region += 1
                     #a known hit
                     elif float(info[6]) / is_length >= args.min_range and float(info[6]) / is_length <= args.max_range:
-                        add_known(x_L, x_R, y_L, y_R, info[6], genbank, args.ref, args.seq, args.temp, args.cds, args.trna, args.rrna, region, feature_count, results, removed_results, 'right_unpaired.bed')               
+                        add_known(x_L, x_R, y_L, y_R, info[6], genbank, args.ref, args.seq, args.temp, args.cds, args.trna, args.rrna, region, feature_count, results, removed_results, line, 'right_unpaired.bed')               
                         region += 1
                     #could possibly be a novel hit but the gap size is too large
                     elif float(info[6]) / is_length <= args.min_range and float(info[6]) / is_length < args.max_range:
