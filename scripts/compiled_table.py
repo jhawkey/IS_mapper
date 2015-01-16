@@ -12,6 +12,7 @@ from Bio.Blast.Applications import NcbiblastnCommandline
 from operator import itemgetter
 import os, sys, re, collections, operator
 from collections import OrderedDict
+from ismap import gbk_to_fasta
 
 def parse_args():
 
@@ -29,14 +30,6 @@ def parse_args():
     parser.add_argument('--output', type=str, required=True, help='name of output file')
 
     return parser.parse_args()
-
-def gbk_to_fasta(genbank, fasta):
-    '''
-    Turns a genbank file into a fasta file.
-    '''
-
-    sequences = SeqIO.parse(genbank, "genbank")
-    SeqIO.write(sequences, fasta, "fasta")
 
 def check_ranges(ranges, range_to_check, gap, orientation):
     '''
@@ -324,6 +317,7 @@ def get_other_gene(reference, pos, direction, cds_features, trna_features, rrna_
     # The closest gene is the one with the smallest distance
     closest_gene = distance[min(distance_keys)]
     return closest_gene
+
 def blast_db(fasta):
     '''
     Create a BLAST database if one doesn't exist already.
