@@ -162,6 +162,7 @@ def functional_prediction(gene_left, gene_right):
 
     # Get distance to left gene (start codon)
     bases = gene_left[1][1:]
+    #print bases
     # If left gene is on + strand, we're upstream, otherwise we're downstream
     if '+' in gene_left[1]:
         prediction = 'Upstream of ' + gene_left[-1][0] + ' by ' + bases + 'bp, '
@@ -170,11 +171,16 @@ def functional_prediction(gene_left, gene_right):
 
     # Get distance to right gene (start codon)
     bases = gene_right[1][1:]
+    #print bases
     # If right gene is on + strand, we're upstream, otherwise we're downstream
     if '+' in gene_right[1]:
         prediction += 'upstream of ' + gene_right[-1][0] + ' by ' + bases + 'bp'
     elif '-' in gene_right[1]:
         prediction += 'downstream of ' + gene_right[-1][0] + ' by ' + bases + 'bp'
+
+    if '+' not in gene_left[1] and '-' not in gene_left[1] and '+' not in gene_right[1] and '-' not in gene_right[1]:
+        prediction = 'Gene interrupted'
+    #print prediction
 
     return prediction
 
@@ -204,11 +210,11 @@ def add_known(x_L, x_R, y_L, y_R, gap, genbank, ref, seq, temp, cds, trna, rrna,
         # Taking all four coordinates and finding min and max to avoid coordinates 
         # that overlap the actual IS (don't want to return those in gene calls)
         # Mark as a known call to improve accuracy of gene calling
-        print 'setting known to true'
+        #print 'setting known to true'
         gene_left = get_other_gene(ref, min(y_L, y_R, x_R, x_L), "left", cds, trna, rrna, known=True)
         gene_right = get_other_gene(ref, max(y_L, y_R, x_R, x_L), "right", cds, trna, rrna, known=True)
-        print gene_left
-        print gene_right
+        #print gene_left
+        #print gene_right
         # If the genes are the same, then this gene must be interrupted by the known site
         if gene_left[0] == gene_right[0]:
             func_pred == 'Gene interrupted'
