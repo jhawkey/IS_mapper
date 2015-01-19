@@ -565,6 +565,7 @@ def main():
             # remove temp folder if required
             if args.temp == False:
                 run_command(['rm', '-rf', temp_folder], shell=True)
+    logging.info('ISMapper finished.')
 
 if __name__ == '__main__':
     main()

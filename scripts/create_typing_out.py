@@ -132,8 +132,8 @@ def novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, ref, cds, trna, rrna, gap, orie
     
     # Get the genes flanking the left and right ends
     gene_left, gene_right = get_flanking_genes(ref, x, y, cds, trna, rrna)
-    print gene_left
-    print gene_right
+    #print gene_left
+    #print gene_right
     # If the genes are the same, then hit is inside the gene
     if gene_left[-1] == gene_right[-1]:
         func_pred = 'Gene interrupted'
@@ -162,23 +162,87 @@ def functional_prediction(gene_left, gene_right):
 
     # Get distance to left gene (start codon)
     bases = gene_left[1][1:]
-    print gene_left
-    print gene_right
+    #print bases
     # If left gene is on + strand, we're upstream, otherwise we're downstream
     if '+' in gene_left[1]:
         prediction = 'Upstream of ' + gene_left[-1][0] + ' by ' + bases + 'bp, '
     elif '-' in gene_left[1]:
-        prediction = 'Downstream of ' + gene_left[-1][0] + ' by ' + bases + 'bp ,'
+        prediction = 'Downstream of ' + gene_left[-1][0] + ' by ' + bases + 'bp, '
 
     # Get distance to right gene (start codon)
     bases = gene_right[1][1:]
+    #print bases
     # If right gene is on + strand, we're upstream, otherwise we're downstream
     if '+' in gene_right[1]:
         prediction += 'upstream of ' + gene_right[-1][0] + ' by ' + bases + 'bp'
     elif '-' in gene_right[1]:
         prediction += 'downstream of ' + gene_right[-1][0] + ' by ' + bases + 'bp'
 
+    if '+' not in gene_left[1] and '-' not in gene_left[1] and '+' not in gene_right[1] and '-' not in gene_right[1]:
+        prediction = 'Gene interrupted'
+    #print prediction
+
     return prediction
+
+def add_known(x_L, x_R, y_L, y_R, gap, genbank, ref, seq, temp, cds, trna, rrna, region, feature_count, results, removed_results, line, file_loc):
+    '''
+    Adds a value to the table that is a known hit
+    '''
+    # Get orientation
+    if y_L < x_R:
+        start = y_L
+        end = x_R
+        orient = 'F'
+    else:
+        start = y_R
+        end = x_L
+        orient = 'R'
+    # Get features and append to genbank
+    left_feature, right_feature = createFeature([x_L, y_L, x_R, y_R], orient)
+    genbank.features.append(left_feature)
+    genbank.features.append(right_feature)
+    # Increment number of features found
+    feature_count += 2
+    # Check to see if the sequence between actually belongs to the IS query
+    seq_results = check_seq_between(ref, seq, start, end, 'region_' + str(region), temp)
+    # This is a known site of coverage and %ID above 80
+    if len(seq_results) != 0 and seq_results[0] >= 80 and seq_results[1] >= 80:
+        # Taking all four coordinates and finding min and max to avoid coordinates 
+        # that overlap the actual IS (don't want to return those in gene calls)
+        # Mark as a known call to improve accuracy of gene calling
+        #print 'setting known to true'
+        gene_left = get_other_gene(ref, min(y_L, y_R, x_R, x_L), "left", cds, trna, rrna, known=True)
+        gene_right = get_other_gene(ref, max(y_L, y_R, x_R, x_L), "right", cds, trna, rrna, known=True)
+        #print gene_left
+        #print gene_right
+        # If the genes are the same, then this gene must be interrupted by the known site
+        if gene_left[0] == gene_right[0]:
+            func_pred == 'Gene interrupted'
+            # Remove + and - from distance as the gene is interrupted
+            gene_right[1] = gene_right[1][:-1]
+            gene_left[1] = gene_left[1][:-1]
+        # Otherwise we need to determine who is upstream/downstream of what
+        else:
+            func_pred = functional_prediction(gene_left, gene_right)
+        # Add to the final results
+        if 'unpaired' in file_loc:
+            call = 'Known?'
+        else:
+            call = 'Known'
+        results['region_' + str(region)] = [orient, str(start), str(end), gap, call, str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1], func_pred]
+    else:   
+        # Then I'm not sure what this is
+        # Get flanking genes anyway
+        gene_left, gene_right = get_flanking_genes(ref, start, end, cds, trna, rrna)
+        func_pred = functional_prediction(gene_left, gene_right)
+        if 'unpaired' in file_loc:
+            call = 'Possible related IS?'
+        else:
+            call = 'Possible releated IS'
+        if len(seq_results) !=0:
+            results['region_' + str(region)] = [orient, str(start), str(end), gap, call, str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1], func_pred]
+        else:
+            removed_results['region_' + str(region)] = line.strip() + '\t' + file_loc +'\n'                
 
 def main():
 
@@ -206,7 +270,6 @@ def main():
     genbank = SeqIO.read(args.ref, 'genbank')
     feature_count = 0
 
-
     intersect_left = []
     intersect_right = []
     closest_left = []
@@ -217,8 +280,7 @@ def main():
             for line in bed_merged:
                 info = line.strip().split('\t')
                 intersect_left.append(info[0:3])
-                intersect_right.append(info[3:6])
-                
+                intersect_right.append(info[3:6])  
                 # Set up coordinates for checking: L is the left end of the IS (5') 
                 # and R is the right end of the IS (3')
                 # Eg: x_L and y_L are the x and y coordinates of the bed block that 
@@ -239,7 +301,8 @@ def main():
                         x = x_L
                         y = y_R
                     else:
-                        print 'neither if statement were correct'
+                        #print 'neither if statement were correct'
+                        pass
                     # Create result
                     novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, unpaired=False)
                     region += 1
@@ -284,7 +347,6 @@ def main():
             if int(info[6]) == 0:
                 pass
             # This is probably a novel hit where there was no overlap detected
-            # Therefore known as an imprecise hit
             elif int(info[6]) <= 10:
                 novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, unpaired=False)
                 region += 1
@@ -292,42 +354,7 @@ def main():
             # Only a known hit if we're in the a range between (default 0.5 and 1.5) the size
             # of the IS query
             elif float(info[6]) / is_length >= args.min_range and float(info[6]) / is_length <= args.max_range:
-                # Get orientation
-                if y_L < x_R:
-                    start = y_L
-                    end = x_R
-                    orient = 'F'
-                else:
-                    start = y_R
-                    end = x_L
-                    orient = 'R'
-                # Get features and append to genbank
-                left_feature, right_feature = createFeature([x_L, y_L, x_R, y_R], orient)
-                genbank.features.append(left_feature)
-                genbank.features.append(right_feature)
-                # Increment number of features found
-                feature_count += 2
-                # Check to see if the sequence between actually belongs to the IS query
-                seq_results = check_seq_between(args.ref, args.seq, start, end, 'region_' + str(region), args.temp)
-                # This is a known site of coverage and %ID above 80
-                if len(seq_results) != 0 and seq_results[0] >= 80 and seq_results[1] >= 80:
-                    # Taking all four coordinates and finding min and max to avoid coordinates 
-                    # that overlap the actual IS (don't want to return those in gene calls)
-                    gene_left = get_other_gene(args.ref, min(y_L, y_R, x_R, x_L), "left", args.cds, args.trna, args.rrna)
-                    gene_right = get_other_gene(args.ref, max(y_L, y_R, x_R, x_L), "right", args.cds, args.trna, args.rrna)
-                    func_pred = functional_prediction(gene_left, gene_right)
-                    # Add to the final results
-                    results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Known', str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1], func_pred]
-                else:
-                   # Then I'm not sure what this is
-                   print 'not sure'
-                   # Get flanking genes anyway
-                   gene_left, gene_right = get_flanking_genes(args.ref, start, end, args.cds, args.trna, args.rrna)
-                   func_pred = functional_prediction(gene_left, gene_right)
-                   if len(seq_results) !=0:
-                       results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Possible related IS', str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1], func_pred]
-                   else:
-                        removed_results['region_' + str(region)] = line.strip() + '\tclosest.bed\n'                
+                add_known(x_L, x_R, y_L, y_R, info[6], genbank, args.ref, args.seq, args.temp, args.cds, args.trna, args.rrna, region, feature_count, results, removed_results, line, 'closest.bed')
                 region += 1
             # Could possibly be a novel hit but the gap size is too large
             elif float(info[6]) / is_length <= args.min_range and float(info[6]) / is_length < args.max_range:
@@ -373,46 +400,14 @@ def main():
                         region += 1
                     # This is a known hit
                     elif float(info[6]) / is_length >= args.min_range and float(info[6]) / is_length <= args.max_range:
-                        if y_L < x_R:
-                            start = y_L
-                            end = x_R
-                            orient = 'F'
-                        else:
-                            start = y_R
-                            end = x_L
-                            orient = 'R'
-                        # Create features and add to genbank
-                        left_feature, right_feature = createFeature([x_L, y_L, x_R, y_R], orient)
-                        genbank.features.append(left_feature)
-                        genbank.features.append(right_feature)
-                        # Increment feature count
-                        feature_count += 2
-                        # Check to see if the sequence between is the IS query
-                        seq_results = check_seq_between(args.ref, args.seq, start, end, 'region_' + str(region), args.temp)
-                        # Known IS site if coverage and %ID above 80
-                        if len(seq_results) != 0 and seq_results[0] >= 80 and seq_results[1] >= 80:
-                            # Get flanking genes and functional info
-                            gene_left = get_other_gene(args.ref, min(start, end), "left", args.cds, args.trna, args.rrna)
-                            gene_right = get_other_gene(args.ref, max(start, end), "right", args.cds, args.trna, args.rrna)
-                            func_pred = functional_prediction(gene_left, gene_right)
-                            # Add to results file
-                            results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Known?', str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1], func_pred]
-                        # Otherwise I'm not sure what this is
-                        else:
-                           print 'not sure'
-                           gene_left, gene_right = get_flanking_genes(args.ref, start, end, args.cds, args.trna, args.rrna)
-                           func_pred = functional_prediction(gene_left, gene_right)
-                           if len(seq_results) !=0:
-                               results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Possible related IS?', str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1], func_pred]
-                           else:
-                                removed_results['region_' + str(region)] = line.strip() + '\tleft_unpaired.bed\n'                
+                        add_known(x_L, x_R, y_L, y_R, info[6], genbank, args.ref, args.seq, args.temp, args.cds, args.trna, args.rrna, region, feature_count, results, removed_results, line, 'left_unpaired.bed')
                         region += 1
                     # Could possibly be a novel hit but the gap size is too large
                     elif float(info[6]) / is_length <= args.min_range and float(info[6]) / is_length < args.max_range:
                         # Add to results file
                         novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, unpaired=True)
                         region +=1
-                    # This is something else altogether - either the gap is r
+                    # This is something else altogether - either the gap is
                     # really large or something, place it in removed_results
                     else:
                         removed_results['region_' + str(region)] = line.strip() + '\tleft_unpaired.bed\n'
@@ -448,36 +443,7 @@ def main():
                         region += 1
                     #a known hit
                     elif float(info[6]) / is_length >= args.min_range and float(info[6]) / is_length <= args.max_range:
-                        if y_L < x_R:
-                            start = y_L
-                            end = x_R
-                            orient = 'F'
-                        else:
-                            start = y_R
-                            end = x_L
-                            orient = 'R'
-                        
-                        left_feature, right_feature = createFeature([x_L, y_L, x_R, y_R], orient)
-                        genbank.features.append(left_feature)
-                        genbank.features.append(right_feature)
-                        feature_count += 2
-
-                        seq_results = check_seq_between(args.ref, args.seq, start, end, 'region_' + str(region), args.temp)
-                        if len(seq_results) != 0 and seq_results[0] >= 80 and seq_results[1] >= 80:
-                            #then this is definitely a known site
-                            gene_left = get_other_gene(args.ref, min(start, end), "left", args.cds, args.trna, args.rrna)
-                            gene_right = get_other_gene(args.ref, max(start, end), "right", args.cds, args.trna, args.rrna)
-                            func_pred = functional_prediction(gene_left, gene_right)
-                            results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Known?', str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1], func_pred]
-                        else:
-                           #then I'm not sure what this is
-                           print 'not sure'
-                           gene_left, gene_right = get_flanking_genes(args.ref, start, end, args.cds, args.trna, args.rrna)
-                           func_pred = functional_prediction(gene_left, gene_right)
-                           if len(seq_results) !=0:
-                               results['region_' + str(region)] = [orient, str(start), str(end), info[6], 'Possible related IS?', str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1], func_pred]
-                           else:
-                                removed_results['region_' + str(region)] = line.strip() + '\tright_unpaired.bed\n'                
+                        add_known(x_L, x_R, y_L, y_R, info[6], genbank, args.ref, args.seq, args.temp, args.cds, args.trna, args.rrna, region, feature_count, results, removed_results, line, 'right_unpaired.bed')               
                         region += 1
                     #could possibly be a novel hit but the gap size is too large
                     elif float(info[6]) / is_length <= args.min_range and float(info[6]) / is_length < args.max_range:
@@ -522,4 +488,5 @@ def main():
     #return(lines, len(removed_results))
 
 if __name__ == "__main__":
+    
     main()

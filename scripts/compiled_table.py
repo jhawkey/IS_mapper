@@ -12,6 +12,7 @@ from Bio.Blast.Applications import NcbiblastnCommandline
 from operator import itemgetter
 import os, sys, re, collections, operator
 from collections import OrderedDict
+from ismap import gbk_to_fasta
 
 def parse_args():
 
@@ -30,18 +31,19 @@ def parse_args():
 
     return parser.parse_args()
 
-def gbk_to_fasta(genbank, fasta):
-    '''
-    Turns a genbank file into a fasta file.
-    '''
-
-    sequences = SeqIO.parse(genbank, "genbank")
-    SeqIO.write(sequences, fasta, "fasta")
-
 def check_ranges(ranges, range_to_check, gap, orientation):
     '''
-    See if two hits overlap. If they do, merge them.
-    Otherwise keep them separate.
+    Takes a list of tuples with currently known ranges, and a new range
+    to check against these to see if it overlaps.
+    Also takes gap variable, indicating that the ranges may be gap distance
+    apart and still merged.
+    Also takes orientation, as only want to merge ranges that are the same 
+    orientation.
+
+    Returns the old range (to be replaced) and the new, merged range (to replace
+        the old range with) and the orientation.
+    If the range_to_check can't be merged with any of the known ranges, then
+    just return False, False, False.
     '''
     # Get start and end coordinates
     start = range_to_check[0]
@@ -53,37 +55,47 @@ def check_ranges(ranges, range_to_check, gap, orientation):
     for i in range(0, len(range_list)):
         # Only merge hits that have the same orientation
         if orientation == ranges[(range_list[i][0], range_list[i][1])]:
+            # Get coordinates of the current range to check
             x = range_list[i][0]
             y = range_list[i][1]
             # Forward orientations have certain rules
             if orientation == 'F':
+                # The x value must lie between start and stop in test range 
+                # taking into account gap
                 if x in range(start - gap, stop + 1) or x in range(start, stop + gap + 1):
-                    # These ranges overlap
+                    # If so, then these ranges overlap
                     new_start = min(x, start)
                     new_end = max(y, stop)
                     return range_list[i], (new_start, new_end), orientation
+                # Otherwise the y value must lie between the start and stop in the test range
+                # taking into account the gap
                 elif y in range(start - gap, stop + 1) or y in range(start, stop + gap + 1):
-                    # These ranges also overlap
+                    # If so, then these ranges overlap
                     new_start = min(x, start)
                     new_end = min(y, stop)
                     return range_list[i], (new_start, new_end), orientation
-            # Reverse orientations have certain rules
+            # Same goes for ranges that are in reverse orientation
             elif orientation == 'R':
                 if x in range(start - gap, stop + 1) or x in range(start, stop + gap + 1):
-                    # These ranges overlap
                     new_start = min(x, start)
                     new_end = max(y, stop)
                     return range_list[i], (new_start, new_end), orientation
                 elif y in range(start - gap, stop + 1) or y in range(start, stop + gap + 1):
-                    # These ranges also overlap
                     new_start = min(x, start)
                     new_end = min(y, stop)
                     return range_list[i], (new_start, new_end), orientation
+    # If the range doesn't overlap any currently know range, then return False
     return False, False, False
 
 def get_ref_positions(reference, is_query, positions_dict, orientation_dict):
     '''
     Get the coordinates of known IS sites in the reference.
+
+    Takes the reference genbank, the IS query and the dictionary to add_argument
+    IS query positions into, as well as a dictionary to add orientations
+    of each of these positions.
+    Returns these positions and orientations, as well as the reference name
+    for file naming.
     '''
     # Get the name of the IS query to create temp file
     is_name = os.path.split(is_query)[1]
@@ -117,7 +129,8 @@ def get_qualifiers(cds_qualifiers, trna_qualifiers, rrna_qualifiers, feature):
     Takes a list of possible qualifier IDs and attempts
     to find them in the feature given.
     If the qualifier is present, appends to a list, otherwise
-    just keeps going.
+    skips and keeps going.
+    Returns a list of qualfiers found in that feature.
     '''
     
     return_quals = []
@@ -135,6 +148,11 @@ def get_qualifiers(cds_qualifiers, trna_qualifiers, rrna_qualifiers, feature):
     return return_quals
 
 def get_main_gene_id(qualifier_list, feature):
+    '''
+    Takes a list of qualifiers and a genbank feature.
+    Returns the name of the qualifier that contains
+    the gene id.
+    '''
 
     for qual in qualifier_list:
         try:
@@ -145,7 +163,13 @@ def get_main_gene_id(qualifier_list, feature):
 
 def get_flanking_genes(reference, left, right, cds_features, trna_features, rrna_features):
     '''
-    Get the genes flanking a left and right hit.
+    Takes the reference genbank, left and right coordinates, as well as 
+    qualifiers for the different possible features in the genbank.
+    Looks at each feature in the genbank and measures how close it is to 
+    the left and right coordinates.
+
+    Returns the genes closest to the left (closest_left) and right (closest_right)
+    coordinates.
     '''
 
     gb = SeqIO.read(reference, 'genbank')
@@ -153,14 +177,8 @@ def get_flanking_genes(reference, left, right, cds_features, trna_features, rrna
     pos_gene_right = []
     distance_with_left = {}
     distance_with_right = {}
-
-    #cds_features = cds_quals.split(',')
-    #trna_features = trna_quals.split(',')
-    #rrna_features = rrna_quals.split(',')
-    print 'this is the left coordinate (closest to left gene)'
-    print left
-    print 'this is the right coordinate (closest to right gene)'
-    print right
+    #print left
+    #print right
 
     for feature in gb.features:
         if feature.type == 'CDS' or feature.type == 'tRNA' or feature.type == 'rRNA':
@@ -170,10 +188,10 @@ def get_flanking_genes(reference, left, right, cds_features, trna_features, rrna
                 pos = feature.location.start
             else:
                 pos = feature.location.end
-            #first check to see if both coordinates fit into the feature
+            # First check to see if both coordinates fit into the feature
             if left in feature.location and right in feature.location:
-                #we want the absolute value because a value with no sign in the compiled table
-                #indicates that the gene is interrupted
+                # We want the absolute value because a value with no sign in the final table
+                # indicates that the gene is interrupted
                 gene_id = get_main_gene_id(cds_features, feature)
                 gene = [gene_id, str(abs(pos - left)), values]
                 pos_gene_left = gene
@@ -224,75 +242,120 @@ def get_flanking_genes(reference, left, right, cds_features, trna_features, rrna
     distance_rkeys = list(OrderedDict.fromkeys(distance_with_right))
     closest_to_right_gene = distance_with_right[min(distance_rkeys)]
     pos_gene_right = closest_to_right_gene
-    print closest_to_left_gene
-    print closest_to_right_gene
+    #print closest_to_left_gene
+    #print closest_to_right_gene
 
     #we already know that the gene isn't interrupted
     if closest_to_left_gene[0] == closest_to_right_gene[0]:
-        print 'same gene'
+        #print 'same gene'
         if closest_to_left_gene[1] > closest_to_right_gene[1]:
-            print 'we look left'
+            #print 'we look left'
             direction = "left"
             other_gene = get_other_gene(reference, left, direction, cds_features, trna_features, rrna_features)
             return other_gene, pos_gene_right
         elif closest_to_left_gene[1] < closest_to_right_gene[1]:
-            print 'we look right'
+            #print 'we look right'
             direction = "right"
             other_gene = get_other_gene(reference, right, direction, cds_features, trna_features, rrna_features)
             return pos_gene_left, other_gene
     return pos_gene_left, pos_gene_right
 
-def get_other_gene(reference, pos, direction, cds_features, trna_features, rrna_features):
+def get_other_gene(reference, pos, direction, cds_features, trna_features, rrna_features, known=False):
     '''
-    Get the other gene
+    Takes reference genbank to look for features in, a coordinate (pos), 
+    the direction to look in (upstream or downstream), and qualifiers for
+    each of the feature types. If known is set to True, 
+    this tells the function that the position could be inside a gene that 
+    is flanking a known IS site in the reference.
+
+    Measure distance compared to the start codon of the feature.
+    (could be feature.location.start or .end depending on strand)
+    - value before the distance indicates we are downstream
+    + value before the distance indicates we are upstream
+
+    Returns the gene closest to the coordinate given (pos).
     '''
 
     gb = SeqIO.read(reference, "genbank")
     distance = {}
-    #cds_features = cds_features.split(',')
-    #trna_features = trna_features.split(',')
-    #rrna_features = rrna_features.split(',')
+
     for feature in gb.features:
-        #only want to look for genes that are to the left of the gene that has
-        #already been found
+        # Only want to look for genes that are to the left of the gene that has
+        # already been found
         if feature.type == "CDS" or feature.type == "tRNA" or feature.type == "rRNA":
             values = get_qualifiers(cds_features, trna_features, rrna_features, feature)
             values.append(feature.strand)
             if feature.strand == 1:
+                # Foward strand, so start and end are simple
                 feature_start = feature.location.start
                 feature_end = feature.location.end
             else:
+                # Reverse strand, so start of gene is actually
+                # the end of the location for the feature
                 feature_start = feature.location.end
                 feature_end = feature.location.start
             if direction == "left":
-                #for this to be true, the position we're looking at must be
-                #larger than the gene start and end (if the position is not
-                #in the gene)
-                if pos > feature_start and feature_end:
+                # For this to be true, the position we're looking at must be
+                # larger than the gene start and end (if the position is not
+                # in the gene)
+                if pos in range(min(feature_start, feature_end), max(feature_start, feature_end)) and known == True:
+                    # We're inside a gene, and this is a known hit, so the 
+                    # flanking region could be inside the gene, but the gene
+                    # is not necessarily interrupted by the known site.
                     gene_id = get_main_gene_id(cds_features, feature)
-                    #always want to refer to the start codon
                     if feature_start - pos > 0:
                         dist = '-' + str(feature_start - pos)
                     else:
                         dist = '+' + str(abs(feature_start - pos))
-
+                    closest_gene = [gene_id, dist, values]
+                    # Return this gene as it must be the answer if we're inside
+                    # this feature
+                    return closest_gene
+                elif pos > feature_start and feature_end:
+                    # Otherwise just check to see how close the
+                    # pos is to this gene
+                    gene_id = get_main_gene_id(cds_features, feature)
+                    # Always want to refer to the start codon
+                    if feature_start - pos > 0:
+                        dist = '-' + str(feature_start - pos)
+                    else:
+                        dist = '+' + str(abs(feature_start - pos))
                     distance[abs(feature_start - pos)] = [gene_id, dist, values]
             elif direction == "right":
-                if pos < feature_start and feature_end:
+                if pos in range(min(feature_start, feature_end), max(feature_start, feature_end)) and known == True:
+                    # We're inside a gene, and this is a known hit, so the 
+                    # flanking region could be inside the gene, but the gene
+                    # is not necessarily interrupted by the known site.
                     gene_id = get_main_gene_id(cds_features, feature)
+                    if feature_start - pos > 0:
+                        dist = '-' + str(feature_start - pos)
+                    else:
+                        dist = '+' + str(abs(feature_start - pos))
+                    closest_gene = [gene_id, dist, values]
+                    # Return this gene as it must be the answer if we're inside
+                    # this feature
+                    return closest_gene
+                elif pos < feature_start and feature_end:
+                    # Otherwise just check to see how close the
+                    # pos is to this gene
+                    gene_id = get_main_gene_id(cds_features, feature)
+                    # Always want to refer to the start codon
                     if feature_start - pos > 0:
                         dist = '-' + str(feature_start - pos)
                     else:
                         dist = '+' + str(abs(feature_start - pos))
                     distance[abs(feature_start - pos)] = [gene_id, dist, values]
                     
+    # Get all the distances and order them
     distance_keys = list(OrderedDict.fromkeys(distance))
+    # The closest gene is the one with the smallest distance
     closest_gene = distance[min(distance_keys)]
     return closest_gene
 
 def blast_db(fasta):
     '''
-    Create a BLAST database if one doesn't exist already.
+    Takes a fasta file and creates a BLAST database 
+    if one doesn't exist already.
     '''
     
     if not os.path.exists(fasta + '.nin'):
@@ -305,115 +368,152 @@ def main():
     unique_results_files = list(OrderedDict.fromkeys(args.tables))
     list_of_isolates = []
 
-    list_of_positions = collections.defaultdict(dict) # key1 = pos, key2 = isolate, value = +/-
+    # key1 = (start, end), key2 = isolate, value = +/*/?
+    list_of_positions = collections.defaultdict(dict)
+    # key1 = (start, end), key2 = ref, value = +
     list_of_ref_positions = collections.defaultdict(dict)
+    # key = (start, end), value = orientation (F/R)
     position_orientation = {}
 
     reference_fasta = args.reference_gbk.split('.g')[0]
+    # Create a fasta file of the reference for BLAST
     gbk_to_fasta(args.reference_gbk, reference_fasta)
-
+    # Make a BLAST database
     blast_db(reference_fasta)
-
+    # Get the reference positions and orientations for this IS query
     list_of_ref_positions, ref_position_orientation, ref_name = get_ref_positions(reference_fasta, args.seq, list_of_ref_positions, position_orientation)
 
+    # Loop through each table give to --tables
     for result_file in unique_results_files:
+        # Get isolate name
         isolate = result_file.split('_table.txt')[0]
         list_of_isolates.append(isolate)
+        # Skip the header
         header = 0
         with open(result_file) as file_open:
             for line in file_open:
+                # Skip header
                 if header == 0:
                     header += 1
+                # Check to make sure there were actually hits
                 elif 'No hits found' not in line and line != '':
                     info = line.strip('\n').split('\t')
+                    # Get orientation for hit and start/end coordinates
                     orientation = info[1]
                     is_start = int(info[2])
                     is_end = int(info[3])
+                    # Note whether call is Known, Novel or Possible related IS
                     call = info[5]
-                    #If the position is one that's in the reference, just do this compared to the reference to make flanking gene
-                    #calls a little easier
+                    # If the position Know and therefore in the reference, 
+                    # compare the hit to the known reference positions
                     if call == 'Known' or call == 'Known?':
                         if (is_start, is_end) not in list_of_ref_positions:
+                            # Looking for hits that are with 100 bp of the Known reference hits
                             old_range, new_range, new_orientation = check_ranges(ref_position_orientation, (is_start, is_end), 100, orientation)
+                            # If we can merge ranges
                             if old_range != False:
                                 store_values = list_of_ref_positions[old_range]
+                                # Remove the old range, and add the new range
                                 del list_of_ref_positions[old_range]
                                 list_of_ref_positions[new_range] = store_values
+                                # Note whether the hit is uncertain (?)
+                                # or confident (+)
                                 if '?' in call:
                                     list_of_ref_positions[new_range][isolate] = '?'
                                 else:
                                     list_of_ref_positions[new_range][isolate] = '+'
+                                # Remove the old range from the reference positions
+                                # and add the new merged range
                                 del ref_position_orientation[old_range]
                                 ref_position_orientation[new_range] = new_orientation
+                            # If we can't merge with a known position
                             else:
+                                # Mark as uncertain if ? in call
                                 if '?' in call:
                                     list_of_positions[(is_start, is_end)][isolate] = '?'
+                                # Otherwise just append it as a new reference position
                                 else:
                                     list_of_ref_positions[new_range][isolate] = '+'
+                                # Note the orientation of the hit
                                 position_orientation[(is_start, is_end)] = orientation
-                    #Otherwise try and merge with positions that are novel
+                    # Otherwise try and merge with positions that are novel
                     elif (is_start, is_end) not in list_of_positions:
+                        # If the list of positions isn't empty, then there are ranges to check against
                         if list_of_positions.keys() != []:
                             old_range, new_range, new_orientation = check_ranges(position_orientation, (is_start, is_end), args.gap, orientation)
+                            print old_range, new_range
+                            # So the current range overlaps with a range we already have
                             if old_range != False:
+                                # Remove the old range and add the new one
                                 store_values = list_of_positions[old_range]
                                 del list_of_positions[old_range]
                                 list_of_positions[new_range] = store_values
+                                # Mark as ? if uncertain, * if imprecise
+                                # or + if confident
                                 if '?' in call:
                                     list_of_positions[new_range][isolate] = '?'
                                 elif '*' in call:
                                     list_of_positions[new_range][isolate] = '*'
                                 else:
                                     list_of_positions[new_range][isolate] = '+'
+                                # Remove the old range from the orientations 
+                                # and add the new one
                                 del position_orientation[old_range]
                                 position_orientation[new_range] = new_orientation
+                            # Otherwise this range hasn't been seen before, so all values are False
                             else:
                                 if '?' in call:
-                                    list_of_positions[new_range][isolate] = '?'
+                                    list_of_positions[(is_start, is_end)][isolate] = '?'
                                 elif '*' in call:
-                                    list_of_positions[new_range][isolate] = '*'
+                                    list_of_positions[(is_start, is_end)][isolate] = '*'
                                 else:
-                                    list_of_positions[new_range][isolate] = '+'
+                                    list_of_positions[(is_start, is_end)][isolate] = '+'
                                 position_orientation[(is_start, is_end)] = orientation
+                        # Otherwise the position list is empty, so there are no ranges to check against
                         else:
                             if '?' in call:
-                                    list_of_positions[new_range][isolate] = '?'
+                                    list_of_positions[(is_start, is_end)][isolate] = '?'
                             elif '*' in call:
-                                list_of_positions[new_range][isolate] = '*'
+                                list_of_positions[(is_start, is_end)][isolate] = '*'
                             else:
-                                list_of_positions[new_range][isolate] = '+'
+                                list_of_positions[(is_start, is_end)][isolate] = '+'
                             position_orientation[(is_start, is_end)] = orientation
+                    # This position is already in the list, so just append the new isolate
                     elif (is_start, is_end) in list_of_positions:
                         if '?' in call:
-                            list_of_positions[new_range][isolate] = '?'
+                            list_of_positions[(is_start, is_end)][isolate] = '?'
                         elif '*' in call:
-                            list_of_positions[new_range][isolate] = '*'
+                            list_of_positions[(is_start, is_end)][isolate] = '*'
                         else:
-                            list_of_positions[new_range][isolate] = '+'
+                            list_of_positions[(is_start, is_end)][isolate] = '+'
 
-    #get the flanking genes for the reference positions
+    # key = (start, end), valye = [left_gene, right_gene]
     position_genes = {}
-    for position in list_of_ref_positions.keys():
-        left_pos = min(position[0], position[1])
-        right_pos = max(position[0], position[1])
-        flanking_left = get_other_gene(args.reference_gbk, left_pos, "left", args.cds, args.trna, args.rrna)
-        flanking_right = get_other_gene(args.reference_gbk, right_pos, "right", args.cds, args.trna, args.rrna)
-        position_genes[(position[0], position[1])] = [flanking_left, flanking_right]
+    # Get the flanking genes for each know position
+    if len(list_of_ref_positions.keys()) != 0:
+        for position in list_of_ref_positions.keys():
+            left_pos = min(position[0], position[1])
+            right_pos = max(position[0], position[1])
+            flanking_left = get_other_gene(args.reference_gbk, left_pos, "left", args.cds, args.trna, args.rrna)
+            flanking_right = get_other_gene(args.reference_gbk, right_pos, "right", args.cds, args.trna, args.rrna)
+            position_genes[(position[0], position[1])] = [flanking_left, flanking_right]
+    # Get flanking genes for novel positions
     for position in list_of_positions.keys():
         genes_before, genes_after = get_flanking_genes(args.reference_gbk, position[0], position[1], args.cds, args.trna, args.rrna)
+        print genes_before, genes_after
         position_genes[(position[0], position[1])] = [genes_before, genes_after]
 
-    # ordering positions from smallest to largest for final table output
+    # Order positions from smallest to largest for final table output
     order_position_list = list(OrderedDict.fromkeys(list_of_positions.keys())) + list(OrderedDict.fromkeys(list_of_ref_positions.keys()))
     order_position_list.sort()
 
-    # create header of table
+    # Create header of table
     with open(args.output, 'w') as out:
         header = ['isolate']
         for position in order_position_list:
             header.append(str(position[0]) + '-' + str(position[1]))
         out.write('\t'.join(header) + '\n')
-
+        # Add the values for the reference positions
         row = [ref_name]
         for position in order_position_list:
             if position in list_of_ref_positions:
@@ -423,7 +523,8 @@ def main():
                 row.append('-')
         out.write('\t'.join(row) + '\n')
         
-        # create each row
+        # Loop through each isoalte
+        # and create each row
         for isolate in list_of_isolates:
             row = [isolate]
             for position in order_position_list:
@@ -438,7 +539,7 @@ def main():
                     else:
                         row.append('-')
             out.write('\t'.join(row) + '\n')
-
+        # Set up flanking genes
         row_l_locus = ['left locus tag']
         row_r_locus = ['right locus tag']
         row_l_dist = ['left distance']
@@ -446,6 +547,7 @@ def main():
         row_l_prod = ['left product']
         row_r_prod = ['right product']
 
+        # Print flanking genes for each position
         for position in order_position_list:
             #   genes_before, genes_after = get_flanking_genes(args.reference_gbk, position[0], position[1], args.cds, args.trna, args.rrna)
             if position in position_genes:
