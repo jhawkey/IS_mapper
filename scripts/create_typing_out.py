@@ -30,7 +30,7 @@ def parse_args():
     parser.add_argument('--trna', nargs='+', type=str, required=False, default=['locus_tag', 'product'], help='qualifiers to look for in reference genbank for tRNA features (default locus_tag product)')
     parser.add_argument('--rrna', nargs='+', type=str, required=False, default=['locus_tag', 'product'], help='qualifiers to look for in reference genbank for rRNA features (default locus_tag product)')
     # Parameters for determining known genes
-    parser.add_argument('--min_range', type=float, required=False, default=0.5, help='Minimum percent size of the gap to be called a known hit (default 0.5, or 50 percent)')
+    parser.add_argument('--min_range', type=float, required=False, default=0.2, help='Minimum percent size of the gap to be called a known hit (default 0.2, or 20 percent)')
     parser.add_argument('--max_range', type=float, required=False, default=1.1, help='Maximum percent size of the gap to be called a known hit (default 1.1, or 110 percent)')
     # Output parameters
     parser.add_argument('--temp', type=str, required=True, help='location of temp folder to place intermediate blast files in')
@@ -291,23 +291,29 @@ def main():
                 y_R = int(info[5])
                 # Check to see if the gap is reasonable
                 if int(info[6]) <= 15:
-                    # Get orientation
-                    if x_L < x_R or y_L < y_R:
-                        orient = 'F'
-                        x = x_R
-                        y = y_L
-                    elif x_L > x_R or y_L > y_R:
-                        orient = 'R'
-                        x = x_L
-                        y = y_R
+                    R_range = range(min(x_R, y_R), max(x_R, y_R))
+                    L_range = range(min(x_L, y_L), max(x_L, y_L))
+                    # if one hit is inside the other hit, remove it - don't know what to do with these
+                    if (x_L in R_range and y_L in R_range) or (x_R in L_range and y_R in L_range):
+                        removed_results['region_' + str(lines)] = line.strip() + '\tOne hit inside the other, intersect.bed\n'
                     else:
-                        #print 'neither if statement were correct'
-                        pass
-                    # Create result
-                    novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, unpaired=False)
-                    region += 1
-                # Otherwise we're removing this region, but keeping the information
-                # so the user can check later
+                        # Get orientation
+                        if x_L < x_R or y_L < y_R:
+                            orient = 'F'
+                            x = x_R
+                            y = y_L
+                        elif x_L > x_R or y_L > y_R:
+                            orient = 'R'
+                            x = x_L
+                            y = y_R
+                        else:
+                            #print 'neither if statement were correct'
+                            pass
+                        # Create result
+                        novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, unpaired=False)
+                        region += 1
+                    # Otherwise we're removing this region, but keeping the information
+                    # so the user can check later
                 else:
                     removed_results['region_' + str(lines)] = line.strip() + '\tintersect.bed\n'
                 lines += 1
@@ -333,38 +339,44 @@ def main():
             y_L = int(info[2])
             x_R = int(info[4])
             y_R = int(info[5])
-            # Set orientation
-            if x_L < x_R and y_L < y_R:
-                orient = 'F'
-                x = y_L
-                y = x_R
-            elif x_L > x_R and y_L > y_R:
-                orient = 'R'
-                x = x_L
-                y = y_R
-            # If the gap column = 0, then they are intersected
-            # This will be in the intersect file, so ignore
-            if int(info[6]) == 0:
-                pass
-            # This is probably a novel hit where there was no overlap detected
-            elif int(info[6]) <= 10:
-                novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, unpaired=False)
-                region += 1
-            # This is probably a known hit, but need to check with BLAST
-            # Only a known hit if we're in the a range between (default 0.5 and 1.5) the size
-            # of the IS query
-            elif float(info[6]) / is_length >= args.min_range and float(info[6]) / is_length <= args.max_range:
-                add_known(x_L, x_R, y_L, y_R, info[6], genbank, args.ref, args.seq, args.temp, args.cds, args.trna, args.rrna, region, feature_count, results, removed_results, line, 'closest.bed')
-                region += 1
-            # Could possibly be a novel hit but the gap size is too large
-            elif float(info[6]) / is_length <= args.min_range and float(info[6]) / is_length < args.max_range:
-                novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, unpaired=False,star=True)
-                region +=1
-            # This is something else altogether - either the gap 
-            # is really large or something, place it in removed_results
+            R_range = range(min(x_R, y_R), max(x_R, y_R))
+            L_range = range(min(x_L, y_L), max(x_L, y_L))
+            # if one hit is inside the other hit, remove it - don't know what to do with these
+            if (x_L in R_range and y_L in R_range) or (x_R in L_range and y_R in L_range):
+                removed_results['region_' + str(region)] = line.strip() + '\tOne hit inside the other, closest.bed\n'
             else:
-                removed_results['region_' + str(region)] = line.strip() + '\tclosest.bed\n'
-                region += 1
+                # Set orientation
+                if x_L < x_R and y_L < y_R:
+                    orient = 'F'
+                    x = y_L
+                    y = x_R
+                elif x_L > x_R and y_L > y_R:
+                    orient = 'R'
+                    x = x_L
+                    y = y_R
+                # If the gap column = 0, then they are intersected
+                # This will be in the intersect file, so ignore
+                if int(info[6]) == 0:
+                    pass
+                # This is probably a novel hit where there was no overlap detected
+                elif int(info[6]) <= 10:
+                    novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, unpaired=False)
+                    region += 1
+                # This is probably a known hit, but need to check with BLAST
+                # Only a known hit if we're in the a range between (default 0.5 and 1.5) the size
+                # of the IS query
+                elif float(info[6]) / is_length >= args.min_range and float(info[6]) / is_length <= args.max_range:
+                    add_known(x_L, x_R, y_L, y_R, info[6], genbank, args.ref, args.seq, args.temp, args.cds, args.trna, args.rrna, region, feature_count, results, removed_results, line, 'closest.bed')
+                    region += 1
+                # Could possibly be a novel hit but the gap size is too large
+                elif float(info[6]) / is_length <= args.min_range and float(info[6]) / is_length < args.max_range:
+                    novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, unpaired=False,star=True)
+                    region +=1
+                # This is something else altogether - either the gap 
+                # is really large or something, place it in removed_results
+                else:
+                    removed_results['region_' + str(region)] = line.strip() + '\tclosest.bed\n'
+                    region += 1
 
     # Looking for unpaired hits which are not in the merged/closest bed files
     # Possibly unpaired because the pair is low coverage and didn't pass
@@ -385,33 +397,39 @@ def main():
                     y_L = int(info[2])
                     x_R = int(info[4])
                     y_R = int(info[5])
-                    # Get orientation
-                    if x_L < x_R and y_L < y_R:
-                        orient = 'F'
-                        x = x_R
-                        y = y_L
-                    elif x_L > x_R and y_L > y_R:
-                        orient = 'R'
-                        x = x_L
-                        y = y_R
-                    # This ia novel hit
-                    if float(info[6]) <= 10:
-                        novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, unpaired=True)
-                        region += 1
-                    # This is a known hit
-                    elif float(info[6]) / is_length >= args.min_range and float(info[6]) / is_length <= args.max_range:
-                        add_known(x_L, x_R, y_L, y_R, info[6], genbank, args.ref, args.seq, args.temp, args.cds, args.trna, args.rrna, region, feature_count, results, removed_results, line, 'left_unpaired.bed')
-                        region += 1
-                    # Could possibly be a novel hit but the gap size is too large
-                    elif float(info[6]) / is_length <= args.min_range and float(info[6]) / is_length < args.max_range:
-                        # Add to results file
-                        novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, unpaired=True)
-                        region +=1
-                    # This is something else altogether - either the gap is
-                    # really large or something, place it in removed_results
+                    R_range = range(min(x_R, y_R), max(x_R, y_R))
+                    L_range = range(min(x_L, y_L), max(x_L, y_L))
+                    # if one hit is inside the other hit, remove it - don't know what to do with these
+                    if (x_L in R_range and y_L in R_range) or (x_R in L_range and y_R in L_range):
+                        removed_results['region_' + str(lines)] = line.strip() + '\tOne hit inside the other, intersect.bed\n'
                     else:
-                        removed_results['region_' + str(region)] = line.strip() + '\tleft_unpaired.bed\n'
-                        region += 1
+                        # Get orientation
+                        if x_L < x_R and y_L < y_R:
+                            orient = 'F'
+                            x = x_R
+                            y = y_L
+                        elif x_L > x_R and y_L > y_R:
+                            orient = 'R'
+                            x = x_L
+                            y = y_R
+                        # This ia novel hit
+                        if float(info[6]) <= 10:
+                            novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, unpaired=True)
+                            region += 1
+                        # This is a known hit
+                        elif float(info[6]) / is_length >= args.min_range and float(info[6]) / is_length <= args.max_range:
+                            add_known(x_L, x_R, y_L, y_R, info[6], genbank, args.ref, args.seq, args.temp, args.cds, args.trna, args.rrna, region, feature_count, results, removed_results, line, 'left_unpaired.bed')
+                            region += 1
+                        # Could possibly be a novel hit but the gap size is too large
+                        elif float(info[6]) / is_length <= args.min_range and float(info[6]) / is_length < args.max_range:
+                            # Add to results file
+                            novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, unpaired=True)
+                            region +=1
+                        # This is something else altogether - either the gap is
+                        # really large or something, place it in removed_results
+                        else:
+                            removed_results['region_' + str(region)] = line.strip() + '\tleft_unpaired.bed\n'
+                            region += 1
     line_check = []
     with open(args.right_bed) as right_bed:
         for line in right_bed:
@@ -428,31 +446,37 @@ def main():
                     y_L = int(info[2])
                     x_R = int(info[4])
                     y_R = int(info[5])
-                    #get orientation
-                    if x_L < x_R and y_L < y_R:
-                        orient = 'F'
-                        x = x_R
-                        y = y_L
-                    elif x_L > x_R and y_L > y_R:
-                        orient = 'R'
-                        x = x_L
-                        y = y_R
-                    #a novel hit
-                    if float(info[6]) <= 10:
-                        novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, unpaired=True)
-                        region += 1
-                    #a known hit
-                    elif float(info[6]) / is_length >= args.min_range and float(info[6]) / is_length <= args.max_range:
-                        add_known(x_L, x_R, y_L, y_R, info[6], genbank, args.ref, args.seq, args.temp, args.cds, args.trna, args.rrna, region, feature_count, results, removed_results, line, 'right_unpaired.bed')               
-                        region += 1
-                    #could possibly be a novel hit but the gap size is too large
-                    elif float(info[6]) / is_length <= args.min_range and float(info[6]) / is_length < args.max_range:
-                        novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, unpaired=True)
-                        region +=1
-                    #this is something else altogether - either the gap is really large or something, place it in removed_results
+                    R_range = range(min(x_R, y_R), max(x_R, y_R))
+                    L_range = range(min(x_L, y_L), max(x_L, y_L))
+                    # if one hit is inside the other hit, remove it - don't know what to do with these
+                    if (x_L in R_range and y_L in R_range) or (x_R in L_range and y_R in L_range):
+                        removed_results['region_' + str(lines)] = line.strip() + '\tOne hit inside the other, intersect.bed\n'
                     else:
-                        removed_results['region_' + str(region)] = line.strip() + '\tright_unpaired.bed\n'
-                        region += 1
+                        #get orientation
+                        if x_L < x_R and y_L < y_R:
+                            orient = 'F'
+                            x = x_R
+                            y = y_L
+                        elif x_L > x_R and y_L > y_R:
+                            orient = 'R'
+                            x = x_L
+                            y = y_R
+                        #a novel hit
+                        if float(info[6]) <= 10:
+                            novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, unpaired=True)
+                            region += 1
+                        #a known hit
+                        elif float(info[6]) / is_length >= args.min_range and float(info[6]) / is_length <= args.max_range:
+                            add_known(x_L, x_R, y_L, y_R, info[6], genbank, args.ref, args.seq, args.temp, args.cds, args.trna, args.rrna, region, feature_count, results, removed_results, line, 'right_unpaired.bed')               
+                            region += 1
+                        #could possibly be a novel hit but the gap size is too large
+                        elif float(info[6]) / is_length <= args.min_range and float(info[6]) / is_length < args.max_range:
+                            novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, unpaired=True)
+                            region +=1
+                        #this is something else altogether - either the gap is really large or something, place it in removed_results
+                        else:
+                            removed_results['region_' + str(region)] = line.strip() + '\tright_unpaired.bed\n'
+                            region += 1
 
     # Sort regions into the correct order
     table_keys = []
