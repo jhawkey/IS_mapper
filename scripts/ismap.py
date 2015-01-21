@@ -54,6 +54,8 @@ def parse_args():
     parser.add_argument('--path', type=str, required=False, default='', help='Path to folder where scripts are (only required for development).')
     # Cutoffs for annotation
     parser.add_argument('--cutoff', type=int, required=False, default=6, help='Minimum depth for mapped region to be kept in bed file (default 6)')
+    parser.add_argument('--min_range', type=str, required=False, default='0.2', help='Minimum percent size of the gap to be called a known hit (default 0.2, or 20 percent)')
+    parser.add_argument('--max_range', type=str, required=False, default='1.1', help='Maximum percent size of the gap to be called a known hit (default 1.1, or 110 percent)')
     parser.add_argument('--merging', type=str, required=False, default='100', help='Value for merging left and right hits in bed files together to simply calculation of closest and intersecting regions (default 100).')
     parser.add_argument('--a', action='store_true', required=False, help='Switch on all alignment reporting for bwa')
     parser.add_argument('--T', type=str, required=False, default='30', help='Mapping quality score for bwa')
@@ -560,7 +562,12 @@ def main():
                 run_command(['closestBed', '-a', five_merged_bed, '-b', three_cov_merged, '-d', '>', bed_unpaired_five], shell=True)
                 run_command(['closestBed', '-a', five_cov_merged, '-b', three_merged_bed, '-d', '>', bed_unpaired_three], shell=True)
                 # Create table and annotate genbank with hits
-                run_command([args.path + 'create_typing_out.py', '--intersect', bed_intersect, '--closest', bed_closest, '--left_bed', five_merged_bed, '--right_bed', three_merged_bed, '--left_unpaired', bed_unpaired_five, '--right_unpaired', bed_unpaired_three, '--seq', query, '--ref', args.typingRef, '--temp', temp_folder, '--cds', args.cds, '--trna', args.trna, '--rrna', args.rrna, '--output', sample + '_' + query_name], shell=True)
+                run_command([args.path + 'create_typing_out.py', '--intersect', bed_intersect, '--closest', bed_closest, 
+                    '--left_bed', five_merged_bed, '--right_bed', three_merged_bed, 
+                    '--left_unpaired', bed_unpaired_five, '--right_unpaired', bed_unpaired_three, 
+                    '--seq', query, '--ref', args.typingRef, '--temp', temp_folder, 
+                    '--cds', args.cds, '--trna', args.trna, '--rrna', args.rrna, '--min_range', args.min_range,
+                    '--max_range', args.max_range, '--output', sample + '_' + query_name], shell=True)
 
             # remove temp folder if required
             if args.temp == False:

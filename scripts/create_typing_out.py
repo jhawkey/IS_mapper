@@ -30,7 +30,7 @@ def parse_args():
     parser.add_argument('--trna', nargs='+', type=str, required=False, default=['locus_tag', 'product'], help='qualifiers to look for in reference genbank for tRNA features (default locus_tag product)')
     parser.add_argument('--rrna', nargs='+', type=str, required=False, default=['locus_tag', 'product'], help='qualifiers to look for in reference genbank for rRNA features (default locus_tag product)')
     # Parameters for determining known genes
-    parser.add_argument('--min_range', type=float, required=False, default=0.2, help='Minimum percent size of the gap to be called a known hit (default 0.5, or 50 percent)')
+    parser.add_argument('--min_range', type=float, required=False, default=0.2, help='Minimum percent size of the gap to be called a known hit (default 0.2, or 20 percent)')
     parser.add_argument('--max_range', type=float, required=False, default=1.1, help='Maximum percent size of the gap to be called a known hit (default 1.1, or 110 percent)')
     # Output parameters
     parser.add_argument('--temp', type=str, required=True, help='location of temp folder to place intermediate blast files in')
