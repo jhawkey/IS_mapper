@@ -314,8 +314,8 @@ def main():
                         region += 1
                     # Otherwise we're removing this region, but keeping the information
                     # so the user can check later
-                    else:
-                        removed_results['region_' + str(lines)] = line.strip() + '\tintersect.bed\n'
+                else:
+                    removed_results['region_' + str(lines)] = line.strip() + '\tintersect.bed\n'
                 lines += 1
     
     # Get size of IS query
