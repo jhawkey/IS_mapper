@@ -86,7 +86,7 @@ def check_seq_between(gb, insertion, start, end, name, temp):
     hit = []
     return []
 
-def createFeature(hits, orient):
+def createFeature(hits, orient, note):
     '''
     Create a feature for the hit to
     be added to the genbank.
@@ -106,10 +106,12 @@ def createFeature(hits, orient):
         #then in forward orientation, set colour to be red
         quals['colour'] = '2'
         quals['orientation'] = 'forward'
+        quals['note'] = note
     elif orient == 'R':
         #then in reverse orientation, set colour to be yellow
         quals['colour'] = '7'
         quals['orientation'] = 'reverse'
+        quals['note'] = note
     # Create features
     left_feature = SeqFeature.SeqFeature(left_location, type='left_end', qualifiers=quals)
     right_feature = SeqFeature.SeqFeature(right_location, type='right_end', qualifiers=quals)
@@ -123,12 +125,15 @@ def novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, ref, cds, trna, rrna, gap, orie
     '''
     
     # Create features for genbank
-    left_feature, right_feature = createFeature([x_L, y_L, x_R, y_R], orient)
+    note = 'Novel hit'
+    if unpaired == True:
+        note += ' , unpaired hit'
+    if star == True:
+        note += ' , imprecise hit'
+    left_feature, right_feature = createFeature([x_L, y_L, x_R, y_R], orient, note)
     # Add features to genbank
     genbank.features.append(left_feature)
     genbank.features.append(right_feature)
-    # Increment the feature count
-    feature_count += 2
     
     # Get the genes flanking the left and right ends
     gene_left, gene_right = get_flanking_genes(ref, x, y, cds, trna, rrna)
@@ -198,11 +203,10 @@ def add_known(x_L, x_R, y_L, y_R, gap, genbank, ref, seq, temp, cds, trna, rrna,
         end = x_L
         orient = 'R'
     # Get features and append to genbank
-    left_feature, right_feature = createFeature([x_L, y_L, x_R, y_R], orient)
+    note = 'Known hit'
+    left_feature, right_feature = createFeature([x_L, y_L, x_R, y_R], orient, note)
     genbank.features.append(left_feature)
     genbank.features.append(right_feature)
-    # Increment number of features found
-    feature_count += 2
     # Check to see if the sequence between actually belongs to the IS query
     seq_results = check_seq_between(ref, seq, start, end, 'region_' + str(region), temp)
     # This is a known site of coverage and %ID above 80
@@ -312,6 +316,7 @@ def main():
                         # Create result
                         novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, unpaired=False)
                         region += 1
+                        feature_count += 2
                     # Otherwise we're removing this region, but keeping the information
                     # so the user can check later
                 else:
@@ -362,16 +367,19 @@ def main():
                 elif int(info[6]) <= 10:
                     novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, unpaired=False)
                     region += 1
+                    feature_count += 2
                 # This is probably a known hit, but need to check with BLAST
                 # Only a known hit if we're in the a range between (default 0.5 and 1.5) the size
                 # of the IS query
                 elif float(info[6]) / is_length >= args.min_range and float(info[6]) / is_length <= args.max_range:
                     add_known(x_L, x_R, y_L, y_R, info[6], genbank, args.ref, args.seq, args.temp, args.cds, args.trna, args.rrna, region, feature_count, results, removed_results, line, 'closest.bed')
                     region += 1
+                    feature_count += 2
                 # Could possibly be a novel hit but the gap size is too large
                 elif float(info[6]) / is_length <= args.min_range and float(info[6]) / is_length < args.max_range:
                     novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, unpaired=False,star=True)
                     region +=1
+                    feature_count += 2
                 # This is something else altogether - either the gap 
                 # is really large or something, place it in removed_results
                 else:
@@ -416,15 +424,18 @@ def main():
                         if float(info[6]) <= 10:
                             novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, unpaired=True)
                             region += 1
+                            feature_count += 2
                         # This is a known hit
                         elif float(info[6]) / is_length >= args.min_range and float(info[6]) / is_length <= args.max_range:
                             add_known(x_L, x_R, y_L, y_R, info[6], genbank, args.ref, args.seq, args.temp, args.cds, args.trna, args.rrna, region, feature_count, results, removed_results, line, 'left_unpaired.bed')
                             region += 1
+                            feature_count += 2
                         # Could possibly be a novel hit but the gap size is too large
                         elif float(info[6]) / is_length <= args.min_range and float(info[6]) / is_length < args.max_range:
                             # Add to results file
                             novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, unpaired=True)
                             region +=1
+                            feature_count += 2
                         # This is something else altogether - either the gap is
                         # really large or something, place it in removed_results
                         else:
@@ -465,19 +476,21 @@ def main():
                         if float(info[6]) <= 10:
                             novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, unpaired=True)
                             region += 1
+                            feature_count += 2
                         #a known hit
                         elif float(info[6]) / is_length >= args.min_range and float(info[6]) / is_length <= args.max_range:
                             add_known(x_L, x_R, y_L, y_R, info[6], genbank, args.ref, args.seq, args.temp, args.cds, args.trna, args.rrna, region, feature_count, results, removed_results, line, 'right_unpaired.bed')               
                             region += 1
+                            feature_count += 2
                         #could possibly be a novel hit but the gap size is too large
                         elif float(info[6]) / is_length <= args.min_range and float(info[6]) / is_length < args.max_range:
                             novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, unpaired=True)
                             region +=1
+                            feature_count += 2
                         #this is something else altogether - either the gap is really large or something, place it in removed_results
                         else:
                             removed_results['region_' + str(region)] = line.strip() + '\tright_unpaired.bed\n'
                             region += 1
-
     # Sort regions into the correct order
     table_keys = []
     for key in results:

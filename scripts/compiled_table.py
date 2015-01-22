@@ -348,6 +348,41 @@ def get_other_gene(reference, pos, direction, cds_features, trna_features, rrna_
                     
     # Get all the distances and order them
     distance_keys = list(OrderedDict.fromkeys(distance))
+    # If an empty list is returned, then we must be either at the very
+    # beginning or the very end of the genbank
+    if len(distance_keys) == 0:
+        # If the distance to the end of the genbank is
+        # smaller than the distance from the start of the
+        # genbank, we're at the end
+        if abs(pos - len(gb)) < abs(1 - pos):
+            # We need the first gene
+            feature_no = 0
+            for feature in gb.features:
+                if feature_no == 0 and (feature.type == 'CDS' or feature.type == 'tRNA' or feature.type == 'rRNA'):
+                    gene_id = get_main_gene_id(cds_features, feature)
+                    values = get_qualifiers(cds_features, trna_features, rrna_features, feature)
+                    values.append(feature.strand)
+                    closest_gene = [gene_id, 'start of genbank', values]
+                    feature_no += 1
+                    return closest_gene
+                else:
+                    pass
+        # Otherwise we're closest to the start
+        else:
+            # We need the last gene
+            closest_gene = []
+            feature_no = 1
+            while closest_gene == []:
+                index_no = '-' + str(feature_no)
+                if gb.features[int(index_no)].type == 'CDS' or gb.features[int(index_no)].type == 'tRNA' or gb.features[int(index_no)].type == 'rRNA':
+                    gene_id = get_main_gene_id(cds_features, feature)
+                    values = get_qualifiers(cds_features, trna_features, rrna_features, feature)
+                    values.append(feature.strand)
+                    closest_gene = [gene_id, 'end of genbank', values]
+                    return closest_gene
+                else:
+                    feature_no += 1
+
     # The closest gene is the one with the smallest distance
     closest_gene = distance[min(distance_keys)]
     return closest_gene
