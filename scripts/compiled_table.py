@@ -23,9 +23,9 @@ def parse_args():
     parser.add_argument('--seq', type=str, required=True, help='fasta file for insertion sequence looking for in reference')
     # Parameters for hits
     parser.add_argument('--gap', type=int, required=False, default=0, help='distance between regions to call overlapping')
-    parser.add_argument('--cds', nargs='+', type=str, required=False, default='locus_tag gene product', help='qualifiers to look for in reference genbank for CDS features')
-    parser.add_argument('--trna', nargs='+', type=str, required=False, default='locus_tag product', help='qualifiers to look for in reference genbank for tRNA features')
-    parser.add_argument('--rrna', nargs='+', type=str, required=False, default='locus_tag product', help='qualifiers to look for in reference genbank for rRNA features')
+    parser.add_argument('--cds', nargs='+', type=str, required=False, default=['locus_tag', 'gene', 'product'], help='qualifiers to look for in reference genbank for CDS features')
+    parser.add_argument('--trna', nargs='+', type=str, required=False, default=['locus_tag', 'product'], help='qualifiers to look for in reference genbank for tRNA features')
+    parser.add_argument('--rrna', nargs='+', type=str, required=False, default=['locus_tag', 'product'], help='qualifiers to look for in reference genbank for rRNA features')
     # Output parameters
     parser.add_argument('--output', type=str, required=True, help='name of output file')
 
@@ -121,7 +121,6 @@ def get_ref_positions(reference, is_query, positions_dict, orientation_dict):
                     orientation_dict[(int(info[6]), int(info[7]))] = 'R'
                 else:
                     orientation_dict[(int(info[6]), int(info[7]))] = 'F'
-
     return positions_dict, orientation_dict, ref_name
 
 def get_qualifiers(cds_qualifiers, trna_qualifiers, rrna_qualifiers, feature):
@@ -468,7 +467,7 @@ def main():
                                     list_of_positions[(is_start, is_end)][isolate] = '?'
                                 # Otherwise just append it as a new reference position
                                 else:
-                                    list_of_ref_positions[new_range][isolate] = '+'
+                                    list_of_ref_positions[(is_start, is_end)][isolate] = '+'
                                 # Note the orientation of the hit
                                 position_orientation[(is_start, is_end)] = orientation
                     # Otherwise try and merge with positions that are novel
@@ -476,7 +475,6 @@ def main():
                         # If the list of positions isn't empty, then there are ranges to check against
                         if list_of_positions.keys() != []:
                             old_range, new_range, new_orientation = check_ranges(position_orientation, (is_start, is_end), args.gap, orientation)
-                            print old_range, new_range
                             # So the current range overlaps with a range we already have
                             if old_range != False:
                                 # Remove the old range and add the new one
@@ -535,7 +533,6 @@ def main():
     # Get flanking genes for novel positions
     for position in list_of_positions.keys():
         genes_before, genes_after = get_flanking_genes(args.reference_gbk, position[0], position[1], args.cds, args.trna, args.rrna)
-        print genes_before, genes_after
         position_genes[(position[0], position[1])] = [genes_before, genes_after]
 
     # Order positions from smallest to largest for final table output
