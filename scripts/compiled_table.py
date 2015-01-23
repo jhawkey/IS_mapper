@@ -423,7 +423,7 @@ def main():
     list_of_ref_positions, ref_position_orientation, ref_name = get_ref_positions(reference_fasta, args.seq, list_of_ref_positions, position_orientation)
 
     elapsed_time = time.time() - start_time
-    print 'Time take: ' + str(elapsed_time)
+    print 'Time taken: ' + str(elapsed_time)
     # Loop through each table give to --tables
     print 'Collating results files ...'
     for result_file in unique_results_files:
@@ -529,7 +529,7 @@ def main():
                             list_of_positions[(is_start, is_end)][isolate] = '+'
 
     elapsed_time = time.time() - start_time
-    print 'Time take: ' + str(elapsed_time)
+    print 'Time taken: ' + str(elapsed_time)
 
     # key = (start, end), valye = [left_gene, right_gene]
     position_genes = {}
@@ -552,7 +552,7 @@ def main():
     order_position_list.sort()
 
     elapsed_time = time.time() - start_time
-    print 'Time take: ' + str(elapsed_time)
+    print 'Time taken: ' + str(elapsed_time)
 
     # Create header of table
     print 'Writing output table to ' + args.output + ' ...'
