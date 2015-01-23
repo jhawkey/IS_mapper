@@ -13,6 +13,7 @@ from operator import itemgetter
 import os, sys, re, collections, operator
 from collections import OrderedDict
 from ismap import gbk_to_fasta
+import time
 
 def parse_args():
 
@@ -396,6 +397,8 @@ def blast_db(fasta):
         os.system('makeblastdb -in ' + fasta + ' -dbtype nucl')
 
 def main():
+    
+    start_time = time.time()
 
     args = parse_args()
 
@@ -411,13 +414,18 @@ def main():
 
     reference_fasta = args.reference_gbk.split('.g')[0]
     # Create a fasta file of the reference for BLAST
+    print 'Creating fasta file and database of reference ...'
     gbk_to_fasta(args.reference_gbk, reference_fasta)
     # Make a BLAST database
     blast_db(reference_fasta)
     # Get the reference positions and orientations for this IS query
+    print '\nGetting query positions in reference ...'
     list_of_ref_positions, ref_position_orientation, ref_name = get_ref_positions(reference_fasta, args.seq, list_of_ref_positions, position_orientation)
 
+    elapsed_time = time.time() - start_time
+    print 'Time take: ' + str(elapsed_time)
     # Loop through each table give to --tables
+    print 'Collating results files ...'
     for result_file in unique_results_files:
         # Get isolate name
         isolate = result_file.split('_table.txt')[0]
@@ -520,9 +528,13 @@ def main():
                         else:
                             list_of_positions[(is_start, is_end)][isolate] = '+'
 
+    elapsed_time = time.time() - start_time
+    print 'Time take: ' + str(elapsed_time)
+
     # key = (start, end), valye = [left_gene, right_gene]
     position_genes = {}
     # Get the flanking genes for each know position
+    print 'Getting flanking genes for each position (this step is the longest and could take some time) ...'
     if len(list_of_ref_positions.keys()) != 0:
         for position in list_of_ref_positions.keys():
             left_pos = min(position[0], position[1])
@@ -539,7 +551,11 @@ def main():
     order_position_list = list(OrderedDict.fromkeys(list_of_positions.keys())) + list(OrderedDict.fromkeys(list_of_ref_positions.keys()))
     order_position_list.sort()
 
+    elapsed_time = time.time() - start_time
+    print 'Time take: ' + str(elapsed_time)
+
     # Create header of table
+    print 'Writing output table to ' + args.output + ' ...'
     with open(args.output, 'w') as out:
         header = ['isolate']
         for position in order_position_list:
@@ -595,6 +611,9 @@ def main():
         out.write('\t'.join(row_r_locus) + '\n')
         out.write('\t'.join(row_r_dist) + '\n')
         out.write('\t'.join(str(i) for i in row_r_prod) + '\n')
+
+    elapsed_time = time.time() - start_time
+    print 'Table compilation finished in ' + str(elapsed_time) 
 
 if __name__ == "__main__":
     main()
