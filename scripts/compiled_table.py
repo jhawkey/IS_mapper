@@ -287,13 +287,13 @@ def get_other_gene(reference, pos, direction, cds_features, trna_features, rrna_
             values.append(feature.strand)
             if feature.strand == 1:
                 # Foward strand, so start and end are simple
-                feature_start = feature.location.start
-                feature_end = feature.location.end
+                feature_start = int(feature.location.start)
+                feature_end = int(feature.location.end)
             else:
                 # Reverse strand, so start of gene is actually
                 # the end of the location for the feature
-                feature_start = feature.location.end
-                feature_end = feature.location.start
+                feature_start = int(feature.location.end)
+                feature_end = int(feature.location.start)
             if direction == "left":
                 # For this to be true, the position we're looking at must be
                 # larger than the gene start and end (if the position is not
