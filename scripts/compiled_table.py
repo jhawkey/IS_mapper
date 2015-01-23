@@ -298,7 +298,7 @@ def get_other_gene(reference, pos, direction, cds_features, trna_features, rrna_
                 # For this to be true, the position we're looking at must be
                 # larger than the gene start and end (if the position is not
                 # in the gene)
-                if pos in range(min(feature_start, feature_end), max(feature_start, feature_end)) and known == True:
+                if pos in range(min(int(feature_start), int(feature_end)), max(int(feature_start), int(feature_end))) and known == True:
                     # We're inside a gene, and this is a known hit, so the 
                     # flanking region could be inside the gene, but the gene
                     # is not necessarily interrupted by the known site.
