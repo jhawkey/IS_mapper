@@ -588,6 +588,7 @@ def main():
                         row.append('-')
             out.write('\t'.join(row) + '\n')
         # Set up flanking genes
+        row_orientation = ['orientation']
         row_l_locus = ['left locus tag']
         row_r_locus = ['right locus tag']
         row_l_dist = ['left distance']
@@ -598,6 +599,10 @@ def main():
         # Print flanking genes for each position
         for position in order_position_list:
             #   genes_before, genes_after = get_flanking_genes(args.reference_gbk, position[0], position[1], args.cds, args.trna, args.rrna)
+            if position[0] > position[1]:
+                row_orientation.append('F')
+            else:
+                row_orientation.append('R')
             if position in position_genes:
                 row_l_locus.append(position_genes[position][0][0])
                 row_r_locus.append(position_genes[position][1][0])
@@ -605,6 +610,7 @@ def main():
                 row_r_dist.append(position_genes[position][1][1])
                 row_l_prod.append(position_genes[position][0][2][:-1])
                 row_r_prod.append(position_genes[position][1][2][:-1])
+        out.write('\t'.join(row_orientation) + '\n')
         out.write('\t'.join(row_l_locus) + '\n')
         out.write('\t'.join(row_l_dist) + '\n')
         out.write('\t.'.join(str(i) for i in row_l_prod) + '\n')

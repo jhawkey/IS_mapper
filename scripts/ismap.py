@@ -332,7 +332,7 @@ def multi_to_single(genbank, name, output):
             newrecord.seq = newrecord.seq + seq
         else:
             # first sequence, initialise seqrecord
-            newrecord = SeqRecord(seq=r.seq,name=options.name,id=options.name)
+            newrecord = SeqRecord(seq=r.seq,name=name,id=name)
             newrecord.seq.alphabet=generic_dna
         # create feature for contig
         if colour_count % 2 == 0:
