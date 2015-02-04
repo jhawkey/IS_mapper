@@ -60,9 +60,9 @@ def check_ranges(ranges, range_to_check, gap, orientation):
 
     #create our list of boxes
     range_boxes = []
-    print 'largest, slice, box length'
-    print largest_value
-    print slice_size
+    #print 'largest, slice, box length'
+    #print largest_value
+    #print slice_size
     for i in range(0, len(list_of_range_tuples) + 10):
         range_boxes.append([])
     print len(range_boxes)
@@ -74,11 +74,12 @@ def check_ranges(ranges, range_to_check, gap, orientation):
             try:
                 range_boxes[index_1].append(tup)
             except IndexError:
-                print 'index1, index2, tuple'
-                print index_1
-                print index_2
-                print tup
-                exit(-1)
+                return False, False, False
+                #print 'index1, index2, tuple'
+                #print index_1
+                #print index_2
+                #print tup
+                #exit(-1)
             index_1 += 1
 
     # find box for new range to check
