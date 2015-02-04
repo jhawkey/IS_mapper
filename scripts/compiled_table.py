@@ -74,18 +74,18 @@ def check_ranges(ranges, range_to_check, gap, orientation):
     start = min(range_to_check[0], range_to_check[1])
     stop = max(range_to_check[1], range_to_check[0])
 
-    print 'slice, start, stop'
-    print slice_size
-    print start
-    print stop
+    #print 'slice, start, stop'
+    #print slice_size
+    #print start
+    #print stop
     index_start = start / slice_size
     index_stop = stop / slice_size
-    print 'index start, index stop'
-    print index_start
-    print index_stop
+    #print 'index start, index stop'
+    #print index_start
+    #print index_stop
 
-    print range_boxes
-    print len(range_boxes)
+    #print range_boxes
+    #print len(range_boxes)
 
     # check each potential box
 
