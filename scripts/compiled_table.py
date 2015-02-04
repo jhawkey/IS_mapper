@@ -84,6 +84,9 @@ def check_ranges(ranges, range_to_check, gap, orientation):
     print index_start
     print index_stop
 
+    print range_boxes
+    print len(range_boxes)
+
     # check each potential box
     while index_start <= index_stop:
         if range_boxes[index_start] != []:
