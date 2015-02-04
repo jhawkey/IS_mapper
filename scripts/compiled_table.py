@@ -74,8 +74,15 @@ def check_ranges(ranges, range_to_check, gap, orientation):
     start = min(range_to_check[0], range_to_check[1])
     stop = max(range_to_check[1], range_to_check[0])
 
+    print 'slice, start, stop'
+    print slice_size
+    print start
+    print stop
     index_start = start / slice_size
     index_stop = stop / slice_size
+    print 'index start, index stop'
+    print index_start
+    print index_stop
 
     # check each potential box
     while index_start <= index_stop:
