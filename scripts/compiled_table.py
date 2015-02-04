@@ -60,14 +60,24 @@ def check_ranges(ranges, range_to_check, gap, orientation):
 
     #create our list of boxes
     range_boxes = []
+    print 'largest, slice, box length'
+    print largest_value
+    print slice_size
     for i in range(0, len(list_of_range_tuples) + 1):
         range_boxes.append([])
+    print len(range_boxes)
     #populate boxes
     for tup in list_of_range_tuples:
         index_1 = tup[0] / slice_size
         index_2 = tup[1] / slice_size
         while index_1 <= index_2:
-            range_boxes[index_1].append(tup)
+            try:
+                range_boxes[index_1].append(tup)
+            except IndexError:
+                print 'index1, index2, tuple'
+                print index_1
+                print index_2
+                print tup
             index_1 += 1
 
     # find box for new range to check
