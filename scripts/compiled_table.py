@@ -65,7 +65,7 @@ def check_ranges(ranges, range_to_check, gap, orientation):
     #print slice_size
     for i in range(0, len(list_of_range_tuples) + 10):
         range_boxes.append([])
-    print len(range_boxes)
+    #print len(range_boxes)
     #populate boxes
     for tup in list_of_range_tuples:
         index_1 = tup[0] / slice_size
