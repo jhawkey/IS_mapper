@@ -46,46 +46,61 @@ def check_ranges(ranges, range_to_check, gap, orientation):
     If the range_to_check can't be merged with any of the known ranges, then
     just return False, False, False.
     '''
-    # Get start and end coordinates
-    start = range_to_check[0]
-    stop = range_to_check[1]
-    # Get current list of ranges
-    range_list = ranges.keys()
 
-    # For every range, check the orientation
-    for i in range(0, len(range_list)):
-        # Only merge hits that have the same orientation
-        if orientation == ranges[(range_list[i][0], range_list[i][1])]:
-            # Get coordinates of the current range to check
-            x = range_list[i][0]
-            y = range_list[i][1]
-            # Forward orientations have certain rules
-            if orientation == 'F':
-                # The x value must lie between start and stop in test range 
-                # taking into account gap
-                if x in range(start - gap, stop + 1) or x in range(start, stop + gap + 1):
-                    # If so, then these ranges overlap
-                    new_start = min(x, start)
-                    new_end = max(y, stop)
-                    return range_list[i], (new_start, new_end), orientation
-                # Otherwise the y value must lie between the start and stop in the test range
-                # taking into account the gap
-                elif y in range(start - gap, stop + 1) or y in range(start, stop + gap + 1):
-                    # If so, then these ranges overlap
-                    new_start = min(x, start)
-                    new_end = min(y, stop)
-                    return range_list[i], (new_start, new_end), orientation
-            # Same goes for ranges that are in reverse orientation
-            elif orientation == 'R':
-                if x in range(start - gap, stop + 1) or x in range(start, stop + gap + 1):
-                    new_start = min(x, start)
-                    new_end = max(y, stop)
-                    return range_list[i], (new_start, new_end), orientation
-                elif y in range(start - gap, stop + 1) or y in range(start, stop + gap + 1):
-                    new_start = min(x, start)
-                    new_end = min(y, stop)
-                    return range_list[i], (new_start, new_end), orientation
-    # If the range doesn't overlap any currently know range, then return False
+    # From ranges, create a list of tuples (min, max, orientation)
+    list_of_range_tuples = []
+    for key in ranges:
+        list_of_range_tuples.append((min(key[0], key[1]), max(key[0], key[1]), ranges[key]))
+
+    # get the largest value
+    largest_value = max(list_of_range_tuples, key=operator.itemgetter(1))[1] + gap + 10
+
+    # calculate the slice size
+    slice_size = largest_value / len(list_of_range_tuples)
+
+    #create our list of boxes
+    range_boxes = []
+    for i in range(0, len(list_of_range_tuples) + 1):
+        range_boxes.append([])
+    #populate boxes
+    for tup in list_of_range_tuples:
+        index_1 = tup[0] / slice_size
+        index_2 = tup[1] / slice_size
+        while index_1 <= index_2:
+            range_boxes[index_1].append(tup)
+            index_1 += 1
+
+    # find box for new range to check
+    start = min(range_to_check[0], range_to_check[1])
+    stop = max(range_to_check[1], range_to_check[0])
+
+    index_start = start / slice_size
+    index_stop = stop / slice_size
+
+    # check each potential box
+    while index_start <= index_stop:
+        if range_boxes[index_start] != []:
+            for tup in range_boxes[index_start]:
+                if orientation == tup[2]:
+                    x = tup[0]
+                    y = tup[1]
+                    # The x value must lie between start and stop in test range 
+                    # taking into account gap
+                    if x in range(start - gap, stop + 1) or x in range(start, stop + gap + 1):
+                        # If so, then these ranges overlap
+                        new_start = min(x, start)
+                        new_end = max(y, stop)
+                        return (x, y), (new_start, new_end), orientation
+                    # Otherwise the y value must lie between the start and stop in the test range
+                    # taking into account the gap
+                    elif y in range(start - gap, stop + 1) or y in range(start, stop + gap + 1):
+                        # If so, then these ranges overlap
+                        new_start = min(x, start)
+                        new_end = min(y, stop)
+                        return (x, y), (new_start, new_end), orientation
+
+        index_start += 1
+
     return False, False, False
 
 def get_ref_positions(reference, is_query, positions_dict, orientation_dict):
@@ -116,12 +131,14 @@ def get_ref_positions(reference, is_query, positions_dict, orientation_dict):
             info = line.strip('\n').split('\t')
             # To be a known site, hast to match query at least 90% with coverage of 95
             if float(info[3]) >= 90 and float(info[4])/float(info[1]) * 100 >= 95:
-                positions_dict[(int(info[6]), int(info[7]))][ref_name] = '+'
+                x = int(info[6])
+                y = int(info[7])
+                positions_dict[(min(x, y), max(x, y))][ref_name] = '+'
                 # Get orientation of known site for merging purposes
-                if int(info[6]) > int(info[7]):
-                    orientation_dict[(int(info[6]), int(info[7]))] = 'R'
+                if x > y:
+                    orientation_dict[(min(x, y), max(x, y))] = 'R'
                 else:
-                    orientation_dict[(int(info[6]), int(info[7]))] = 'F'
+                    orientation_dict[(min(x, y), max(x, y))] = 'F'
     return positions_dict, orientation_dict, ref_name
 
 def get_qualifiers(cds_qualifiers, trna_qualifiers, rrna_qualifiers, feature):
@@ -295,7 +312,7 @@ def main():
     blast_db(reference_fasta)
     # Get the reference positions and orientations for this IS query
     print '\nGetting query positions in reference ...'
-    list_of_ref_positions, ref_position_orientation, ref_name = get_ref_positions(reference_fasta, args.seq, list_of_ref_positions, position_orientation)
+    list_of_positions, position_orientation, ref_name = get_ref_positions(reference_fasta, args.seq, list_of_positions, position_orientation)
 
     elapsed_time = time.time() - start_time
     print 'Time taken: ' + str(elapsed_time)
@@ -317,32 +334,32 @@ def main():
                     info = line.strip('\n').split('\t')
                     # Get orientation for hit and start/end coordinates
                     orientation = info[1]
-                    is_start = int(info[2])
-                    is_end = int(info[3])
+                    is_start = min(int(info[2]), int(info[3]))
+                    is_end = max(int(info[3]), int(info[2]))
                     # Note whether call is Known, Novel or Possible related IS
                     call = info[5]
                     # If the position Know and therefore in the reference, 
                     # compare the hit to the known reference positions
                     if call == 'Known' or call == 'Known?':
-                        if (is_start, is_end) not in list_of_ref_positions:
+                        if (is_start, is_end) not in list_of_positions:
                             # Looking for hits that are with 100 bp of the Known reference hits
-                            old_range, new_range, new_orientation = check_ranges(ref_position_orientation, (is_start, is_end), 100, orientation)
+                            old_range, new_range, new_orientation = check_ranges(position_orientation, (is_start, is_end), 100, orientation)
                             # If we can merge ranges
                             if old_range != False:
-                                store_values = list_of_ref_positions[old_range]
+                                store_values = list_of_positions[old_range]
                                 # Remove the old range, and add the new range
-                                del list_of_ref_positions[old_range]
-                                list_of_ref_positions[new_range] = store_values
+                                del list_of_positions[old_range]
+                                list_of_positions[new_range] = store_values
                                 # Note whether the hit is uncertain (?)
                                 # or confident (+)
                                 if '?' in call:
-                                    list_of_ref_positions[new_range][isolate] = '?'
+                                    list_of_positions[new_range][isolate] = '?'
                                 else:
-                                    list_of_ref_positions[new_range][isolate] = '+'
+                                    list_of_positions[new_range][isolate] = '+'
                                 # Remove the old range from the reference positions
                                 # and add the new merged range
-                                del ref_position_orientation[old_range]
-                                ref_position_orientation[new_range] = new_orientation
+                                del position_orientation[old_range]
+                                position_orientation[new_range] = new_orientation
                             # If we can't merge with a known position
                             else:
                                 # Mark as uncertain if ? in call
@@ -350,7 +367,7 @@ def main():
                                     list_of_positions[(is_start, is_end)][isolate] = '?'
                                 # Otherwise just append it as a new reference position
                                 else:
-                                    list_of_ref_positions[(is_start, is_end)][isolate] = '+'
+                                    list_of_positions[(is_start, is_end)][isolate] = '+'
                                 # Note the orientation of the hit
                                 position_orientation[(is_start, is_end)] = orientation
                     # Otherwise try and merge with positions that are novel
@@ -424,7 +441,7 @@ def main():
         else:
             feature_count += 1
 
-    if len(list_of_ref_positions.keys()) != 0:
+    '''if len(list_of_ref_positions.keys()) != 0:
         for position in list_of_ref_positions.keys():
             if position[0] < position[1]:
                 left_pos = position[0]
@@ -432,20 +449,17 @@ def main():
             else:
                 left_pos = position[1]
                 right_pos = position[0]
-            #flanking_left = get_other_gene(args.reference_gbk, left_pos, "left", args.cds, args.trna, args.rrna)
-            #flanking_right = get_other_gene(args.reference_gbk, right_pos, "right", args.cds, args.trna, args.rrna)
             flanking_left, flanking_right = get_flanking_genes(gb.features, feature_list, left_pos, right_pos, args.cds, args.trna, args.rrna)
-            position_genes[(position[0], position[1])] = [flanking_left, flanking_right]
-    # Get flanking genes for novel positions
+            position_genes[(position[0], position[1])] = [flanking_left, flanking_right]'''
+    # Get flanking genes
     for position in list_of_positions.keys():
-        #genes_before, genes_after = get_flanking_genes(args.reference_gbk, position[0], position[1], args.cds, args.trna, args.rrna)
         left_pos = min(position[0], position[1])
         right_pos = max(position[0], position[1])
         genes_before, genes_after =  get_flanking_genes(gb.features, feature_list, left_pos, right_pos, args.cds, args.trna, args.rrna)
         position_genes[(position[0], position[1])] = [genes_before, genes_after]
 
     # Order positions from smallest to largest for final table output
-    order_position_list = list(OrderedDict.fromkeys(list_of_positions.keys())) + list(OrderedDict.fromkeys(list_of_ref_positions.keys()))
+    order_position_list = list(OrderedDict.fromkeys(list_of_positions.keys()))
     order_position_list.sort()
 
     elapsed_time = time.time() - start_time
@@ -456,16 +470,19 @@ def main():
     with open(args.output, 'w') as out:
         header = ['isolate']
         for position in order_position_list:
-            header.append(str(position[0]) + '-' + str(position[1]))
+            if position_orientation[position] == 'F':
+                header.append(str(position[0]) + '-' + str(position[1]))
+            else:
+                header.append(str(position[1]) + '-' + str(position[0]))
         out.write('\t'.join(header) + '\n')
         # Add the values for the reference positions
         row = [ref_name]
         for position in order_position_list:
-            if position in list_of_ref_positions:
-                if ref_name in list_of_ref_positions[position]: 
-                    row.append(list_of_ref_positions[position][ref_name])
-            else:
-                row.append('-')
+            if position in list_of_positions:
+                if ref_name in list_of_positions[position]:
+                    row.append(list_of_positions[position][ref_name])
+                else:
+                    row.append('-')
         out.write('\t'.join(row) + '\n')
         
         # Loop through each isoalte
@@ -473,12 +490,7 @@ def main():
         for isolate in list_of_isolates:
             row = [isolate]
             for position in order_position_list:
-                if position in list_of_ref_positions:
-                    if isolate in (list_of_ref_positions[position]):
-                        row.append(list_of_ref_positions[position][isolate])
-                    else:
-                        row.append('-')
-                elif position in list_of_positions:
+                if position in list_of_positions:
                     if isolate in list_of_positions[position]:
                         row.append(list_of_positions[position][isolate])
                     else:
@@ -498,11 +510,7 @@ def main():
         # Print flanking genes for each position
         for position in order_position_list:
             #   genes_before, genes_after = get_flanking_genes(args.reference_gbk, position[0], position[1], args.cds, args.trna, args.rrna)
-
-            if position[0] < position[1]:
-                row_orientation.append('F')
-            else:
-                row_orientation.append('R')
+            row_orientation.append(position_orientation[position])
             if position in position_genes:
                 #print position_genes[position]
                 row_l_locus.append(position_genes[position][0][0])
