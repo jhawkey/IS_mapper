@@ -88,7 +88,8 @@ def check_ranges(ranges, range_to_check, gap, orientation):
     print len(range_boxes)
 
     # check each potential box
-    while index_start <= index_stop:
+
+    while index_start <= index_stop and stop <= ((largest_value/slice_size) + 1):
         if range_boxes[index_start] != []:
             for tup in range_boxes[index_start]:
                 if orientation == tup[2]:
