@@ -23,7 +23,7 @@ import sys, re, os
 from argparse import ArgumentParser
 from subprocess import call, check_output, CalledProcessError, STDOUT
 from Bio import SeqIO
-from Bio import SeqFeature, FeatureLocation
+from Bio import SeqFeature
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio.Alphabet import generic_dna
