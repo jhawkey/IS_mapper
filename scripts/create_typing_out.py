@@ -278,7 +278,7 @@ def main():
 
     for feature in genbank.features:
         if feature.type in feature_types:
-            feature_list.append([int(feature.location.start), int(feature.location.end), feature_count])
+            feature_list.append([int(feature.location.start), int(feature.location.end), feature_count_list])
             feature_count_list += 1
         else:
             feature_count_list += 1
