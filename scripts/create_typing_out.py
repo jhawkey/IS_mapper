@@ -220,7 +220,7 @@ def add_known(x_L, x_R, y_L, y_R, gap, genbank, ref, seq, temp, cds, trna, rrna,
 
         # If the genes are the same, then this gene must be interrupted by the known site
         if gene_left[0] == gene_right[0]:
-            func_pred == 'Gene interrupted'
+            func_pred = 'Gene interrupted'
             # Remove + and - from distance as the gene is interrupted
             gene_right[1] = gene_right[1][:-1]
             gene_left[1] = gene_left[1][:-1]
