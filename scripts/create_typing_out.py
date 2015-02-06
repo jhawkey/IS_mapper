@@ -214,11 +214,10 @@ def add_known(x_L, x_R, y_L, y_R, gap, genbank, ref, seq, temp, cds, trna, rrna,
         # Taking all four coordinates and finding min and max to avoid coordinates 
         # that overlap the actual IS (don't want to return those in gene calls)
         # Mark as a known call to improve accuracy of gene calling
-        #print 'setting known to true'
-        gene_left = get_other_gene(ref, min(y_L, y_R, x_R, x_L), "left", cds, trna, rrna, known=True)
-        gene_right = get_other_gene(ref, max(y_L, y_R, x_R, x_L), "right", cds, trna, rrna, known=True)
-        #print gene_left
-        #print gene_right
+        gene_left, gene_right = get_flanking_genes(features, feature_list, x, y, cds, trna, rrna)
+        #gene_left = get_other_gene(ref, min(y_L, y_R, x_R, x_L), "left", cds, trna, rrna, known=True)
+        #gene_right = get_other_gene(ref, max(y_L, y_R, x_R, x_L), "right", cds, trna, rrna, known=True)
+
         # If the genes are the same, then this gene must be interrupted by the known site
         if gene_left[0] == gene_right[0]:
             func_pred == 'Gene interrupted'
@@ -237,7 +236,7 @@ def add_known(x_L, x_R, y_L, y_R, gap, genbank, ref, seq, temp, cds, trna, rrna,
     else:   
         # Then I'm not sure what this is
         # Get flanking genes anyway
-        gene_left, gene_right = get_flanking_genes(ref, start, end, cds, trna, rrna)
+        gene_left, gene_right = get_flanking_genes(features, feature_list, x, y, cds, trna, rrna)
         func_pred = functional_prediction(gene_left, gene_right)
         if 'unpaired' in file_loc:
             call = 'Possible related IS?'
