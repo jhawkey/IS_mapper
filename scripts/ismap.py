@@ -351,6 +351,20 @@ def multi_to_single(genbank, name, output):
     #write out new single entry genbank
     SeqIO.write(newrecord, output, "genbank")
 
+def extract_clipped_reads(fastq_file, size):
+
+    clipped = SeqIO.parse(fastq_file, "fastq")
+    left_reads = []
+    right_reads = []
+    for fastq in clipped:
+        if len(fastq.seq) <= size:
+            # These are forward reads, so are on the right-hand side
+            if fastq.name[-2:] == '_1':
+                right_reads.append(fastq)
+            else:
+                left_reads.append(fastq)
+    return left_reads, right_reads
+
 def main():
 
     args = parse_args()
@@ -419,17 +433,31 @@ def main():
             three_bam = temp_folder + sample + '_' + query_name + '_3.bam'
             five_reads = temp_folder + sample + '_' + query_name + '_5.fastq'
             three_reads = temp_folder + sample + '_' + query_name + '_3.fastq'
+            clipped_reads = temp_folder + sample + '_' + query_name + '_clipped.fastq'
+            left_clipped_reads = temp_folder + sample + '_' + query_name + '_left_clipped.fastq'
+            right_clipped_reads = temp_folder + sample + '_' + query_name + '_right_clipped.fastq'
+            final_left_reads = temp_folder + sample + '_' + query_name + '_LeftFinal.fastq'
+            final_right_reads = temp_folder + sample + '_' + query_name + '_RightFinal.fastq'
             no_hits_table = sample + '_' + query_name + '_table.txt'
             make_directories([temp_folder])
 
             # Map to IS query
             run_command(['bwa', 'mem', query, forward_read, reverse_read, '>', output_sam], shell=True)
+            # Run Samblaster to extract softclipped reads
+            run_command(['samblaster', '-u', clipped_reads, '-i', output_sam, '-o /dev/null', '-e', '--minClipSize 10'], shell=True)
             # Pull unmapped reads flanking IS
             run_command(['samtools view', '-Sb', '-f 36', output_sam, '>', five_bam], shell=True)
             run_command(['samtools view', '-Sb', '-f 4', '-F 40', output_sam, '>', three_bam], shell=True)
             # Turn bams to reads for mapping
             run_command(['bedtools', 'bamtofastq', '-i', five_bam, '-fq', five_reads], shell=True)
             run_command(['bedtools', 'bamtofastq', '-i', three_bam, '-fq', three_reads], shell=True)
+            # Add corresponding clipped reads to their respective left and right ends
+            left_clipped, right_clipped = extract_clipped_reads(clipped_reads, 100)
+            SeqIO.write(left_clipped, left_clipped_reads, 'fastq')
+            SeqIO.write(right_clipped, right_clipped_reads, 'fastq')
+            run_command(['cat', left_clipped_reads, five_reads, '>', final_left_reads], shell=True)
+            run_command(['cat', right_clipped_reads, three_reads, '>', final_right_reads], shell=True)
+
             # Create BLAST database for IS query
             check_blast_database(query)
             if os.stat(five_reads)[6] == 0 or os.stat(three_reads)[6] == 0:
