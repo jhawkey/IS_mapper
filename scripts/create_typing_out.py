@@ -11,7 +11,7 @@ from operator import itemgetter
 import os, sys, re, collections, operator
 import numpy as np
 from collections import OrderedDict
-from compiled_table import get_flanking_genes, get_other_gene, get_qualifiers
+from compiled_table import get_flanking_genes, get_qualifiers
 
 def parse_args():
 
@@ -119,7 +119,7 @@ def createFeature(hits, orient, note):
     # Return features
     return left_feature, right_feature
 
-def novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, ref, cds, trna, rrna, gap, orient, feature_count, region, results, unpaired=False, star=False):
+def novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, ref, cds, trna, rrna, gap, orient, feature_count, region, results, features, feature_list, unpaired=False, star=False):
     '''
     Get flanking gene information for novel hits.
     '''
@@ -136,7 +136,7 @@ def novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, ref, cds, trna, rrna, gap, orie
     genbank.features.append(right_feature)
     
     # Get the genes flanking the left and right ends
-    gene_left, gene_right = get_flanking_genes(ref, x, y, cds, trna, rrna)
+    gene_left, gene_right = get_flanking_genes(features, feature_list, x, y, cds, trna, rrna)
     #print gene_left
     #print gene_right
     # If the genes are the same, then hit is inside the gene
@@ -189,7 +189,7 @@ def functional_prediction(gene_left, gene_right):
 
     return prediction
 
-def add_known(x_L, x_R, y_L, y_R, gap, genbank, ref, seq, temp, cds, trna, rrna, region, feature_count, results, removed_results, line, file_loc):
+def add_known(x_L, x_R, y_L, y_R, gap, genbank, ref, seq, temp, cds, trna, rrna, region, feature_count, results, features, feature_list, removed_results, line, file_loc):
     '''
     Adds a value to the table that is a known hit
     '''
@@ -214,14 +214,13 @@ def add_known(x_L, x_R, y_L, y_R, gap, genbank, ref, seq, temp, cds, trna, rrna,
         # Taking all four coordinates and finding min and max to avoid coordinates 
         # that overlap the actual IS (don't want to return those in gene calls)
         # Mark as a known call to improve accuracy of gene calling
-        #print 'setting known to true'
-        gene_left = get_other_gene(ref, min(y_L, y_R, x_R, x_L), "left", cds, trna, rrna, known=True)
-        gene_right = get_other_gene(ref, max(y_L, y_R, x_R, x_L), "right", cds, trna, rrna, known=True)
-        #print gene_left
-        #print gene_right
+        gene_left, gene_right = get_flanking_genes(features, feature_list, start, end, cds, trna, rrna)
+        #gene_left = get_other_gene(ref, min(y_L, y_R, x_R, x_L), "left", cds, trna, rrna, known=True)
+        #gene_right = get_other_gene(ref, max(y_L, y_R, x_R, x_L), "right", cds, trna, rrna, known=True)
+
         # If the genes are the same, then this gene must be interrupted by the known site
         if gene_left[0] == gene_right[0]:
-            func_pred == 'Gene interrupted'
+            func_pred = 'Gene interrupted'
             # Remove + and - from distance as the gene is interrupted
             gene_right[1] = gene_right[1][:-1]
             gene_left[1] = gene_left[1][:-1]
@@ -237,7 +236,7 @@ def add_known(x_L, x_R, y_L, y_R, gap, genbank, ref, seq, temp, cds, trna, rrna,
     else:   
         # Then I'm not sure what this is
         # Get flanking genes anyway
-        gene_left, gene_right = get_flanking_genes(ref, start, end, cds, trna, rrna)
+        gene_left, gene_right = get_flanking_genes(features, feature_list, start, end, cds, trna, rrna)
         func_pred = functional_prediction(gene_left, gene_right)
         if 'unpaired' in file_loc:
             call = 'Possible related IS?'
@@ -270,8 +269,20 @@ def main():
         # Exit ISMapper
         sys.exit()
 
-    # Read in genbank and intialise feature count
+    # Read in genbank and create feature list for searching
     genbank = SeqIO.read(args.ref, 'genbank')
+    feature_list = []
+    feature_count_list = 0
+    feature_types = ["CDS", "tRNA", "rRNA"]
+
+    for feature in genbank.features:
+        if feature.type in feature_types:
+            feature_list.append([int(feature.location.start), int(feature.location.end), feature_count_list])
+            feature_count_list += 1
+        else:
+            feature_count_list += 1
+    
+    # Initialise feature count
     feature_count = 0
 
     intersect_left = []
@@ -314,7 +325,7 @@ def main():
                             #print 'neither if statement were correct'
                             pass
                         # Create result
-                        novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, unpaired=False)
+                        novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, genbank.features, feature_list, unpaired=False)
                         region += 1
                         feature_count += 2
                     # Otherwise we're removing this region, but keeping the information
@@ -365,19 +376,19 @@ def main():
                     pass
                 # This is probably a novel hit where there was no overlap detected
                 elif int(info[6]) <= 10:
-                    novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, unpaired=False)
+                    novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, genbank.features, feature_list, unpaired=False)
                     region += 1
                     feature_count += 2
                 # This is probably a known hit, but need to check with BLAST
                 # Only a known hit if we're in the a range between (default 0.5 and 1.5) the size
                 # of the IS query
                 elif float(info[6]) / is_length >= args.min_range and float(info[6]) / is_length <= args.max_range:
-                    add_known(x_L, x_R, y_L, y_R, info[6], genbank, args.ref, args.seq, args.temp, args.cds, args.trna, args.rrna, region, feature_count, results, removed_results, line, 'closest.bed')
+                    add_known(x_L, x_R, y_L, y_R, info[6], genbank, args.ref, args.seq, args.temp, args.cds, args.trna, args.rrna, region, feature_count, results, genbank.features, feature_list, removed_results, line, 'closest.bed')
                     region += 1
                     feature_count += 2
                 # Could possibly be a novel hit but the gap size is too large
                 elif float(info[6]) / is_length <= args.min_range and float(info[6]) / is_length < args.max_range:
-                    novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, unpaired=False,star=True)
+                    novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, genbank.features, feature_list, unpaired=False,star=True)
                     region +=1
                     feature_count += 2
                 # This is something else altogether - either the gap 
@@ -422,18 +433,18 @@ def main():
                             y = y_R
                         # This ia novel hit
                         if float(info[6]) <= 10:
-                            novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, unpaired=True)
+                            novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, genbank.features, feature_list, unpaired=True)
                             region += 1
                             feature_count += 2
                         # This is a known hit
                         elif float(info[6]) / is_length >= args.min_range and float(info[6]) / is_length <= args.max_range:
-                            add_known(x_L, x_R, y_L, y_R, info[6], genbank, args.ref, args.seq, args.temp, args.cds, args.trna, args.rrna, region, feature_count, results, removed_results, line, 'left_unpaired.bed')
+                            add_known(x_L, x_R, y_L, y_R, info[6], genbank, args.ref, args.seq, args.temp, args.cds, args.trna, args.rrna, region, feature_count, results, genbank.features, feature_list, removed_results, line, 'left_unpaired.bed')
                             region += 1
                             feature_count += 2
                         # Could possibly be a novel hit but the gap size is too large
                         elif float(info[6]) / is_length <= args.min_range and float(info[6]) / is_length < args.max_range:
                             # Add to results file
-                            novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, unpaired=True)
+                            novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, genbank.features, feature_list, unpaired=True)
                             region +=1
                             feature_count += 2
                         # This is something else altogether - either the gap is
@@ -474,17 +485,17 @@ def main():
                             y = y_R
                         #a novel hit
                         if float(info[6]) <= 10:
-                            novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, unpaired=True)
+                            novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, genbank.features, feature_list, unpaired=True)
                             region += 1
                             feature_count += 2
                         #a known hit
                         elif float(info[6]) / is_length >= args.min_range and float(info[6]) / is_length <= args.max_range:
-                            add_known(x_L, x_R, y_L, y_R, info[6], genbank, args.ref, args.seq, args.temp, args.cds, args.trna, args.rrna, region, feature_count, results, removed_results, line, 'right_unpaired.bed')               
+                            add_known(x_L, x_R, y_L, y_R, info[6], genbank, args.ref, args.seq, args.temp, args.cds, args.trna, args.rrna, region, feature_count, results, genbank.features, feature_list, removed_results, line, 'right_unpaired.bed')               
                             region += 1
                             feature_count += 2
                         #could possibly be a novel hit but the gap size is too large
                         elif float(info[6]) / is_length <= args.min_range and float(info[6]) / is_length < args.max_range:
-                            novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, unpaired=True)
+                            novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, genbank.features, feature_list, unpaired=True)
                             region +=1
                             feature_count += 2
                         #this is something else altogether - either the gap is really large or something, place it in removed_results
