@@ -453,7 +453,9 @@ def main():
             run_command(['bedtools', 'bamtofastq', '-i', five_bam, '-fq', five_reads], shell=True)
             run_command(['bedtools', 'bamtofastq', '-i', three_bam, '-fq', three_reads], shell=True)
             # Add corresponding clipped reads to their respective left and right ends
+            logging.info('Filtering soft clipped reads, selecting reads that are <= 100bp')
             left_clipped, right_clipped = extract_clipped_reads(clipped_reads, 100)
+            logging.info('Writing out left and right soft clipped reads')
             SeqIO.write(left_clipped, left_clipped_reads, 'fastq')
             SeqIO.write(right_clipped, right_clipped_reads, 'fastq')
             run_command(['cat', left_clipped_reads, five_reads, '>', final_left_reads], shell=True)
