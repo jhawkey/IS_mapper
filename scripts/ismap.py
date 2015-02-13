@@ -516,6 +516,8 @@ def main():
                 run_command(['samtools', 'view', '-Sb', three_to_ref_sam, '>', three_to_ref_bam], shell=True)
                 run_command(['samtools', 'sort', five_to_ref_bam, five_bam_sorted], shell=True)
                 run_command(['samtools', 'sort', three_to_ref_bam, three_bam_sorted], shell=True)
+                run_command(['samtools', 'index', five_bam_sorted + '.bam'], shell=True)
+                run_command(['samtools', 'index', three_bam_sorted + '.bam'], shell=True)
                 # Create BED file with coverage information
                 run_command(['bedtools', 'genomecov', '-ibam', five_bam_sorted + '.bam', '-bg', '>', five_cov_bed], shell=True)
                 run_command(['bedtools', 'genomecov', '-ibam', three_bam_sorted + '.bam', '-bg', '>', three_cov_bed], shell=True)
@@ -575,8 +577,8 @@ def main():
                 run_command(['samtools', 'view', '-Sb', three_to_ref_sam, '>', three_to_ref_bam], shell=True)
                 run_command(['samtools', 'sort', five_to_ref_bam, five_bam_sorted], shell=True)
                 run_command(['samtools', 'sort', three_to_ref_bam, three_bam_sorted], shell=True)
-                run_command(['samtools', 'index', five_bam_sorted], shell=True)
-                run_command(['samtools', 'index', three_bam_sorted], shell=True)
+                run_command(['samtools', 'index', five_bam_sorted + '.bam'], shell=True)
+                run_command(['samtools', 'index', three_bam_sorted + '.bam'], shell=True)
                 # Create BED files with coverage information
                 run_command(['bedtools', 'genomecov', '-ibam', five_bam_sorted + '.bam', '-bg', '>', five_cov_bed], shell=True)
                 run_command(['bedtools', 'genomecov', '-ibam', three_bam_sorted + '.bam', '-bg', '>', three_cov_bed], shell=True)
