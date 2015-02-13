@@ -52,14 +52,16 @@ def parse_args():
     parser.add_argument('--extension', type=str, required=False, help='Extension for assemblies (eg: .fasta, .fa, .gbk, default is .fasta)', default='.fasta')
     parser.add_argument('--typingRef', type=str, required=False, help='Reference genome for typing against in genbank format')
     parser.add_argument('--type', type=str, required=False, default='fasta', help='Indicator for contig assembly type, genbank or fasta (default fasta)')
-    parser.add_argument('--path', type=str, required=False, default='', help='Path to folder where scripts are (only required for development).')
-    # Cutoffs for annotation
+    parser.add_argument('--path', type=str, required=False, default='/vlsci/VR0082/shared/jane/IS_mapper/scripts/', help='Path to folder where scripts are (only required for development, default is VLSCI path).')
+    # Parameters
     parser.add_argument('--cutoff', type=int, required=False, default=6, help='Minimum depth for mapped region to be kept in bed file (default 6)')
     parser.add_argument('--min_range', type=str, required=False, default='0.2', help='Minimum percent size of the gap to be called a known hit (default 0.2, or 20 percent)')
     parser.add_argument('--max_range', type=str, required=False, default='1.1', help='Maximum percent size of the gap to be called a known hit (default 1.1, or 110 percent)')
     parser.add_argument('--merging', type=str, required=False, default='100', help='Value for merging left and right hits in bed files together to simply calculation of closest and intersecting regions (default 100).')
-    parser.add_argument('--a', action='store_true', required=False, help='Switch on all alignment reporting for bwa')
-    parser.add_argument('--T', type=str, required=False, default='30', help='Mapping quality score for bwa')
+    parser.add_argument('--a', action='store_true', required=False, help='Switch on all alignment reporting for bwa.')
+    parser.add_argument('--T', type=str, required=False, default='30', help='Mapping quality score for bwa (default 30).')
+    parser.add_argument('--min_clip', type=str, required=False, default='10', help='Minimum size for softclipped region to be extracted from initial mapping (default 10).')
+    parser.add_argument('--max_clip', type=int, required=False, default=100, help='Maximum size for softclipped regions to be included (default 100).')
     # Options for table output (typing)
     parser.add_argument('--cds', nargs='+', type=str, required=False, default=['locus_tag', 'gene', 'product'], help='qualifiers to look for in reference genbank for CDS features (default locus_tag gene product)')
     parser.add_argument('--trna', nargs='+', type=str, required=False, default=['locus_tag', 'product'], help='qualifiers to look for in reference genbank for tRNA features (default locus_tag product)')
@@ -445,7 +447,7 @@ def main():
             # Map to IS query
             run_command(['bwa', 'mem', query, forward_read, reverse_read, '>', output_sam], shell=True)
             # Run Samblaster to extract softclipped reads
-            run_command(['samblaster', '-u', clipped_reads, '-i', output_sam, '-o /dev/null', '-e', '--minClipSize 10'], shell=True)
+            run_command(['samblaster', '-u', clipped_reads, '-i', output_sam, '-o /dev/null', '-e', '--minClipSize', args.min_clip], shell=True)
             # Pull unmapped reads flanking IS
             run_command(['samtools view', '-Sb', '-f 36', output_sam, '>', five_bam], shell=True)
             run_command(['samtools view', '-Sb', '-f 4', '-F 40', output_sam, '>', three_bam], shell=True)
@@ -453,8 +455,8 @@ def main():
             run_command(['bedtools', 'bamtofastq', '-i', five_bam, '-fq', five_reads], shell=True)
             run_command(['bedtools', 'bamtofastq', '-i', three_bam, '-fq', three_reads], shell=True)
             # Add corresponding clipped reads to their respective left and right ends
-            logging.info('Filtering soft clipped reads, selecting reads that are <= 100bp')
-            left_clipped, right_clipped = extract_clipped_reads(clipped_reads, 100)
+            logging.info('Filtering soft clipped reads, selecting reads that are <= ' + str(args.max_clip) + 'bp')
+            left_clipped, right_clipped = extract_clipped_reads(clipped_reads, args.max_clip)
             logging.info('Writing out left and right soft clipped reads')
             SeqIO.write(left_clipped, left_clipped_reads, 'fastq')
             SeqIO.write(right_clipped, right_clipped_reads, 'fastq')
