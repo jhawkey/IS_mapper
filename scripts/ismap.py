@@ -357,12 +357,15 @@ def multi_to_single(genbank, name, output):
 
 def extract_clipped_reads(fastq_file, size):
 
+    print 'Usage at start of extract_clipped_reads function'
     print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
     clipped = SeqIO.parse(fastq_file, "fastq")
+    print 'Usage after reading in fastq with SeqIO'
     print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
     left_reads = []
     right_reads = []
     for fastq in clipped:
+        print 'Usage for each fastq file'
         print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
         if len(fastq.seq) <= size:
             # These are forward reads, so are on the right-hand side
@@ -370,6 +373,7 @@ def extract_clipped_reads(fastq_file, size):
                 right_reads.append(fastq)
             else:
                 left_reads.append(fastq)
+    print 'Usage just before returning final left and right fastq lists'
     print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
     return left_reads, right_reads
 
@@ -452,8 +456,10 @@ def main():
             # Map to IS query
             run_command(['bwa', 'mem', query, forward_read, reverse_read, '>', output_sam], shell=True)
             # Run Samblaster to extract softclipped reads
+            print 'Usage before samblaster'
             print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
             run_command(['samblaster', '-u', clipped_reads, '-i', output_sam, '-o /dev/null', '-e', '--minClipSize', args.min_clip], shell=True)
+            print 'Usage after samblaster'
             print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
             # Pull unmapped reads flanking IS
             run_command(['samtools view', '-Sb', '-f 36', output_sam, '>', five_bam], shell=True)
@@ -462,16 +468,20 @@ def main():
             run_command(['bedtools', 'bamtofastq', '-i', five_bam, '-fq', five_reads], shell=True)
             run_command(['bedtools', 'bamtofastq', '-i', three_bam, '-fq', three_reads], shell=True)
             # Add corresponding clipped reads to their respective left and right ends
+            print 'Usage before filtering reads'
             print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
             logging.info('Filtering soft clipped reads, selecting reads that are <= ' + str(args.max_clip) + 'bp')
             left_clipped, right_clipped = extract_clipped_reads(clipped_reads, args.max_clip)
+            print 'Usage after reads filtered, before reads written out'
             print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
             logging.info('Writing out left and right soft clipped reads')
             SeqIO.write(left_clipped, left_clipped_reads, 'fastq')
             SeqIO.write(right_clipped, right_clipped_reads, 'fastq')
+            print 'Usage after reads written out, before concatentation'
             print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
             run_command(['cat', left_clipped_reads, five_reads, '>', final_left_reads], shell=True)
             run_command(['cat', right_clipped_reads, three_reads, '>', final_right_reads], shell=True)
+            print 'Usage after reads concatenated onto previous reads'
             print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
             # Create BLAST database for IS query
