@@ -13,6 +13,7 @@
 #   Bedtools v2.20.1 - http://bedtools.readthedocs.org/en/latest/content/installation.html
 #   BioPython v1.63 - http://biopython.org/wiki/Main_Page
 #   BLAST+ v2.2.28 - ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/
+#   Samblaster v0.1.21 - https://github.com/GregoryFaust/samblaster
 #
 # Git repository: https://github.com/jhawkey/IS_mapper
 # README: https://github.com/jhawkey/IS_mapper/blob/master/README.txt
@@ -29,6 +30,7 @@ from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio.Alphabet import generic_dna
 import resource
+import time
 try:
     from version import ismap_version
 except:
@@ -371,6 +373,8 @@ def extract_clipped_reads(fastq_file, size, left_file_out, right_file_out):
 
 def main():
 
+    start_time = time.time()
+
     args = parse_args()
 
     # Checks to see if path argument contains final /, adds it if not
@@ -621,7 +625,9 @@ def main():
             # remove temp folder if required
             if args.temp == False:
                 run_command(['rm', '-rf', temp_folder], shell=True)
-    logging.info('ISMapper finished.')
+    total_time = start_time - time.time()
+    time_mins = float(total_time) / 60
+    logging.info('ISMapper finished in ' + str(time_mins) + ' mins.')
 
 if __name__ == '__main__':
     main()
