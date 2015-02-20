@@ -396,6 +396,7 @@ def main():
     check_command(['samtools'], 'samtools')
     check_command(['makeblastdb'], 'blast')
     check_command(['bedtools'], 'bedtools')
+    check_command(['samblaster', '--version'], 'samblaster')
 
     # Checks to make sure the runtype is valid and provides an error if not
     if args.runtype != "improvement" and args.runtype != "typing":
