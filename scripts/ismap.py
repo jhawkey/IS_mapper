@@ -355,30 +355,44 @@ def multi_to_single(genbank, name, output):
     #write out new single entry genbank
     SeqIO.write(newrecord, output, "genbank")
 
-def extract_clipped_reads(fastq_file, size):
+def extract_clipped_reads(fastq_file, size, left_file_out, right_file_out):
 
     print 'Usage at start of extract_clipped_reads function'
     print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-    with open(fastq_file, 'r') as f:
-        clipped = list(SeqIO.parse(f, "fastq"))
-        print 'Usage after reading in fastq with SeqIO'
+    clipped = SeqIO.parse(open(fastq_file, "rU"), "fastq")
+    short_right_clipped = (fastq for fastq in clipped if len(fastq.seq) <= size and fastq.name.endswith('_1'))
+    right_file_handle = open(right_file_out, "w")
+    SeqIO.write(short_right_clipped, right_file_handle, "fastq")
+    short_left_clipped = (fastq for fastq in clipped if len(fastq.seq) <= size and fastq.name.endswith('_2'))
+    left_file_handle = open(left_file_out, "w")
+    SeqIO.write(short_left_clipped, left_file_out, "fastq")
+    print 'Usage after reading in fastq with SeqIO'
+    print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+    
+    '''left_file_written = False
+    right_file_written = False
+    left_reads = []
+    right_reads = []
+    
+    for fastq in clipped:
+        print 'Usage for each fastq file'
         print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-        left_reads = []
-        right_reads = []
-        for fastq in clipped:
-            print 'Usage for each fastq file'
-            print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-            if len(fastq.seq) <= size:
-                # These are forward reads, so are on the right-hand side
-                if fastq.name[-2:] == '_1':
-                    right_reads.append(fastq)
+        if len(fastq.seq) <= size:
+            # These are forward reads, so are on the right-hand side
+            if fastq.name[-2:] == '_1':
+                if right_file_written == False:
+                    SeqIO.write(fastq, right_file, 'fastq')
+                    right_file_written = True
                 else:
-                    left_reads.append(fastq)
+                    with open(right_file, 'a') as r:
+                        r.write(fastq)
+                right_reads.append(fastq)
+            else:
+                left_reads.append(fastq)
 
-        print 'Usage just before returning final left and right fastq lists'
-        print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-    clipped=[]
-    return left_reads, right_reads
+    print 'Usage just before returning final left and right fastq lists'
+    print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+    return left_reads, right_reads'''
 
 def main():
 
@@ -474,12 +488,12 @@ def main():
             print 'Usage before filtering reads'
             print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
             logging.info('Filtering soft clipped reads, selecting reads that are <= ' + str(args.max_clip) + 'bp')
-            left_clipped, right_clipped = extract_clipped_reads(clipped_reads, args.max_clip)
+            extract_clipped_reads(clipped_reads, args.max_clip, left_clipped_reads, right_clipped_reads)
             print 'Usage after reads filtered, before reads written out'
             print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
             logging.info('Writing out left and right soft clipped reads')
-            SeqIO.write(left_clipped, left_clipped_reads, 'fastq')
-            SeqIO.write(right_clipped, right_clipped_reads, 'fastq')
+            #SeqIO.write(left_clipped, left_clipped_reads, 'fastq')
+            #SeqIO.write(right_clipped, right_clipped_reads, 'fastq')
             print 'Usage after reads written out, before concatentation'
             print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
             run_command(['cat', left_clipped_reads, five_reads, '>', final_left_reads], shell=True)
