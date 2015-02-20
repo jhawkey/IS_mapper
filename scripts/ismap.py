@@ -368,31 +368,6 @@ def extract_clipped_reads(fastq_file, size, left_file_out, right_file_out):
     SeqIO.write(short_left_clipped, left_file_out, "fastq")
     print 'Usage after reading in fastq with SeqIO'
     print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-    
-    '''left_file_written = False
-    right_file_written = False
-    left_reads = []
-    right_reads = []
-    
-    for fastq in clipped:
-        print 'Usage for each fastq file'
-        print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-        if len(fastq.seq) <= size:
-            # These are forward reads, so are on the right-hand side
-            if fastq.name[-2:] == '_1':
-                if right_file_written == False:
-                    SeqIO.write(fastq, right_file, 'fastq')
-                    right_file_written = True
-                else:
-                    with open(right_file, 'a') as r:
-                        r.write(fastq)
-                right_reads.append(fastq)
-            else:
-                left_reads.append(fastq)
-
-    print 'Usage just before returning final left and right fastq lists'
-    print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-    return left_reads, right_reads'''
 
 def main():
 
