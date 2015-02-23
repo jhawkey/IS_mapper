@@ -344,7 +344,7 @@ def main():
             closest_right.append(info[3:6])
             # If the fourth column contains -1, there are no closest hits
             if info[3] == '-1':
-                output = open(args.output, 'w')
+                output = open(args.output + '_table.txt', 'w')
                 output.write('\t'.join(header) + '\n')
                 output.write('No hits found')
                 output.close()
