@@ -524,11 +524,11 @@ def main():
                 # Map ends back to contigs
                 bwa_index(assembly)
                 if args.a == True:
-                    run_command(['bwa', 'mem', 'a', '-T', args.T, assembly, five_reads, '>', five_to_ref_sam], shell=True)
-                    run_command(['bwa', 'mem', 'a', '-T', args.T, assembly, three_reads, '>', three_to_ref_sam], shell=True)
+                    run_command(['bwa', 'mem', 'a', '-T', args.T, assembly, final_left_reads, '>', five_to_ref_sam], shell=True)
+                    run_command(['bwa', 'mem', 'a', '-T', args.T, assembly, final_right_reads, '>', three_to_ref_sam], shell=True)
                 else:
-                    run_command(['bwa', 'mem', assembly, five_reads, '>', five_to_ref_sam], shell=True)
-                    run_command(['bwa', 'mem', assembly, three_reads, '>', three_to_ref_sam], shell=True)
+                    run_command(['bwa', 'mem', assembly, final_left_reads, '>', five_to_ref_sam], shell=True)
+                    run_command(['bwa', 'mem', assembly, final_right_reads, '>', three_to_ref_sam], shell=True)
                 
                 run_command(['samtools', 'view', '-Sb', five_to_ref_sam, '>', five_to_ref_bam], shell=True)
                 run_command(['samtools', 'view', '-Sb', three_to_ref_sam, '>', three_to_ref_bam], shell=True)
@@ -586,11 +586,11 @@ def main():
 
                 # Map reads to reference, sort
                 if args.a == True:
-                    run_command(['bwa', 'mem', '-a', '-T', args.T, typingRefFasta, five_reads, '>', five_to_ref_sam], shell=True)
-                    run_command(['bwa', 'mem', '-a', '-T', args.T, typingRefFasta, three_reads, '>', three_to_ref_sam], shell=True)
+                    run_command(['bwa', 'mem', '-a', '-T', args.T, typingRefFasta, final_left_reads, '>', five_to_ref_sam], shell=True)
+                    run_command(['bwa', 'mem', '-a', '-T', args.T, typingRefFasta, final_right_reads, '>', three_to_ref_sam], shell=True)
                 else:
-                    run_command(['bwa', 'mem', typingRefFasta, five_reads, '>', five_to_ref_sam], shell=True)
-                    run_command(['bwa', 'mem', typingRefFasta, three_reads, '>', three_to_ref_sam], shell=True)
+                    run_command(['bwa', 'mem', typingRefFasta, final_left_reads, '>', five_to_ref_sam], shell=True)
+                    run_command(['bwa', 'mem', typingRefFasta, final_right_reads, '>', three_to_ref_sam], shell=True)
                 run_command(['samtools', 'view', '-Sb', five_to_ref_sam, '>', five_to_ref_bam], shell=True)
                 run_command(['samtools', 'view', '-Sb', three_to_ref_sam, '>', three_to_ref_bam], shell=True)
                 run_command(['samtools', 'sort', five_to_ref_bam, five_bam_sorted], shell=True)
