@@ -64,7 +64,7 @@ def parse_args():
     parser.add_argument('--a', action='store_true', required=False, help='Switch on all alignment reporting for bwa.')
     parser.add_argument('--T', type=str, required=False, default='30', help='Mapping quality score for bwa (default 30).')
     parser.add_argument('--min_clip', type=str, required=False, default='10', help='Minimum size for softclipped region to be extracted from initial mapping (default 10).')
-    parser.add_argument('--max_clip', type=int, required=False, default=100, help='Maximum size for softclipped regions to be included (default 100).')
+    parser.add_argument('--max_clip', type=int, required=False, default=30, help='Maximum size for softclipped regions to be included (default 30).')
     # Options for table output (typing)
     parser.add_argument('--cds', nargs='+', type=str, required=False, default=['locus_tag', 'gene', 'product'], help='qualifiers to look for in reference genbank for CDS features (default locus_tag gene product)')
     parser.add_argument('--trna', nargs='+', type=str, required=False, default=['locus_tag', 'product'], help='qualifiers to look for in reference genbank for tRNA features (default locus_tag product)')
@@ -483,7 +483,7 @@ def main():
 
             # Create BLAST database for IS query
             check_blast_database(query)
-            if os.stat(five_reads)[6] == 0 or os.stat(three_reads)[6] == 0:
+            if os.stat(final_left_reads)[6] == 0 or os.stat(final_right_reads)[6] == 0:
                 logging.info('One or both read files are empty. This is probably due to no copies of the IS of interest being present in this sample. Program quitting.')
                 with open(no_hits_table, 'w') as f:
                     if args.runtype == 'typing':
