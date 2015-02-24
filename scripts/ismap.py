@@ -365,6 +365,7 @@ def extract_clipped_reads(fastq_file, size, left_file_out, right_file_out):
     short_right_clipped = (fastq for fastq in clipped if len(fastq.seq) <= size and fastq.name.endswith('_1'))
     right_file_handle = open(right_file_out, "w")
     SeqIO.write(short_right_clipped, right_file_handle, "fastq")
+    clipped = SeqIO.parse(open(fastq_file, "rU"), "fastq")
     short_left_clipped = (fastq for fastq in clipped if len(fastq.seq) <= size and fastq.name.endswith('_2'))
     left_file_handle = open(left_file_out, "w")
     SeqIO.write(short_left_clipped, left_file_out, "fastq")
