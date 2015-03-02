@@ -13,6 +13,7 @@
 #   Bedtools v2.20.1 - http://bedtools.readthedocs.org/en/latest/content/installation.html
 #   BioPython v1.63 - http://biopython.org/wiki/Main_Page
 #   BLAST+ v2.2.28 - ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/
+#   Samblaster v0.1.21 - https://github.com/GregoryFaust/samblaster
 #
 # Git repository: https://github.com/jhawkey/IS_mapper
 # README: https://github.com/jhawkey/IS_mapper/blob/master/README.txt
@@ -23,10 +24,13 @@ import sys, re, os
 from argparse import ArgumentParser
 from subprocess import call, check_output, CalledProcessError, STDOUT
 from Bio import SeqIO
-from Bio import SeqFeature, FeatureLocation
+from Bio import SeqFeature
+from Bio.SeqFeature import SeqFeature, FeatureLocation
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio.Alphabet import generic_dna
+import resource
+import time
 try:
     from version import ismap_version
 except:
@@ -51,14 +55,16 @@ def parse_args():
     parser.add_argument('--extension', type=str, required=False, help='Extension for assemblies (eg: .fasta, .fa, .gbk, default is .fasta)', default='.fasta')
     parser.add_argument('--typingRef', type=str, required=False, help='Reference genome for typing against in genbank format')
     parser.add_argument('--type', type=str, required=False, default='fasta', help='Indicator for contig assembly type, genbank or fasta (default fasta)')
-    parser.add_argument('--path', type=str, required=False, default='', help='Path to folder where scripts are (only required for development).')
-    # Cutoffs for annotation
+    parser.add_argument('--path', type=str, required=False, default='/vlsci/VR0082/shared/jane/IS_mapper/scripts/', help='Path to folder where scripts are (only required for development, default is VLSCI path).')
+    # Parameters
     parser.add_argument('--cutoff', type=int, required=False, default=6, help='Minimum depth for mapped region to be kept in bed file (default 6)')
     parser.add_argument('--min_range', type=str, required=False, default='0.2', help='Minimum percent size of the gap to be called a known hit (default 0.2, or 20 percent)')
     parser.add_argument('--max_range', type=str, required=False, default='1.1', help='Maximum percent size of the gap to be called a known hit (default 1.1, or 110 percent)')
     parser.add_argument('--merging', type=str, required=False, default='100', help='Value for merging left and right hits in bed files together to simply calculation of closest and intersecting regions (default 100).')
-    parser.add_argument('--a', action='store_true', required=False, help='Switch on all alignment reporting for bwa')
-    parser.add_argument('--T', type=str, required=False, default='30', help='Mapping quality score for bwa')
+    parser.add_argument('--a', action='store_true', required=False, help='Switch on all alignment reporting for bwa.')
+    parser.add_argument('--T', type=str, required=False, default='30', help='Mapping quality score for bwa (default 30).')
+    parser.add_argument('--min_clip', type=str, required=False, default='10', help='Minimum size for softclipped region to be extracted from initial mapping (default 10).')
+    parser.add_argument('--max_clip', type=int, required=False, default=30, help='Maximum size for softclipped regions to be included (default 30).')
     # Options for table output (typing)
     parser.add_argument('--cds', nargs='+', type=str, required=False, default=['locus_tag', 'gene', 'product'], help='qualifiers to look for in reference genbank for CDS features (default locus_tag gene product)')
     parser.add_argument('--trna', nargs='+', type=str, required=False, default=['locus_tag', 'product'], help='qualifiers to look for in reference genbank for tRNA features (default locus_tag product)')
@@ -351,7 +357,24 @@ def multi_to_single(genbank, name, output):
     #write out new single entry genbank
     SeqIO.write(newrecord, output, "genbank")
 
+def extract_clipped_reads(fastq_file, size, left_file_out, right_file_out):
+
+    print 'Usage at start of extract_clipped_reads function'
+    print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+    clipped = SeqIO.parse(open(fastq_file, "rU"), "fastq")
+    short_right_clipped = (fastq for fastq in clipped if len(fastq.seq) <= size and fastq.name.endswith('_1'))
+    right_file_handle = open(right_file_out, "w")
+    SeqIO.write(short_right_clipped, right_file_handle, "fastq")
+    clipped = SeqIO.parse(open(fastq_file, "rU"), "fastq")
+    short_left_clipped = (fastq for fastq in clipped if len(fastq.seq) <= size and fastq.name.endswith('_2'))
+    left_file_handle = open(left_file_out, "w")
+    SeqIO.write(short_left_clipped, left_file_out, "fastq")
+    print 'Usage after reading in fastq with SeqIO'
+    print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+
 def main():
+
+    start_time = time.time()
 
     args = parse_args()
 
@@ -378,6 +401,7 @@ def main():
     check_command(['samtools'], 'samtools')
     check_command(['makeblastdb'], 'blast')
     check_command(['bedtools'], 'bedtools')
+    check_command(['samblaster', '--version'], 'samblaster')
 
     # Checks to make sure the runtype is valid and provides an error if not
     if args.runtype != "improvement" and args.runtype != "typing":
@@ -419,20 +443,48 @@ def main():
             three_bam = temp_folder + sample + '_' + query_name + '_3.bam'
             five_reads = temp_folder + sample + '_' + query_name + '_5.fastq'
             three_reads = temp_folder + sample + '_' + query_name + '_3.fastq'
+            clipped_reads = temp_folder + sample + '_' + query_name + '_clipped.fastq'
+            left_clipped_reads = temp_folder + sample + '_' + query_name + '_left_clipped.fastq'
+            right_clipped_reads = temp_folder + sample + '_' + query_name + '_right_clipped.fastq'
+            final_left_reads = temp_folder + sample + '_' + query_name + '_LeftFinal.fastq'
+            final_right_reads = temp_folder + sample + '_' + query_name + '_RightFinal.fastq'
             no_hits_table = sample + '_' + query_name + '_table.txt'
             make_directories([temp_folder])
 
             # Map to IS query
             run_command(['bwa', 'mem', query, forward_read, reverse_read, '>', output_sam], shell=True)
+            # Run Samblaster to extract softclipped reads
+            print 'Usage before samblaster'
+            print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+            run_command(['samblaster', '-u', clipped_reads, '-i', output_sam, '-o /dev/null', '-e', '--minClipSize', args.min_clip], shell=True)
+            print 'Usage after samblaster'
+            print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
             # Pull unmapped reads flanking IS
             run_command(['samtools view', '-Sb', '-f 36', output_sam, '>', five_bam], shell=True)
             run_command(['samtools view', '-Sb', '-f 4', '-F 40', output_sam, '>', three_bam], shell=True)
             # Turn bams to reads for mapping
             run_command(['bedtools', 'bamtofastq', '-i', five_bam, '-fq', five_reads], shell=True)
             run_command(['bedtools', 'bamtofastq', '-i', three_bam, '-fq', three_reads], shell=True)
+            # Add corresponding clipped reads to their respective left and right ends
+            print 'Usage before filtering reads'
+            print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+            logging.info('Filtering soft clipped reads, selecting reads that are <= ' + str(args.max_clip) + 'bp')
+            extract_clipped_reads(clipped_reads, args.max_clip, left_clipped_reads, right_clipped_reads)
+            print 'Usage after reads filtered, before reads written out'
+            print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+            logging.info('Writing out left and right soft clipped reads')
+            #SeqIO.write(left_clipped, left_clipped_reads, 'fastq')
+            #SeqIO.write(right_clipped, right_clipped_reads, 'fastq')
+            print 'Usage after reads written out, before concatentation'
+            print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+            run_command(['cat', left_clipped_reads, five_reads, '>', final_left_reads], shell=True)
+            run_command(['cat', right_clipped_reads, three_reads, '>', final_right_reads], shell=True)
+            print 'Usage after reads concatenated onto previous reads'
+            print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+
             # Create BLAST database for IS query
             check_blast_database(query)
-            if os.stat(five_reads)[6] == 0 or os.stat(three_reads)[6] == 0:
+            if os.stat(final_left_reads)[6] == 0 or os.stat(final_right_reads)[6] == 0:
                 logging.info('One or both read files are empty. This is probably due to no copies of the IS of interest being present in this sample. Program quitting.')
                 with open(no_hits_table, 'w') as f:
                     if args.runtype == 'typing':
@@ -473,16 +525,18 @@ def main():
                 # Map ends back to contigs
                 bwa_index(assembly)
                 if args.a == True:
-                    run_command(['bwa', 'mem', 'a', '-T', args.T, assembly, five_reads, '>', five_to_ref_sam], shell=True)
-                    run_command(['bwa', 'mem', 'a', '-T', args.T, assembly, three_reads, '>', three_to_ref_sam], shell=True)
+                    run_command(['bwa', 'mem', 'a', '-T', args.T, assembly, final_left_reads, '>', five_to_ref_sam], shell=True)
+                    run_command(['bwa', 'mem', 'a', '-T', args.T, assembly, final_right_reads, '>', three_to_ref_sam], shell=True)
                 else:
-                    run_command(['bwa', 'mem', assembly, five_reads, '>', five_to_ref_sam], shell=True)
-                    run_command(['bwa', 'mem', assembly, three_reads, '>', three_to_ref_sam], shell=True)
+                    run_command(['bwa', 'mem', assembly, final_left_reads, '>', five_to_ref_sam], shell=True)
+                    run_command(['bwa', 'mem', assembly, final_right_reads, '>', three_to_ref_sam], shell=True)
                 
                 run_command(['samtools', 'view', '-Sb', five_to_ref_sam, '>', five_to_ref_bam], shell=True)
                 run_command(['samtools', 'view', '-Sb', three_to_ref_sam, '>', three_to_ref_bam], shell=True)
                 run_command(['samtools', 'sort', five_to_ref_bam, five_bam_sorted], shell=True)
                 run_command(['samtools', 'sort', three_to_ref_bam, three_bam_sorted], shell=True)
+                run_command(['samtools', 'index', five_bam_sorted + '.bam'], shell=True)
+                run_command(['samtools', 'index', three_bam_sorted + '.bam'], shell=True)
                 # Create BED file with coverage information
                 run_command(['bedtools', 'genomecov', '-ibam', five_bam_sorted + '.bam', '-bg', '>', five_cov_bed], shell=True)
                 run_command(['bedtools', 'genomecov', '-ibam', three_bam_sorted + '.bam', '-bg', '>', three_cov_bed], shell=True)
@@ -533,17 +587,17 @@ def main():
 
                 # Map reads to reference, sort
                 if args.a == True:
-                    run_command(['bwa', 'mem', '-a', '-T', args.T, typingRefFasta, five_reads, '>', five_to_ref_sam], shell=True)
-                    run_command(['bwa', 'mem', '-a', '-T', args.T, typingRefFasta, three_reads, '>', three_to_ref_sam], shell=True)
+                    run_command(['bwa', 'mem', '-a', '-T', args.T, typingRefFasta, final_left_reads, '>', five_to_ref_sam], shell=True)
+                    run_command(['bwa', 'mem', '-a', '-T', args.T, typingRefFasta, final_right_reads, '>', three_to_ref_sam], shell=True)
                 else:
-                    run_command(['bwa', 'mem', typingRefFasta, five_reads, '>', five_to_ref_sam], shell=True)
-                    run_command(['bwa', 'mem', typingRefFasta, three_reads, '>', three_to_ref_sam], shell=True)
+                    run_command(['bwa', 'mem', typingRefFasta, final_left_reads, '>', five_to_ref_sam], shell=True)
+                    run_command(['bwa', 'mem', typingRefFasta, final_right_reads, '>', three_to_ref_sam], shell=True)
                 run_command(['samtools', 'view', '-Sb', five_to_ref_sam, '>', five_to_ref_bam], shell=True)
                 run_command(['samtools', 'view', '-Sb', three_to_ref_sam, '>', three_to_ref_bam], shell=True)
                 run_command(['samtools', 'sort', five_to_ref_bam, five_bam_sorted], shell=True)
                 run_command(['samtools', 'sort', three_to_ref_bam, three_bam_sorted], shell=True)
-                run_command(['samtools', 'index', five_bam_sorted], shell=True)
-                run_command(['samtools', 'index', three_bam_sorted], shell=True)
+                run_command(['samtools', 'index', five_bam_sorted + '.bam'], shell=True)
+                run_command(['samtools', 'index', three_bam_sorted + '.bam'], shell=True)
                 # Create BED files with coverage information
                 run_command(['bedtools', 'genomecov', '-ibam', five_bam_sorted + '.bam', '-bg', '>', five_cov_bed], shell=True)
                 run_command(['bedtools', 'genomecov', '-ibam', three_bam_sorted + '.bam', '-bg', '>', three_cov_bed], shell=True)
@@ -572,7 +626,9 @@ def main():
             # remove temp folder if required
             if args.temp == False:
                 run_command(['rm', '-rf', temp_folder], shell=True)
-    logging.info('ISMapper finished.')
+    total_time = start_time - time.time()
+    time_mins = float(total_time) / 60
+    logging.info('ISMapper finished in ' + str(time_mins) + ' mins.')
 
 if __name__ == '__main__':
     main()

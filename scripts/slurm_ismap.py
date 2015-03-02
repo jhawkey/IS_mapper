@@ -10,7 +10,7 @@ def parse_args():
 
     parser = ArgumentParser(description="Submit ISMapper jobs to SLURM")
     # SLURM options
-    parser.add_argument('--walltime', type=str, required=False, help='Amount of wall time. Default 1 hr', default='0-00:15:00')
+    parser.add_argument('--walltime', type=str, required=False, help='Amount of wall time. Default 20 minutes', default='0-00:20:00')
     parser.add_argument('--memory', type=str, required=False, help='Amount of memory (in MB). Default is 8gb', default='8192')
     parser.add_argument('--rundir', type=str, required=False, help='Directory to run in. Default is current directory')
     # ISmapper options
@@ -165,6 +165,7 @@ def main():
         cmd += '\nmodule load samtools-intel/1.1'
         cmd += '\nmodule load blast+-gcc/2.2.25'
         cmd += '\nmodule load bedtools-intel/2.20.1'
+        cmd += '\nmodule load samblaster-gcc/0.1.21'
         
         cmd += '\npython ' + args.script
         cmd += ' --queries ' + args.queries
