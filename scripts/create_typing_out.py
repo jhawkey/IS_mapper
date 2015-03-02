@@ -142,9 +142,8 @@ def novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, ref, cds, trna, rrna, gap, orie
     # If the genes are the same, then hit is inside the gene
     if gene_left[-1] == gene_right[-1]:
         func_pred = 'Gene interrupted'
-    # Otherwise need to do some more looking to determine functional predition
     else:
-        func_pred = functional_prediction(gene_left, gene_right)
+        func_pred = ''
     
     # This is a confident hit
     if unpaired == False:
@@ -158,36 +157,6 @@ def novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, ref, cds, trna, rrna, gap, orie
     
     # Store all information for final table output
     results['region_' + str(region)] = [orient, str(x), str(y), gap, call, '', '', gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1], func_pred]
-
-def functional_prediction(gene_left, gene_right):
-    '''
-    Determine how far upstream/downstream the IS insertion
-    is from flanking genes. 
-    '''
-
-    # Get distance to left gene (start codon)
-    bases = gene_left[1][1:]
-    #print bases
-    # If left gene is on + strand, we're upstream, otherwise we're downstream
-    if '+' in gene_left[1]:
-        prediction = 'Upstream of ' + gene_left[-1][0] + ' by ' + bases + 'bp, '
-    elif '-' in gene_left[1]:
-        prediction = 'Downstream of ' + gene_left[-1][0] + ' by ' + bases + 'bp, '
-
-    # Get distance to right gene (start codon)
-    bases = gene_right[1][1:]
-    #print bases
-    # If right gene is on + strand, we're upstream, otherwise we're downstream
-    if '+' in gene_right[1]:
-        prediction += 'upstream of ' + gene_right[-1][0] + ' by ' + bases + 'bp'
-    elif '-' in gene_right[1]:
-        prediction += 'downstream of ' + gene_right[-1][0] + ' by ' + bases + 'bp'
-
-    if '+' not in gene_left[1] and '-' not in gene_left[1] and '+' not in gene_right[1] and '-' not in gene_right[1]:
-        prediction = 'Gene interrupted'
-    #print prediction
-
-    return prediction
 
 def add_known(x_L, x_R, y_L, y_R, gap, genbank, ref, seq, temp, cds, trna, rrna, region, feature_count, results, features, feature_list, removed_results, line, file_loc):
     '''
@@ -226,7 +195,7 @@ def add_known(x_L, x_R, y_L, y_R, gap, genbank, ref, seq, temp, cds, trna, rrna,
             gene_left[1] = gene_left[1][:-1]
         # Otherwise we need to determine who is upstream/downstream of what
         else:
-            func_pred = functional_prediction(gene_left, gene_right)
+            func_pred = ''
         # Add to the final results
         if 'unpaired' in file_loc:
             call = 'Known?'
@@ -237,7 +206,6 @@ def add_known(x_L, x_R, y_L, y_R, gap, genbank, ref, seq, temp, cds, trna, rrna,
         # Then I'm not sure what this is
         # Get flanking genes anyway
         gene_left, gene_right = get_flanking_genes(features, feature_list, start, end, cds, trna, rrna)
-        func_pred = functional_prediction(gene_left, gene_right)
         if 'unpaired' in file_loc:
             call = 'Possible related IS?'
         else:
