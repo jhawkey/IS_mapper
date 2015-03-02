@@ -12,6 +12,7 @@ For support, add an issue to GitHubs issue tracker, or you can email the author 
 * Samtools v0.1.19 - http://samtools.sourceforge.net/
 * Bedtools v2.20.1 - http://bedtools.readthedocs.org/en/latest/content/installation.html
 * BLAST+ v2.2.28 - ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/
+* Samblaster v0.1.21 - https://github.com/GregoryFaust/samblaster
 
 ## Installation
 Install Python and its dependencies first.
@@ -50,18 +51,6 @@ Once peaks have been selected, Bedtools is used to find regions which intersect 
 
 These positions are then further analysed and tabulated into the _table.txt file if they are considered to be accurate. Any hits which do not make it into the _table.txt file are moved to _removedHits.txt, showing their position and which bed file they come from (intersect or closest) so they can be investigated further if required.
 
-## Running ISMapper without installing  
-
-ISMapper can be run directly from its directory without installing it via pip. To do so, ismap.py needs the path to the folder that contains all the scripts supplied to the argument `--path`. 
-
-eg:  
-`ismap.py --reads x_1.fastq.gz x_2.fastq.gz --queries is_query.fasta --path /path/to/IS_mapper/scripts/`
-
-If using the slurm_ismap.py script, `--path` can be supplied inside `--other_args`, but slurm_ismap.py also requires the path to the actual ismap.py script as well.
-
-eg:  
-`slurm_ismap.py --reads x_2.fastq.gz x_2.fastq.gz --queries is_query.fasta --script /path/to/IS_mapper/scripts/ismap.py --other_args "--path /path/to/IS_mapper/scripts"`  
-
 ## Usage
 
 There are two possible options for running ISMapper, depending on what reference genome you would like to compare to. The typing option looks for your IS query locations in your short read data, and compares these locations to a reference genome (which may or may not have that particular location in it).
@@ -76,7 +65,7 @@ Input files:
 
 Basic usage for ISMapper:
 
-Multiple read sets can be supplied one after the other, separated by spaces, after --reads. ISMapper will pair the reads together.  
+Multiple read sets can be supplied as /path/to/reads/*.fastq.gz. They can also be supplied one after the other, separated by spaces, after --reads. ISMapper will pair the reads together.  
 Multiple IS queries can also be supplied, seperated by spaces, after --queries. ISMapper will run queries sequentially in the same output folder.  
 
 `
@@ -142,17 +131,25 @@ ismap --reads [isolateA_1.fastq.gz] [isolateA_2.fastq.gz] [isolateB_1.fastq.gz] 
 
 Once ISMapper has finished running, multiple output files will be generated, the most interesting of which will be the *_table.txt file. The table file contains the names of contigs that have either a left or a right end in them.
 
+## Common Issues
+
+When running ISMapper on typing mode with a reference genome in Genbank format, check to see if all CDS/tRNA/rRNA features have the locus_tag qualifier. This is the default setting for ISMapper when choosing what to print in the final table. If the reference genome doesn't have locus_tag's, ISMapper will throw an error in the final table create step. This can be avoided by changing the setting of `--cds` (or `--trna` or `--rrna`) flags to db_xref gene product (or whatever other identifiers are present in your genbank file). 
+
 ## Adavnced Options for ismap
 
 `--forward` and `--reverse` are used to designate which reads are forward and reverse only used if NOT inMiSeq format sample_S1_L001_R1_001.fastq.gz; otherwise default is _1, i.e. expect forward reads as sample_1.fastq.gz)
 
-`--cutoff` is used to determine the read depth at a position that will be called as a 'true' peak, and thus make it to the next round of analysis. Default is currently 6 - if you're having issues detecting locations that you feel like should be there, lowering this cutoff may assist in finding them.
+`--cutoff` is used to determine the read depth at a position that will be called as a 'true' peak, and thus make it to the next round of analysis. Default is currently 6 - if you're having issues detecting locations that you feel like should be there, lowering this cutoff may assist in finding them.  
+
+`--min_range` and `--max_range` are used to determine the gap size between a left and right end for calling a known hit. The current default setting is 0.2 and 1.1 (so between 20% and 110% of the actual size - allows for the detection of known truncated hits).  
 
 `--merging` is the distance between two blocks that will be merged by Bedtools. The default is 100. This setting helps remove duplicate peaks in the same region that are not overlapping, but still belong to the same IS query location/
 
+`--min_clip` and `--max_clip` are used to determine the size of soft clipped sections of reads that are including in the final mapping step. The default size is currently 5bp and 30bp, which is ideal for reads between 100 - 150bp. To improve the detection of the exact target site duplication size, it is probably advantageous to increase the size of `--max_clip`.
+
 `--a` and `--T` are flags that are passed to BWA. --a will turn on all alignment reporting in BWA, and --T is used to give an integer mapping score to BWA to determine what alignments are kept. These options may be useful in finding IS query positions that are next to repeated elements as BWA will report all hits for the read not just the best random hit. However, using these options may cause noise and confusion in the final output files.
 
-`--cds`, `--trna` and `--rrna` are used to specify what qualifiers will be looked for in the reference genbank when determining genes flanking the IS query location. Defaults are locus_tag and product.
+`--cds`, `--trna` and `--rrna` are used to specify what qualifiers will be looked for in the reference genbank when determining genes flanking the IS query location. Defaults are locus_tag gene product.
 
 `--log` turns on the log file.
 
@@ -165,7 +162,22 @@ Once ISMapper has finished running, multiple output files will be generated, the
 
 `--cds`, `--trna` and `--rrna` are used to specify what qualifiers will be looked for in the reference genbank when determining genes flanking the IS query location. Defaults are locus_tag and product.
 
+## Running ISMapper without installing  
+
+ISMapper can be run directly from its directory without installing it via pip. To do so, ismap.py needs the path to the folder that contains all the scripts supplied to the argument `--path`. 
+
+eg:  
+`ismap.py --reads x_1.fastq.gz x_2.fastq.gz --queries is_query.fasta --path /path/to/IS_mapper/scripts/`
+
+If using the slurm_ismap.py script, `--path` can be supplied inside `--other_args`, but slurm_ismap.py also requires the path to the actual ismap.py script as well.
+
+eg:  
+`slurm_ismap.py --reads x_2.fastq.gz x_2.fastq.gz --queries is_query.fasta --script /path/to/IS_mapper/scripts/ismap.py --other_args "--path /path/to/IS_mapper/scripts"`  
+
 ## Running multiple jobs on a SLURM queing system
+
+There is no need to set the --output flag in other_args for this script, it sets it itself using the name of the readset.  
+Also, make sure the query sequence is already index with bwa (using `bwa mem query.fasta`) to prevent corruption of the index once multiple jobs start running.
 
 ```
 python slurm_ismap.py -h
