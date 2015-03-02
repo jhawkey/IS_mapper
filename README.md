@@ -81,7 +81,7 @@ The final _table.txt file contains the following columns:
 * x - left most position in the genome where the IS is located (does not indicate orientation)  
 * y - right most position in the genome where the IS is located (does not indicate orientation)  
 * gap - distance between x and y (small gaps usually indicate the overlap of the left and right ends and usually represent the DR the IS makes when it inserts)  
-* call - either Known (in the reference) or Novel (not in the reference) or Unknown (not a known position in the reference but not novel either - warrants closer investigation)  
+* call - either Known (in the reference) or Novel (not in the reference). A * next to either of these calls indicates that the call is imprecise; ie: the gap size is larger than expected. A ? next to either of these calls indicates that the call is unconfident; ie: one side (left or right) is high coverage, whilst the other side is low coverage and likely next to a repeat region. The call Possible related IS occurs when the gap between the two hits is approximately the right size for the query IS, however the BLAST results fall below a threshold of 80% ID and 80% coverage.
 * %ID - percent match of the sequence between x and y to the IS query if a Known position  
 * %Cov - percent coverage of the sequence between x and y to the IS query if a Known position  
 * left_gene - information about the left most feature to the IS location (default is locus_tag, gene, product for CDS features or locus_tag and product for tRNA and rRNA features)  
@@ -90,10 +90,10 @@ The final _table.txt file contains the following columns:
 * right_gene - information about the right most feature to the IS location (default is locus_tag, gene, product for CDS features or locus_tag and product for tRNA and rRNA features)  
 * right_strand - direction of the right most feature to the IS location  
 * right_distance - distance of the IS location from the start codon of the right most feature   
-* functional_prediction - UNDER CONSTRUCTION (will contain some functional information about this IS location and its context)  
+* functional_prediction - states 'Gene interrupted' if both the left and right flanking genes are the same, indicating that the IS is in the middle of this feature
 
 
-The individual _table.txt files for each isolate can be compiled together to generate one large table showing all possible IS query locations in all isolates as well as the reference genome by using the compiled_table script.
+The individual _table.txt files for each isolate can be compiled together to generate one large table showing all possible IS query locations in all isolates as well as the reference genome by using the compiled_table script. Options required are shown below, further options are detailed in the section 'Other options for compiled_table'.
 
 `
 compiled_table.py --tables *_table.txt --reference_gbk reference_genome.gbk --seq IS_query.fasta --output compiled_table_out.txt
@@ -101,8 +101,15 @@ compiled_table.py --tables *_table.txt --reference_gbk reference_genome.gbk --se
 
 This final compiled table has a list of isolates compiled together in the first column, with a header showing the different IS locations.
 The top row will always be the reference genome (the same one used in the original analysis).
-A - sign indicates that this particular position is not present in the isolate, while a + sign indicates that it is.
-The final 6 rows show you the locus tag for the left most feature to this IS location, the distance from the start codon of this feature and the product that it encodes, and then the same for the right most feature for this IS location.
+A - sign indicates that this particular position is not present in the isolate, while a +, * or ? sign indicates that it is present, with the caveats about * (imprecise) and ? (uncofindant) calls as above.
+The final seven rows indicate:
+* orientation of the IS (either F or R)
+* left flanking gene ID (default is locus_tag, or the first in the list set by `--cds`, `--trna` or `--rrna`)
+* distance from the IS position to the left flanking gene
+* left flanking gene strand (either 1 for forward or -1 for reverse)
+* information about the left flanking gene in the feature annotation (default is gene name and product, or the remainder of the options in `--cds`, `--trna` or `--rrna`)
+* right flanking gene ID, distance, strand and information
+
 
 ### Improvement
 
@@ -145,7 +152,7 @@ When running ISMapper on typing mode with a reference genome in Genbank format, 
 
 `--merging` is the distance between two blocks that will be merged by Bedtools. The default is 100. This setting helps remove duplicate peaks in the same region that are not overlapping, but still belong to the same IS query location/
 
-`--min_clip` and `--max_clip` are used to determine the size of soft clipped sections of reads that are including in the final mapping step. The default size is currently 5bp and 30bp, which is ideal for reads between 100 - 150bp. To improve the detection of the exact target site duplication size, it is probably advantageous to increase the size of `--max_clip`.
+`--min_clip` and `--max_clip` are used to determine the size of soft clipped sections of reads that are including in the final mapping step. The default size is currently 5bp and 30bp, which is ideal for reads between 100 - 150bp. To improve the detection of the exact target site duplication size, it is sometimes helpful to increase the size of `--max_clip`. However large values of `--max_clip` can increase the amount of noise in the final mapping step and cause nonsensical results.
 
 `--a` and `--T` are flags that are passed to BWA. --a will turn on all alignment reporting in BWA, and --T is used to give an integer mapping score to BWA to determine what alignments are kept. These options may be useful in finding IS query positions that are next to repeated elements as BWA will report all hits for the read not just the best random hit. However, using these options may cause noise and confusion in the final output files.
 
@@ -161,6 +168,8 @@ When running ISMapper on typing mode with a reference genome in Genbank format, 
 `--gap` determines the overlap between nearby positions to be called as the same position in the final compiled tables output. Default is 0 (so positions must be exactly the same in different isolates to compile together), however increasing this number can simplify the final output
 
 `--cds`, `--trna` and `--rrna` are used to specify what qualifiers will be looked for in the reference genbank when determining genes flanking the IS query location. Defaults are locus_tag and product.
+
+
 
 ## Running ISMapper without installing  
 

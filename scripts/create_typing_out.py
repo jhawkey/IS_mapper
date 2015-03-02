@@ -215,6 +215,14 @@ def add_known(x_L, x_R, y_L, y_R, gap, genbank, ref, seq, temp, cds, trna, rrna,
         else:
             removed_results['region_' + str(region)] = line.strip() + '\t' + file_loc +'\n'                
 
+def gbk_to_fasta(genbank, fasta):
+    '''
+    Converts a genbank to a fasta using BioPython
+    '''
+
+    sequences = SeqIO.parse(genbank, "genbank")
+    SeqIO.write(sequences, fasta, "fasta")
+
 def main():
 
     args = parse_args()
