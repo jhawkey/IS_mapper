@@ -377,11 +377,6 @@ def main():
     start_time = time.time()
 
     args = parse_args()
-
-    # Checks to see if path argument contains final /, adds it if not
-    if args.path != '':
-        if args.path[-1] != '/':
-            args.path = args.path + "/"
     
     # Set up logfile
     if args.log is True:
