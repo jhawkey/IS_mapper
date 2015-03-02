@@ -55,7 +55,7 @@ def parse_args():
     parser.add_argument('--extension', type=str, required=False, help='Extension for assemblies (eg: .fasta, .fa, .gbk, default is .fasta)', default='.fasta')
     parser.add_argument('--typingRef', type=str, required=False, help='Reference genome for typing against in genbank format')
     parser.add_argument('--type', type=str, required=False, default='fasta', help='Indicator for contig assembly type, genbank or fasta (default fasta)')
-    parser.add_argument('--path', type=str, required=False, default='/vlsci/VR0082/shared/jane/IS_mapper/scripts/', help='Path to folder where scripts are (only required for development, default is VLSCI path).')
+    parser.add_argument('--path', type=str, required=False, help='Path to folder where scripts are (only required for development, default is VLSCI path).')
     # Parameters
     parser.add_argument('--cutoff', type=int, required=False, default=6, help='Minimum depth for mapped region to be kept in bed file (default 6)')
     parser.add_argument('--min_range', type=str, required=False, default='0.2', help='Minimum percent size of the gap to be called a known hit (default 0.2, or 20 percent)')
