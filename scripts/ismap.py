@@ -626,7 +626,7 @@ def main():
             # remove temp folder if required
             if args.temp == False:
                 run_command(['rm', '-rf', temp_folder], shell=True)
-    total_time = start_time - time.time()
+    total_time = time.time() - start_time
     time_mins = float(total_time) / 60
     logging.info('ISMapper finished in ' + str(time_mins) + ' mins.')
 
