@@ -210,6 +210,7 @@ def add_known(x_L, x_R, y_L, y_R, gap, genbank, ref, seq, temp, cds, trna, rrna,
             call = 'Possible related IS?'
         else:
             call = 'Possible releated IS'
+        func_pred = ''
         if len(seq_results) !=0:
             results['region_' + str(region)] = [orient, str(start), str(end), gap, call, str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1], func_pred]
         else:
