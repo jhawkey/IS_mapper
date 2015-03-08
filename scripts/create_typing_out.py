@@ -302,7 +302,8 @@ def main():
                             #print 'neither if statement were correct'
                             pass
                         # Create result
-                        novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, genbank.features, feature_list, unpaired=False)
+                        # Gap size is -ve because the regions are intersecting
+                        novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, '-' + info[6], orient, feature_count, region, results, genbank.features, feature_list, unpaired=False)
                         region += 1
                         feature_count += 2
                     # Otherwise we're removing this region, but keeping the information
