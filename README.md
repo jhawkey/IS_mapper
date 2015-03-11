@@ -28,12 +28,30 @@ Install with pip:
 pip install IS_mapper/
 ```
 
-Testing the installation:
+Testing ISMapper is installed:
 
 ```
 ismap --version
 compiled_table.py -h
 ```
+
+### Running a test case
+
+To check that all dependencies are working correctly and outputs are as expected:
+
+Download _Streptococcus suis_ P1/7 reads from SRA
+
+```
+wget ftp://ftp.sra.ebi.ac.uk/vol1/fastq/ERR225/ERR225612/ERR225612_*.fastq.gz
+```
+
+Run ISMapper, using the IS query and reference genbank in test/inputs
+
+```
+ismap --reads ERR225612_*.fastq.gz --queries IS_mapper/test/inputs/ISSsu3.fasta --typingRef IS_mapper/test/inputs/S_suis_P17.gbk --log --runtype typing --output S_suis
+```
+
+There are some example output files in test/example_results to compare your results files to.
 
 ## Method
 
