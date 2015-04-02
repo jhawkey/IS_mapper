@@ -14,6 +14,17 @@ import os, sys, re, collections, operator
 from collections import OrderedDict
 import time
 
+class Position(object):
+    def __init__(self, x, y, orientation, isolate_dict, left_feature, right_feature):
+        self.x = x
+        self.y = y
+        self.orientation = orientation
+        self.isolate_dict = isolate_dict
+        self.left_feature = left_feature
+        self.right_feature = right_feature
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
 def parse_args():
 
     parser = ArgumentParser(description="Create a table of IS hits in all isolates for ISMapper")
@@ -31,7 +42,7 @@ def parse_args():
 
     return parser.parse_args()
 
-def check_ranges(ranges, range_to_check, gap, orientation):
+def check_ranges(positions, range_to_check, gap, orientation):
     '''
     Takes a list of tuples with currently known ranges, and a new range
     to check against these to see if it overlaps.
@@ -46,10 +57,15 @@ def check_ranges(ranges, range_to_check, gap, orientation):
     just return False, False, False.
     '''
 
-    # From ranges, create a list of tuples (min, max, orientation)
+    # From positions, create a list of tuples (min, max, orientation)
     list_of_range_tuples = []
+    for pos in positions:
+        list_of_range_tuples.append((pos.x, pos.y, pos.orientation))
+
+    # From ranges, create a list of tuples (min, max, orientation)
+    '''list_of_range_tuples = []
     for key in ranges:
-        list_of_range_tuples.append((min(key[0], key[1]), max(key[0], key[1]), ranges[key]))
+        list_of_range_tuples.append((min(key[0], key[1]), max(key[0], key[1]), ranges[key]))'''
 
     # get the largest value
     largest_value = max(list_of_range_tuples, key=operator.itemgetter(1))[1] + gap + 10
@@ -59,12 +75,8 @@ def check_ranges(ranges, range_to_check, gap, orientation):
 
     #create our list of boxes
     range_boxes = []
-    #print 'largest, slice, box length'
-    #print largest_value
-    #print slice_size
     for i in range(0, len(list_of_range_tuples) + 10):
         range_boxes.append([])
-    #print len(range_boxes)
     #populate boxes
     for tup in list_of_range_tuples:
         index_1 = tup[0] / slice_size
@@ -73,59 +85,111 @@ def check_ranges(ranges, range_to_check, gap, orientation):
             try:
                 range_boxes[index_1].append(tup)
             except IndexError:
-                return False, False, False
-                #print 'index1, index2, tuple'
-                #print index_1
-                #print index_2
-                #print tup
+                print 'IndexError: index1, index2, tuple'
+                print index_1
+                print index_2
+                print tup
+                return False, False
                 #exit(-1)
             index_1 += 1
 
+    print 'Our current gap value is ' + str(gap)
+    print 'The current number of tuples we have is ' + str(len(list_of_range_tuples))
+    print 'Our range box set looks like this:'
+    print range_boxes
+    print 'It is this long: ' + str(len(range_boxes))
+    print 'largest value is ' + str(largest_value)
+    print 'slice size is ' + str(slice_size)
     # find box for new range to check
     start = min(range_to_check[0], range_to_check[1])
     stop = max(range_to_check[1], range_to_check[0])
 
-    #print 'slice, start, stop'
-    #print slice_size
-    #print start
-    #print stop
+    print 'Our start value from the position we need to check is ' + str(start)
+    print 'Our stop value from the position we need to check is ' + str(stop)
     index_start = start / slice_size
     index_stop = stop / slice_size
-    #print 'index start, index stop'
-    #print index_start
-    #print index_stop
-
-    #print range_boxes
-    #print len(range_boxes)
+    print 'The index of our start value is ' + str(index_start)
+    print 'The index of our stop value is ' + str(index_stop)
 
     # check each potential box
-
+    print 'Now we need to check each potential box'
+    print 'To do this, we start at the box indicated by index start, and continue looking in each box until index stop'
     while index_start <= index_stop and index_stop <= ((largest_value/slice_size) + 1):
         if range_boxes[index_start] != []:
+            print 'Currently looking inside non empty box ' + str(index_start)
             for tup in range_boxes[index_start]:
+                print 'Looking at each tuple in this box'
+                print tup
                 if orientation == tup[2]:
+                    print 'orientation matches for this tuple, so it is a possible candidate'
+                    #print tup
                     x = tup[0]
                     y = tup[1]
                     # The x value must lie between start and stop in test range 
                     # taking into account gap
-                    if x in range(start - gap, stop + 1) or x in range(start, stop + gap + 1):
+                    if (x in range(start - gap, stop + 1)) or (x in range(start, stop + gap + 1)):
+                        # If so, then these ranges overlap
+                        print 'the x ranges overlapped'
+                        new_start = min(x, start)
+                        new_end = max(y, stop)
+                        print 'Our new position is ' + str((new_start, new_end))
+                        for pos in positions:
+                            if x == pos.x and y == pos.y:
+                                matched_pos = pos
+                        return matched_pos, (new_start, new_end)
+                    # Otherwise the y value must lie between the start and stop in the test range
+                    # taking into account the gap
+                    elif (y in range(start - gap, stop + 1)) or (y in range(start, stop + gap + 1)):
+                        print 'the y ranges overlapped'
                         # If so, then these ranges overlap
                         new_start = min(x, start)
                         new_end = max(y, stop)
-                        return (x, y), (new_start, new_end), orientation
-                    # Otherwise the y value must lie between the start and stop in the test range
-                    # taking into account the gap
-                    elif y in range(start - gap, stop + 1) or y in range(start, stop + gap + 1):
-                        # If so, then these ranges overlap
+                        print 'Our new position is ' + str((new_start, new_end))
+                        for pos in positions:
+                            if x == pos.x and y == pos.y:
+                                matched_pos = pos
+                        return matched_pos, (new_start, new_end)
+                    # Also need to check if start and top lie within x and y
+                    elif start in range(x - gap, y + 1) or start in range(x, y + gap + 1):
+                        print 'the start ranges overlapped'
                         new_start = min(x, start)
-                        new_end = min(y, stop)
-                        return (x, y), (new_start, new_end), orientation
+                        new_end = max(y, stop)
+                        print 'Our new position is ' + str((new_start, new_end))
+                        for pos in positions:
+                            if x == pos.x and y == pos.y:
+                                matched_pos = pos
+                        return matched_pos, (new_start, new_end)
+                    elif stop in range(x - gap, y + 1) or stop in range(x, y + gap + 1):
+                        print 'the stop ranges overlapped'
+                        new_start = min(x, start)
+                        new_end = max(y, stop)
+                        print 'Our new position is ' + str((new_start, new_end))
+                        for pos in positions:
+                            if x == pos.x and y == pos.y:
+                                matched_pos = pos
+                        return matched_pos, (new_start, new_end)
+                    else:
+                        print 'This is x and y, and then start and stop, then stop + 1'
+                        print x
+                        print y
+                        print start
+                        print stop
+                        print stop + 1
+                        print 'This is the gap'
+                        print gap
+                        print 'These are the x ranges to check'
+                        print range(start - gap, stop + 1)
+                        print range(start, stop + gap + 1)
+                        print 'These are the y ranges to check'
+                        print range(start - gap, stop + 1)
+                        print range(start, stop + gap + 1)
+
 
         index_start += 1
 
-    return False, False, False
+    return False, False
 
-def get_ref_positions(reference, is_query, positions_dict, orientation_dict):
+def get_ref_positions(reference, is_query, positions_list):
     '''
     Get the coordinates of known IS sites in the reference.
 
@@ -155,13 +219,20 @@ def get_ref_positions(reference, is_query, positions_dict, orientation_dict):
             if float(info[3]) >= 90 and float(info[4])/float(info[1]) * 100 >= 95:
                 x = int(info[6])
                 y = int(info[7])
-                positions_dict[(min(x, y), max(x, y))][ref_name] = '+'
-                # Get orientation of known site for merging purposes
                 if x > y:
-                    orientation_dict[(min(x, y), max(x, y))] = 'R'
+                    orientation = 'R'
                 else:
-                    orientation_dict[(min(x, y), max(x, y))] = 'F'
-    return positions_dict, orientation_dict, ref_name
+                    orientation = 'F'
+                pos_dict = {ref_name: '+'}
+                new_pos = Position(min(x, y), max(x, y), orientation, pos_dict, None, None)
+                #positions_dict[(min(x, y), max(x, y))][ref_name] = '+'
+                # Get orientation of known site for merging purposes
+                #if x > y:
+                #    orientation_dict[(min(x, y), max(x, y))] = 'R'
+                #else:
+                #    orientation_dict[(min(x, y), max(x, y))] = 'F'
+                positions_list.append(new_pos)
+    return positions_list, ref_name
 
 def get_qualifiers(cds_qualifiers, trna_qualifiers, rrna_qualifiers, feature):
     '''
@@ -318,6 +389,45 @@ def gbk_to_fasta(genbank, fasta):
     sequences = SeqIO.parse(genbank, "genbank")
     SeqIO.write(sequences, fasta, "fasta")
 
+def final_ranges_check():
+
+    # From ranges, create a list of tuples (min, max, orientation)
+    list_of_range_tuples = []
+    for key in ranges:
+        list_of_range_tuples.append((min(key[0], key[1]), max(key[0], key[1]), ranges[key]))
+
+    # sort the list into order based on x value
+    list_of_range_tuples.sort()
+
+    # start at the first index
+    current_index = 0
+    while current_index < len(list_of_range_tuples):
+        # get x and y coordinates of range
+        x = list_of_range_tuples[current_index][0]
+        y = list_of_range_tuples[current_index][1]
+        try:
+            # check to see that the very next range is the same orientation,
+            # otherwise we're not going to merge
+            if list_of_range_tuples[current_index][2] == list_of_range_tuples[current_index + 1][2]:
+                x2 = list_of_range_tuples[current_index + 1][0]
+                y2 = list_of_range_tuples[current_index + 1][1]
+                # if our previous y value is greater than or equal to the next-door
+                # x value, then we should merge these columns
+                if y >= x2:
+                    new_position = (x, y2, list_of_range_tuples[current_index][2])
+                    # need to check to see if this new position is able to be merged with any others
+
+                # otherwise just store it as is
+                else:
+                    new_position = (x, y, list_of_range_tuples[current_index][2])
+        except IndexError:
+            # then we're at the last value so we just add that to the final list
+            pass
+        # increment our index
+        current_index += 1
+
+
+
 def main():
     
     start_time = time.time()
@@ -328,11 +438,12 @@ def main():
     list_of_isolates = []
 
     # key1 = (start, end), key2 = isolate, value = +/*/?
-    list_of_positions = collections.defaultdict(dict)
+    #list_of_positions = collections.defaultdict(dict)
+    list_of_positions = []
     # key1 = (start, end), key2 = ref, value = +
-    list_of_ref_positions = collections.defaultdict(dict)
+    #list_of_ref_positions = collections.defaultdict(dict)
     # key = (start, end), value = orientation (F/R)
-    position_orientation = {}
+    #position_orientation = {}
 
     reference_fasta = args.reference_gbk.split('.g')[0]
     # Create a fasta file of the reference for BLAST
@@ -342,10 +453,12 @@ def main():
     blast_db(reference_fasta)
     # Get the reference positions and orientations for this IS query
     print '\nGetting query positions in reference ...'
-    list_of_positions, position_orientation, ref_name = get_ref_positions(reference_fasta, args.seq, list_of_positions, position_orientation)
+    list_of_positions, ref_name = get_ref_positions(reference_fasta, args.seq, list_of_positions)
 
     elapsed_time = time.time() - start_time
     print 'Time taken: ' + str(elapsed_time)
+    #print list_of_positions
+    #print ref_name
     # Loop through each table give to --tables
     print 'Collating results files ...'
     for result_file in unique_results_files:
@@ -354,6 +467,8 @@ def main():
         list_of_isolates.append(isolate)
         # Skip the header
         header = 0
+        print 'This is the isolate we are looking at'
+        print isolate
         with open(result_file) as file_open:
             for line in file_open:
                 # Skip header
@@ -368,95 +483,147 @@ def main():
                     is_end = max(int(info[3]), int(info[2]))
                     # Note whether call is Known, Novel or Possible related IS
                     call = info[5]
-                    # If the position Know and therefore in the reference, 
-                    # compare the hit to the known reference positions
-                    if call == 'Known' or call == 'Known?':
-                        if (is_start, is_end) not in list_of_positions:
-                            # Looking for hits that are with 100 bp of the Known reference hits
-                            old_range, new_range, new_orientation = check_ranges(position_orientation, (is_start, is_end), 100, orientation)
-                            # If we can merge ranges
-                            if old_range != False:
-                                store_values = list_of_positions[old_range]
-                                # Remove the old range, and add the new range
-                                del list_of_positions[old_range]
-                                list_of_positions[new_range] = store_values
-                                # Note whether the hit is uncertain (?)
-                                # or confident (+)
-                                if '?' in call:
-                                    list_of_positions[new_range][isolate] = '?'
-                                else:
-                                    list_of_positions[new_range][isolate] = '+'
-                                # Remove the old range from the reference positions
-                                # and add the new merged range
-                                del position_orientation[old_range]
-                                position_orientation[new_range] = new_orientation
-                            # If we can't merge with a known position
+                    # See if this position is already in the list of positions
+                    match = False
+                    isolate_dict = {}
+                    for pos in list_of_positions:
+                        if pos.x == is_start and pos.y == is_end and pos.orientation == orientation:
+                            print 'This position already exists'
+                            # Then this position already exists
+                            match = True
+                            # And we want to retreive the position to which it is exactly the same
+                            matching_pos = pos
+                            # Then we want to add the info about this new position to the list
+                            if '?' in call:
+                                matching_pos.isolate_dict[isolate] = '?'
+                            elif '*' in call:
+                                matching_pos.isolate_dict[isolate] = '*'
                             else:
-                                # Mark as uncertain if ? in call
-                                if '?' in call:
-                                    list_of_positions[(is_start, is_end)][isolate] = '?'
-                                # Otherwise just append it as a new reference position
-                                else:
-                                    list_of_positions[(is_start, is_end)][isolate] = '+'
-                                # Note the orientation of the hit
-                                position_orientation[(is_start, is_end)] = orientation
-                    # Otherwise try and merge with positions that are novel
-                    elif (is_start, is_end) not in list_of_positions:
+                                matching_pos.isolate_dict[isolate] = '+'
+                    
+                    # So we haven't seen this position before
+                    if match == False:
+                        print 'We have not seen this position before'
+                        # The position list is empty, so there's nothing to check against, so just add
+                        # this new position
+                        if list_of_positions == []:
+                            print 'Our position list is empty so we will just add it'
+                            if '?' in call:
+                                isolate_dict[isolate] = '?'
+                            elif '*' in call:
+                                isolate_dict[isolate] = '*'
+                            else:
+                                isolate_dict[isolate] = '+'
+                            new_pos = Position(is_start, is_end, orientation, isolate_dict, None, None)
+                            list_of_positions.append(new_pos)
+                        
                         # If the list of positions isn't empty, then there are ranges to check against
-                        if list_of_positions.keys() != []:
-                            old_range, new_range, new_orientation = check_ranges(position_orientation, (is_start, is_end), args.gap, orientation)
+                        else:
+                            print 'We need to see if this position merges with any others'
+                            old_position, new_range = check_ranges(list_of_positions, (is_start, is_end), args.gap, orientation)
                             # So the current range overlaps with a range we already have
-                            if old_range != False:
-                                # Remove the old range and add the new one
-                                store_values = list_of_positions[old_range]
-                                del list_of_positions[old_range]
-                                list_of_positions[new_range] = store_values
+                            if old_position != False:
+                                #print 'here is the old position'
+                                #print old_position.x
+                                #print old_position.y
+                                #print old_position.isolate_dict
+                                isolate_dict = old_position.isolate_dict
+                                # Add the new isolate to this dictionary
                                 # Mark as ? if uncertain, * if imprecise
                                 # or + if confident
                                 if '?' in call:
-                                    list_of_positions[new_range][isolate] = '?'
+                                    isolate_dict[isolate] = '?'
                                 elif '*' in call:
-                                    list_of_positions[new_range][isolate] = '*'
+                                    isolate_dict[isolate] = '*'
                                 else:
-                                    list_of_positions[new_range][isolate] = '+'
-                                # Remove the old range from the orientations 
-                                # and add the new one
-                                del position_orientation[old_range]
-                                position_orientation[new_range] = new_orientation
+                                    isolate_dict[isolate] = '+'
+                                # Remove the old position from the list
+                                list_of_positions.remove(old_position)
+                                # Create the new position and add it
+                                new_pos = Position(new_range[0], new_range[1], orientation, isolate_dict, None, None)
+                                list_of_positions.append(new_pos)
                             # Otherwise this range hasn't been seen before, so all values are False
                             else:
                                 if '?' in call:
-                                    list_of_positions[(is_start, is_end)][isolate] = '?'
+                                    isolate_dict[isolate] = '?'
                                 elif '*' in call:
-                                    list_of_positions[(is_start, is_end)][isolate] = '*'
+                                    isolate_dict[isolate] = '*'
                                 else:
-                                    list_of_positions[(is_start, is_end)][isolate] = '+'
-                                position_orientation[(is_start, is_end)] = orientation
-                        # Otherwise the position list is empty, so there are no ranges to check against
-                        else:
-                            if '?' in call:
-                                    list_of_positions[(is_start, is_end)][isolate] = '?'
-                            elif '*' in call:
-                                list_of_positions[(is_start, is_end)][isolate] = '*'
-                            else:
-                                list_of_positions[(is_start, is_end)][isolate] = '+'
-                            position_orientation[(is_start, is_end)] = orientation
-                    # This position is already in the list, so just append the new isolate
-                    elif (is_start, is_end) in list_of_positions:
-                        if '?' in call:
-                            list_of_positions[(is_start, is_end)][isolate] = '?'
-                        elif '*' in call:
-                            list_of_positions[(is_start, is_end)][isolate] = '*'
-                        else:
-                            list_of_positions[(is_start, is_end)][isolate] = '+'
+                                    isolate_dict[isolate] = '+'
+                                new_pos = Position(is_start, is_end, orientation, isolate_dict, None, None)
+                                list_of_positions.append(new_pos)
 
     elapsed_time = time.time() - start_time
     print 'Time taken: ' + str(elapsed_time)
+    
+    '''
+    # Perhaps do one last check to make sure that no columns can be collapsed
+    print 'number of old positions'
+    print len(list_of_positions)
 
+    final_position_list = []
+    temp_pos_list = []
+    
+    merge_count = 0
+    current_list_len = len(list_of_positions)
+    print current_list_len
+    index_count = 0
+    while current_list_len > index_count:
+        index_count += 1
+        #print pos
+        #print pos.x
+        #print pos.y
+        # remove the position that we're actually looking at because obviously it's going to match to itself
+        current_pos = list_of_positions.pop()
+        print current_pos
+        #print temp_pos_list
+        if list_of_positions != []:
+            old_position, new_range = check_ranges(list_of_positions, (current_pos.x, current_pos.y), args.gap, pos.orientation)
+            if new_range == False:
+                # Then this position doesn't merge with anything, so let's keep it as is
+                final_position_list.append(current_pos)
+            else:
+                # So we've matched to something that's already there
+                # So let's just merge these two positions together in a new one
+                print 'We need to merge two positions'
+                print 'These are the coordinates of the current position'
+                print current_pos.x
+                print current_pos.y
+                print 'These are the coordinates of the position to merge with'
+                print old_position.x
+                print old_position.y
+                print 'These are the new coordinates'
+                print new_range[0]
+                print new_range[1]
+                print 'This is the current positions dictionary'
+                print current_pos.isolate_dict
+                print len(current_pos.isolate_dict)
+                print 'This is the old positions dictionary'
+                print old_position.isolate_dict
+                print len(old_position.isolate_dict)
+                current_pos.isolate_dict.update(old_position.isolate_dict)
+                print 'This is the new positions dictionary'
+                print current_pos.isolate_dict
+                print len(current_pos.isolate_dict)
+                current_pos.x = new_range[0]
+                current_pos.y = new_range[1]
+                new_pos = Position(new_range[0], new_range[1], current_pos.orientation, current_pos.isolate_dict, None, None)
+                final_position_list.append(new_pos)
+                merge_count += 1
+        else:
+            final_position_list.append(current_pos)
+    
+    # Compare final number of positions after merging
+    print 'The number of positions merged'
+    print merge_count
+    print 'final number of positions'
+    print len(final_position_list)
+    '''
+
+    # Get the flanking genes for each position now they've all been merged
+    print 'Getting flanking genes for each position (this step is the longest and could take some time) ...'
     # key = (start, end), valye = [left_gene, right_gene]
     position_genes = {}
-    # Get the flanking genes for each know position
-    print 'Getting flanking genes for each position (this step is the longest and could take some time) ...'
 
     # Get feature list
     gb = SeqIO.read(args.reference_gbk, "genbank")
@@ -471,60 +638,47 @@ def main():
         else:
             feature_count += 1
 
-    '''if len(list_of_ref_positions.keys()) != 0:
-        for position in list_of_ref_positions.keys():
-            if position[0] < position[1]:
-                left_pos = position[0]
-                right_pos = position[1]
-            else:
-                left_pos = position[1]
-                right_pos = position[0]
-            flanking_left, flanking_right = get_flanking_genes(gb.features, feature_list, left_pos, right_pos, args.cds, args.trna, args.rrna)
-            position_genes[(position[0], position[1])] = [flanking_left, flanking_right]'''
     # Get flanking genes
-    for position in list_of_positions.keys():
-        left_pos = min(position[0], position[1])
-        right_pos = max(position[0], position[1])
-        genes_before, genes_after =  get_flanking_genes(gb.features, feature_list, left_pos, right_pos, args.cds, args.trna, args.rrna)
-        position_genes[(position[0], position[1])] = [genes_before, genes_after]
+    for pos in list_of_positions:
+        genes_before, genes_after =  get_flanking_genes(gb.features, feature_list, pos.x, pos.y, args.cds, args.trna, args.rrna)
+        pos.left_feature = genes_before
+        pos.right_feature = genes_after
 
-    # Order positions from smallest to largest for final table output
-    order_position_list = list(OrderedDict.fromkeys(list_of_positions.keys()))
-    order_position_list.sort()
 
     elapsed_time = time.time() - start_time
     print 'Time taken: ' + str(elapsed_time)
 
-    # Create header of table
+    # Order positions from smallest to largest for final table output
+    list_of_positions.sort(key=lambda x: x.x)
+    
+    # Write out table
     print 'Writing output table to ' + args.output + ' ...'
     with open(args.output, 'w') as out:
         header = ['isolate']
-        for position in order_position_list:
-            if position_orientation[position] == 'F':
-                header.append(str(position[0]) + '-' + str(position[1]))
+        for pos in list_of_positions:
+            if pos.orientation == 'F':
+                header.append(str(pos.x) + '-' + str(pos.y))
             else:
-                header.append(str(position[1]) + '-' + str(position[0]))
+                header.append(str(pos.y) + '-' + str(pos.x))
         out.write('\t'.join(header) + '\n')
         # Add the values for the reference positions
         row = [ref_name]
-        for position in order_position_list:
-            if position in list_of_positions:
-                if ref_name in list_of_positions[position]:
-                    row.append(list_of_positions[position][ref_name])
-                else:
-                    row.append('-')
+        for pos in list_of_positions:
+            if ref_name in pos.isolate_dict.keys():
+                row.append(pos.isolate_dict[ref_name])
+            else:
+                row.append('-')
         out.write('\t'.join(row) + '\n')
         
-        # Loop through each isoalte
+        # Loop through each isolate
         # and create each row
         for isolate in list_of_isolates:
             row = [isolate]
-            for position in order_position_list:
-                if position in list_of_positions:
-                    if isolate in list_of_positions[position]:
-                        row.append(list_of_positions[position][isolate])
-                    else:
-                        row.append('-')
+            for pos in list_of_positions:
+                if isolate in pos.isolate_dict.keys():
+                    row.append(pos.isolate_dict[isolate])
+                else:
+                    row.append('-')
             out.write('\t'.join(row) + '\n')
         # Set up flanking genes
         row_orientation = ['orientation']
@@ -537,20 +691,17 @@ def main():
         row_l_prod = ['left info']
         row_r_prod = ['right info']
 
-        # Print flanking genes for each position
-        for position in order_position_list:
-            #   genes_before, genes_after = get_flanking_genes(args.reference_gbk, position[0], position[1], args.cds, args.trna, args.rrna)
-            row_orientation.append(position_orientation[position])
-            if position in position_genes:
-                #print position_genes[position]
-                row_l_locus.append(position_genes[position][0][0])
-                row_r_locus.append(position_genes[position][1][0])
-                row_l_dist.append(position_genes[position][0][1])
-                row_r_dist.append(position_genes[position][1][1])
-                row_l_strand.append(position_genes[position][0][2][-1])
-                row_r_strand.append(position_genes[position][1][2][-1])
-                row_l_prod.append(position_genes[position][0][2])
-                row_r_prod.append(position_genes[position][1][2])
+        # Print orientation and flanking genes for each position
+        for pos in list_of_positions:
+            row_orientation.append(pos.orientation)
+            row_l_locus.append(pos.left_feature[0])
+            row_r_locus.append(pos.right_feature[0])
+            row_l_dist.append(pos.left_feature[1])
+            row_r_dist.append(pos.right_feature[1])
+            row_l_strand.append(pos.left_feature[2][-1])
+            row_r_strand.append(pos.right_feature[2][-1])
+            row_l_prod.append(pos.left_feature[2])
+            row_r_prod.append(pos.right_feature[2])
         out.write('\t'.join(row_orientation) + '\n')
         out.write('\t'.join(row_l_locus) + '\n')
         out.write('\t'.join(row_l_dist) + '\n')
@@ -562,7 +713,7 @@ def main():
         out.write('\t'.join(str(i) for i in row_r_prod) + '\n')
 
     elapsed_time = time.time() - start_time
-    print 'Table compilation finished in ' + str(elapsed_time) 
+    print 'Table compilation finished in ' + str(elapsed_time)
 
 if __name__ == "__main__":
     main()
