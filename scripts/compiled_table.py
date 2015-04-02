@@ -62,11 +62,6 @@ def check_ranges(positions, range_to_check, gap, orientation):
     for pos in positions:
         list_of_range_tuples.append((pos.x, pos.y, pos.orientation))
 
-    # From ranges, create a list of tuples (min, max, orientation)
-    '''list_of_range_tuples = []
-    for key in ranges:
-        list_of_range_tuples.append((min(key[0], key[1]), max(key[0], key[1]), ranges[key]))'''
-
     # get the largest value
     largest_value = max(list_of_range_tuples, key=operator.itemgetter(1))[1] + gap + 10
 
@@ -85,43 +80,21 @@ def check_ranges(positions, range_to_check, gap, orientation):
             try:
                 range_boxes[index_1].append(tup)
             except IndexError:
-                print 'IndexError: index1, index2, tuple'
-                print index_1
-                print index_2
-                print tup
                 return False, False
-                #exit(-1)
             index_1 += 1
 
-    print 'Our current gap value is ' + str(gap)
-    print 'The current number of tuples we have is ' + str(len(list_of_range_tuples))
-    print 'Our range box set looks like this:'
-    print range_boxes
-    print 'It is this long: ' + str(len(range_boxes))
-    print 'largest value is ' + str(largest_value)
-    print 'slice size is ' + str(slice_size)
     # find box for new range to check
     start = min(range_to_check[0], range_to_check[1])
     stop = max(range_to_check[1], range_to_check[0])
 
-    print 'Our start value from the position we need to check is ' + str(start)
-    print 'Our stop value from the position we need to check is ' + str(stop)
     index_start = start / slice_size
     index_stop = stop / slice_size
-    print 'The index of our start value is ' + str(index_start)
-    print 'The index of our stop value is ' + str(index_stop)
 
     # check each potential box
-    print 'Now we need to check each potential box'
-    print 'To do this, we start at the box indicated by index start, and continue looking in each box until index stop'
     while index_start <= index_stop and index_stop <= ((largest_value/slice_size) + 1):
         if range_boxes[index_start] != []:
-            print 'Currently looking inside non empty box ' + str(index_start)
             for tup in range_boxes[index_start]:
-                print 'Looking at each tuple in this box'
-                print tup
                 if orientation == tup[2]:
-                    print 'orientation matches for this tuple, so it is a possible candidate'
                     #print tup
                     x = tup[0]
                     y = tup[1]
@@ -129,10 +102,8 @@ def check_ranges(positions, range_to_check, gap, orientation):
                     # taking into account gap
                     if (x in range(start - gap, stop + 1)) or (x in range(start, stop + gap + 1)):
                         # If so, then these ranges overlap
-                        print 'the x ranges overlapped'
                         new_start = min(x, start)
                         new_end = max(y, stop)
-                        print 'Our new position is ' + str((new_start, new_end))
                         for pos in positions:
                             if x == pos.x and y == pos.y:
                                 matched_pos = pos
@@ -140,30 +111,24 @@ def check_ranges(positions, range_to_check, gap, orientation):
                     # Otherwise the y value must lie between the start and stop in the test range
                     # taking into account the gap
                     elif (y in range(start - gap, stop + 1)) or (y in range(start, stop + gap + 1)):
-                        print 'the y ranges overlapped'
                         # If so, then these ranges overlap
                         new_start = min(x, start)
                         new_end = max(y, stop)
-                        print 'Our new position is ' + str((new_start, new_end))
                         for pos in positions:
                             if x == pos.x and y == pos.y:
                                 matched_pos = pos
                         return matched_pos, (new_start, new_end)
                     # Also need to check if start and top lie within x and y
                     elif start in range(x - gap, y + 1) or start in range(x, y + gap + 1):
-                        print 'the start ranges overlapped'
                         new_start = min(x, start)
                         new_end = max(y, stop)
-                        print 'Our new position is ' + str((new_start, new_end))
                         for pos in positions:
                             if x == pos.x and y == pos.y:
                                 matched_pos = pos
                         return matched_pos, (new_start, new_end)
                     elif stop in range(x - gap, y + 1) or stop in range(x, y + gap + 1):
-                        print 'the stop ranges overlapped'
                         new_start = min(x, start)
                         new_end = max(y, stop)
-                        print 'Our new position is ' + str((new_start, new_end))
                         for pos in positions:
                             if x == pos.x and y == pos.y:
                                 matched_pos = pos
@@ -467,8 +432,6 @@ def main():
         list_of_isolates.append(isolate)
         # Skip the header
         header = 0
-        print 'This is the isolate we are looking at'
-        print isolate
         with open(result_file) as file_open:
             for line in file_open:
                 # Skip header
@@ -488,7 +451,6 @@ def main():
                     isolate_dict = {}
                     for pos in list_of_positions:
                         if pos.x == is_start and pos.y == is_end and pos.orientation == orientation:
-                            print 'This position already exists'
                             # Then this position already exists
                             match = True
                             # And we want to retreive the position to which it is exactly the same
@@ -503,11 +465,9 @@ def main():
                     
                     # So we haven't seen this position before
                     if match == False:
-                        print 'We have not seen this position before'
                         # The position list is empty, so there's nothing to check against, so just add
                         # this new position
                         if list_of_positions == []:
-                            print 'Our position list is empty so we will just add it'
                             if '?' in call:
                                 isolate_dict[isolate] = '?'
                             elif '*' in call:
@@ -519,14 +479,9 @@ def main():
                         
                         # If the list of positions isn't empty, then there are ranges to check against
                         else:
-                            print 'We need to see if this position merges with any others'
                             old_position, new_range = check_ranges(list_of_positions, (is_start, is_end), args.gap, orientation)
                             # So the current range overlaps with a range we already have
                             if old_position != False:
-                                #print 'here is the old position'
-                                #print old_position.x
-                                #print old_position.y
-                                #print old_position.isolate_dict
                                 isolate_dict = old_position.isolate_dict
                                 # Add the new isolate to this dictionary
                                 # Mark as ? if uncertain, * if imprecise
@@ -556,70 +511,6 @@ def main():
     elapsed_time = time.time() - start_time
     print 'Time taken: ' + str(elapsed_time)
     
-    '''
-    # Perhaps do one last check to make sure that no columns can be collapsed
-    print 'number of old positions'
-    print len(list_of_positions)
-
-    final_position_list = []
-    temp_pos_list = []
-    
-    merge_count = 0
-    current_list_len = len(list_of_positions)
-    print current_list_len
-    index_count = 0
-    while current_list_len > index_count:
-        index_count += 1
-        #print pos
-        #print pos.x
-        #print pos.y
-        # remove the position that we're actually looking at because obviously it's going to match to itself
-        current_pos = list_of_positions.pop()
-        print current_pos
-        #print temp_pos_list
-        if list_of_positions != []:
-            old_position, new_range = check_ranges(list_of_positions, (current_pos.x, current_pos.y), args.gap, pos.orientation)
-            if new_range == False:
-                # Then this position doesn't merge with anything, so let's keep it as is
-                final_position_list.append(current_pos)
-            else:
-                # So we've matched to something that's already there
-                # So let's just merge these two positions together in a new one
-                print 'We need to merge two positions'
-                print 'These are the coordinates of the current position'
-                print current_pos.x
-                print current_pos.y
-                print 'These are the coordinates of the position to merge with'
-                print old_position.x
-                print old_position.y
-                print 'These are the new coordinates'
-                print new_range[0]
-                print new_range[1]
-                print 'This is the current positions dictionary'
-                print current_pos.isolate_dict
-                print len(current_pos.isolate_dict)
-                print 'This is the old positions dictionary'
-                print old_position.isolate_dict
-                print len(old_position.isolate_dict)
-                current_pos.isolate_dict.update(old_position.isolate_dict)
-                print 'This is the new positions dictionary'
-                print current_pos.isolate_dict
-                print len(current_pos.isolate_dict)
-                current_pos.x = new_range[0]
-                current_pos.y = new_range[1]
-                new_pos = Position(new_range[0], new_range[1], current_pos.orientation, current_pos.isolate_dict, None, None)
-                final_position_list.append(new_pos)
-                merge_count += 1
-        else:
-            final_position_list.append(current_pos)
-    
-    # Compare final number of positions after merging
-    print 'The number of positions merged'
-    print merge_count
-    print 'final number of positions'
-    print len(final_position_list)
-    '''
-
     # Get the flanking genes for each position now they've all been merged
     print 'Getting flanking genes for each position (this step is the longest and could take some time) ...'
     # key = (start, end), valye = [left_gene, right_gene]
