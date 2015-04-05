@@ -133,7 +133,7 @@ def check_ranges(positions, range_to_check, gap, orientation):
                             if x == pos.x and y == pos.y:
                                 matched_pos = pos
                         return matched_pos, (new_start, new_end)
-                    else:
+                    '''else:
                         print 'This is x and y, and then start and stop, then stop + 1'
                         print x
                         print y
@@ -147,7 +147,7 @@ def check_ranges(positions, range_to_check, gap, orientation):
                         print range(start, stop + gap + 1)
                         print 'These are the y ranges to check'
                         print range(start - gap, stop + 1)
-                        print range(start, stop + gap + 1)
+                        print range(start, stop + gap + 1)'''
 
 
         index_start += 1
