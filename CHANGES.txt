@@ -1,1 +1,2 @@
 v0.1.0, Tues 14 Oct 2014, -- Inital release.
+v0.1.1, Fri 24 April 2015, -- updated compiled_table to correctly collapse hits
