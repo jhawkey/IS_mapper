@@ -1,2 +1,5 @@
-v0.1.0, Tues 14 Oct 2014, -- Inital release.
+v0.1.2, Mon 18 May 2015
+    * removed functional prediction as currently buggy
+    * corrected some intermediate file names
 v0.1.1, Fri 24 April 2015, -- updated compiled_table to correctly collapse hits
+v0.1.0, Tues 14 Oct 2014, -- Inital release.
