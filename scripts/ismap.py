@@ -567,7 +567,7 @@ def main():
                 five_to_ref_bam = temp_folder + five_header + '_' + query_name + '.bam'
                 three_to_ref_bam = temp_folder + three_header + '_' + query_name + '.bam'
                 five_bam_sorted = five_header + '_' + query_name + '.sorted'
-                three_bam_sorted = three_header + '.sorted'
+                three_bam_sorted = three_header + '_' + query_name + '.sorted'
                 five_cov_bed = temp_folder + five_header + '_' + query_name + '_cov.bed'
                 three_cov_bed = temp_folder + three_header + '_' + query_name + '_cov.bed'
                 five_cov_merged = temp_folder + five_header + '_' + query_name + '_cov_merged.sorted.bed'

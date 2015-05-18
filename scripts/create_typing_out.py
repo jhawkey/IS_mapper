@@ -144,6 +144,7 @@ def novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, ref, cds, trna, rrna, gap, orie
         func_pred = 'Gene interrupted'
     else:
         func_pred = ''
+    func_pred = ''
     
     # This is a confident hit
     if unpaired == False:
@@ -196,6 +197,7 @@ def add_known(x_L, x_R, y_L, y_R, gap, genbank, ref, seq, temp, cds, trna, rrna,
         # Otherwise we need to determine who is upstream/downstream of what
         else:
             func_pred = ''
+        func_pred = ''
         # Add to the final results
         if 'unpaired' in file_loc:
             call = 'Known?'
