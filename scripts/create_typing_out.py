@@ -35,6 +35,9 @@ def parse_args():
     # Output parameters
     parser.add_argument('--temp', type=str, required=True, help='location of temp folder to place intermediate blast files in')
     parser.add_argument('--output', type=str, required=True, help='name for output file')
+    parser.add_argument('--igv', action='store_true', help='format of output bedfile - if True, adds IGV trackline and formats 4th column for hovertext display')
+    parser.add_argument('--chr_name', type=str, required=False, default='', help='chromosome name for bedfile - must match genome name to load in IGV (default = genbank accession)')
+
     return parser.parse_args()
 
 def insertion_length(insertion):
@@ -502,6 +505,20 @@ def main():
     if arr == 0:
         output.write('No hits found.')
     output.close()
+    
+    # Write out the found hits to bed file for viewing in IGV
+    with open(args.output + '_hits.bed', 'w') as outfile:
+        if args.chr_name == '':
+            args.chr_name = SeqIO.read(args.ref, 'genbank').id
+        if args.igv:
+            outfile.write('#gffTags \n')
+            for key in sorted_keys[:,0]:
+                r = results[key]
+                outfile.write(args.chr_name + '\t' + r[1] + '\t' + r[2] + '\t' + 'Name=' + key + ';orientation=' + r[0] + ';' + ';'.join((header[i] + '=' + r[i]) for i in range(3, len(header)))+ '\n')
+        else:
+            for key in sorted_keys[:,0]:
+                r = results[key]
+                outfile.write(args.chr_name + '\t' + r[1] + '\t' + r[2] + key + '\n')
 
     # Write out hits that were removed for whatever reason to file
     if len(removed_results) != 0:
@@ -518,3 +535,4 @@ def main():
 if __name__ == "__main__":
     
     main()
+    
