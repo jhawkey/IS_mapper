@@ -1,3 +1,6 @@
+v0.2.0, Wed 22 July 2015
+    * moved from Samblaster to Pysam to get soft clipped reads
+    * added some extra information about what step ISMapper is up to in the log file
 v0.1.2, Mon 18 May 2015
     * removed functional prediction as currently buggy
     * corrected some intermediate file names

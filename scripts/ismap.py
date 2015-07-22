@@ -13,7 +13,7 @@
 #   Bedtools v2.20.1 - http://bedtools.readthedocs.org/en/latest/content/installation.html
 #   BioPython v1.63 - http://biopython.org/wiki/Main_Page
 #   BLAST+ v2.2.28 - ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/
-#   pysam
+#   pysam v0.8.3 - https://github.com/pysam-developers/pysam
 #
 # Git repository: https://github.com/jhawkey/IS_mapper
 # README: https://github.com/jhawkey/IS_mapper/blob/master/README.txt
@@ -364,10 +364,6 @@ def extract_clipped_reads(sam_file, min_size, max_size, left_clipped_sam, right_
     right_clipped_reads = pysam.AlignmentFile("temp_right.sam", "w", header=samfile.header)
     file_header = samfile.header
     file_header_string = '@SQ\tLN:' + str(file_header['SQ'][0]['LN']) + '\tSN:' + str(file_header['SQ'][0]['SN'] + '\n')
-    print left_clipped_reads.header
-    print right_clipped_reads.header
-    #left_clipped_reads = open(left_clipped_bam, 'w')
-    #right_clipped_reads = open(right_clipped_bam, 'w')
     for read in samfile.fetch():
         if read.cigarstring != None and 'S' in read.cigarstring:
             cigar = read.cigartuples
@@ -508,12 +504,15 @@ def main():
             make_directories([temp_folder])
 
             # Map to IS query
+            logging.info('Mapping reads to IS query ' + query_name + ' ...')
             run_command(['bwa', 'mem', query, forward_read, reverse_read, '>', output_sam], shell=True)
             # Get softclipped reads
+            logging.info('Selecting softclipped reads...')
             extract_clipped_reads(output_sam, args.min_clip, args.max_clip, left_clipped_sam, right_clipped_sam)
             # Need to convert the result sam files into bam files
             run_command(['samtools view', '-Sb', left_clipped_sam, '>', left_clipped_bam], shell=True)
             run_command(['samtools view', '-Sb', right_clipped_sam, '>', right_clipped_bam], shell=True)
+            logging.info('Selecting reads flanking the IS...')
             # Pull unmapped reads flanking IS
             run_command(['samtools view', '-Sb', '-f 36', output_sam, '>', five_bam], shell=True)
             run_command(['samtools view', '-Sb', '-f 4', '-F 40', output_sam, '>', three_bam], shell=True)
@@ -524,12 +523,9 @@ def main():
             run_command(['bedtools', 'bamtofastq', '-i', left_clipped_bam, '-fq', left_clipped_reads], shell=True)
             run_command(['bedtools', 'bamtofastq', '-i', right_clipped_bam, '-fq', right_clipped_reads], shell=True)
             # Add corresponding clipped reads to their respective left and right ends
-            print 'Usage after reads written out, before concatentation'
-            print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+            logging.info('Adding softclipped reads to unmapped reads...')
             run_command(['cat', left_clipped_reads, five_reads, '>', final_left_reads], shell=True)
             run_command(['cat', right_clipped_reads, three_reads, '>', final_right_reads], shell=True)
-            print 'Usage after reads concatenated onto previous reads'
-            print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
             # Create BLAST database for IS query
             check_blast_database(query)
@@ -574,12 +570,14 @@ def main():
                 # Map ends back to contigs
                 bwa_index(assembly)
                 if args.a == True:
+                    logging.info('Mapping reads to assembly ...')
                     run_command(['bwa', 'mem', 'a', '-T', args.T, assembly, final_left_reads, '>', five_to_ref_sam], shell=True)
                     run_command(['bwa', 'mem', 'a', '-T', args.T, assembly, final_right_reads, '>', three_to_ref_sam], shell=True)
                 else:
+                    logging.info('Mapping reads to assembly ...')
                     run_command(['bwa', 'mem', assembly, final_left_reads, '>', five_to_ref_sam], shell=True)
                     run_command(['bwa', 'mem', assembly, final_right_reads, '>', three_to_ref_sam], shell=True)
-                
+                logging.info('Converting SAM files to BAM ...')
                 run_command(['samtools', 'view', '-Sb', five_to_ref_sam, '>', five_to_ref_bam], shell=True)
                 run_command(['samtools', 'view', '-Sb', three_to_ref_sam, '>', three_to_ref_bam], shell=True)
                 run_command(['samtools', 'sort', five_to_ref_bam, five_bam_sorted], shell=True)
@@ -587,6 +585,7 @@ def main():
                 run_command(['samtools', 'index', five_bam_sorted + '.bam'], shell=True)
                 run_command(['samtools', 'index', three_bam_sorted + '.bam'], shell=True)
                 # Create BED file with coverage information
+                logging.info('Filtering BED files based on coverage cutoff, currently set to: ' + str(args.cutoff))
                 run_command(['bedtools', 'genomecov', '-ibam', five_bam_sorted + '.bam', '-bg', '>', five_cov_bed], shell=True)
                 run_command(['bedtools', 'genomecov', '-ibam', three_bam_sorted + '.bam', '-bg', '>', three_cov_bed], shell=True)
                 filter_on_depth(five_cov_bed, five_final_cov, args.cutoff)
@@ -594,11 +593,13 @@ def main():
                 run_command(['bedtools', 'merge', '-i', five_final_cov, '-d', args.merging, '>', five_merged_bed], shell=True)
                 run_command(['bedtools', 'merge', '-i', three_final_cov, '-d', args.merging, '>', three_merged_bed], shell=True)       
                 # Create table and genbank
+                logging.info('Creating final tabular and genbank outputs ...')
                 if args.extension == '.fasta':
                     run_command([args.path + 'create_genbank_table.py', '--five_bed', five_merged_bed, '--three_bed', three_merged_bed, '--assembly', assembly, '--type fasta', '--output', sample + '_' + query_name], shell=True)
                 elif args.extension == '.gbk':
                     run_command([args.path + 'create_genbank_table.py', '--five_bed', five_merged_bed, '--three_bed', three_merged_bed, '--assembly', assembly_gbk, '--type genbank', '--output', sample + '_' + query_name], shell=True)
                 #create single entry genbank
+                logging.info('Creating a single entry genbank for viewing in Artemis ...')
                 multi_to_single(sample + '_' + query_name + '_annotated.gbk', sample, final_genbankSingle)
 
             # Typing mode
@@ -636,11 +637,14 @@ def main():
 
                 # Map reads to reference, sort
                 if args.a == True:
+                    logging.info('Mapping reads to reference genome ...')
                     run_command(['bwa', 'mem', '-a', '-T', args.T, typingRefFasta, final_left_reads, '>', five_to_ref_sam], shell=True)
                     run_command(['bwa', 'mem', '-a', '-T', args.T, typingRefFasta, final_right_reads, '>', three_to_ref_sam], shell=True)
                 else:
+                    logging.info('Mapping reads to reference genome ...')
                     run_command(['bwa', 'mem', typingRefFasta, final_left_reads, '>', five_to_ref_sam], shell=True)
                     run_command(['bwa', 'mem', typingRefFasta, final_right_reads, '>', three_to_ref_sam], shell=True)
+                logging.info('Convering SAM files to BAM ...')
                 run_command(['samtools', 'view', '-Sb', five_to_ref_sam, '>', five_to_ref_bam], shell=True)
                 run_command(['samtools', 'view', '-Sb', three_to_ref_sam, '>', three_to_ref_bam], shell=True)
                 run_command(['samtools', 'sort', five_to_ref_bam, five_bam_sorted], shell=True)
@@ -648,23 +652,28 @@ def main():
                 run_command(['samtools', 'index', five_bam_sorted + '.bam'], shell=True)
                 run_command(['samtools', 'index', three_bam_sorted + '.bam'], shell=True)
                 # Create BED files with coverage information
+                logging.info('Creating BED files ...')
                 run_command(['bedtools', 'genomecov', '-ibam', five_bam_sorted + '.bam', '-bg', '>', five_cov_bed], shell=True)
                 run_command(['bedtools', 'genomecov', '-ibam', three_bam_sorted + '.bam', '-bg', '>', three_cov_bed], shell=True)
                 run_command(['bedtools', 'merge', '-d', args.merging, '-i', five_cov_bed, '>', five_cov_merged], shell=True)
                 run_command(['bedtools', 'merge', '-d', args.merging, '-i', three_cov_bed, '>', three_cov_merged], shell=True)
                 # Filter coveraged BED files on coverage cutoff (so only take 
                 # high coverage regions for further analysis)
+                logging.info('Filtering BED files based on coverage cutoff, currently set to: ' + str(args.cutoff))
                 filter_on_depth(five_cov_bed, five_final_cov, args.cutoff)
                 filter_on_depth(three_cov_bed, three_final_cov, args.cutoff)
                 run_command(['bedtools', 'merge', '-d', args.merging, '-i', five_final_cov, '>', five_merged_bed], shell=True)
                 run_command(['bedtools', 'merge', '-d', args.merging, '-i', three_final_cov, '>', three_merged_bed], shell=True)
                 # Find intersects and closest points of regions
+                logging.info('Finding regions that are close or intersect ...')
                 run_command(['bedtools', 'intersect', '-a', five_merged_bed, '-b', three_merged_bed, '-wo', '>', bed_intersect], shell=True)
                 run_command(['closestBed', '-a', five_merged_bed, '-b', three_merged_bed, '-d', '>', bed_closest], shell=True)
                 # Create all possible closest bed files for checking unpaired hits
+                logging info('Checking for unpaired hits ...')
                 run_command(['closestBed', '-a', five_merged_bed, '-b', three_cov_merged, '-d', '>', bed_unpaired_five], shell=True)
                 run_command(['closestBed', '-a', five_cov_merged, '-b', three_merged_bed, '-d', '>', bed_unpaired_three], shell=True)
                 # Create table and annotate genbank with hits
+                logging.info('Creating final tabular and genbank outputs ...')
                 run_command([args.path + 'create_typing_out.py', '--intersect', bed_intersect, '--closest', bed_closest, 
                     '--left_bed', five_merged_bed, '--right_bed', three_merged_bed, 
                     '--left_unpaired', bed_unpaired_five, '--right_unpaired', bed_unpaired_three, 
@@ -674,6 +683,7 @@ def main():
 
             # remove temp folder if required
             if args.temp == False:
+                logging.info('Remvoing temp folder ...')
                 run_command(['rm', '-rf', temp_folder], shell=True)
     total_time = time.time() - start_time
     time_mins = float(total_time) / 60
