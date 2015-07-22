@@ -669,7 +669,7 @@ def main():
                 run_command(['bedtools', 'intersect', '-a', five_merged_bed, '-b', three_merged_bed, '-wo', '>', bed_intersect], shell=True)
                 run_command(['closestBed', '-a', five_merged_bed, '-b', three_merged_bed, '-d', '>', bed_closest], shell=True)
                 # Create all possible closest bed files for checking unpaired hits
-                logging info('Checking for unpaired hits ...')
+                logging.info('Checking for unpaired hits ...')
                 run_command(['closestBed', '-a', five_merged_bed, '-b', three_cov_merged, '-d', '>', bed_unpaired_five], shell=True)
                 run_command(['closestBed', '-a', five_cov_merged, '-b', three_merged_bed, '-d', '>', bed_unpaired_three], shell=True)
                 # Create table and annotate genbank with hits
