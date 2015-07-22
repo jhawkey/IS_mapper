@@ -13,7 +13,7 @@
 #   Bedtools v2.20.1 - http://bedtools.readthedocs.org/en/latest/content/installation.html
 #   BioPython v1.63 - http://biopython.org/wiki/Main_Page
 #   BLAST+ v2.2.28 - ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/
-#   Samblaster v0.1.21 - https://github.com/GregoryFaust/samblaster
+#   pysam
 #
 # Git repository: https://github.com/jhawkey/IS_mapper
 # README: https://github.com/jhawkey/IS_mapper/blob/master/README.txt
@@ -31,6 +31,7 @@ from Bio.SeqRecord import SeqRecord
 from Bio.Alphabet import generic_dna
 import resource
 import time
+import pysam
 try:
     from version import ismap_version
 except:
@@ -63,8 +64,8 @@ def parse_args():
     parser.add_argument('--merging', type=str, required=False, default='100', help='Value for merging left and right hits in bed files together to simply calculation of closest and intersecting regions (default 100).')
     parser.add_argument('--a', action='store_true', required=False, help='Switch on all alignment reporting for bwa.')
     parser.add_argument('--T', type=str, required=False, default='30', help='Mapping quality score for bwa (default 30).')
-    parser.add_argument('--min_clip', type=str, required=False, default='10', help='Minimum size for softclipped region to be extracted from initial mapping (default 10).')
-    parser.add_argument('--max_clip', type=int, required=False, default=30, help='Maximum size for softclipped regions to be included (default 30).')
+    parser.add_argument('--min_clip', type=int, required=False, default=10, help='Minimum size for softclipped region to be extracted from initial mapping (default 10).')
+    parser.add_argument('--max_clip', type=int, required=False, default=20, help='Maximum size for softclipped regions to be included (default 20).')
     # Options for table output (typing)
     parser.add_argument('--cds', nargs='+', type=str, required=False, default=['locus_tag', 'gene', 'product'], help='qualifiers to look for in reference genbank for CDS features (default locus_tag gene product)')
     parser.add_argument('--trna', nargs='+', type=str, required=False, default=['locus_tag', 'product'], help='qualifiers to look for in reference genbank for tRNA features (default locus_tag product)')
@@ -357,20 +358,76 @@ def multi_to_single(genbank, name, output):
     #write out new single entry genbank
     SeqIO.write(newrecord, output, "genbank")
 
-def extract_clipped_reads(fastq_file, size, left_file_out, right_file_out):
+def extract_clipped_reads(sam_file, min_size, max_size, left_clipped_sam, right_clipped_sam):
+    samfile = pysam.AlignmentFile(sam_file, "r")
+    left_clipped_reads = pysam.AlignmentFile("temp_left.sam", "w", header=samfile.header)
+    right_clipped_reads = pysam.AlignmentFile("temp_right.sam", "w", header=samfile.header)
+    file_header = samfile.header
+    file_header_string = '@SQ\tLN:' + str(file_header['SQ'][0]['LN']) + '\tSN:' + str(file_header['SQ'][0]['SN'] + '\n')
+    print left_clipped_reads.header
+    print right_clipped_reads.header
+    #left_clipped_reads = open(left_clipped_bam, 'w')
+    #right_clipped_reads = open(right_clipped_bam, 'w')
+    for read in samfile.fetch():
+        if read.cigarstring != None and 'S' in read.cigarstring:
+            cigar = read.cigartuples
+            # operation 4 indicates soft clipping
+            index_no = [operation[0] for operation in cigar].index(4)
+            if index_no == 0 and read.is_read1:
+                # goes in left reads
+                if cigar[index_no][1] >= min_size and cigar[index_no][1] <= max_size:
+                    # just want the soft clipped section
+                    q = read.query_qualities
+                    read.query_sequence = read.query_sequence[0:cigar[index_no][1] - 1]
+                    read.query_qualities = q[0:cigar[index_no][1] - 1]
+                    read.cigar = None
+                    left_clipped_reads.write(read)
+            elif index_no == 0 and read.is_read2:
+                # goes in right reads
+                if cigar[index_no][1] >= min_size and cigar[index_no][1] <= max_size:
+                    q = read.query_qualities
+                    read.query_sequence = read.query_sequence[0:cigar[index_no][1] - 1]
+                    read.query_qualities = q[0:cigar[index_no][1] - 1]
+                    read.cigar = None
+                    right_clipped_reads.write(read)
+            elif index_no == 1 and read.is_read1:
+                # goes in right reads
+                if cigar[index_no][1] >= min_size and cigar[index_no][1] <= max_size:
+                    q = read.query_qualities
+                    read.query_sequence = read.query_sequence[cigar[index_no][1] - 1:]
+                    read.query_qualities = q[cigar[index_no][1] - 1:]
+                    read.cigar = None
+                    right_clipped_reads.write(read)
+            elif index_no == 1 and read.is_read2:
+                #goes in left reads
+                if cigar[index_no][1] >= min_size and cigar[index_no][1] <= max_size:
+                    q = read.query_qualities
+                    read.query_sequence = read.query_sequence[cigar[index_no][1] - 1:]
+                    read.query_qualities = q[cigar[index_no][1] - 1:]
+                    read.cigar = None
+                    left_clipped_reads.write(read)
+            elif index_no > 1:
+                logging.info("Clipped read that has other operations (not just 2): " + read.cigarstring)
 
-    print 'Usage at start of extract_clipped_reads function'
-    print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-    clipped = SeqIO.parse(open(fastq_file, "rU"), "fastq")
-    short_right_clipped = (fastq for fastq in clipped if len(fastq.seq) <= size and fastq.name.endswith('_1'))
-    right_file_handle = open(right_file_out, "w")
-    SeqIO.write(short_right_clipped, right_file_handle, "fastq")
-    clipped = SeqIO.parse(open(fastq_file, "rU"), "fastq")
-    short_left_clipped = (fastq for fastq in clipped if len(fastq.seq) <= size and fastq.name.endswith('_2'))
-    left_file_handle = open(left_file_out, "w")
-    SeqIO.write(short_left_clipped, left_file_out, "fastq")
-    print 'Usage after reading in fastq with SeqIO'
-    print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+    samfile.close()
+    left_clipped_reads.close()
+    right_clipped_reads.close()
+
+    # now need to add the headers
+    left_clipped_reads = open(left_clipped_sam, 'w')
+    left_clipped_reads.write(file_header_string)
+    right_clipped_reads = open(right_clipped_sam, 'w')
+    right_clipped_reads.write(file_header_string)
+    with open("temp_left.sam", "r") as f:
+        for line in f:
+            left_clipped_reads.write(line)
+    with open("temp_right.sam", "r") as f:
+        for line in f:
+            right_clipped_reads.write(line)
+
+    left_clipped_reads.close()
+    right_clipped_reads.close()
+
 
 def main():
 
@@ -397,7 +454,6 @@ def main():
     check_command(['samtools'], 'samtools')
     check_command(['makeblastdb'], 'blast')
     check_command(['bedtools'], 'bedtools')
-    check_command(['samblaster', '--version'], 'samblaster')
 
     # Checks to make sure the runtype is valid and provides an error if not
     if args.runtype != "improvement" and args.runtype != "typing":
@@ -440,6 +496,10 @@ def main():
             five_reads = temp_folder + sample + '_' + query_name + '_5.fastq'
             three_reads = temp_folder + sample + '_' + query_name + '_3.fastq'
             clipped_reads = temp_folder + sample + '_' + query_name + '_clipped.fastq'
+            left_clipped_sam  = temp_folder + sample + '_' + query_name + '_left_clipped.sam'
+            right_clipped_sam = temp_folder + sample + '_' + query_name + '_right_clipped.sam'
+            left_clipped_bam  = temp_folder + sample + '_' + query_name + '_left_clipped.bam'
+            right_clipped_bam = temp_folder + sample + '_' + query_name + '_right_clipped.bam'
             left_clipped_reads = temp_folder + sample + '_' + query_name + '_left_clipped.fastq'
             right_clipped_reads = temp_folder + sample + '_' + query_name + '_right_clipped.fastq'
             final_left_reads = temp_folder + sample + '_' + query_name + '_LeftFinal.fastq'
@@ -449,28 +509,21 @@ def main():
 
             # Map to IS query
             run_command(['bwa', 'mem', query, forward_read, reverse_read, '>', output_sam], shell=True)
-            # Run Samblaster to extract softclipped reads
-            print 'Usage before samblaster'
-            print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-            run_command(['samblaster', '-u', clipped_reads, '-i', output_sam, '-o /dev/null', '-e', '--minClipSize', args.min_clip], shell=True)
-            print 'Usage after samblaster'
-            print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+            # Get softclipped reads
+            extract_clipped_reads(output_sam, args.min_clip, args.max_clip, left_clipped_sam, right_clipped_sam)
+            # Need to convert the result sam files into bam files
+            run_command(['samtools view', '-Sb', left_clipped_sam, '>', left_clipped_bam], shell=True)
+            run_command(['samtools view', '-Sb', right_clipped_sam, '>', right_clipped_bam], shell=True)
             # Pull unmapped reads flanking IS
             run_command(['samtools view', '-Sb', '-f 36', output_sam, '>', five_bam], shell=True)
             run_command(['samtools view', '-Sb', '-f 4', '-F 40', output_sam, '>', three_bam], shell=True)
             # Turn bams to reads for mapping
             run_command(['bedtools', 'bamtofastq', '-i', five_bam, '-fq', five_reads], shell=True)
             run_command(['bedtools', 'bamtofastq', '-i', three_bam, '-fq', three_reads], shell=True)
+            # Turn bams from clipped reads into fastq
+            run_command(['bedtools', 'bamtofastq', '-i', left_clipped_bam, '-fq', left_clipped_reads], shell=True)
+            run_command(['bedtools', 'bamtofastq', '-i', right_clipped_bam, '-fq', right_clipped_reads], shell=True)
             # Add corresponding clipped reads to their respective left and right ends
-            print 'Usage before filtering reads'
-            print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-            logging.info('Filtering soft clipped reads, selecting reads that are <= ' + str(args.max_clip) + 'bp')
-            extract_clipped_reads(clipped_reads, args.max_clip, left_clipped_reads, right_clipped_reads)
-            print 'Usage after reads filtered, before reads written out'
-            print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-            logging.info('Writing out left and right soft clipped reads')
-            #SeqIO.write(left_clipped, left_clipped_reads, 'fastq')
-            #SeqIO.write(right_clipped, right_clipped_reads, 'fastq')
             print 'Usage after reads written out, before concatentation'
             print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
             run_command(['cat', left_clipped_reads, five_reads, '>', final_left_reads], shell=True)
