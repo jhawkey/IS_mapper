@@ -13,7 +13,6 @@
 #   Bedtools v2.20.1 - http://bedtools.readthedocs.org/en/latest/content/installation.html
 #   BioPython v1.63 - http://biopython.org/wiki/Main_Page
 #   BLAST+ v2.2.28 - ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/
-#   Samblaster v0.1.21 - https://github.com/GregoryFaust/samblaster
 #
 # Git repository: https://github.com/jhawkey/IS_mapper
 # README: https://github.com/jhawkey/IS_mapper/blob/master/README.txt
@@ -69,6 +68,8 @@ def parse_args():
     parser.add_argument('--cds', nargs='+', type=str, required=False, default=['locus_tag', 'gene', 'product'], help='qualifiers to look for in reference genbank for CDS features (default locus_tag gene product)')
     parser.add_argument('--trna', nargs='+', type=str, required=False, default=['locus_tag', 'product'], help='qualifiers to look for in reference genbank for tRNA features (default locus_tag product)')
     parser.add_argument('--rrna', nargs='+', type=str, required=False, default=['locus_tag', 'product'], help='qualifiers to look for in reference genbank for rRNA features (default locus_tag product)')
+    parser.add_argument('--igv', action='store_true', help='format of output bedfile - if True, adds IGV trackline and formats 4th column for hovertext display')
+    parser.add_argument('--chr_name', type=str, required=False, default='not_specified', help='chromosome name for bedfile - must match genome name to load in IGV (default = genbank accession)')
     # Reporting options
     parser.add_argument('--log', action='store_true', required=False, help='Switch on logging to file (otherwise log to stdout')
     parser.add_argument('--output', type=str, required=True, help='prefix for output files')
@@ -357,20 +358,63 @@ def multi_to_single(genbank, name, output):
     #write out new single entry genbank
     SeqIO.write(newrecord, output, "genbank")
 
-def extract_clipped_reads(fastq_file, size, left_file_out, right_file_out):
+#def extract_clipped_reads(fastq_file, size, left_file_out, right_file_out):
+#
+#    print 'Usage at start of extract_clipped_reads function'
+#    print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+#    clipped = SeqIO.parse(open(fastq_file, "rU"), "fastq")
+#    short_right_clipped = (fastq for fastq in clipped if len(fastq.seq) <= size and fastq.name.endswith('_1'))
+#    right_file_handle = open(right_file_out, "w")
+#    SeqIO.write(short_right_clipped, right_file_handle, "fastq")
+#    clipped = SeqIO.parse(open(fastq_file, "rU"), "fastq")
+#    short_left_clipped = (fastq for fastq in clipped if len(fastq.seq) <= size and fastq.name.endswith('_2'))
+#    left_file_handle = open(left_file_out, "w")
+#    SeqIO.write(short_left_clipped, left_file_out, "fastq")
+#    print 'Usage after reading in fastq with SeqIO'
+#    print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
-    print 'Usage at start of extract_clipped_reads function'
-    print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-    clipped = SeqIO.parse(open(fastq_file, "rU"), "fastq")
-    short_right_clipped = (fastq for fastq in clipped if len(fastq.seq) <= size and fastq.name.endswith('_1'))
-    right_file_handle = open(right_file_out, "w")
-    SeqIO.write(short_right_clipped, right_file_handle, "fastq")
-    clipped = SeqIO.parse(open(fastq_file, "rU"), "fastq")
-    short_left_clipped = (fastq for fastq in clipped if len(fastq.seq) <= size and fastq.name.endswith('_2'))
-    left_file_handle = open(left_file_out, "w")
-    SeqIO.write(short_left_clipped, left_file_out, "fastq")
-    print 'Usage after reading in fastq with SeqIO'
-    print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+def extract_clipped_reads(sam_file, min_size, max_size, out_five_file, out_three_file):
+    with open(sam_file, 'r') as in_file, open(out_five_file, 'w') as out_five, open(out_three_file, 'w') as out_three:
+        for line in in_file:
+            # split fields
+            entries = line.split('\t')
+            # check if it's a header line, and if so, skip it
+            if re.search('^@[A-Z][A-Z]$', entries[0]):
+                pass
+            else:
+                # check the SAM flag - if it's unmapped, skip this read.
+                sam_flag = int(entries [1])
+                if sam_flag & 4:
+                    pass
+                else:
+                    # check if the read has been reverse complemented
+                    reverse_complement = sam_flag & 16
+                    #grab the read name and cigar string
+                    read_name, cigar = entries[0], entries[5]
+                    #parse the cigar info, exclude hard-clipped regions (these can only be on the very edges, outside of soft-clips if soft-clipping is present)
+                    map_regions = re.findall('[0-9]+[MIDNSP=X]', cigar)
+                        
+                    # Get the first and last items from the cigar string and see if it's soft-clipped (last letter = S). Soft clips will only ever be at the ends (inside would be I/D/N)
+                    # If so, find out how many bases are soft-clipped
+                    # If it's the right size, add the read and it's quality score to the appropriate fastq file, reverse-complementing if needed
+                    if map_regions[0][-1] == 'S':
+                        num_soft_clipped = int(map_regions[0][:-1])
+                        if min_size <= num_soft_clipped <= max_size:
+                            soft_clipped_seq = Seq(entries[9][:num_soft_clipped], generic_dna)
+                            qual_scores = entries[10][:num_soft_clipped]
+                            if reverse_complement:
+                                out_five.write('@' + read_name + '\n' + str(soft_clipped_seq.reverse_complement()) + '\n+\n' + qual_scores[::-1] + '\n')
+                            else:
+                                out_five.write('@' + read_name + '\n' + str(soft_clipped_seq) + '\n+\n' + qual_scores + '\n')
+                    if map_regions[-1][-1] == 'S':
+                        num_soft_clipped = int(map_regions[-1][:-1])
+                        if min_size <= num_soft_clipped <= max_size:
+                            soft_clipped_seq = Seq(entries[9][-num_soft_clipped:], generic_dna)
+                            qual_scores = entries[10][-num_soft_clipped:]
+                            if reverse_complement:
+                                out_three.write('@' + read_name + '\n' + str(soft_clipped_seq.reverse_complement()) + '\n+\n' + qual_scores[::-1] + '\n')
+                            else:
+                                out_three.write('@' + read_name + '\n' + str(soft_clipped_seq) + '\n+\n' + qual_scores + '\n')
 
 def main():
 
@@ -397,7 +441,6 @@ def main():
     check_command(['samtools'], 'samtools')
     check_command(['makeblastdb'], 'blast')
     check_command(['bedtools'], 'bedtools')
-    check_command(['samblaster', '--version'], 'samblaster')
 
     # Checks to make sure the runtype is valid and provides an error if not
     if args.runtype != "improvement" and args.runtype != "typing":
@@ -439,7 +482,6 @@ def main():
             three_bam = temp_folder + sample + '_' + query_name + '_3.bam'
             five_reads = temp_folder + sample + '_' + query_name + '_5.fastq'
             three_reads = temp_folder + sample + '_' + query_name + '_3.fastq'
-            clipped_reads = temp_folder + sample + '_' + query_name + '_clipped.fastq'
             left_clipped_reads = temp_folder + sample + '_' + query_name + '_left_clipped.fastq'
             right_clipped_reads = temp_folder + sample + '_' + query_name + '_right_clipped.fastq'
             final_left_reads = temp_folder + sample + '_' + query_name + '_LeftFinal.fastq'
@@ -449,12 +491,6 @@ def main():
 
             # Map to IS query
             run_command(['bwa', 'mem', query, forward_read, reverse_read, '>', output_sam], shell=True)
-            # Run Samblaster to extract softclipped reads
-            print 'Usage before samblaster'
-            print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-            run_command(['samblaster', '-u', clipped_reads, '-i', output_sam, '-o /dev/null', '-e', '--minClipSize', args.min_clip], shell=True)
-            print 'Usage after samblaster'
-            print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
             # Pull unmapped reads flanking IS
             run_command(['samtools view', '-Sb', '-f 36', output_sam, '>', five_bam], shell=True)
             run_command(['samtools view', '-Sb', '-f 4', '-F 40', output_sam, '>', three_bam], shell=True)
@@ -462,15 +498,10 @@ def main():
             run_command(['bedtools', 'bamtofastq', '-i', five_bam, '-fq', five_reads], shell=True)
             run_command(['bedtools', 'bamtofastq', '-i', three_bam, '-fq', three_reads], shell=True)
             # Add corresponding clipped reads to their respective left and right ends
-            print 'Usage before filtering reads'
+            print 'Usage before extracting soft-clipped reads'
             print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-            logging.info('Filtering soft clipped reads, selecting reads that are <= ' + str(args.max_clip) + 'bp')
-            extract_clipped_reads(clipped_reads, args.max_clip, left_clipped_reads, right_clipped_reads)
-            print 'Usage after reads filtered, before reads written out'
-            print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-            logging.info('Writing out left and right soft clipped reads')
-            #SeqIO.write(left_clipped, left_clipped_reads, 'fastq')
-            #SeqIO.write(right_clipped, right_clipped_reads, 'fastq')
+            logging.info('Extracting soft clipped reads, selecting reads that are <= ' + str(args.max_clip) + 'bp and >= ' + str(args.min_clip) + 'bp')
+            extract_clipped_reads(output_sam, args.min_clip, args.max_clip, left_clipped_reads, right_clipped_reads)
             print 'Usage after reads written out, before concatentation'
             print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
             run_command(['cat', left_clipped_reads, five_reads, '>', final_left_reads], shell=True)
@@ -612,12 +643,16 @@ def main():
                 run_command(['closestBed', '-a', five_merged_bed, '-b', three_cov_merged, '-d', '>', bed_unpaired_five], shell=True)
                 run_command(['closestBed', '-a', five_cov_merged, '-b', three_merged_bed, '-d', '>', bed_unpaired_three], shell=True)
                 # Create table and annotate genbank with hits
-                run_command([args.path + 'create_typing_out.py', '--intersect', bed_intersect, '--closest', bed_closest, 
+                if args.igv:
+                    igv_flag = '1'
+                else:
+                    igv_flag = '0'
+                run_command([args.path + 'create_typing_out.py', '--intersect', bed_intersect, '--closest', bed_closest,
                     '--left_bed', five_merged_bed, '--right_bed', three_merged_bed, 
                     '--left_unpaired', bed_unpaired_five, '--right_unpaired', bed_unpaired_three, 
                     '--seq', query, '--ref', args.typingRef, '--temp', temp_folder, 
                     '--cds', args.cds, '--trna', args.trna, '--rrna', args.rrna, '--min_range', args.min_range,
-                    '--max_range', args.max_range, '--output', sample + '_' + query_name], shell=True)
+                    '--max_range', args.max_range, '--output', sample + '_' + query_name, '--igv', igv_flag, '--chr_name', args.chr_name], shell=True)
 
             # remove temp folder if required
             if args.temp == False:
