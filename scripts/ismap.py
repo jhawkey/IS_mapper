@@ -62,7 +62,7 @@ def parse_args():
     parser.add_argument('--merging', type=str, required=False, default='100', help='Value for merging left and right hits in bed files together to simply calculation of closest and intersecting regions (default 100).')
     parser.add_argument('--a', action='store_true', required=False, help='Switch on all alignment reporting for bwa.')
     parser.add_argument('--T', type=str, required=False, default='30', help='Mapping quality score for bwa (default 30).')
-    parser.add_argument('--min_clip', type=str, required=False, default='10', help='Minimum size for softclipped region to be extracted from initial mapping (default 10).')
+    parser.add_argument('--min_clip', type=int, required=False, default='10', help='Minimum size for softclipped region to be extracted from initial mapping (default 10).')
     parser.add_argument('--max_clip', type=int, required=False, default=30, help='Maximum size for softclipped regions to be included (default 30).')
     # Options for table output (typing)
     parser.add_argument('--cds', nargs='+', type=str, required=False, default=['locus_tag', 'gene', 'product'], help='qualifiers to look for in reference genbank for CDS features (default locus_tag gene product)')
@@ -358,63 +358,52 @@ def multi_to_single(genbank, name, output):
     #write out new single entry genbank
     SeqIO.write(newrecord, output, "genbank")
 
-#def extract_clipped_reads(fastq_file, size, left_file_out, right_file_out):
-#
-#    print 'Usage at start of extract_clipped_reads function'
-#    print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-#    clipped = SeqIO.parse(open(fastq_file, "rU"), "fastq")
-#    short_right_clipped = (fastq for fastq in clipped if len(fastq.seq) <= size and fastq.name.endswith('_1'))
-#    right_file_handle = open(right_file_out, "w")
-#    SeqIO.write(short_right_clipped, right_file_handle, "fastq")
-#    clipped = SeqIO.parse(open(fastq_file, "rU"), "fastq")
-#    short_left_clipped = (fastq for fastq in clipped if len(fastq.seq) <= size and fastq.name.endswith('_2'))
-#    left_file_handle = open(left_file_out, "w")
-#    SeqIO.write(short_left_clipped, left_file_out, "fastq")
-#    print 'Usage after reading in fastq with SeqIO'
-#    print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-
 def extract_clipped_reads(sam_file, min_size, max_size, out_five_file, out_three_file):
     with open(sam_file, 'r') as in_file, open(out_five_file, 'w') as out_five, open(out_three_file, 'w') as out_three:
+        print "extracting clip reads into" + out_five_file + out_three_file
         for line in in_file:
             # split fields
             entries = line.split('\t')
             # check if it's a header line, and if so, skip it
             if re.search('^@[A-Z][A-Z]$', entries[0]):
-                pass
-            else:
-                # check the SAM flag - if it's unmapped, skip this read.
-                sam_flag = int(entries [1])
-                if sam_flag & 4:
-                    pass
-                else:
-                    # check if the read has been reverse complemented
-                    reverse_complement = sam_flag & 16
-                    #grab the read name and cigar string
-                    read_name, cigar = entries[0], entries[5]
-                    #parse the cigar info, exclude hard-clipped regions (these can only be on the very edges, outside of soft-clips if soft-clipping is present)
-                    map_regions = re.findall('[0-9]+[MIDNSP=X]', cigar)
-                        
-                    # Get the first and last items from the cigar string and see if it's soft-clipped (last letter = S). Soft clips will only ever be at the ends (inside would be I/D/N)
-                    # If so, find out how many bases are soft-clipped
-                    # If it's the right size, add the read and it's quality score to the appropriate fastq file, reverse-complementing if needed
-                    if map_regions[0][-1] == 'S':
-                        num_soft_clipped = int(map_regions[0][:-1])
-                        if min_size <= num_soft_clipped <= max_size:
-                            soft_clipped_seq = Seq(entries[9][:num_soft_clipped], generic_dna)
-                            qual_scores = entries[10][:num_soft_clipped]
-                            if reverse_complement:
-                                out_five.write('@' + read_name + '\n' + str(soft_clipped_seq.reverse_complement()) + '\n+\n' + qual_scores[::-1] + '\n')
-                            else:
-                                out_five.write('@' + read_name + '\n' + str(soft_clipped_seq) + '\n+\n' + qual_scores + '\n')
-                    if map_regions[-1][-1] == 'S':
-                        num_soft_clipped = int(map_regions[-1][:-1])
-                        if min_size <= num_soft_clipped <= max_size:
-                            soft_clipped_seq = Seq(entries[9][-num_soft_clipped:], generic_dna)
-                            qual_scores = entries[10][-num_soft_clipped:]
-                            if reverse_complement:
-                                out_three.write('@' + read_name + '\n' + str(soft_clipped_seq.reverse_complement()) + '\n+\n' + qual_scores[::-1] + '\n')
-                            else:
-                                out_three.write('@' + read_name + '\n' + str(soft_clipped_seq) + '\n+\n' + qual_scores + '\n')
+                continue
+            # check the SAM flag - if it's unmapped, skip this read.
+            sam_flag = int(entries [1])
+            if sam_flag & 4:
+                continue
+            # check if the read has been reverse complemented
+            reverse_complement = sam_flag & 16
+            #grab the read name and cigar string
+            read_name, cigar = entries[0], entries[5]
+            #parse the cigar info, exclude hard-clipped regions (these can only be on the very edges, outside of soft-clips if soft-clipping is present)
+            map_regions = re.findall('[0-9]+[MIDNSP=X]', cigar)
+            
+            # Get the first and last items from the cigar string and see if it's soft-clipped (last letter = S). Soft clips will only ever be at the ends (inside would be I/D/N)
+            # If so, find out how many bases are soft-clipped
+            # If it's the right size, add the read and it's quality score to the appropriate fastq file, reverse-complementing if needed
+            if map_regions[0][-1] == 'S':
+                print line
+                print "soft-clip at beginning"
+                num_soft_clipped = int(map_regions[0][:-1])
+                if min_size <= num_soft_clipped <= max_size:
+                    print "soft-clip right size"
+                    soft_clipped_seq = Seq(entries[9][:num_soft_clipped], generic_dna)
+                    print soft_clipped_seq
+                    qual_scores = entries[10][:num_soft_clipped]
+                    print out_five
+                    if reverse_complement:
+                        out_five.write('@' + read_name + '\n' + str(soft_clipped_seq.reverse_complement()) + '\n+\n' + qual_scores[::-1] + '\n')
+                    else:
+                        out_five.write('@' + read_name + '\n' + str(soft_clipped_seq) + '\n+\n' + qual_scores + '\n')
+            if map_regions[-1][-1] == 'S':
+                num_soft_clipped = int(map_regions[-1][:-1])
+                if min_size <= num_soft_clipped <= max_size:
+                    soft_clipped_seq = Seq(entries[9][-num_soft_clipped:], generic_dna)
+                    qual_scores = entries[10][-num_soft_clipped:]
+                    if reverse_complement:
+                        out_three.write('@' + read_name + '\n' + str(soft_clipped_seq.reverse_complement()) + '\n+\n' + qual_scores[::-1] + '\n')
+                    else:
+                        out_three.write('@' + read_name + '\n' + str(soft_clipped_seq) + '\n+\n' + qual_scores + '\n')
 
 def main():
 

@@ -240,7 +240,7 @@ def main():
     removed_results = {}
     region = 1
     lines = 0
-    header = ["region", "orientation", "x", "y", "gap", "call", "%ID", "%Cov", "left_gene", "left_strand", "left_distance", "right_gene", "right_strand", "right_distance", "functional_prediction"]
+    header = ["region", "orientation", "x", "y", "gap", "call", "Percent_ID", "Percent_Cov", "left_gene", "left_strand", "left_distance", "right_gene", "right_strand", "right_distance", "functional_prediction"]
     
     # If both intersect and bed files are empty, there are no hits
     if os.stat(args.intersect)[6] == 0 and os.stat(args.closest)[6] == 0:
@@ -514,8 +514,7 @@ def main():
             outfile.write('#gffTags \n')
             for key in sorted_keys[:,0]:
                 r = results[key]
-                for item in r:
-                outfile.write(args.chr_name + '\t' + r[1] + '\t' + r[2] + '\t' + 'Name=' + key + ';orientation=' + r[0] + ';' + ';'.join((header[i] + '=' + str(r[i])) for i in range(3, len(r)))+ '\n')
+                outfile.write(args.chr_name + '\t' + r[1] + '\t' + r[2] + '\t' + 'Name=' + key + ';orientation=' + r[0] + ';' + ';'.join([header[i+1] + '=' + str(r[i]) for i in range(3, len(r))])+ '\n')
         else:
             for key in sorted_keys[:,0]:
                 r = results[key]
