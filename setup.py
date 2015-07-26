@@ -4,7 +4,7 @@ from distutils.core import setup
 
 setup(
     name='ISMapper',
-    version='0.2.0',
+    version='0.1.0',
     author='Jane Hawkey',
     author_email='hawkey.jane@gmail.com',
     packages=['ismap'],
