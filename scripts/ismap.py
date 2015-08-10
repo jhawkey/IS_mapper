@@ -383,15 +383,10 @@ def extract_clipped_reads(sam_file, min_size, max_size, out_five_file, out_three
             # If so, find out how many bases are soft-clipped
             # If it's the right size, add the read and it's quality score to the appropriate fastq file, reverse-complementing if needed
             if map_regions[0][-1] == 'S':
-                print line
-                print "soft-clip at beginning"
                 num_soft_clipped = int(map_regions[0][:-1])
                 if min_size <= num_soft_clipped <= max_size:
-                    print "soft-clip right size"
                     soft_clipped_seq = Seq(entries[9][:num_soft_clipped], generic_dna)
-                    print soft_clipped_seq
                     qual_scores = entries[10][:num_soft_clipped]
-                    print out_five
                     if reverse_complement:
                         out_five.write('@' + read_name + '\n' + str(soft_clipped_seq.reverse_complement()) + '\n+\n' + qual_scores[::-1] + '\n')
                     else:
