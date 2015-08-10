@@ -74,6 +74,7 @@ def parse_args():
     parser.add_argument('--log', action='store_true', required=False, help='Switch on logging to file (otherwise log to stdout')
     parser.add_argument('--output', type=str, required=True, help='prefix for output files')
     parser.add_argument('--temp', action='store_true', required=False, help='Switch on keeping the temp folder instead of deleting it at the end of the program')
+    parser.add_argument('--bam', action='store_true', required=False, help='Switch on keeping the final bam files instead of deleting them at the end of the program')
 
     return parser.parse_args()
 
@@ -646,6 +647,8 @@ def main():
             # remove temp folder if required
             if args.temp == False:
                 run_command(['rm', '-rf', temp_folder], shell=True)
+            if args.bam == False:
+                run_command(['rm', five_bam_sorted + '.bam', three_bam_sorted + '.bam', five_bam_sorted + '.bam.bai', three_bam_sorted + '.bam.bai'], shell=True)
     total_time = time.time() - start_time
     time_mins = float(total_time) / 60
     logging.info('ISMapper finished in ' + str(time_mins) + ' mins.')
