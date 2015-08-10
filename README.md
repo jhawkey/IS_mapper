@@ -14,7 +14,6 @@ The paper can be found as a pre-print on Biorxiv here: http://biorxiv.org/conten
 * Samtools v0.1.19 - http://samtools.sourceforge.net/
 * Bedtools v2.20.1 - http://bedtools.readthedocs.org/en/latest/content/installation.html
 * BLAST+ v2.2.28 - ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/
-* pysam v0.8.3 - https://github.com/pysam-developers/pysam
 
 ## Installation
 Install Python and its dependencies first.
