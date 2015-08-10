@@ -1,3 +1,7 @@
+v0.1.3, Mon 10 Aug 2015
+    * fixed soft clipped read selection (Special thanks to Katie Cox for helping with this one)
+    * bam files now deleted by default, can be kept using the --bam flag
+    * IGV compatible bed files now created if --igv flag used (again thanks to Katie Cox)
 v0.1.2, Mon 18 May 2015
     * removed functional prediction as currently buggy
     * corrected some intermediate file names

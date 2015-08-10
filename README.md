@@ -172,15 +172,21 @@ When running ISMapper on typing mode with a reference genome in Genbank format, 
 
 `--merging` is the distance between two blocks that will be merged by Bedtools. The default is 100. This setting helps remove duplicate peaks in the same region that are not overlapping, but still belong to the same IS query location/
 
-`--min_clip` and `--max_clip` are used to determine the size of soft clipped sections of reads that are including in the final mapping step. The default size is currently 5bp and 30bp, which is ideal for reads between 100 - 150bp. To improve the detection of the exact target site duplication size, it is sometimes helpful to increase the size of `--max_clip`. However large values of `--max_clip` can increase the amount of noise in the final mapping step and cause nonsensical results.
+`--min_clip` and `--max_clip` are used to determine the size of soft clipped sections of reads that are including in the final mapping step. The default size is currently 10 bp and 30 bp, which is ideal for reads between 100 - 150bp. To improve the detection of the exact target site duplication size, it is sometimes helpful to increase the size of `--max_clip`. However large values of `--max_clip` can increase the amount of noise in the final mapping step and cause nonsensical results.
 
 `--a` and `--T` are flags that are passed to BWA. --a will turn on all alignment reporting in BWA, and --T is used to give an integer mapping score to BWA to determine what alignments are kept. These options may be useful in finding IS query positions that are next to repeated elements as BWA will report all hits for the read not just the best random hit. However, using these options may cause noise and confusion in the final output files.
 
 `--cds`, `--trna` and `--rrna` are used to specify what qualifiers will be looked for in the reference genbank when determining genes flanking the IS query location. Defaults are locus_tag gene product.
 
+`--igv` turns on the creation of a trackline and hovertext display for the BED file for viewing in IGV.
+
+`--chr_name` specifies the chromosome name for the IGV BED file - must match the genome name loaded into IGV. The default is 'not_specified', which will pull the genome accession from the reference genbank.
+
 `--log` turns on the log file.
 
 `--temp` turns on keeping the temporary files instead of deleting them once the run has completed.
+
+`--bam` turns on keeping the final sorted and indexed BAM files of flanking reads for comparison against the reference genome (by default these files are deleted to save disk space). 
 
 
 ## Other options for compiled_table
