@@ -35,6 +35,9 @@ def parse_args():
     # Output parameters
     parser.add_argument('--temp', type=str, required=True, help='location of temp folder to place intermediate blast files in')
     parser.add_argument('--output', type=str, required=True, help='name for output file')
+    parser.add_argument('--igv', type=int, required=True, help='format of output bedfile - if 1, adds IGV trackline and formats 4th column for hovertext display')
+    parser.add_argument('--chr_name', type=str, required=True, help='chromosome name for bedfile - must match genome name to load in IGV (default = genbank accession)')
+
     return parser.parse_args()
 
 def insertion_length(insertion):
@@ -237,7 +240,7 @@ def main():
     removed_results = {}
     region = 1
     lines = 0
-    header = ["region", "orientation", "x", "y", "gap", "call", "%ID", "%Cov", "left_gene", "left_strand", "left_distance", "right_gene", "right_strand", "right_distance", "functional_prediction"]
+    header = ["region", "orientation", "x", "y", "gap", "call", "Percent_ID", "Percent_Cov", "left_gene", "left_strand", "left_distance", "right_gene", "right_strand", "right_distance", "functional_prediction"]
     
     # If both intersect and bed files are empty, there are no hits
     if os.stat(args.intersect)[6] == 0 and os.stat(args.closest)[6] == 0:
@@ -502,6 +505,20 @@ def main():
     if arr == 0:
         output.write('No hits found.')
     output.close()
+    
+    # Write out the found hits to bed file for viewing in IGV
+    with open(args.output + '_hits.bed', 'w') as outfile:
+        if args.chr_name == 'not_specified':
+            args.chr_name = SeqIO.read(args.ref, 'genbank').id
+        if args.igv == 1:
+            outfile.write('#gffTags \n')
+            for key in sorted_keys[:,0]:
+                r = results[key]
+                outfile.write(args.chr_name + '\t' + r[1] + '\t' + r[2] + '\t' + 'Name=' + key + ';orientation=' + r[0] + ';' + ';'.join([header[i+1] + '=' + str(r[i]) for i in range(3, len(r))])+ '\n')
+        else:
+            for key in sorted_keys[:,0]:
+                r = results[key]
+                outfile.write(args.chr_name + '\t' + r[1] + '\t' + r[2] + key + '\n')
 
     # Write out hits that were removed for whatever reason to file
     if len(removed_results) != 0:
@@ -518,3 +535,4 @@ def main():
 if __name__ == "__main__":
     
     main()
+    
