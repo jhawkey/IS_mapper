@@ -316,7 +316,6 @@ def main():
                 else:
                     removed_results['region_' + str(lines)] = line.strip() + '\tintersect.bed\n'
                 lines += 1
-    
     # Get size of IS query
     is_length = insertion_length(args.seq)
     # Look inside the closest file (known or imprecise hits)
@@ -485,6 +484,9 @@ def main():
                         else:
                             removed_results['region_' + str(region)] = line.strip() + '\tright_unpaired.bed\n'
                             region += 1
+    # Open the output file and write in the header
+    output = open(args.output + '_table.txt', 'w')
+    output.write('\t'.join(header) + '\n')
     # Sort regions into the correct order
     table_keys = []
     for key in results:
@@ -493,32 +495,30 @@ def main():
     for region in table_keys:
         region_indexes.append(region.split('region_')[1])
     arr = np.vstack((table_keys, region_indexes)).transpose()
+    # Write out the found hits to file
     if arr != 0:
         sorted_keys = arr[arr[:,1].astype('int').argsort()]
-
-    # Write out the found hits to file
-    output = open(args.output + '_table.txt', 'w')
-    output.write('\t'.join(header) + '\n')
-    if arr != 0:
         for key in sorted_keys[:,0]:
             output.write(key + '\t' + '\t'.join(str(i) for i in results[key]) + '\n')
-    if arr == 0:
+    # If all the hits failed, write out that no hits were found
+    elif arr == 0:
         output.write('No hits found.')
     output.close()
     
     # Write out the found hits to bed file for viewing in IGV
     with open(args.output + '_hits.bed', 'w') as outfile:
-        if args.chr_name == 'not_specified':
-            args.chr_name = SeqIO.read(args.ref, 'genbank').id
-        if args.igv == 1:
-            outfile.write('#gffTags \n')
-            for key in sorted_keys[:,0]:
-                r = results[key]
-                outfile.write(args.chr_name + '\t' + r[1] + '\t' + r[2] + '\t' + 'Name=' + key + ';orientation=' + r[0] + ';' + ';'.join([header[i+1] + '=' + str(r[i]) for i in range(3, len(r))])+ '\n')
-        else:
-            for key in sorted_keys[:,0]:
-                r = results[key]
-                outfile.write(args.chr_name + '\t' + r[1] + '\t' + r[2] + key + '\n')
+        if arr != 0:
+            if args.chr_name == 'not_specified':
+                args.chr_name = SeqIO.read(args.ref, 'genbank').id
+            if args.igv == 1:
+                outfile.write('#gffTags \n')
+                for key in sorted_keys[:,0]:
+                    r = results[key]
+                    outfile.write(args.chr_name + '\t' + r[1] + '\t' + r[2] + '\t' + 'Name=' + key + ';orientation=' + r[0] + ';' + ';'.join([header[i+1] + '=' + str(r[i]) for i in range(3, len(r))])+ '\n')
+            else:
+                for key in sorted_keys[:,0]:
+                    r = results[key]
+                    outfile.write(args.chr_name + '\t' + r[1] + '\t' + r[2] + key + '\n')
 
     # Write out hits that were removed for whatever reason to file
     if len(removed_results) != 0:
