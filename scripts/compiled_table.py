@@ -317,6 +317,13 @@ def get_flanking_genes(features, feature_list, left, right, cds_features, trna_f
     left_feature_index = binary_search(feature_list, left, 'L')
     right_feature_index = binary_search(feature_list, right, 'R')
     # Extract the SeqFeature object that corresponds to that index
+    if type(left_feature_index) != int or type(right_feature_index) != int:
+        print 'left index'
+        print left_feature_index
+        print 'right index'
+        print right_feature_index
+        print 'left position: ' + str(left)
+        print 'right position: ' + str(right)
     left_feature = features[left_feature_index]
     right_feature = features[right_feature_index]
 
@@ -528,7 +535,8 @@ def main():
             feature_count += 1
         else:
             feature_count += 1
-
+    # Sort the list just in case it's out of order (has caused issues in the past!!)
+    feature_list = sorted(feature_list, key=itemgetter(0))
     # Get flanking genes
     for pos in list_of_positions:
         genes_before, genes_after =  get_flanking_genes(gb.features, feature_list, pos.x, pos.y, args.cds, args.trna, args.rrna)
