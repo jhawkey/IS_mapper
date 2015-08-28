@@ -294,10 +294,7 @@ def findFeatureBeforePosition(features, isPosition, m):
 def findFeatureAfterPosition(features, isPosition, m):
     # If we are looking for the feature to the right of the
     # IS position, then either m or m+1 is our answer
-    print m
-    print len(features)
-    print features[m]
-    print isPosition
+
     # an index error will occur if m is the final feature, so just check that the first part is true
     # and return m
     try:
