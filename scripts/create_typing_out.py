@@ -402,7 +402,10 @@ def main():
                     L_range = range(min(x_L, y_L), max(x_L, y_L))
                     # if one hit is inside the other hit, remove it - don't know what to do with these
                     if (x_L in R_range and y_L in R_range) or (x_R in L_range and y_R in L_range):
-                        removed_results['region_' + str(lines)] = line.strip() + '\tOne hit inside the other, intersect.bed\n'
+                        removed_results['region_' + str(lines)] = line.strip() + '\tOne hit inside the other, left_unpaired.bed\n'
+                    # or if a hit is paired with itself, which means it doesn't have a pair
+                    elif x_L == x_R and y_L == y_R:
+                        removed_results['region_' + str(region)] = line.strip() + '\tleft_unpaired.bed, paired with self\n'
                     else:
                         # Get orientation
                         if x_L < x_R and y_L < y_R:
@@ -443,6 +446,7 @@ def main():
         with open(args.right_unpaired) as right_unpaired:
             for line in right_unpaired:
                 info = line.strip().split('\t')
+                print info
                 #this is an unpaired hit
                 if line.strip().split('\t')[3:6] in line_check:
                     #get coordinate info
@@ -454,7 +458,10 @@ def main():
                     L_range = range(min(x_L, y_L), max(x_L, y_L))
                     # if one hit is inside the other hit, remove it - don't know what to do with these
                     if (x_L in R_range and y_L in R_range) or (x_R in L_range and y_R in L_range):
-                        removed_results['region_' + str(lines)] = line.strip() + '\tOne hit inside the other, intersect.bed\n'
+                        removed_results['region_' + str(lines)] = line.strip() + '\tOne hit inside the other, right_unpaired.bed\n'
+                    # or if a hit is paired with itself, which means it doesn't have a pair
+                    elif x_L == x_R and y_L == y_R:
+                        removed_results['region_' + str(region)] = line.strip() + '\tright_unpaired.bed, paired with self\n'
                     else:
                         #get orientation
                         if x_L < x_R and y_L < y_R:
