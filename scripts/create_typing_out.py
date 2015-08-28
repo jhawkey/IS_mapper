@@ -139,7 +139,7 @@ def novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, ref, cds, trna, rrna, gap, orie
     genbank.features.append(right_feature)
     
     # Get the genes flanking the left and right ends
-    gene_left, gene_right = get_flanking_genes(features, feature_list, x, y, cds, trna, rrna)
+    gene_left, gene_right = get_flanking_genes(features, feature_list, x, y, cds, trna, rrna, len(genbank.seq))
     #print gene_left
     #print gene_right
     # If the genes are the same, then hit is inside the gene
@@ -187,7 +187,7 @@ def add_known(x_L, x_R, y_L, y_R, gap, genbank, ref, seq, temp, cds, trna, rrna,
         # Taking all four coordinates and finding min and max to avoid coordinates 
         # that overlap the actual IS (don't want to return those in gene calls)
         # Mark as a known call to improve accuracy of gene calling
-        gene_left, gene_right = get_flanking_genes(features, feature_list, start, end, cds, trna, rrna)
+        gene_left, gene_right = get_flanking_genes(features, feature_list, start, end, cds, trna, rrna, len(genbank.seq))
         #gene_left = get_other_gene(ref, min(y_L, y_R, x_R, x_L), "left", cds, trna, rrna, known=True)
         #gene_right = get_other_gene(ref, max(y_L, y_R, x_R, x_L), "right", cds, trna, rrna, known=True)
 
@@ -210,7 +210,7 @@ def add_known(x_L, x_R, y_L, y_R, gap, genbank, ref, seq, temp, cds, trna, rrna,
     else:   
         # Then I'm not sure what this is
         # Get flanking genes anyway
-        gene_left, gene_right = get_flanking_genes(features, feature_list, start, end, cds, trna, rrna)
+        gene_left, gene_right = get_flanking_genes(features, feature_list, start, end, cds, trna, rrna, len(genbank.seq))
         if 'unpaired' in file_loc:
             call = 'Possible related IS?'
         else:
