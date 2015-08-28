@@ -446,7 +446,6 @@ def main():
         with open(args.right_unpaired) as right_unpaired:
             for line in right_unpaired:
                 info = line.strip().split('\t')
-                print info
                 #this is an unpaired hit
                 if line.strip().split('\t')[3:6] in line_check:
                     #get coordinate info
