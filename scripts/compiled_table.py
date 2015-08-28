@@ -334,8 +334,6 @@ def get_flanking_genes(features, feature_list, left, right, cds_features, trna_f
         print right_feature_index
         print 'left position: ' + str(left)
         print 'right position: ' + str(right)
-    print left_feature_index
-    print right_feature_index
     # Extract the SeqFeature object that corresponds to that index
     left_feature = features[left_feature_index]
     right_feature = features[right_feature_index]
