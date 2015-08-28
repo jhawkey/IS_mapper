@@ -294,7 +294,19 @@ def findFeatureBeforePosition(features, isPosition, m):
 def findFeatureAfterPosition(features, isPosition, m):
     # If we are looking for the feature to the right of the
     # IS position, then either m or m+1 is our answer
-
+    print m
+    print len(features)
+    print features[m]
+    print isPosition
+    # an index error will occur if m is the final feature, so just check that the first part is true
+    # and return m
+    try:
+        features[m+1]
+    except IndexError:
+        if features[m][0] > isPosition:
+            return features[m][2]
+        else:
+            return "4 - THIS SHOULDN'T HAPPEN!"
     # If the end of the m feature is before the IS position,
     # then m is before the IS and m+1 is the correct feature
     if features[m][1] < isPosition:
@@ -307,7 +319,6 @@ def findFeatureAfterPosition(features, isPosition, m):
     # then m will be closer to the IS and is the correct feature
     elif features[m][0] > isPosition and features[m+1][0] > isPosition:
         return features[m][2]
-
     else:
         return "3 - THIS SHOULDN'T HAPPEN!"
 
