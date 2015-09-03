@@ -264,6 +264,7 @@ def main():
         else:
             feature_count_list += 1
     
+    feature_list = sorted(feature_list, key=itemgetter(0))
     # Initialise feature count
     feature_count = 0
 
