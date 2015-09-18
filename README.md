@@ -211,7 +211,9 @@ eg:
 ## Running multiple jobs on a SLURM queing system
 
 There is no need to set the --output flag in other_args for this script, it sets it itself using the name of the readset.  
-Also, make sure the query sequence is already index with bwa (using `bwa mem query.fasta`) to prevent corruption of the index once multiple jobs start running.
+Also, make sure the query sequence is already index with bwa (using `bwa mem query.fasta`) to prevent corruption of the index once multiple jobs start running.  
+
+When running in improvement mode, ensure that --assemblies and --assembliesid is passed to the slurm script, but --extension and --type are passed to the ismap script through --other_args.
 
 ```
 python slurm_ismap.py -h
