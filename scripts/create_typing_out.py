@@ -289,8 +289,8 @@ def main():
                 y_R = int(info[5])
                 # Check to see if the gap is reasonable
                 if int(info[6]) <= 15:
-                    R_range = range(min(x_R, y_R), max(x_R, y_R))
-                    L_range = range(min(x_L, y_L), max(x_L, y_L))
+                    R_range = range(min(x_R, y_R), max(x_R, y_R)+1)
+                    L_range = range(min(x_L, y_L), max(x_L, y_L)+1)
                     # if one hit is inside the other hit, remove it - don't know what to do with these
                     if (x_L in R_range and y_L in R_range) or (x_R in L_range and y_R in L_range):
                         removed_results['region_' + str(lines)] = line.strip() + '\tOne hit inside the other, intersect.bed\n'
@@ -338,8 +338,8 @@ def main():
             y_L = int(info[2])
             x_R = int(info[4])
             y_R = int(info[5])
-            R_range = range(min(x_R, y_R), max(x_R, y_R))
-            L_range = range(min(x_L, y_L), max(x_L, y_L))
+            R_range = range(min(x_R, y_R), max(x_R, y_R)+1)
+            L_range = range(min(x_L, y_L), max(x_L, y_L)+1)
             # if one hit is inside the other hit, remove it - don't know what to do with these
             if (x_L in R_range and y_L in R_range) or (x_R in L_range and y_R in L_range):
                 removed_results['region_' + str(region)] = line.strip() + '\tOne hit inside the other, closest.bed\n'
@@ -399,8 +399,8 @@ def main():
                     y_L = int(info[2])
                     x_R = int(info[4])
                     y_R = int(info[5])
-                    R_range = range(min(x_R, y_R), max(x_R, y_R))
-                    L_range = range(min(x_L, y_L), max(x_L, y_L))
+                    R_range = range(min(x_R, y_R), max(x_R, y_R)+1)
+                    L_range = range(min(x_L, y_L), max(x_L, y_L)+1)
                     # if one hit is inside the other hit, remove it - don't know what to do with these
                     if (x_L in R_range and y_L in R_range) or (x_R in L_range and y_R in L_range):
                         removed_results['region_' + str(lines)] = line.strip() + '\tOne hit inside the other, left_unpaired.bed\n'
@@ -454,8 +454,8 @@ def main():
                     y_L = int(info[2])
                     x_R = int(info[4])
                     y_R = int(info[5])
-                    R_range = range(min(x_R, y_R), max(x_R, y_R))
-                    L_range = range(min(x_L, y_L), max(x_L, y_L))
+                    R_range = range(min(x_R, y_R), max(x_R, y_R)+1)
+                    L_range = range(min(x_L, y_L), max(x_L, y_L)+1)
                     # if one hit is inside the other hit, remove it - don't know what to do with these
                     if (x_L in R_range and y_L in R_range) or (x_R in L_range and y_R in L_range):
                         removed_results['region_' + str(lines)] = line.strip() + '\tOne hit inside the other, right_unpaired.bed\n'
