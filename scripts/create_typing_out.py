@@ -207,19 +207,18 @@ def add_known(x_L, x_R, y_L, y_R, gap, genbank, ref, seq, temp, cds, trna, rrna,
         else:
             call = 'Known'
         results['region_' + str(region)] = [orient, str(start), str(end), gap, call, str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1], func_pred]
-    else:   
-        # Then I'm not sure what this is
-        # Get flanking genes anyway
+    elif len(seq_results) != 0 and seq_results[0] >=50 and seq_results[1] >= 50:   
+        # Calling it a possible related IS if there is 50% nucleotide ID and 50% coverage
         gene_left, gene_right = get_flanking_genes(features, feature_list, start, end, cds, trna, rrna, len(genbank.seq))
         if 'unpaired' in file_loc:
             call = 'Possible related IS?'
         else:
             call = 'Possible releated IS'
         func_pred = ''
-        if len(seq_results) !=0:
-            results['region_' + str(region)] = [orient, str(start), str(end), gap, call, str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1], func_pred]
-        else:
-            removed_results['region_' + str(region)] = line.strip() + '\t' + file_loc +'\n'                
+        results['region_' + str(region)] = [orient, str(start), str(end), gap, call, str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1], func_pred]
+    else:
+    # otherwise this a suprious result
+        removed_results['region_' + str(region)] = line.strip() + '\t' + file_loc +'\n'          
 
 def gbk_to_fasta(genbank, fasta):
     '''
