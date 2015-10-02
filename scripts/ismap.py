@@ -62,6 +62,7 @@ def parse_args():
     parser.add_argument('--merging', type=str, required=False, default='100', help='Value for merging left and right hits in bed files together to simply calculation of closest and intersecting regions (default 100).')
     parser.add_argument('--a', action='store_true', required=False, help='Switch on all alignment reporting for bwa.')
     parser.add_argument('--T', type=str, required=False, default='30', help='Mapping quality score for bwa (default 30).')
+    parser.add_argument('--t', type=str, required=False, default='1', help='Number of threads for bwa (default 1).')
     parser.add_argument('--min_clip', type=int, required=False, default='10', help='Minimum size for softclipped region to be extracted from initial mapping (default 10).')
     parser.add_argument('--max_clip', type=int, required=False, default=30, help='Maximum size for softclipped regions to be included (default 30).')
     # Options for table output (typing)
@@ -103,7 +104,7 @@ def bwa_index(fasta):
     Check to see if bwa index for given input fasta exists.
     If it doesn't, build an index from the given input fasta.
     '''
-    
+
     #check_command_version('bwa')
     built_index = fasta + '.bwt'
     print built_index
@@ -378,7 +379,7 @@ def extract_clipped_reads(sam_file, min_size, max_size, out_five_file, out_three
             read_name, cigar = entries[0], entries[5]
             #parse the cigar info, exclude hard-clipped regions (these can only be on the very edges, outside of soft-clips if soft-clipping is present)
             map_regions = re.findall('[0-9]+[MIDNSP=X]', cigar)
-            
+
             # Get the first and last items from the cigar string and see if it's soft-clipped (last letter = S). Soft clips will only ever be at the ends (inside would be I/D/N)
             # If so, find out how many bases are soft-clipped
             # If it's the right size, add the read and it's quality score to the appropriate fastq file, reverse-complementing if needed
@@ -406,7 +407,7 @@ def main():
     start_time = time.time()
 
     args = parse_args()
-    
+
     # Set up logfile
     if args.log is True:
         logfile = args.output + ".log"
@@ -475,7 +476,7 @@ def main():
             make_directories([temp_folder])
 
             # Map to IS query
-            run_command(['bwa', 'mem', query, forward_read, reverse_read, '>', output_sam], shell=True)
+            run_command(['bwa', 'mem', '-t', args.t, query, forward_read, reverse_read, '>', output_sam], shell=True)
             # Pull unmapped reads flanking IS
             run_command(['samtools view', '-Sb', '-f 36', output_sam, '>', five_bam], shell=True)
             run_command(['samtools view', '-Sb', '-f 4', '-F 40', output_sam, '>', three_bam], shell=True)
@@ -537,12 +538,12 @@ def main():
                 # Map ends back to contigs
                 bwa_index(assembly)
                 if args.a == True:
-                    run_command(['bwa', 'mem', 'a', '-T', args.T, assembly, final_left_reads, '>', five_to_ref_sam], shell=True)
-                    run_command(['bwa', 'mem', 'a', '-T', args.T, assembly, final_right_reads, '>', three_to_ref_sam], shell=True)
+                    run_command(['bwa', 'mem', 'a', '-T', args.T, '-t', args.t, assembly, final_left_reads, '>', five_to_ref_sam], shell=True)
+                    run_command(['bwa', 'mem', 'a', '-T', args.T, '-t', args.t, assembly, final_right_reads, '>', three_to_ref_sam], shell=True)
                 else:
-                    run_command(['bwa', 'mem', assembly, final_left_reads, '>', five_to_ref_sam], shell=True)
-                    run_command(['bwa', 'mem', assembly, final_right_reads, '>', three_to_ref_sam], shell=True)
-                
+                    run_command(['bwa', 'mem', '-t', args.t, assembly, final_left_reads, '>', five_to_ref_sam], shell=True)
+                    run_command(['bwa', 'mem', '-t', args.t, assembly, final_right_reads, '>', three_to_ref_sam], shell=True)
+
                 run_command(['samtools', 'view', '-Sb', five_to_ref_sam, '>', five_to_ref_bam], shell=True)
                 run_command(['samtools', 'view', '-Sb', three_to_ref_sam, '>', three_to_ref_bam], shell=True)
                 run_command(['samtools', 'sort', five_to_ref_bam, five_bam_sorted], shell=True)
@@ -555,7 +556,7 @@ def main():
                 filter_on_depth(five_cov_bed, five_final_cov, args.cutoff)
                 filter_on_depth(three_cov_bed, three_final_cov, args.cutoff)
                 run_command(['bedtools', 'merge', '-i', five_final_cov, '-d', args.merging, '>', five_merged_bed], shell=True)
-                run_command(['bedtools', 'merge', '-i', three_final_cov, '-d', args.merging, '>', three_merged_bed], shell=True)       
+                run_command(['bedtools', 'merge', '-i', three_final_cov, '-d', args.merging, '>', three_merged_bed], shell=True)
                 # Create table and genbank
                 if args.extension == '.fasta':
                     run_command([args.path + 'create_genbank_table.py', '--five_bed', five_merged_bed, '--three_bed', three_merged_bed, '--assembly', assembly, '--type fasta', '--output', sample + '_' + query_name], shell=True)
@@ -574,7 +575,7 @@ def main():
                 # Create reference fasta from genbank
                 gbk_to_fasta(args.typingRef, typingRefFasta)
                 # Create bwa index file for typing reference
-                bwa_index(typingRefFasta)         
+                bwa_index(typingRefFasta)
                 # Set up file names for output files
                 five_header = sample + '_5_' + typingName
                 three_header = sample + '_3_' + typingName
@@ -599,11 +600,11 @@ def main():
 
                 # Map reads to reference, sort
                 if args.a == True:
-                    run_command(['bwa', 'mem', '-a', '-T', args.T, typingRefFasta, final_left_reads, '>', five_to_ref_sam], shell=True)
-                    run_command(['bwa', 'mem', '-a', '-T', args.T, typingRefFasta, final_right_reads, '>', three_to_ref_sam], shell=True)
+                    run_command(['bwa', 'mem', '-a', '-T', args.T, '-t', args.t, typingRefFasta, final_left_reads, '>', five_to_ref_sam], shell=True)
+                    run_command(['bwa', 'mem', '-a', '-T', args.T, '-t', args.t,typingRefFasta, final_right_reads, '>', three_to_ref_sam], shell=True)
                 else:
-                    run_command(['bwa', 'mem', typingRefFasta, final_left_reads, '>', five_to_ref_sam], shell=True)
-                    run_command(['bwa', 'mem', typingRefFasta, final_right_reads, '>', three_to_ref_sam], shell=True)
+                    run_command(['bwa', 'mem', '-t', args.t, typingRefFasta, final_left_reads, '>', five_to_ref_sam], shell=True)
+                    run_command(['bwa', 'mem', '-t', args.t, typingRefFasta, final_right_reads, '>', three_to_ref_sam], shell=True)
                 run_command(['samtools', 'view', '-Sb', five_to_ref_sam, '>', five_to_ref_bam], shell=True)
                 run_command(['samtools', 'view', '-Sb', three_to_ref_sam, '>', three_to_ref_bam], shell=True)
                 run_command(['samtools', 'sort', five_to_ref_bam, five_bam_sorted], shell=True)
@@ -615,7 +616,7 @@ def main():
                 run_command(['bedtools', 'genomecov', '-ibam', three_bam_sorted + '.bam', '-bg', '>', three_cov_bed], shell=True)
                 run_command(['bedtools', 'merge', '-d', args.merging, '-i', five_cov_bed, '>', five_cov_merged], shell=True)
                 run_command(['bedtools', 'merge', '-d', args.merging, '-i', three_cov_bed, '>', three_cov_merged], shell=True)
-                # Filter coveraged BED files on coverage cutoff (so only take 
+                # Filter coveraged BED files on coverage cutoff (so only take
                 # high coverage regions for further analysis)
                 filter_on_depth(five_cov_bed, five_final_cov, args.cutoff)
                 filter_on_depth(three_cov_bed, three_final_cov, args.cutoff)
@@ -633,9 +634,9 @@ def main():
                 else:
                     igv_flag = '0'
                 run_command([args.path + 'create_typing_out.py', '--intersect', bed_intersect, '--closest', bed_closest,
-                    '--left_bed', five_merged_bed, '--right_bed', three_merged_bed, 
-                    '--left_unpaired', bed_unpaired_five, '--right_unpaired', bed_unpaired_three, 
-                    '--seq', query, '--ref', args.typingRef, '--temp', temp_folder, 
+                    '--left_bed', five_merged_bed, '--right_bed', three_merged_bed,
+                    '--left_unpaired', bed_unpaired_five, '--right_unpaired', bed_unpaired_three,
+                    '--seq', query, '--ref', args.typingRef, '--temp', temp_folder,
                     '--cds', args.cds, '--trna', args.trna, '--rrna', args.rrna, '--min_range', args.min_range,
                     '--max_range', args.max_range, '--output', sample + '_' + query_name, '--igv', igv_flag, '--chr_name', args.chr_name], shell=True)
 
