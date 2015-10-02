@@ -468,7 +468,7 @@ def main():
                 current_dir = args.directory
             if current_dir[-1] != '/':
                 current_dir = current_dir + '/'
-            
+
             temp_folder = current_dir + sample + '_' + query_name + '_temp/'
             output_sam = temp_folder + sample + '_' + query_name + '.sam'
             five_bam = temp_folder + sample + '_' + query_name + '_5.bam'
@@ -479,7 +479,7 @@ def main():
             right_clipped_reads = temp_folder + sample + '_' + query_name + '_right_clipped.fastq'
             final_left_reads = temp_folder + sample + '_' + query_name + '_LeftFinal.fastq'
             final_right_reads = temp_folder + sample + '_' + query_name + '_RightFinal.fastq'
-            no_hits_table = sample + '_' + query_name + '_table.txt'
+            no_hits_table = current_dir + sample + '_' + query_name + '_table.txt'
             make_directories([temp_folder])
 
             # Map to IS query
@@ -529,11 +529,11 @@ def main():
                 three_bam_sorted = three_header + '_' + query_name + '.sorted'
                 five_cov_bed = temp_folder + five_header + '_' + query_name + '_cov.bed'
                 three_cov_bed = temp_folder + three_header + '_' + query_name + '_cov.bed'
-                five_final_cov = five_header + '_' + query_name + '_finalcov.bed'
-                three_final_cov = three_header + '_' + query_name + '_finalcov.bed'
-                five_merged_bed = five_header + '_' + query_name + '_merged.sorted.bed'
-                three_merged_bed = three_header + '_' + query_name + '_merged.sorted.bed'
-                final_genbankSingle = sample + '_' + query_name + '_annotatedSingle.gbk'
+                five_final_cov =  current_dir + five_header + '_' + query_name + '_finalcov.bed'
+                three_final_cov = current_dir + three_header + '_' + query_name + '_finalcov.bed'
+                five_merged_bed = current_dir + five_header + '_' + query_name + '_merged.sorted.bed'
+                three_merged_bed = current_dir + three_header + '_' + query_name + '_merged.sorted.bed'
+                final_genbankSingle = current_dir + sample + '_' + query_name + '_annotatedSingle.gbk'
 
                 # create fasta file from genbank if required
                 if args.extension == '.gbk':
@@ -596,14 +596,14 @@ def main():
                 three_cov_bed = temp_folder + three_header + '_' + query_name + '_cov.bed'
                 five_cov_merged = temp_folder + five_header + '_' + query_name + '_cov_merged.sorted.bed'
                 three_cov_merged = temp_folder + three_header + '_' + query_name + '_cov_merged.sorted.bed'
-                five_final_cov = five_header + '_' + query_name + '_finalcov.bed'
-                three_final_cov = three_header + '_' + query_name + '_finalcov.bed'
-                five_merged_bed = five_header + '_' + query_name + '_merged.sorted.bed'
-                three_merged_bed = three_header + '_' + query_name + '_merged.sorted.bed'
-                bed_intersect = sample + '_' + typingName + '_' + query_name + '_intersect.bed'
-                bed_closest = sample + '_' + typingName + '_' + query_name + '_closest.bed'
-                bed_unpaired_five = sample + '_' + typingName + '_' + query_name + '_left_unpaired.bed'
-                bed_unpaired_three = sample + '_' + typingName + '_' + query_name + '_right_unpaired.bed'
+                five_final_cov = current_dir + five_header + '_' + query_name + '_finalcov.bed'
+                three_final_cov = current_dir + three_header + '_' + query_name + '_finalcov.bed'
+                five_merged_bed = current_dir + five_header + '_' + query_name + '_merged.sorted.bed'
+                three_merged_bed = current_dir + three_header + '_' + query_name + '_merged.sorted.bed'
+                bed_intersect = current_dir + sample + '_' + typingName + '_' + query_name + '_intersect.bed'
+                bed_closest = current_dir + sample + '_' + typingName + '_' + query_name + '_closest.bed'
+                bed_unpaired_five = current_dir + sample + '_' + typingName + '_' + query_name + '_left_unpaired.bed'
+                bed_unpaired_three = current_dir + sample + '_' + typingName + '_' + query_name + '_right_unpaired.bed'
 
                 # Map reads to reference, sort
                 if args.a == True:
