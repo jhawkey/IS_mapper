@@ -76,6 +76,7 @@ def parse_args():
     parser.add_argument('--output', type=str, required=True, help='prefix for output files')
     parser.add_argument('--temp', action='store_true', required=False, help='Switch on keeping the temp folder instead of deleting it at the end of the program')
     parser.add_argument('--bam', action='store_true', required=False, help='Switch on keeping the final bam files instead of deleting them at the end of the program')
+    parser.add_argument('--directory', type=store, required=False, default='', help='Output directory for all output files.')
 
     return parser.parse_args()
 
@@ -410,7 +411,7 @@ def main():
 
     # Set up logfile
     if args.log is True:
-        logfile = args.output + ".log"
+        logfile = args.directory + args.output + ".log"
     else:
         logfile = None
     logging.basicConfig(
@@ -461,7 +462,10 @@ def main():
 
             # Create the output file and folder names,
             # make the folders where necessary
-            current_dir = os.getcwd() + '/'
+            if args.directory == '':
+                current_dir = os.getcwd() + '/'
+            else:
+                current_dir = args.directory
             temp_folder = current_dir + sample + '_' + query_name + '_temp/'
             output_sam = temp_folder + sample + '_' + query_name + '.sam'
             five_bam = temp_folder + sample + '_' + query_name + '_5.bam'
