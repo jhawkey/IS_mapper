@@ -466,6 +466,9 @@ def main():
                 current_dir = os.getcwd() + '/'
             else:
                 current_dir = args.directory
+            if current_dir[-1] != '/':
+                current_dir = current_dir + '/'
+            
             temp_folder = current_dir + sample + '_' + query_name + '_temp/'
             output_sam = temp_folder + sample + '_' + query_name + '.sam'
             five_bam = temp_folder + sample + '_' + query_name + '_5.bam'
