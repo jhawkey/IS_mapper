@@ -76,7 +76,7 @@ def parse_args():
     parser.add_argument('--output', type=str, required=True, help='prefix for output files')
     parser.add_argument('--temp', action='store_true', required=False, help='Switch on keeping the temp folder instead of deleting it at the end of the program')
     parser.add_argument('--bam', action='store_true', required=False, help='Switch on keeping the final bam files instead of deleting them at the end of the program')
-    parser.add_argument('--directory', type=store, required=False, default='', help='Output directory for all output files.')
+    parser.add_argument('--directory', type=str, required=False, default='', help='Output directory for all output files.')
 
     return parser.parse_args()
 
