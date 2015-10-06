@@ -566,9 +566,9 @@ def main():
                 run_command(['bedtools', 'merge', '-i', three_final_cov, '-d', args.merging, '>', three_merged_bed], shell=True)
                 # Create table and genbank
                 if args.extension == '.fasta':
-                    run_command([args.path + 'create_genbank_table.py', '--five_bed', five_merged_bed, '--three_bed', three_merged_bed, '--assembly', assembly, '--type fasta', '--output', sample + '_' + query_name], shell=True)
+                    run_command([args.path + 'create_genbank_table.py', '--five_bed', five_merged_bed, '--three_bed', three_merged_bed, '--assembly', assembly, '--type fasta', '--output', current_dir + sample + '_' + query_name], shell=True)
                 elif args.extension == '.gbk':
-                    run_command([args.path + 'create_genbank_table.py', '--five_bed', five_merged_bed, '--three_bed', three_merged_bed, '--assembly', assembly_gbk, '--type genbank', '--output', sample + '_' + query_name], shell=True)
+                    run_command([args.path + 'create_genbank_table.py', '--five_bed', five_merged_bed, '--three_bed', three_merged_bed, '--assembly', assembly_gbk, '--type genbank', '--output', current_dir + sample + '_' + query_name], shell=True)
                 #create single entry genbank
                 multi_to_single(sample + '_' + query_name + '_annotated.gbk', sample, final_genbankSingle)
 
@@ -645,7 +645,7 @@ def main():
                     '--left_unpaired', bed_unpaired_five, '--right_unpaired', bed_unpaired_three,
                     '--seq', query, '--ref', args.typingRef, '--temp', temp_folder,
                     '--cds', args.cds, '--trna', args.trna, '--rrna', args.rrna, '--min_range', args.min_range,
-                    '--max_range', args.max_range, '--output', sample + '_' + query_name, '--igv', igv_flag, '--chr_name', args.chr_name], shell=True)
+                    '--max_range', args.max_range, '--output', current_dir + sample + '_' + query_name, '--igv', igv_flag, '--chr_name', args.chr_name], shell=True)
 
             # remove temp folder if required
             if args.temp == False:
