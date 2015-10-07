@@ -159,7 +159,7 @@ Once ISMapper has finished running, multiple output files will be generated, the
 
 ## Common Issues
 
-When running ISMapper on typing mode with a reference genome in Genbank format, check to see if all CDS/tRNA/rRNA features have the locus_tag qualifier. This is the default setting for ISMapper when choosing what to print in the final table. If the reference genome doesn't have locus_tag's, ISMapper will throw an error in the final table create step. This can be avoided by changing the setting of `--cds` (or `--trna` or `--rrna`) flags to db_xref gene product (or whatever other identifiers are present in your genbank file). 
+When running ISMapper on typing mode with a reference genome in Genbank format, check to see if all CDS/tRNA/rRNA features have the locus_tag qualifier. This is the default setting for ISMapper when choosing what to print in the final table. If the reference genome doesn't have locus_tag's, ISMapper will throw an error in the final table create step. This can be avoided by changing the setting of `--cds` (or `--trna` or `--rrna`) flags to db_xref gene product (or whatever other identifiers are present in your genbank file).
 
 ## Adavnced Options for ismap
 
@@ -173,7 +173,7 @@ When running ISMapper on typing mode with a reference genome in Genbank format, 
 
 `--min_clip` and `--max_clip` are used to determine the size of soft clipped sections of reads that are including in the final mapping step. The default size is currently 10 bp and 30 bp, which is ideal for reads between 100 - 150bp. To improve the detection of the exact target site duplication size, it is sometimes helpful to increase the size of `--max_clip`. However large values of `--max_clip` can increase the amount of noise in the final mapping step and cause nonsensical results.
 
-`--a` and `--T` are flags that are passed to BWA. --a will turn on all alignment reporting in BWA, and --T is used to give an integer mapping score to BWA to determine what alignments are kept. These options may be useful in finding IS query positions that are next to repeated elements as BWA will report all hits for the read not just the best random hit. However, using these options may cause noise and confusion in the final output files.
+`--a`, `--T` and `--t` are flags that are passed to BWA. --a will turn on all alignment reporting in BWA, and --T is used to give an integer mapping score to BWA to determine what alignments are kept. These options may be useful in finding IS query positions that are next to repeated elements as BWA will report all hits for the read not just the best random hit. However, using these options may cause noise and confusion in the final output files. `--t` is used to supply more threads to BWA if required.
 
 `--cds`, `--trna` and `--rrna` are used to specify what qualifiers will be looked for in the reference genbank when determining genes flanking the IS query location. Defaults are locus_tag gene product.
 
@@ -183,9 +183,11 @@ When running ISMapper on typing mode with a reference genome in Genbank format, 
 
 `--log` turns on the log file.
 
+`--directory` sets an output directory for the output files (defualt is the directory where ISMapper is being run).
+
 `--temp` turns on keeping the temporary files instead of deleting them once the run has completed.
 
-`--bam` turns on keeping the final sorted and indexed BAM files of flanking reads for comparison against the reference genome (by default these files are deleted to save disk space). 
+`--bam` turns on keeping the final sorted and indexed BAM files of flanking reads for comparison against the reference genome (by default these files are deleted to save disk space).
 
 
 ## Other options for compiled_table
@@ -198,7 +200,7 @@ When running ISMapper on typing mode with a reference genome in Genbank format, 
 
 ## Running ISMapper without installing  
 
-ISMapper can be run directly from its directory without installing it via pip. To do so, ismap.py needs the path to the folder that contains all the scripts supplied to the argument `--path`. 
+ISMapper can be run directly from its directory without installing it via pip. To do so, ismap.py needs the path to the folder that contains all the scripts supplied to the argument `--path`.
 
 eg:  
 `ismap.py --reads x_1.fastq.gz x_2.fastq.gz --queries is_query.fasta --path /path/to/IS_mapper/scripts/`
