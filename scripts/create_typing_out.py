@@ -139,7 +139,7 @@ def novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, ref, cds, trna, rrna, gap, orie
     genbank.features.append(right_feature)
     
     # Get the genes flanking the left and right ends
-    gene_left, gene_right = get_flanking_genes(features, feature_list, x, y, cds, trna, rrna)
+    gene_left, gene_right = get_flanking_genes(features, feature_list, x, y, cds, trna, rrna, len(genbank.seq))
     #print gene_left
     #print gene_right
     # If the genes are the same, then hit is inside the gene
@@ -187,7 +187,7 @@ def add_known(x_L, x_R, y_L, y_R, gap, genbank, ref, seq, temp, cds, trna, rrna,
         # Taking all four coordinates and finding min and max to avoid coordinates 
         # that overlap the actual IS (don't want to return those in gene calls)
         # Mark as a known call to improve accuracy of gene calling
-        gene_left, gene_right = get_flanking_genes(features, feature_list, start, end, cds, trna, rrna)
+        gene_left, gene_right = get_flanking_genes(features, feature_list, start, end, cds, trna, rrna, len(genbank.seq))
         #gene_left = get_other_gene(ref, min(y_L, y_R, x_R, x_L), "left", cds, trna, rrna, known=True)
         #gene_right = get_other_gene(ref, max(y_L, y_R, x_R, x_L), "right", cds, trna, rrna, known=True)
 
@@ -207,19 +207,18 @@ def add_known(x_L, x_R, y_L, y_R, gap, genbank, ref, seq, temp, cds, trna, rrna,
         else:
             call = 'Known'
         results['region_' + str(region)] = [orient, str(start), str(end), gap, call, str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1], func_pred]
-    else:   
-        # Then I'm not sure what this is
-        # Get flanking genes anyway
-        gene_left, gene_right = get_flanking_genes(features, feature_list, start, end, cds, trna, rrna)
+    elif len(seq_results) != 0 and seq_results[0] >=50 and seq_results[1] >= 50:   
+        # Calling it a possible related IS if there is 50% nucleotide ID and 50% coverage
+        gene_left, gene_right = get_flanking_genes(features, feature_list, start, end, cds, trna, rrna, len(genbank.seq))
         if 'unpaired' in file_loc:
             call = 'Possible related IS?'
         else:
             call = 'Possible releated IS'
         func_pred = ''
-        if len(seq_results) !=0:
-            results['region_' + str(region)] = [orient, str(start), str(end), gap, call, str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1], func_pred]
-        else:
-            removed_results['region_' + str(region)] = line.strip() + '\t' + file_loc +'\n'                
+        results['region_' + str(region)] = [orient, str(start), str(end), gap, call, str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1], func_pred]
+    else:
+    # otherwise this a suprious result
+        removed_results['region_' + str(region)] = line.strip() + '\t' + file_loc +'\n'          
 
 def gbk_to_fasta(genbank, fasta):
     '''
@@ -264,6 +263,7 @@ def main():
         else:
             feature_count_list += 1
     
+    feature_list = sorted(feature_list, key=itemgetter(0))
     # Initialise feature count
     feature_count = 0
 
@@ -288,8 +288,8 @@ def main():
                 y_R = int(info[5])
                 # Check to see if the gap is reasonable
                 if int(info[6]) <= 15:
-                    R_range = range(min(x_R, y_R), max(x_R, y_R))
-                    L_range = range(min(x_L, y_L), max(x_L, y_L))
+                    R_range = range(min(x_R, y_R), max(x_R, y_R)+1)
+                    L_range = range(min(x_L, y_L), max(x_L, y_L)+1)
                     # if one hit is inside the other hit, remove it - don't know what to do with these
                     if (x_L in R_range and y_L in R_range) or (x_R in L_range and y_R in L_range):
                         removed_results['region_' + str(lines)] = line.strip() + '\tOne hit inside the other, intersect.bed\n'
@@ -316,7 +316,6 @@ def main():
                 else:
                     removed_results['region_' + str(lines)] = line.strip() + '\tintersect.bed\n'
                 lines += 1
-    
     # Get size of IS query
     is_length = insertion_length(args.seq)
     # Look inside the closest file (known or imprecise hits)
@@ -338,8 +337,8 @@ def main():
             y_L = int(info[2])
             x_R = int(info[4])
             y_R = int(info[5])
-            R_range = range(min(x_R, y_R), max(x_R, y_R))
-            L_range = range(min(x_L, y_L), max(x_L, y_L))
+            R_range = range(min(x_R, y_R), max(x_R, y_R)+1)
+            L_range = range(min(x_L, y_L), max(x_L, y_L)+1)
             # if one hit is inside the other hit, remove it - don't know what to do with these
             if (x_L in R_range and y_L in R_range) or (x_R in L_range and y_R in L_range):
                 removed_results['region_' + str(region)] = line.strip() + '\tOne hit inside the other, closest.bed\n'
@@ -399,11 +398,14 @@ def main():
                     y_L = int(info[2])
                     x_R = int(info[4])
                     y_R = int(info[5])
-                    R_range = range(min(x_R, y_R), max(x_R, y_R))
-                    L_range = range(min(x_L, y_L), max(x_L, y_L))
+                    R_range = range(min(x_R, y_R), max(x_R, y_R)+1)
+                    L_range = range(min(x_L, y_L), max(x_L, y_L)+1)
                     # if one hit is inside the other hit, remove it - don't know what to do with these
                     if (x_L in R_range and y_L in R_range) or (x_R in L_range and y_R in L_range):
-                        removed_results['region_' + str(lines)] = line.strip() + '\tOne hit inside the other, intersect.bed\n'
+                        removed_results['region_' + str(lines)] = line.strip() + '\tOne hit inside the other, left_unpaired.bed\n'
+                    # or if a hit is paired with itself, which means it doesn't have a pair
+                    elif x_L == x_R and y_L == y_R:
+                        removed_results['region_' + str(region)] = line.strip() + '\tleft_unpaired.bed, paired with self\n'
                     else:
                         # Get orientation
                         if x_L < x_R and y_L < y_R:
@@ -451,11 +453,14 @@ def main():
                     y_L = int(info[2])
                     x_R = int(info[4])
                     y_R = int(info[5])
-                    R_range = range(min(x_R, y_R), max(x_R, y_R))
-                    L_range = range(min(x_L, y_L), max(x_L, y_L))
+                    R_range = range(min(x_R, y_R), max(x_R, y_R)+1)
+                    L_range = range(min(x_L, y_L), max(x_L, y_L)+1)
                     # if one hit is inside the other hit, remove it - don't know what to do with these
                     if (x_L in R_range and y_L in R_range) or (x_R in L_range and y_R in L_range):
-                        removed_results['region_' + str(lines)] = line.strip() + '\tOne hit inside the other, intersect.bed\n'
+                        removed_results['region_' + str(lines)] = line.strip() + '\tOne hit inside the other, right_unpaired.bed\n'
+                    # or if a hit is paired with itself, which means it doesn't have a pair
+                    elif x_L == x_R and y_L == y_R:
+                        removed_results['region_' + str(region)] = line.strip() + '\tright_unpaired.bed, paired with self\n'
                     else:
                         #get orientation
                         if x_L < x_R and y_L < y_R:
@@ -485,6 +490,9 @@ def main():
                         else:
                             removed_results['region_' + str(region)] = line.strip() + '\tright_unpaired.bed\n'
                             region += 1
+    # Open the output file and write in the header
+    output = open(args.output + '_table.txt', 'w')
+    output.write('\t'.join(header) + '\n')
     # Sort regions into the correct order
     table_keys = []
     for key in results:
@@ -493,32 +501,30 @@ def main():
     for region in table_keys:
         region_indexes.append(region.split('region_')[1])
     arr = np.vstack((table_keys, region_indexes)).transpose()
+    # Write out the found hits to file
     if arr != 0:
         sorted_keys = arr[arr[:,1].astype('int').argsort()]
-
-    # Write out the found hits to file
-    output = open(args.output + '_table.txt', 'w')
-    output.write('\t'.join(header) + '\n')
-    if arr != 0:
         for key in sorted_keys[:,0]:
             output.write(key + '\t' + '\t'.join(str(i) for i in results[key]) + '\n')
-    if arr == 0:
+    # If all the hits failed, write out that no hits were found
+    elif arr == 0:
         output.write('No hits found.')
     output.close()
     
     # Write out the found hits to bed file for viewing in IGV
     with open(args.output + '_hits.bed', 'w') as outfile:
-        if args.chr_name == 'not_specified':
-            args.chr_name = SeqIO.read(args.ref, 'genbank').id
-        if args.igv == 1:
-            outfile.write('#gffTags \n')
-            for key in sorted_keys[:,0]:
-                r = results[key]
-                outfile.write(args.chr_name + '\t' + r[1] + '\t' + r[2] + '\t' + 'Name=' + key + ';orientation=' + r[0] + ';' + ';'.join([header[i+1] + '=' + str(r[i]) for i in range(3, len(r))])+ '\n')
-        else:
-            for key in sorted_keys[:,0]:
-                r = results[key]
-                outfile.write(args.chr_name + '\t' + r[1] + '\t' + r[2] + key + '\n')
+        if arr != 0:
+            if args.chr_name == 'not_specified':
+                args.chr_name = SeqIO.read(args.ref, 'genbank').id
+            if args.igv == 1:
+                outfile.write('#gffTags \n')
+                for key in sorted_keys[:,0]:
+                    r = results[key]
+                    outfile.write(args.chr_name + '\t' + r[1] + '\t' + r[2] + '\t' + 'Name=' + key + ';orientation=' + r[0] + ';' + ';'.join([header[i+1] + '=' + str(r[i]) for i in range(3, len(r))])+ '\n')
+            else:
+                for key in sorted_keys[:,0]:
+                    r = results[key]
+                    outfile.write(args.chr_name + '\t' + r[1] + '\t' + r[2] + key + '\n')
 
     # Write out hits that were removed for whatever reason to file
     if len(removed_results) != 0:

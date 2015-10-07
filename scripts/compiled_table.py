@@ -295,6 +295,17 @@ def findFeatureAfterPosition(features, isPosition, m):
     # If we are looking for the feature to the right of the
     # IS position, then either m or m+1 is our answer
 
+    # an index error will occur if m is the final feature, so just check that the first part is true
+    # and return m
+    try:
+        features[m+1]
+    except IndexError:
+        if features[m][0] > isPosition:
+            return features[m][2]
+        # otherwise we must be after the final position, so need to
+        # return the start position of the very first feature
+        else:
+            return features[0][2]
     # If the end of the m feature is before the IS position,
     # then m is before the IS and m+1 is the correct feature
     if features[m][1] < isPosition:
@@ -307,15 +318,22 @@ def findFeatureAfterPosition(features, isPosition, m):
     # then m will be closer to the IS and is the correct feature
     elif features[m][0] > isPosition and features[m+1][0] > isPosition:
         return features[m][2]
-
     else:
         return "3 - THIS SHOULDN'T HAPPEN!"
 
-def get_flanking_genes(features, feature_list, left, right, cds_features, trna_features, rrna_features):
+def get_flanking_genes(features, feature_list, left, right, cds_features, trna_features, rrna_features, genome_size):
     
     # Find the correct indexes
     left_feature_index = binary_search(feature_list, left, 'L')
     right_feature_index = binary_search(feature_list, right, 'R')
+    # Print out information if returning one of the error codes
+    if type(left_feature_index) != int or type(right_feature_index) != int:
+        print 'left index'
+        print left_feature_index
+        print 'right index'
+        print right_feature_index
+        print 'left position: ' + str(left)
+        print 'right position: ' + str(right)
     # Extract the SeqFeature object that corresponds to that index
     left_feature = features[left_feature_index]
     right_feature = features[right_feature_index]
@@ -331,6 +349,32 @@ def get_flanking_genes(features, feature_list, left, right, cds_features, trna_f
     left_dist = abs(max(left_feature.location.start, left_feature.location.end) - left)
     # The distance to the right gene is the startmost position of the feature - the right IS coord
     right_dist = abs(min(right_feature.location.start, right_feature.location.end) - right)
+
+    # Here is probably a good place to check if we've got a position that wraps around from start
+    # to end of the reference
+    # If we've got a distance that is close to the size of the reference, then we know we need to 
+    # alter it
+    if left_dist in range(int(round(genome_size * 0.9)), int(round(genome_size * 1.1))):
+        # The the left hand feature is at the end of the genome
+        # Distance from IS position to start of the genome is the
+        # position itself
+        dist_to_start = left
+        # Distance from the end of the final gene to the end of the
+        # genome
+        dist_to_end = abs(left_feature.location.end - genome_size)
+        # So the total distnace is those two added together
+        left_dist = dist_to_start + dist_to_end
+
+    elif right_dist in range(int(round(genome_size * 0.9)), int(round(genome_size * 1.1))):
+        # Then the right hand feature is at the start of the genome
+        # Distance from the IS position to the end of the genome
+        dist_to_end = abs(genome_size - right)
+        # Distance from the start of the genome to the start of the first feature
+        # is the start position of the first feature
+        dist_to_feature = right_feature.location.start
+        # So the total distance is those two added together
+        right_dist = dist_to_end + dist_to_feature
+
     # The first string in this values list is the main gene id (eg locus_tag)
     left_gene = [left_values[0], str(left_dist), left_values[1:]]
     right_gene = [right_values[0], str(right_dist), right_values[1:]]
@@ -528,10 +572,11 @@ def main():
             feature_count += 1
         else:
             feature_count += 1
-
+    # Sort the list just in case it's out of order (has caused issues in the past!!)
+    feature_list = sorted(feature_list, key=itemgetter(0))
     # Get flanking genes
     for pos in list_of_positions:
-        genes_before, genes_after =  get_flanking_genes(gb.features, feature_list, pos.x, pos.y, args.cds, args.trna, args.rrna)
+        genes_before, genes_after =  get_flanking_genes(gb.features, feature_list, pos.x, pos.y, args.cds, args.trna, args.rrna, len(gb.seq))
         pos.left_feature = genes_before
         pos.right_feature = genes_after
 

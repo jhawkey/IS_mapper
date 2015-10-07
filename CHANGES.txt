@@ -1,3 +1,12 @@
+v0.1.4, Wed 7 Oct 2015
+    * can now supply output directory using --directory command
+    * can now ask BWA to use multiple threads using --t command
+    * fixed some cases where an unpaired hit would pair incorrectly with itself
+    * correct distances returned if the flanking gene should be the first or last
+      gene in the reference
+    * fixed an error where no hits reported but bed files are non-empty
+    * possible related IS call must now meet 50% ID and 50% coverage threshold
+      otherwise the hit is discarded
 v0.1.3, Mon 10 Aug 2015
     * fixed soft clipped read selection (Special thanks to Katie Cox for helping with this one)
     * bam files now deleted by default, can be kept using the --bam flag
