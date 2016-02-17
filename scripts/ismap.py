@@ -403,6 +403,14 @@ def extract_clipped_reads(sam_file, min_size, max_size, out_five_file, out_three
                     else:
                         out_three.write('@' + read_name + '\n' + str(soft_clipped_seq) + '\n+\n' + qual_scores + '\n')
 
+def remove_temp_directory(keep_temp, temp_folder):
+    if not keep_temp:
+        run_command(['rm', '-rf', temp_folder], shell=True)
+
+def remove_bams(keep_bam, five_bam_sorted, three_bam_sorted):
+    if not keep_bam:
+        run_command(['rm', five_bam_sorted + '.bam', three_bam_sorted + '.bam', five_bam_sorted + '.bam.bai', three_bam_sorted + '.bam.bai'], shell=True)
+
 def main():
 
     start_time = time.time()
@@ -517,6 +525,7 @@ def main():
                     else:
                         header = ['contig', 'end', 'x', 'y']
                         f.write('\t'.join(header) + '\nNo hits found')
+                remove_temp_directory(args.temp, temp_folder)
                 continue
 
             # Improvement mode
@@ -651,11 +660,9 @@ def main():
                     '--cds', args.cds, '--trna', args.trna, '--rrna', args.rrna, '--min_range', args.min_range,
                     '--max_range', args.max_range, '--output', current_dir + sample + '_' + query_name, '--igv', igv_flag, '--chr_name', args.chr_name], shell=True)
 
-            # remove temp folder if required
-            if args.temp == False:
-                run_command(['rm', '-rf', temp_folder], shell=True)
-            if args.bam == False:
-                run_command(['rm', five_bam_sorted + '.bam', three_bam_sorted + '.bam', five_bam_sorted + '.bam.bai', three_bam_sorted + '.bam.bai'], shell=True)
+            remove_temp_directory(args.temp, temp_folder)
+            remove_bams(args.bam, five_bam_sorted, three_bam_sorted)
+
     total_time = time.time() - start_time
     time_mins = float(total_time) / 60
     logging.info('ISMapper finished in ' + str(time_mins) + ' mins.')
