@@ -409,6 +409,10 @@ def main():
 
     args = parse_args()
 
+    # Create the output directory if it doesn't already exist.
+    if not os.path.exists(args.directory):
+        os.makedirs(args.directory)
+
     # Set up logfile
     if args.log is True:
         logfile = os.path.join(args.directory, args.output + ".log")
