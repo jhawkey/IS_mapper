@@ -417,8 +417,9 @@ def main():
 
     args = parse_args()
 
-    # Create the output directory if it doesn't already exist.
-    if not os.path.exists(args.directory):
+    # If the user gave an output directory and it doesn't already exist,
+    # create it.
+    if args.directory and not os.path.exists(args.directory):
         os.makedirs(args.directory)
 
     # Set up logfile
