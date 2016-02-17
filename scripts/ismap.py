@@ -411,7 +411,7 @@ def main():
 
     # Set up logfile
     if args.log is True:
-        logfile = args.directory + args.output + ".log"
+        logfile = os.path.join(args.directory, args.output + ".log")
     else:
         logfile = None
     logging.basicConfig(
