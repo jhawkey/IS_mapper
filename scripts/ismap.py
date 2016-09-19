@@ -649,10 +649,12 @@ def main():
                 # If any of these fail, just make empty unapired files to pass to create_typing_out
                 try:
                     run_command(['closestBed', '-a', five_merged_bed, '-b', three_cov_merged, '-d', '>', bed_unpaired_five], shell=True)
-                    run_command(['closestBed', '-a', five_cov_merged, '-b', three_merged_bed, '-d', '>', bed_unpaired_three], shell=True)
                 except BedtoolsError:
                     if not os.path.isfile(bed_unpaired_five) or os.stat(bed_unpaired_five)[6] == 0:
                         open(bed_unpaired_five, 'w').close()
+                try:
+                    run_command(['closestBed', '-a', five_cov_merged, '-b', three_merged_bed, '-d', '>', bed_unpaired_three], shell=True)
+                except BedtoolsError:
                     if not os.path.isfile(bed_unpaired_three) or os.stat(bed_unpaired_three)[6] == 0:
                         open(bed_unpaired_three, 'w').close()
                 # Create table and annotate genbank with hits
