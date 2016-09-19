@@ -366,9 +366,9 @@ def multi_to_single(genbank, name, output):
     #write out new single entry genbank
     SeqIO.write(newrecord, output, "genbank")
 
-def extract_clipped_reads(sam_file, min_size, max_size, out_five_file, out_three_file):
-    with open(sam_file, 'r') as in_file, open(out_five_file, 'w') as out_five, open(out_three_file, 'w') as out_three:
-        print "extracting clip reads into" + out_five_file + out_three_file
+def extract_clipped_reads(sam_file, min_size, max_size, out_left_file, out_right_file):
+    with open(sam_file, 'r') as in_file, open(out_left_file, 'w') as out_left, open(out_right_file, 'w') as out_right:
+        print "extracting clip reads into" + out_left_file + out_right_file
         for line in in_file:
             # split fields
             entries = line.split('\t')
@@ -395,18 +395,18 @@ def extract_clipped_reads(sam_file, min_size, max_size, out_five_file, out_three
                     soft_clipped_seq = Seq(entries[9][:num_soft_clipped], generic_dna)
                     qual_scores = entries[10][:num_soft_clipped]
                     if reverse_complement:
-                        out_five.write('@' + read_name + '\n' + str(soft_clipped_seq.reverse_complement()) + '\n+\n' + qual_scores[::-1] + '\n')
+                        out_left.write('@' + read_name + '\n' + str(soft_clipped_seq.reverse_complement()) + '\n+\n' + qual_scores[::-1] + '\n')
                     else:
-                        out_five.write('@' + read_name + '\n' + str(soft_clipped_seq) + '\n+\n' + qual_scores + '\n')
+                        out_left.write('@' + read_name + '\n' + str(soft_clipped_seq) + '\n+\n' + qual_scores + '\n')
             if map_regions[-1][-1] == 'S':
                 num_soft_clipped = int(map_regions[-1][:-1])
                 if min_size <= num_soft_clipped <= max_size:
                     soft_clipped_seq = Seq(entries[9][-num_soft_clipped:], generic_dna)
                     qual_scores = entries[10][-num_soft_clipped:]
                     if reverse_complement:
-                        out_three.write('@' + read_name + '\n' + str(soft_clipped_seq.reverse_complement()) + '\n+\n' + qual_scores[::-1] + '\n')
+                        out_right.write('@' + read_name + '\n' + str(soft_clipped_seq.reverse_complement()) + '\n+\n' + qual_scores[::-1] + '\n')
                     else:
-                        out_three.write('@' + read_name + '\n' + str(soft_clipped_seq) + '\n+\n' + qual_scores + '\n')
+                        out_right.write('@' + read_name + '\n' + str(soft_clipped_seq) + '\n+\n' + qual_scores + '\n')
 
 def main():
 
@@ -476,10 +476,10 @@ def main():
 
             temp_folder = current_dir + sample + '_' + query_name + '_temp/'
             output_sam = temp_folder + sample + '_' + query_name + '.sam'
-            five_bam = temp_folder + sample + '_' + query_name + '_5.bam'
-            three_bam = temp_folder + sample + '_' + query_name + '_3.bam'
-            five_reads = temp_folder + sample + '_' + query_name + '_5.fastq'
-            three_reads = temp_folder + sample + '_' + query_name + '_3.fastq'
+            left_bam = temp_folder + sample + '_' + query_name + '_left.bam'
+            right_bam = temp_folder + sample + '_' + query_name + '_right.bam'
+            left_reads = temp_folder + sample + '_' + query_name + '_left.fastq'
+            right_reads = temp_folder + sample + '_' + query_name + '_right.fastq'
             left_clipped_reads = temp_folder + sample + '_' + query_name + '_left_clipped.fastq'
             right_clipped_reads = temp_folder + sample + '_' + query_name + '_right_clipped.fastq'
             final_left_reads = temp_folder + sample + '_' + query_name + '_LeftFinal.fastq'
@@ -490,11 +490,11 @@ def main():
             # Map to IS query
             run_command(['bwa', 'mem', '-t', args.t, query, forward_read, reverse_read, '>', output_sam], shell=True)
             # Pull unmapped reads flanking IS
-            run_command(['samtools view', '-Sb', '-f 36', output_sam, '>', five_bam], shell=True)
-            run_command(['samtools view', '-Sb', '-f 4', '-F 40', output_sam, '>', three_bam], shell=True)
+            run_command(['samtools view', '-Sb', '-f 36', output_sam, '>', left_bam], shell=True)
+            run_command(['samtools view', '-Sb', '-f 4', '-F 40', output_sam, '>', right_bam], shell=True)
             # Turn bams to reads for mapping
-            run_command(['bedtools', 'bamtofastq', '-i', five_bam, '-fq', five_reads], shell=True)
-            run_command(['bedtools', 'bamtofastq', '-i', three_bam, '-fq', three_reads], shell=True)
+            run_command(['bedtools', 'bamtofastq', '-i', left_bam, '-fq', left_reads], shell=True)
+            run_command(['bedtools', 'bamtofastq', '-i', right_bam, '-fq', right_reads], shell=True)
             # Add corresponding clipped reads to their respective left and right ends
             print 'Usage before extracting soft-clipped reads'
             print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
@@ -502,8 +502,8 @@ def main():
             extract_clipped_reads(output_sam, args.min_clip, args.max_clip, left_clipped_reads, right_clipped_reads)
             print 'Usage after reads written out, before concatentation'
             print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-            run_command(['cat', left_clipped_reads, five_reads, '>', final_left_reads], shell=True)
-            run_command(['cat', right_clipped_reads, three_reads, '>', final_right_reads], shell=True)
+            run_command(['cat', left_clipped_reads, left_reads, '>', final_left_reads], shell=True)
+            run_command(['cat', right_clipped_reads, right_reads, '>', final_right_reads], shell=True)
             print 'Usage after reads concatenated onto previous reads'
             print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
@@ -524,20 +524,20 @@ def main():
             if args.runtype == "improvement":
 
                 # Get prefix for output filenames
-                five_header = sample + '_5'
-                three_header = sample + '_3'
-                five_to_ref_sam = temp_folder + five_header + '_' + query_name + '.sam'
-                three_to_ref_sam = temp_folder + three_header + '_' + query_name + '.sam'
-                five_to_ref_bam = temp_folder + five_header + '_' + query_name + '.bam'
-                three_to_ref_bam = temp_folder + three_header + '_' + query_name + '.bam'
-                five_bam_sorted = five_header + '_' + query_name + '.sorted'
-                three_bam_sorted = three_header + '_' + query_name + '.sorted'
-                five_cov_bed = temp_folder + five_header + '_' + query_name + '_cov.bed'
-                three_cov_bed = temp_folder + three_header + '_' + query_name + '_cov.bed'
-                five_final_cov =  current_dir + five_header + '_' + query_name + '_finalcov.bed'
-                three_final_cov = current_dir + three_header + '_' + query_name + '_finalcov.bed'
-                five_merged_bed = current_dir + five_header + '_' + query_name + '_merged.sorted.bed'
-                three_merged_bed = current_dir + three_header + '_' + query_name + '_merged.sorted.bed'
+                left_header = sample + '_left'
+                right_header = sample + '_right'
+                left_to_ref_sam = temp_folder + left_header + '_' + query_name + '.sam'
+                right_to_ref_sam = temp_folder + right_header + '_' + query_name + '.sam'
+                left_to_ref_bam = temp_folder + left_header + '_' + query_name + '.bam'
+                right_to_ref_bam = temp_folder + right_header + '_' + query_name + '.bam'
+                left_bam_sorted = left_header + '_' + query_name + '.sorted'
+                right_bam_sorted = right_header + '_' + query_name + '.sorted'
+                left_cov_bed = temp_folder + left_header + '_' + query_name + '_cov.bed'
+                right_cov_bed = temp_folder + right_header + '_' + query_name + '_cov.bed'
+                left_final_cov =  current_dir + left_header + '_' + query_name + '_finalcov.bed'
+                right_final_cov = current_dir + right_header + '_' + query_name + '_finalcov.bed'
+                left_merged_bed = current_dir + left_header + '_' + query_name + '_merged.sorted.bed'
+                right_merged_bed = current_dir + right_header + '_' + query_name + '_merged.sorted.bed'
                 final_genbankSingle = current_dir + sample + '_' + query_name + '_annotatedSingle.gbk'
 
                 # create fasta file from genbank if required
@@ -550,30 +550,30 @@ def main():
                 # Map ends back to contigs
                 bwa_index(assembly)
                 if args.a == True:
-                    run_command(['bwa', 'mem', 'a', '-T', args.T, '-t', args.t, assembly, final_left_reads, '>', five_to_ref_sam], shell=True)
-                    run_command(['bwa', 'mem', 'a', '-T', args.T, '-t', args.t, assembly, final_right_reads, '>', three_to_ref_sam], shell=True)
+                    run_command(['bwa', 'mem', 'a', '-T', args.T, '-t', args.t, assembly, final_left_reads, '>', left_to_ref_sam], shell=True)
+                    run_command(['bwa', 'mem', 'a', '-T', args.T, '-t', args.t, assembly, final_right_reads, '>', right_to_ref_sam], shell=True)
                 else:
-                    run_command(['bwa', 'mem', '-t', args.t, assembly, final_left_reads, '>', five_to_ref_sam], shell=True)
-                    run_command(['bwa', 'mem', '-t', args.t, assembly, final_right_reads, '>', three_to_ref_sam], shell=True)
+                    run_command(['bwa', 'mem', '-t', args.t, assembly, final_left_reads, '>', left_to_ref_sam], shell=True)
+                    run_command(['bwa', 'mem', '-t', args.t, assembly, final_right_reads, '>', right_to_ref_sam], shell=True)
 
-                run_command(['samtools', 'view', '-Sb', five_to_ref_sam, '>', five_to_ref_bam], shell=True)
-                run_command(['samtools', 'view', '-Sb', three_to_ref_sam, '>', three_to_ref_bam], shell=True)
-                run_command(['samtools', 'sort', five_to_ref_bam, five_bam_sorted], shell=True)
-                run_command(['samtools', 'sort', three_to_ref_bam, three_bam_sorted], shell=True)
-                run_command(['samtools', 'index', five_bam_sorted + '.bam'], shell=True)
-                run_command(['samtools', 'index', three_bam_sorted + '.bam'], shell=True)
+                run_command(['samtools', 'view', '-Sb', left_to_ref_sam, '>', left_to_ref_bam], shell=True)
+                run_command(['samtools', 'view', '-Sb', right_to_ref_sam, '>', right_to_ref_bam], shell=True)
+                run_command(['samtools', 'sort', left_to_ref_bam, left_bam_sorted], shell=True)
+                run_command(['samtools', 'sort', right_to_ref_bam, right_bam_sorted], shell=True)
+                run_command(['samtools', 'index', left_bam_sorted + '.bam'], shell=True)
+                run_command(['samtools', 'index', right_bam_sorted + '.bam'], shell=True)
                 # Create BED file with coverage information
-                run_command(['bedtools', 'genomecov', '-ibam', five_bam_sorted + '.bam', '-bg', '>', five_cov_bed], shell=True)
-                run_command(['bedtools', 'genomecov', '-ibam', three_bam_sorted + '.bam', '-bg', '>', three_cov_bed], shell=True)
-                filter_on_depth(five_cov_bed, five_final_cov, args.cutoff)
-                filter_on_depth(three_cov_bed, three_final_cov, args.cutoff)
-                run_command(['bedtools', 'merge', '-i', five_final_cov, '-d', args.merging, '>', five_merged_bed], shell=True)
-                run_command(['bedtools', 'merge', '-i', three_final_cov, '-d', args.merging, '>', three_merged_bed], shell=True)
+                run_command(['bedtools', 'genomecov', '-ibam', left_bam_sorted + '.bam', '-bg', '>', left_cov_bed], shell=True)
+                run_command(['bedtools', 'genomecov', '-ibam', right_bam_sorted + '.bam', '-bg', '>', right_cov_bed], shell=True)
+                filter_on_depth(left_cov_bed, left_final_cov, args.cutoff)
+                filter_on_depth(right_cov_bed, right_final_cov, args.cutoff)
+                run_command(['bedtools', 'merge', '-i', left_final_cov, '-d', args.merging, '>', left_merged_bed], shell=True)
+                run_command(['bedtools', 'merge', '-i', right_final_cov, '-d', args.merging, '>', right_merged_bed], shell=True)
                 # Create table and genbank
                 if args.extension == '.fasta':
-                    run_command([args.path + 'create_genbank_table.py', '--five_bed', five_merged_bed, '--three_bed', three_merged_bed, '--assembly', assembly, '--type fasta', '--output', current_dir + sample + '_' + query_name], shell=True)
+                    run_command([args.path + 'create_genbank_table.py', '--left_bed', left_merged_bed, '--right_bed', right_merged_bed, '--assembly', assembly, '--type fasta', '--output', current_dir + sample + '_' + query_name], shell=True)
                 elif args.extension == '.gbk':
-                    run_command([args.path + 'create_genbank_table.py', '--five_bed', five_merged_bed, '--three_bed', three_merged_bed, '--assembly', assembly_gbk, '--type genbank', '--output', current_dir + sample + '_' + query_name], shell=True)
+                    run_command([args.path + 'create_genbank_table.py', '--left_bed', left_merged_bed, '--right_bed', right_merged_bed, '--assembly', assembly_gbk, '--type genbank', '--output', current_dir + sample + '_' + query_name], shell=True)
                 #create single entry genbank
                 multi_to_single(sample + '_' + query_name + '_annotated.gbk', sample, final_genbankSingle)
 
@@ -589,57 +589,57 @@ def main():
                 # Create bwa index file for typing reference
                 bwa_index(typingRefFasta)
                 # Set up file names for output files
-                five_header = sample + '_5_' + typingName
-                three_header = sample + '_3_' + typingName
-                five_to_ref_sam = temp_folder + five_header + '_' + query_name + '.sam'
-                three_to_ref_sam = temp_folder + three_header + '_' + query_name + '.sam'
-                five_to_ref_bam = temp_folder + five_header + '_' + query_name + '.bam'
-                three_to_ref_bam = temp_folder + three_header + '_' + query_name + '.bam'
-                five_bam_sorted = five_header + '_' + query_name + '.sorted'
-                three_bam_sorted = three_header + '_' + query_name + '.sorted'
-                five_cov_bed = temp_folder + five_header + '_' + query_name + '_cov.bed'
-                three_cov_bed = temp_folder + three_header + '_' + query_name + '_cov.bed'
-                five_cov_merged = temp_folder + five_header + '_' + query_name + '_cov_merged.sorted.bed'
-                three_cov_merged = temp_folder + three_header + '_' + query_name + '_cov_merged.sorted.bed'
-                five_final_cov = current_dir + five_header + '_' + query_name + '_finalcov.bed'
-                three_final_cov = current_dir + three_header + '_' + query_name + '_finalcov.bed'
-                five_merged_bed = current_dir + five_header + '_' + query_name + '_merged.sorted.bed'
-                three_merged_bed = current_dir + three_header + '_' + query_name + '_merged.sorted.bed'
+                left_header = sample + '_left_' + typingName
+                right_header = sample + '_right_' + typingName
+                left_to_ref_sam = temp_folder + left_header + '_' + query_name + '.sam'
+                right_to_ref_sam = temp_folder + right_header + '_' + query_name + '.sam'
+                left_to_ref_bam = temp_folder + left_header + '_' + query_name + '.bam'
+                right_to_ref_bam = temp_folder + right_header + '_' + query_name + '.bam'
+                left_bam_sorted = left_header + '_' + query_name + '.sorted'
+                right_bam_sorted = right_header + '_' + query_name + '.sorted'
+                left_cov_bed = temp_folder + left_header + '_' + query_name + '_cov.bed'
+                right_cov_bed = temp_folder + right_header + '_' + query_name + '_cov.bed'
+                left_cov_merged = temp_folder + left_header + '_' + query_name + '_cov_merged.sorted.bed'
+                right_cov_merged = temp_folder + right_header + '_' + query_name + '_cov_merged.sorted.bed'
+                left_final_cov = current_dir + left_header + '_' + query_name + '_finalcov.bed'
+                right_final_cov = current_dir + right_header + '_' + query_name + '_finalcov.bed'
+                left_merged_bed = current_dir + left_header + '_' + query_name + '_merged.sorted.bed'
+                right_merged_bed = current_dir + right_header + '_' + query_name + '_merged.sorted.bed'
                 bed_intersect = current_dir + sample + '_' + typingName + '_' + query_name + '_intersect.bed'
                 bed_closest = current_dir + sample + '_' + typingName + '_' + query_name + '_closest.bed'
-                bed_unpaired_five = current_dir + sample + '_' + typingName + '_' + query_name + '_left_unpaired.bed'
-                bed_unpaired_three = current_dir + sample + '_' + typingName + '_' + query_name + '_right_unpaired.bed'
+                bed_unpaired_left = current_dir + sample + '_' + typingName + '_' + query_name + '_left_unpaired.bed'
+                bed_unpaired_right = current_dir + sample + '_' + typingName + '_' + query_name + '_right_unpaired.bed'
 
                 # Map reads to reference, sort
                 if args.a == True:
-                    run_command(['bwa', 'mem', '-a', '-T', args.T, '-t', args.t, typingRefFasta, final_left_reads, '>', five_to_ref_sam], shell=True)
-                    run_command(['bwa', 'mem', '-a', '-T', args.T, '-t', args.t,typingRefFasta, final_right_reads, '>', three_to_ref_sam], shell=True)
+                    run_command(['bwa', 'mem', '-a', '-T', args.T, '-t', args.t, typingRefFasta, final_left_reads, '>', left_to_ref_sam], shell=True)
+                    run_command(['bwa', 'mem', '-a', '-T', args.T, '-t', args.t,typingRefFasta, final_right_reads, '>', right_to_ref_sam], shell=True)
                 else:
-                    run_command(['bwa', 'mem', '-t', args.t, typingRefFasta, final_left_reads, '>', five_to_ref_sam], shell=True)
-                    run_command(['bwa', 'mem', '-t', args.t, typingRefFasta, final_right_reads, '>', three_to_ref_sam], shell=True)
-                run_command(['samtools', 'view', '-Sb', five_to_ref_sam, '>', five_to_ref_bam], shell=True)
-                run_command(['samtools', 'view', '-Sb', three_to_ref_sam, '>', three_to_ref_bam], shell=True)
-                run_command(['samtools', 'sort', five_to_ref_bam, five_bam_sorted], shell=True)
-                run_command(['samtools', 'sort', three_to_ref_bam, three_bam_sorted], shell=True)
-                run_command(['samtools', 'index', five_bam_sorted + '.bam'], shell=True)
-                run_command(['samtools', 'index', three_bam_sorted + '.bam'], shell=True)
+                    run_command(['bwa', 'mem', '-t', args.t, typingRefFasta, final_left_reads, '>', left_to_ref_sam], shell=True)
+                    run_command(['bwa', 'mem', '-t', args.t, typingRefFasta, final_right_reads, '>', right_to_ref_sam], shell=True)
+                run_command(['samtools', 'view', '-Sb', left_to_ref_sam, '>', left_to_ref_bam], shell=True)
+                run_command(['samtools', 'view', '-Sb', right_to_ref_sam, '>', right_to_ref_bam], shell=True)
+                run_command(['samtools', 'sort', left_to_ref_bam, left_bam_sorted], shell=True)
+                run_command(['samtools', 'sort', right_to_ref_bam, right_bam_sorted], shell=True)
+                run_command(['samtools', 'index', left_bam_sorted + '.bam'], shell=True)
+                run_command(['samtools', 'index', right_bam_sorted + '.bam'], shell=True)
                 # Create BED files with coverage information
-                run_command(['bedtools', 'genomecov', '-ibam', five_bam_sorted + '.bam', '-bg', '>', five_cov_bed], shell=True)
-                run_command(['bedtools', 'genomecov', '-ibam', three_bam_sorted + '.bam', '-bg', '>', three_cov_bed], shell=True)
-                run_command(['bedtools', 'merge', '-d', args.merging, '-i', five_cov_bed, '>', five_cov_merged], shell=True)
-                run_command(['bedtools', 'merge', '-d', args.merging, '-i', three_cov_bed, '>', three_cov_merged], shell=True)
+                run_command(['bedtools', 'genomecov', '-ibam', left_bam_sorted + '.bam', '-bg', '>', left_cov_bed], shell=True)
+                run_command(['bedtools', 'genomecov', '-ibam', right_bam_sorted + '.bam', '-bg', '>', right_cov_bed], shell=True)
+                run_command(['bedtools', 'merge', '-d', args.merging, '-i', left_cov_bed, '>', left_cov_merged], shell=True)
+                run_command(['bedtools', 'merge', '-d', args.merging, '-i', right_cov_bed, '>', right_cov_merged], shell=True)
                 # Filter coveraged BED files on coverage cutoff (so only take
                 # high coverage regions for further analysis)
-                filter_on_depth(five_cov_bed, five_final_cov, args.cutoff)
-                filter_on_depth(three_cov_bed, three_final_cov, args.cutoff)
-                run_command(['bedtools', 'merge', '-d', args.merging, '-i', five_final_cov, '>', five_merged_bed], shell=True)
-                run_command(['bedtools', 'merge', '-d', args.merging, '-i', three_final_cov, '>', three_merged_bed], shell=True)
+                filter_on_depth(left_cov_bed, left_final_cov, args.cutoff)
+                filter_on_depth(right_cov_bed, right_final_cov, args.cutoff)
+                run_command(['bedtools', 'merge', '-d', args.merging, '-i', left_final_cov, '>', left_merged_bed], shell=True)
+                run_command(['bedtools', 'merge', '-d', args.merging, '-i', right_final_cov, '>', right_merged_bed], shell=True)
                 # Find intersects and closest points of regions
-                run_command(['bedtools', 'intersect', '-a', five_merged_bed, '-b', three_merged_bed, '-wo', '>', bed_intersect], shell=True)
+                run_command(['bedtools', 'intersect', '-a', left_merged_bed, '-b', right_merged_bed, '-wo', '>', bed_intersect], shell=True)
                 # if one or more of the bed files are empty, then closestBed returns an error
                 # that needs to be caught
                 try:
-                    run_command(['closestBed', '-a', five_merged_bed, '-b', three_merged_bed, '-d', '>', bed_closest], shell=True)
+                    run_command(['closestBed', '-a', left_merged_bed, '-b', right_merged_bed, '-d', '>', bed_closest], shell=True)
                 except BedtoolsError:
                     with open(no_hits_table, 'w') as f:
                         header = ["region", "orientation", "x", "y", "gap", "call", "%ID", "%Cov", "left_gene", "left_strand", "left_distance", "right_gene", "right_strand", "right_distance", "functional_prediction"]
@@ -648,23 +648,23 @@ def main():
                 # Create all possible closest bed files for checking unpaired hits
                 # If any of these fail, just make empty unapired files to pass to create_typing_out
                 try:
-                    run_command(['closestBed', '-a', five_merged_bed, '-b', three_cov_merged, '-d', '>', bed_unpaired_five], shell=True)
+                    run_command(['closestBed', '-a', left_merged_bed, '-b', right_cov_merged, '-d', '>', bed_unpaired_left], shell=True)
                 except BedtoolsError:
-                    if not os.path.isfile(bed_unpaired_five) or os.stat(bed_unpaired_five)[6] == 0:
-                        open(bed_unpaired_five, 'w').close()
+                    if not os.path.isfile(bed_unpaired_left) or os.stat(bed_unpaired_left)[6] == 0:
+                        open(bed_unpaired_left, 'w').close()
                 try:
-                    run_command(['closestBed', '-a', five_cov_merged, '-b', three_merged_bed, '-d', '>', bed_unpaired_three], shell=True)
+                    run_command(['closestBed', '-a', left_cov_merged, '-b', right_merged_bed, '-d', '>', bed_unpaired_right], shell=True)
                 except BedtoolsError:
-                    if not os.path.isfile(bed_unpaired_three) or os.stat(bed_unpaired_three)[6] == 0:
-                        open(bed_unpaired_three, 'w').close()
+                    if not os.path.isfile(bed_unpaired_right) or os.stat(bed_unpaired_right)[6] == 0:
+                        open(bed_unpaired_right, 'w').close()
                 # Create table and annotate genbank with hits
                 if args.igv:
                     igv_flag = '1'
                 else:
                     igv_flag = '0'
                 run_command([args.path + 'create_typing_out.py', '--intersect', bed_intersect, '--closest', bed_closest,
-                    '--left_bed', five_merged_bed, '--right_bed', three_merged_bed,
-                    '--left_unpaired', bed_unpaired_five, '--right_unpaired', bed_unpaired_three,
+                    '--left_bed', left_merged_bed, '--right_bed', right_merged_bed,
+                    '--left_unpaired', bed_unpaired_left, '--right_unpaired', bed_unpaired_right,
                     '--seq', query, '--ref', args.typingRef, '--temp', temp_folder,
                     '--cds', args.cds, '--trna', args.trna, '--rrna', args.rrna, '--min_range', args.min_range,
                     '--max_range', args.max_range, '--output', current_dir + sample + '_' + query_name, '--igv', igv_flag, '--chr_name', args.chr_name], shell=True)
@@ -673,7 +673,7 @@ def main():
             if args.temp == False:
                 run_command(['rm', '-rf', temp_folder], shell=True)
             if args.bam == False:
-                run_command(['rm', five_bam_sorted + '.bam', three_bam_sorted + '.bam', five_bam_sorted + '.bam.bai', three_bam_sorted + '.bam.bai'], shell=True)
+                run_command(['rm', left_bam_sorted + '.bam', right_bam_sorted + '.bam', left_bam_sorted + '.bam.bai', right_bam_sorted + '.bam.bai'], shell=True)
     total_time = time.time() - start_time
     time_mins = float(total_time) / 60
     logging.info('ISMapper finished in ' + str(time_mins) + ' mins.')
