@@ -99,7 +99,7 @@ def run_command(command, **kwargs):
     except OSError as e:
         message = "Command '{}' failed due to O/S error: {}".format(command_str, str(e))
         raise CommandError({"message": message})
-    if exit_status == 139 and command[0] == 'bedtools':
+    if exit_status == 139 and command[0] == 'closestBed':
         raise BedtoolsError({'message':'One or more bed files are empty. Writing out empty results table.'})
     if exit_status != 0:
         message = "Command '{}' failed with non-zero exit status: {}".format(command_str, exit_status)
