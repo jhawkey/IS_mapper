@@ -191,8 +191,9 @@ def main():
                 os.system('echo "' + cmd + '" | sbatch')
             except IndexError:
                 unused_fileSets.append(sample)
-    print 'Unable to run the following samples:'
-    print ' '.join(unused_fileSets)
+    if len(unused_fileSets) != 0:
+        print 'Unable to run the following samples:'
+        print ' '.join(unused_fileSets)
 
 if __name__ == '__main__':
     main()
