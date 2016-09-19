@@ -84,6 +84,9 @@ def parse_args():
 class CommandError(Exception):
     pass
 
+class BedtoolsError(Exception):
+    pass
+
 def run_command(command, **kwargs):
     '''
     Execute a shell command and check the exit status and any O/S exceptions.
@@ -96,6 +99,8 @@ def run_command(command, **kwargs):
     except OSError as e:
         message = "Command '{}' failed due to O/S error: {}".format(command_str, str(e))
         raise CommandError({"message": message})
+    if exit_status == 139 and command[0] == 'bedtools':
+        raise BedtoolsError({'message':'One or more bed files are empty. Writing out empty results table.'})
     if exit_status != 0:
         message = "Command '{}' failed with non-zero exit status: {}".format(command_str, exit_status)
         raise CommandError({"message": message})
@@ -631,10 +636,25 @@ def main():
                 run_command(['bedtools', 'merge', '-d', args.merging, '-i', three_final_cov, '>', three_merged_bed], shell=True)
                 # Find intersects and closest points of regions
                 run_command(['bedtools', 'intersect', '-a', five_merged_bed, '-b', three_merged_bed, '-wo', '>', bed_intersect], shell=True)
-                run_command(['closestBed', '-a', five_merged_bed, '-b', three_merged_bed, '-d', '>', bed_closest], shell=True)
+                # if one or more of the bed files are empty, then closestBed returns an error
+                # that needs to be caught
+                try:
+                    run_command(['closestBed', '-a', five_merged_bed, '-b', three_merged_bed, '-d', '>', bed_closest], shell=True)
+                except BedtoolsError:
+                    with open(no_hits_table, 'w') as f:
+                        header = ["region", "orientation", "x", "y", "gap", "call", "%ID", "%Cov", "left_gene", "left_strand", "left_distance", "right_gene", "right_strand", "right_distance", "functional_prediction"]
+                        f.write('\t'.join(header) + '\nNo hits found')
+                    continue
                 # Create all possible closest bed files for checking unpaired hits
-                run_command(['closestBed', '-a', five_merged_bed, '-b', three_cov_merged, '-d', '>', bed_unpaired_five], shell=True)
-                run_command(['closestBed', '-a', five_cov_merged, '-b', three_merged_bed, '-d', '>', bed_unpaired_three], shell=True)
+                # If any of these fail, just make empty unapired files to pass to create_typing_out
+                try:
+                    run_command(['closestBed', '-a', five_merged_bed, '-b', three_cov_merged, '-d', '>', bed_unpaired_five], shell=True)
+                    run_command(['closestBed', '-a', five_cov_merged, '-b', three_merged_bed, '-d', '>', bed_unpaired_three], shell=True)
+                except BedtoolsError:
+                    if not os.path.isfile(bed_unpaired_five) or os.stat(bed_unpaired_five)[6] == 0:
+                        open(bed_unpaired_five, 'w').close()
+                    if not os.path.isfile(bed_unpaired_three) or os.stat(bed_unpaired_three)[6] == 0:
+                        open(bed_unpaired_three, 'w').close()
                 # Create table and annotate genbank with hits
                 if args.igv:
                     igv_flag = '1'
