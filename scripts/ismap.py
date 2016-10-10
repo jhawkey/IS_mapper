@@ -38,23 +38,29 @@ except:
 
 class RunSamtools:
     def __init__(self):
+        # check iF SAMTOOLS environment variable exists, then use that command
+        try:
+            self.samtools_cmd = os.environ['SAMTOOLS']
+        except:
+            self.samtools_cmd = 'samtools'
         # check version:
-        p = Popen(['samtools'], stderr = PIPE)
+
+        p = Popen([self.samtools_cmd], stderr = PIPE)
         out,err = p.communicate()
         version_string = [l for l in err.decode('UTF-8').split('\n') if re.search('^Version', l)][0]
         if len(version_string) == 0:
             print("Could not find Samtools")
             raise IOError
         if len(re.findall('1\.[0-9]\.[0-9]', version_string)):
-            version_id=re.findall('1\.[0-9]\.[0-9]', version_string)[0]
+            version_id=re.findall('1\.[0-9]\.[0-9]{1,2}', version_string)[0]
             print("Found samtools version {}".format(version_id))
             self.version=1
         else:
-            version_id=re.findall('0\.[0-9]\.[0-9]', version_string)[0]
+            version_id=re.findall('0\.[0-9]\.[0-9]{1,2}', version_string)[0]
             print("Found samtools version {}".format(version_id))
             self.version=0
     def view(self, output_bam, input_sam, bigF=None, smallF=None):
-        cmd = 'samtools view -Sb'
+        cmd = self.samtools_cmd + ' view -Sb'
         if bigF !=None:
             cmd = cmd + ' -F {}'.format(bigF)
         if smallF != None:
@@ -62,7 +68,7 @@ class RunSamtools:
         cmd = cmd + ' -o {} {}'.format(output_bam, input_sam)
         return(shlex.split(cmd))
     def sort(self, output_bam, input_bam):
-        cmd = 'samtools sort'
+        cmd = self.samtools_cmd + ' sort'
         if self.version == 1:
             output_bam = output_bam + '.bam'
             cmd = cmd + ' -T tmp -o {} {}'.format(output_bam, input_bam)
@@ -70,7 +76,7 @@ class RunSamtools:
             cmd = cmd + ' {} {}'.format(input_bam, output_bam)
         return(shlex.split(cmd))
     def index(self, input_bam):
-        cmd = 'samtools index {}.bam'.format(input_bam)
+        cmd = self.samtools_cmd + ' index {}.bam'.format(input_bam)
         return(shlex.split(cmd))
 
 
