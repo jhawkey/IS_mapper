@@ -161,9 +161,10 @@ def main():
         cmd += '\n#SBATCH --time=' + args.walltime
         cmd += '\ncd ' + args.rundir
         cmd += '\nmodule load Python/2.7.10-vlsci_intel-2015.08.25'
-        cmd += '\nmodule load BWA/0.7.12-iccifort-2015.2.164-GCC-4.9.2'
+        cmd += '\nmodule load BWA/0.7.15-iccifort-2015.2.164-GCC-4.9.2'
         #cmd += '\nmodule load SAMtools/1.2-iccifort-2015.2.164-GCC-4.9.2-HTSlib-1.2.1'
-        cmd += '\nmodule load SAMtools/0.1.19-vlsci_intel-2015.08.25'
+        #cmd += '\nmodule load SAMtools/0.1.19-vlsci_intel-2015.08.25'
+        cmd += '\nmodule load SAMtools/0.1.18-iccifort-2015.2.164-GCC-4.9.2'
         cmd += '\nmodule load BLAST+/2.2.30-vlsci_intel-2015.08.25-Python-2.7.10'
         cmd += '\nmodule load BEDTools/2.25.0-iccifort-2015.2.164-GCC-4.9.2'
         cmd += '\nmodule load SAMblaster/0.1.22-iccifort-2015.2.164-GCC-4.9.2'
