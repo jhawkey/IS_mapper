@@ -79,9 +79,6 @@ class RunSamtools:
         cmd = self.samtools_cmd + ' index {}.bam'.format(input_bam)
         return(shlex.split(cmd))
 
-
-
-
 def parse_args():
     '''
     Parse the input arguments, use -h for help.

@@ -3,9 +3,9 @@
 This program takes paired end Illumina short read sequence data, an IS query of interest and a reference genome or assembly and reports the locations of the IS query in the reference genome or the assembly.
 For a more in depth description of how the program works, see 'Method' below.
 
-For support, add an issue to GitHubs issue tracker, or you can email the author at hawkey dot jane at gmail dot com.
+For support, please create an issue in the GitHub issue tracker.
 
-The paper can be found as a pre-print on Biorxiv here: http://biorxiv.org/content/early/2015/03/10/016345
+The paper has now been published in BMC Genomics: http://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-015-1860-2
 
 ## Dependencies
 * Python v2.7.5
@@ -208,7 +208,7 @@ eg:
 If using the slurm_ismap.py script, `--path` can be supplied inside `--other_args`, but slurm_ismap.py also requires the path to the actual ismap.py script as well.
 
 eg:  
-`slurm_ismap.py --reads x_2.fastq.gz x_2.fastq.gz --queries is_query.fasta --script /path/to/IS_mapper/scripts/ismap.py --other_args "--path /path/to/IS_mapper/scripts"`  
+`slurm_ismap.py --reads x_1.fastq.gz x_2.fastq.gz --queries is_query.fasta --script /path/to/IS_mapper/scripts/ismap.py --other_args "--path /path/to/IS_mapper/scripts --typingRef path/to/reference/genome.gbk"`  
 
 ## Running multiple jobs on a SLURM queing system
 
