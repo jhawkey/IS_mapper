@@ -21,7 +21,7 @@
 import logging
 import sys, re, os
 from argparse import ArgumentParser
-from subprocess import call, check_output, CalledProcessError, STDOUT
+from subprocess import call, check_output, CalledProcessError, STDOUT, Popen, PIPE
 from Bio import SeqIO
 from Bio import SeqFeature
 from Bio.SeqFeature import SeqFeature, FeatureLocation
@@ -30,10 +30,57 @@ from Bio.SeqRecord import SeqRecord
 from Bio.Alphabet import generic_dna
 import resource
 import time
+import shlex
 try:
     from version import ismap_version
 except:
     ismap_version = 'version unknown'
+
+class RunSamtools:
+    def __init__(self):
+        # check iF SAMTOOLS environment variable exists, then use that command
+        try:
+            self.samtools_cmd = os.environ['SAMTOOLS']
+        except:
+            self.samtools_cmd = 'samtools'
+        # check version:
+
+        p = Popen([self.samtools_cmd], stderr = PIPE)
+        out,err = p.communicate()
+        version_string = [l for l in err.decode('UTF-8').split('\n') if re.search('^Version', l)][0]
+        if len(version_string) == 0:
+            print("Could not find Samtools")
+            raise IOError
+        if len(re.findall('1\.[0-9]\.[0-9]', version_string)):
+            version_id=re.findall('1\.[0-9]\.[0-9]{1,2}', version_string)[0]
+            print("Found samtools version {}".format(version_id))
+            self.version=1
+        else:
+            version_id=re.findall('0\.[0-9]\.[0-9]{1,2}', version_string)[0]
+            print("Found samtools version {}".format(version_id))
+            self.version=0
+    def view(self, output_bam, input_sam, bigF=None, smallF=None):
+        cmd = self.samtools_cmd + ' view -Sb'
+        if bigF !=None:
+            cmd = cmd + ' -F {}'.format(bigF)
+        if smallF != None:
+            cmd = cmd + ' -f {}'.format(smallF)
+        cmd = cmd + ' -o {} {}'.format(output_bam, input_sam)
+        return(shlex.split(cmd))
+    def sort(self, output_bam, input_bam):
+        cmd = self.samtools_cmd + ' sort'
+        if self.version == 1:
+            output_bam = output_bam + '.bam'
+            cmd = cmd + ' -T tmp -o {} {}'.format(output_bam, input_bam)
+        else:
+            cmd = cmd + ' {} {}'.format(input_bam, output_bam)
+        return(shlex.split(cmd))
+    def index(self, input_bam):
+        cmd = self.samtools_cmd + ' index {}.bam'.format(input_bam)
+        return(shlex.split(cmd))
+
+
+
 
 def parse_args():
     '''
@@ -414,6 +461,8 @@ def main():
 
     args = parse_args()
 
+    samtools_runner = RunSamtools()
+
     # Set up logfile
     if args.log is True:
         logfile = args.directory + args.output + ".log"
@@ -430,7 +479,7 @@ def main():
 
     # Checks that the correct programs are installed
     check_command(['bwa'], 'bwa')
-    check_command(['samtools'], 'samtools')
+    #check_command(['samtools'], 'samtools')
     check_command(['makeblastdb'], 'blast')
     check_command(['bedtools'], 'bedtools')
 
@@ -490,8 +539,8 @@ def main():
             # Map to IS query
             run_command(['bwa', 'mem', '-t', args.t, query, forward_read, reverse_read, '>', output_sam], shell=True)
             # Pull unmapped reads flanking IS
-            run_command(['samtools view', '-Sb', '-f 36', output_sam, '>', left_bam], shell=True)
-            run_command(['samtools view', '-Sb', '-f 4', '-F 40', output_sam, '>', right_bam], shell=True)
+            run_command(samtools_runner.view(left_bam, output_sam, smallF = 36), shell=True)
+            run_command(samtools_runner.view(right_bam, output_sam, smallF = 4, bigF = 40), shell=True)
             # Turn bams to reads for mapping
             run_command(['bedtools', 'bamtofastq', '-i', left_bam, '-fq', left_reads], shell=True)
             run_command(['bedtools', 'bamtofastq', '-i', right_bam, '-fq', right_reads], shell=True)
@@ -556,12 +605,12 @@ def main():
                     run_command(['bwa', 'mem', '-t', args.t, assembly, final_left_reads, '>', left_to_ref_sam], shell=True)
                     run_command(['bwa', 'mem', '-t', args.t, assembly, final_right_reads, '>', right_to_ref_sam], shell=True)
 
-                run_command(['samtools', 'view', '-Sb', left_to_ref_sam, '>', left_to_ref_bam], shell=True)
-                run_command(['samtools', 'view', '-Sb', right_to_ref_sam, '>', right_to_ref_bam], shell=True)
-                run_command(['samtools', 'sort', left_to_ref_bam, left_bam_sorted], shell=True)
-                run_command(['samtools', 'sort', right_to_ref_bam, right_bam_sorted], shell=True)
-                run_command(['samtools', 'index', left_bam_sorted + '.bam'], shell=True)
-                run_command(['samtools', 'index', right_bam_sorted + '.bam'], shell=True)
+                run_command(samtools_runner.view(left_to_ref_bam, left_to_ref_sam), shell=True)
+                run_command(samtools_runner.view(right_to_ref_bam, right_to_ref_sam), shell=True)
+                run_command(samtools_runner.sort(left_bam_sorted, left_to_ref_bam), shell=True)
+                run_command(samtools_runner.sort(right_bam_sorted, right_to_ref_bam), shell=True)
+                run_command(samtools_runner.index(left_bam_sorted), shell=True)
+                run_command(samtools_runner.index(right_bam_sorted), shell=True)
                 # Create BED file with coverage information
                 run_command(['bedtools', 'genomecov', '-ibam', left_bam_sorted + '.bam', '-bg', '>', left_cov_bed], shell=True)
                 run_command(['bedtools', 'genomecov', '-ibam', right_bam_sorted + '.bam', '-bg', '>', right_cov_bed], shell=True)
@@ -617,12 +666,14 @@ def main():
                 else:
                     run_command(['bwa', 'mem', '-t', args.t, typingRefFasta, final_left_reads, '>', left_to_ref_sam], shell=True)
                     run_command(['bwa', 'mem', '-t', args.t, typingRefFasta, final_right_reads, '>', right_to_ref_sam], shell=True)
-                run_command(['samtools', 'view', '-Sb', left_to_ref_sam, '>', left_to_ref_bam], shell=True)
-                run_command(['samtools', 'view', '-Sb', right_to_ref_sam, '>', right_to_ref_bam], shell=True)
-                run_command(['samtools', 'sort', left_to_ref_bam, left_bam_sorted], shell=True)
-                run_command(['samtools', 'sort', right_to_ref_bam, right_bam_sorted], shell=True)
-                run_command(['samtools', 'index', left_bam_sorted + '.bam'], shell=True)
-                run_command(['samtools', 'index', right_bam_sorted + '.bam'], shell=True)
+
+                run_command(samtools_runner.view(left_to_ref_bam, left_to_ref_sam), shell=True)
+                run_command(samtools_runner.view(right_to_ref_bam, right_to_ref_sam), shell=True)
+                run_command(samtools_runner.sort(left_bam_sorted, left_to_ref_bam), shell=True)
+                run_command(samtools_runner.sort(right_bam_sorted, right_to_ref_bam), shell=True)
+                run_command(samtools_runner.index(left_bam_sorted), shell=True)
+                run_command(samtools_runner.index(right_bam_sorted), shell=True)
+
                 # Create BED files with coverage information
                 run_command(['bedtools', 'genomecov', '-ibam', left_bam_sorted + '.bam', '-bg', '>', left_cov_bed], shell=True)
                 run_command(['bedtools', 'genomecov', '-ibam', right_bam_sorted + '.bam', '-bg', '>', right_cov_bed], shell=True)
