@@ -452,6 +452,14 @@ def extract_clipped_reads(sam_file, min_size, max_size, out_left_file, out_right
                     else:
                         out_right.write('@' + read_name + '\n' + str(soft_clipped_seq) + '\n+\n' + qual_scores + '\n')
 
+def remove_temp_directory(keep_temp, temp_folder):
+    if not keep_temp:
+        run_command(['rm', '-rf', temp_folder], shell=True)
+
+def remove_bams(keep_bam, five_bam_sorted, three_bam_sorted):
+    if not keep_bam:
+        run_command(['rm', five_bam_sorted + '.bam', three_bam_sorted + '.bam', five_bam_sorted + '.bam.bai', three_bam_sorted + '.bam.bai'], shell=True)
+
 def main():
 
     start_time = time.time()
@@ -460,9 +468,14 @@ def main():
 
     samtools_runner = RunSamtools()
 
+    # If the user gave an output directory and it doesn't already exist,
+    # create it.
+    if args.directory and not os.path.exists(args.directory):
+        os.makedirs(args.directory)
+
     # Set up logfile
     if args.log is True:
-        logfile = args.directory + args.output + ".log"
+        logfile = os.path.join(args.directory, args.output + ".log")
     else:
         logfile = None
     logging.basicConfig(
@@ -571,6 +584,7 @@ def main():
                     else:
                         header = ['contig', 'end', 'x', 'y']
                         f.write('\t'.join(header) + '\nNo hits found')
+                remove_temp_directory(args.temp, temp_folder)
                 continue
 
             # Improvement mode
@@ -583,8 +597,8 @@ def main():
                 right_to_ref_sam = temp_folder + right_header + '_' + query_name + '.sam'
                 left_to_ref_bam = temp_folder + left_header + '_' + query_name + '.bam'
                 right_to_ref_bam = temp_folder + right_header + '_' + query_name + '.bam'
-                left_bam_sorted = left_header + '_' + query_name + '.sorted'
-                right_bam_sorted = right_header + '_' + query_name + '.sorted'
+                left_bam_sorted = current_dir + left_header + '_' + query_name + '.sorted'
+                right_bam_sorted = current_dir + right_header + '_' + query_name + '.sorted'
                 left_cov_bed = temp_folder + left_header + '_' + query_name + '_cov.bed'
                 right_cov_bed = temp_folder + right_header + '_' + query_name + '_cov.bed'
                 left_final_cov =  current_dir + left_header + '_' + query_name + '_finalcov.bed'
@@ -648,8 +662,8 @@ def main():
                 right_to_ref_sam = temp_folder + right_header + '_' + query_name + '.sam'
                 left_to_ref_bam = temp_folder + left_header + '_' + query_name + '.bam'
                 right_to_ref_bam = temp_folder + right_header + '_' + query_name + '.bam'
-                left_bam_sorted = left_header + '_' + query_name + '.sorted'
-                right_bam_sorted = right_header + '_' + query_name + '.sorted'
+                left_bam_sorted = current_dir + left_header + '_' + query_name + '.sorted'
+                right_bam_sorted = current_dir + right_header + '_' + query_name + '.sorted'
                 left_cov_bed = temp_folder + left_header + '_' + query_name + '_cov.bed'
                 right_cov_bed = temp_folder + right_header + '_' + query_name + '_cov.bed'
                 left_cov_merged = temp_folder + left_header + '_' + query_name + '_cov_merged.sorted.bed'
@@ -725,10 +739,9 @@ def main():
                     '--max_range', args.max_range, '--output', current_dir + sample + '_' + query_name, '--igv', igv_flag, '--chr_name', args.chr_name], shell=True)
 
             # remove temp folder if required
-            if args.temp == False:
-                run_command(['rm', '-rf', temp_folder], shell=True)
-            if args.bam == False:
-                run_command(['rm', left_bam_sorted + '.bam', right_bam_sorted + '.bam', left_bam_sorted + '.bam.bai', right_bam_sorted + '.bam.bai'], shell=True)
+            remove_temp_directory(args.temp, temp_folder)
+            remove_bams(args.bam, five_bam_sorted, three_bam_sorted)
+
     total_time = time.time() - start_time
     time_mins = float(total_time) / 60
     logging.info('ISMapper finished in ' + str(time_mins) + ' mins.')
