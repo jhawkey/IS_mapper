@@ -117,7 +117,7 @@ def parse_args():
     parser.add_argument('--chr_name', type=str, required=False, default='not_specified', help='chromosome name for bedfile - must match genome name to load in IGV (default = genbank accession)')
     # Reporting options
     parser.add_argument('--log', action='store_true', required=False, help='Switch on logging to file (otherwise log to stdout')
-    parser.add_argument('--output', type=str, required=True, help='prefix for output files')
+    parser.add_argument('--output', type=str, required=False, help='Prefix for output files. If not supplied, prefix will be current date and time.', default='')
     parser.add_argument('--temp', action='store_true', required=False, help='Switch on keeping the temp folder instead of deleting it at the end of the program')
     parser.add_argument('--bam', action='store_true', required=False, help='Switch on keeping the final bam files instead of deleting them at the end of the program')
     parser.add_argument('--directory', type=str, required=False, default='', help='Output directory for all output files.')
@@ -475,7 +475,11 @@ def main():
 
     # Set up logfile
     if args.log is True:
-        logfile = os.path.join(args.directory, args.output + ".log")
+        if args.output != '':
+            logfile = os.path.join(args.directory, args.output + ".log")
+        else:
+            # come up with a different prefix
+            logfile = os.path.join(args.directory, time.strftime("%d%m%y_%H%M", time.localtime()) + '.log')
     else:
         logfile = None
     logging.basicConfig(
@@ -488,10 +492,10 @@ def main():
     logging.info('command line: {0}'.format(' '.join(sys.argv)))
 
     # Checks that the correct programs are installed
-    #check_command(['bwa'], 'bwa')
+    check_command(['bwa'], 'bwa')
     #check_command(['samtools'], 'samtools')
     check_command(['makeblastdb'], 'blast')
-    #check_command(['bedtools'], 'bedtools')
+    check_command(['bedtools'], 'bedtools')
 
     # Checks to make sure the runtype is valid and provides an error if not
     if args.runtype != "improvement" and args.runtype != "typing":
