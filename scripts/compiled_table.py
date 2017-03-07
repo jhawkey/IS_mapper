@@ -48,7 +48,7 @@ def check_ranges(positions, range_to_check, gap, orientation):
     to check against these to see if it overlaps.
     Also takes gap variable, indicating that the ranges may be gap distance
     apart and still merged.
-    Also takes orientation, as only want to merge ranges that are the same 
+    Also takes orientation, as only want to merge ranges that are the same
     orientation.
 
     Returns the old range (to be replaced) and the new, merged range (to replace
@@ -98,7 +98,7 @@ def check_ranges(positions, range_to_check, gap, orientation):
                     #print tup
                     x = tup[0]
                     y = tup[1]
-                    # The x value must lie between start and stop in test range 
+                    # The x value must lie between start and stop in test range
                     # taking into account gap
                     if (x in range(start - gap, stop + 1)) or (x in range(start, stop + gap + 1)):
                         # If so, then these ranges overlap
@@ -207,7 +207,7 @@ def get_qualifiers(cds_qualifiers, trna_qualifiers, rrna_qualifiers, feature):
     skips and keeps going.
     Returns a list of qualfiers found in that feature.
     '''
-    
+
     return_quals = []
     if feature.type == 'CDS':
         qualifier_list = cds_qualifiers
@@ -250,12 +250,12 @@ def binary_search(features, isPosition, direction):
                 return findFeatureAfterPosition(features, isPosition, m)
             else:
                 return findFeatureBeforePosition(features, isPosition, m)
-        
+
         # Find the midpoint and save the feature attributes
         m = (min + max) // 2
         featureStart = features[m][0]
         featureEnd = features[m][1]
-        featureIndex = features[m][2]       
+        featureIndex = features[m][2]
 
         # If the IS position is after the feature, move the minimum to
         # be after the feature.
@@ -266,7 +266,7 @@ def binary_search(features, isPosition, direction):
         # be before the feature.
         elif featureStart > isPosition:
             max = m - 1
-        
+
         # If the IS position is inside the feature, return only that feature
         elif isPosition >= featureStart and isPosition <= featureEnd:
             return featureIndex
@@ -322,7 +322,7 @@ def findFeatureAfterPosition(features, isPosition, m):
         return "3 - THIS SHOULDN'T HAPPEN!"
 
 def get_flanking_genes(features, feature_list, left, right, cds_features, trna_features, rrna_features, genome_size):
-    
+
     # Find the correct indexes
     left_feature_index = binary_search(feature_list, left, 'L')
     right_feature_index = binary_search(feature_list, right, 'R')
@@ -352,7 +352,7 @@ def get_flanking_genes(features, feature_list, left, right, cds_features, trna_f
 
     # Here is probably a good place to check if we've got a position that wraps around from start
     # to end of the reference
-    # If we've got a distance that is close to the size of the reference, then we know we need to 
+    # If we've got a distance that is close to the size of the reference, then we know we need to
     # alter it
     if left_dist in range(int(round(genome_size * 0.9)), int(round(genome_size * 1.1))):
         # The the left hand feature is at the end of the genome
@@ -383,10 +383,10 @@ def get_flanking_genes(features, feature_list, left, right, cds_features, trna_f
 
 def blast_db(fasta):
     '''
-    Takes a fasta file and creates a BLAST database 
+    Takes a fasta file and creates a BLAST database
     if one doesn't exist already.
     '''
-    
+
     if not os.path.exists(fasta + '.nin'):
         os.system('makeblastdb -in ' + fasta + ' -dbtype nucl')
 
@@ -398,47 +398,42 @@ def gbk_to_fasta(genbank, fasta):
     sequences = SeqIO.parse(genbank, "genbank")
     SeqIO.write(sequences, fasta, "fasta")
 
-def final_ranges_check():
+def final_ranges_check(positions, gap):
 
-    # From ranges, create a list of tuples (min, max, orientation)
-    list_of_range_tuples = []
-    for key in ranges:
-        list_of_range_tuples.append((min(key[0], key[1]), max(key[0], key[1]), ranges[key]))
+    # if the number of positions to check is only 1, then we don't need
+    # to do an overlap check. Exit the function
+    if len(positions) <= 1:
+        return(positions)
+    # want to check if any of the final positions need to be merged
+    final_positions = []
+    # go through each position, and check if there are any other positions it should be merged with
+    # obviously we want to ignore the position itself
+    for pos in positions:
+        pos_index = positions.index(pos)
+        positions_without_check = positions[:pos_index] + positions[(pos_index + 1):]
+        matching_position, new_range = check_ranges(positions_without_check, (pos.x, pos.y), gap, pos.orientation)
+        # if the current range overlaps with a range we already have (so no False's are returned)
+        if matching_position != False:
+            # grab the isolate dictionary of the matching position
+            matching_isolate_dict = matching_position.isolate_dict
+            # grab the isolate dictionry of the current position
+            current_isolate_dict = pos.isolate_dict
+            # merge the two dictionaries together
+            new_isolate_dict = matching_isolate_dict.copy()
+            new_isolate_dict.update(current_isolate_dict)
+            # Remove the matching position from the list
+            positions.remove(matching_position)
+            # Create the new position and add it to the list of final positions
+            new_pos = Position(new_range[0], new_range[1], pos.orientation, new_isolate_dict, None, None)
+            final_positions.append(new_pos)
+        else:
+            # just append the position to the list of final positions
+            final_positions.append(pos)
 
-    # sort the list into order based on x value
-    list_of_range_tuples.sort()
-
-    # start at the first index
-    current_index = 0
-    while current_index < len(list_of_range_tuples):
-        # get x and y coordinates of range
-        x = list_of_range_tuples[current_index][0]
-        y = list_of_range_tuples[current_index][1]
-        try:
-            # check to see that the very next range is the same orientation,
-            # otherwise we're not going to merge
-            if list_of_range_tuples[current_index][2] == list_of_range_tuples[current_index + 1][2]:
-                x2 = list_of_range_tuples[current_index + 1][0]
-                y2 = list_of_range_tuples[current_index + 1][1]
-                # if our previous y value is greater than or equal to the next-door
-                # x value, then we should merge these columns
-                if y >= x2:
-                    new_position = (x, y2, list_of_range_tuples[current_index][2])
-                    # need to check to see if this new position is able to be merged with any others
-
-                # otherwise just store it as is
-                else:
-                    new_position = (x, y, list_of_range_tuples[current_index][2])
-        except IndexError:
-            # then we're at the last value so we just add that to the final list
-            pass
-        # increment our index
-        current_index += 1
-
-
+    return(final_positions)
 
 def main():
-    
+
     start_time = time.time()
 
     args = parse_args()
@@ -506,7 +501,7 @@ def main():
                                 matching_pos.isolate_dict[isolate] = '*'
                             else:
                                 matching_pos.isolate_dict[isolate] = '+'
-                    
+
                     # So we haven't seen this position before
                     if match == False:
                         # The position list is empty, so there's nothing to check against, so just add
@@ -520,7 +515,7 @@ def main():
                                 isolate_dict[isolate] = '+'
                             new_pos = Position(is_start, is_end, orientation, isolate_dict, None, None)
                             list_of_positions.append(new_pos)
-                        
+
                         # If the list of positions isn't empty, then there are ranges to check against
                         else:
                             old_position, new_range = check_ranges(list_of_positions, (is_start, is_end), args.gap, orientation)
@@ -552,9 +547,12 @@ def main():
                                 new_pos = Position(is_start, is_end, orientation, isolate_dict, None, None)
                                 list_of_positions.append(new_pos)
 
+    # do one last check for positions that should be merged
+    list_of_positions = final_ranges_check(list_of_positions, args.gap)
+
     elapsed_time = time.time() - start_time
     print 'Time taken: ' + str(elapsed_time)
-    
+
     # Get the flanking genes for each position now they've all been merged
     print 'Getting flanking genes for each position (this step is the longest and could take some time) ...'
     # key = (start, end), valye = [left_gene, right_gene]
@@ -586,7 +584,7 @@ def main():
 
     # Order positions from smallest to largest for final table output
     list_of_positions.sort(key=lambda x: x.x)
-    
+
     # Write out table
     print 'Writing output table to ' + args.output + ' ...'
     with open(args.output, 'w') as out:
@@ -605,7 +603,7 @@ def main():
             else:
                 row.append('-')
         out.write('\t'.join(row) + '\n')
-        
+
         # Loop through each isolate
         # and create each row
         for isolate in list_of_isolates:
