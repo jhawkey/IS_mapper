@@ -79,7 +79,7 @@ Alternately, ISMapper can also be used for assembly improvement if the improveme
 
 Input files:
 * short read data in fastq format (can be gzipped)
-* IS query/queries of interest in fasta format
+* IS query/queries of interest in fasta/multifasta format
 * reference genome to compare to in genbank format
 
 Basic usage for ISMapper:
@@ -109,8 +109,6 @@ The final _table.txt file contains the following columns:
 * right_gene - information about the right most feature to the IS location (default is locus_tag, gene, product for CDS features or locus_tag and product for tRNA and rRNA features)  
 * right_strand - direction of the right most feature to the IS location  
 * right_distance - distance of the IS location from the start codon of the right most feature   
-* functional_prediction - states 'Gene interrupted' if both the left and right flanking genes are the same, indicating that the IS is in the middle of this feature
-
 
 The individual _table.txt files for each isolate can be compiled together to generate one large table showing all possible IS query locations in all isolates as well as the reference genome by using the compiled_table script. Options required are shown below, further options are detailed in the section 'Other options for compiled_table'.
 
@@ -134,7 +132,7 @@ The final seven rows indicate:
 
 Input files:
 * short read sequence data in fastq format (can be gzipped)
-* IS query/queries of interest in fasta format
+* IS query/queries of interest in fasta/multifasta format
 * assemblies for each of your isolates, either in fasta or genbank format
 
 Basic usage:
@@ -152,7 +150,7 @@ Multiple read sets can be supplied one after the other, separated by spaces, aft
 Multiple IS queries can also be supplied, seperated by spaces, after --queries. ISMapper will run queries sequentially in the same output folder.
 
 `
-ismap --reads [isolateA_1.fastq.gz] [isolateA_2.fastq.gz] [isolateB_1.fastq.gz] [isolateB_2.fastq.gz] --queries IS_query1.fasta IS_query2.fasta --assemblies [isolateA_assembly.fasta] [isolateB_assembly.fasta] --assemblyid _assembly --extension .fasta --type fasta --runtype improvement --output prefix_out
+ismap --reads [isolateA_1.fastq.gz] [isolateA_2.fastq.gz] [isolateB_1.fastq.gz] [isolateB_2.fastq.gz] --queries allQueries.fasta --assemblies [isolateA_assembly.fasta] [isolateB_assembly.fasta] --assemblyid _assembly --extension .fasta --type fasta --runtype improvement --output prefix_out
 `
 
 Once ISMapper has finished running, multiple output files will be generated, the most interesting of which will be the *_table.txt file. The table file contains the names of contigs that have either a left or a right end in them.
