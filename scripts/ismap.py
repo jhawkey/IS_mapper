@@ -740,7 +740,7 @@ def main():
 
             # remove temp folder if required
             remove_temp_directory(args.temp, temp_folder)
-            remove_bams(args.bam, five_bam_sorted, three_bam_sorted)
+            remove_bams(args.bam, left_bam_sorted, right_bam_sorted)
 
     total_time = time.time() - start_time
     time_mins = float(total_time) / 60
