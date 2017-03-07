@@ -92,7 +92,7 @@ def parse_args():
     parser.add_argument('--reads', nargs='+', type=str, required=False, help='Paired end reads for analysing (can be gzipped)')
     parser.add_argument('--forward', type=str, required=False, default='_1', help='Identifier for forward reads if not in MiSeq format (default _1)')
     parser.add_argument('--reverse', type=str, required=False, default='_2', help='Identifier for reverse reads if not in MiSeq format (default _2)')
-    parser.add_argument('--queries', nargs='+', type=str, required=True, help='Fasta files for query genes (eg: insertion sequence) that will be mapped to')
+    parser.add_argument('--queries', type=str, required=True, help='Multifasta file for query gene(s) (eg: insertion sequence) that will be mapped to.')
     parser.add_argument('--assemblies', nargs='+', type=str, required=False, help='Contig assemblies, one for each read set')
     parser.add_argument('--assemblyid', type=str, required=False, help='Identifier for assemblies eg: sampleName_contigs (specify _contigs) or sampleName_assembly (specify _assembly). Do not specify extension.')
     parser.add_argument('--extension', type=str, required=False, help='Extension for assemblies (eg: .fasta, .fa, .gbk, default is .fasta)', default='.fasta')
@@ -475,10 +475,10 @@ def main():
     logging.info('command line: {0}'.format(' '.join(sys.argv)))
 
     # Checks that the correct programs are installed
-    check_command(['bwa'], 'bwa')
+    #check_command(['bwa'], 'bwa')
     #check_command(['samtools'], 'samtools')
     check_command(['makeblastdb'], 'blast')
-    check_command(['bedtools'], 'bedtools')
+    #check_command(['bedtools'], 'bedtools')
 
     # Checks to make sure the runtype is valid and provides an error if not
     if args.runtype != "improvement" and args.runtype != "typing":
@@ -503,13 +503,12 @@ def main():
         except IndexError:
             pass
 
+        # Read in the queries
+        query_records = SeqIO.parse(args.queries, 'fasta')
         # Cycle through each query on its own before moving onto the next one
-        for query in args.queries:
-
-            # Index the IS query for BWA
-            bwa_index(query)
-            # Get query name
-            query_name = os.path.split(query)[1].split('.f')[0]
+        for query in query_records:
+            # get the name of the query to set up file names
+            query_name = query.id
 
             # Create the output file and folder names,
             # make the folders where necessary
@@ -533,8 +532,16 @@ def main():
             no_hits_table = current_dir + sample + '_' + query_name + '_table.txt'
             make_directories([temp_folder])
 
+            # need to write out each query to a temp file
+            # otherwise it can't be indexed etc
+            query_tmp = temp_folder + query_name + '.fasta'
+            SeqIO.write(query, query_tmp, 'fasta')
+
+            # Index the IS query for BWA
+            bwa_index(query_tmp)
+
             # Map to IS query
-            run_command(['bwa', 'mem', '-t', args.t, query, forward_read, reverse_read, '>', output_sam], shell=True)
+            run_command(['bwa', 'mem', '-t', args.t, query_tmp, forward_read, reverse_read, '>', output_sam], shell=True)
             # Pull unmapped reads flanking IS
             run_command(samtools_runner.view(left_bam, output_sam, smallF = 36), shell=True)
             run_command(samtools_runner.view(right_bam, output_sam, smallF = 4, bigF = 40), shell=True)
@@ -554,7 +561,7 @@ def main():
             print ('Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
             # Create BLAST database for IS query
-            check_blast_database(query)
+            check_blast_database(query_tmp)
             if os.stat(final_left_reads)[6] == 0 or os.stat(final_right_reads)[6] == 0:
                 logging.info('One or both read files are empty. This is probably due to no copies of the IS of interest being present in this sample. Program quitting.')
                 with open(no_hits_table, 'w') as f:
@@ -713,7 +720,7 @@ def main():
                 run_command([args.path + 'create_typing_out.py', '--intersect', bed_intersect, '--closest', bed_closest,
                     '--left_bed', left_merged_bed, '--right_bed', right_merged_bed,
                     '--left_unpaired', bed_unpaired_left, '--right_unpaired', bed_unpaired_right,
-                    '--seq', query, '--ref', args.typingRef, '--temp', temp_folder,
+                    '--seq', query_tmp, '--ref', args.typingRef, '--temp', temp_folder,
                     '--cds', args.cds, '--trna', args.trna, '--rrna', args.rrna, '--min_range', args.min_range,
                     '--max_range', args.max_range, '--output', current_dir + sample + '_' + query_name, '--igv', igv_flag, '--chr_name', args.chr_name], shell=True)
 
