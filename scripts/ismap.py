@@ -86,7 +86,7 @@ def parse_args():
 
     parser = ArgumentParser(description='IS mapper')
 
-    parser.add_argument("--version", action='version', version='v1.2')
+    parser.add_argument("--version", action='version', version='0.1.5')
     # Inputs
     parser.add_argument('--runtype', type=str, required=True, help='"typing" or "improvement"')
     parser.add_argument('--reads', nargs='+', type=str, required=False, help='Paired end reads for analysing (can be gzipped)')
