@@ -154,18 +154,20 @@ def main():
     for sample in fileSets:
 
         cmd = '#!/bin/bash'
-        cmd += '\n#SBATCH -p main'
+        cmd += '\n#SBATCH -p sysgen'
         cmd += '\n#SBATCH --job-name=ismapper' + sample
         cmd += '\n#SBATCH --ntasks=1'
         cmd += '\n#SBATCH --mem-per-cpu=' + args.memory
         cmd += '\n#SBATCH --time=' + args.walltime
         cmd += '\ncd ' + args.rundir
-        cmd += '\nmodule load python-gcc/2.7.5'
-        cmd += '\nmodule load bwa-intel/0.7.12'
-        cmd += '\nmodule load samtools-intel/1.1'
-        cmd += '\nmodule load blast+-gcc/2.2.25'
-        cmd += '\nmodule load bedtools-intel/2.20.1'
-        cmd += '\nmodule load samblaster-gcc/0.1.21'
+        cmd += '\nmodule load Python/2.7.10-vlsci_intel-2015.08.25'
+        cmd += '\nmodule load BWA/0.7.15-iccifort-2015.2.164-GCC-4.9.2'
+        #cmd += '\nmodule load SAMtools/1.2-iccifort-2015.2.164-GCC-4.9.2-HTSlib-1.2.1'
+        #cmd += '\nmodule load SAMtools/0.1.19-vlsci_intel-2015.08.25'
+        cmd += '\nmodule load SAMtools/0.1.18-iccifort-2015.2.164-GCC-4.9.2'
+        cmd += '\nmodule load BLAST+/2.2.30-vlsci_intel-2015.08.25-Python-2.7.10'
+        cmd += '\nmodule load BEDTools/2.25.0-iccifort-2015.2.164-GCC-4.9.2'
+        cmd += '\nmodule load SAMblaster/0.1.22-iccifort-2015.2.164-GCC-4.9.2'
 
         cmd += '\npython ' + args.script
         cmd += ' --queries ' + args.queries

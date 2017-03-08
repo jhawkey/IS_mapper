@@ -3,9 +3,9 @@
 This program takes paired end Illumina short read sequence data, an IS query of interest and a reference genome or assembly and reports the locations of the IS query in the reference genome or the assembly.
 For a more in depth description of how the program works, see 'Method' below.
 
-For support, add an issue to GitHubs issue tracker, or you can email the author at hawkey dot jane at gmail dot com.
+For support, please create an issue in the GitHub issue tracker.
 
-The paper can be found as a pre-print on Biorxiv here: http://biorxiv.org/content/early/2015/03/10/016345
+The paper has now been published in BMC Genomics: http://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-015-1860-2
 
 ## Dependencies
 * Python v2.7.5
@@ -79,7 +79,7 @@ Alternately, ISMapper can also be used for assembly improvement if the improveme
 
 Input files:
 * short read data in fastq format (can be gzipped)
-* IS query/queries of interest in fasta format
+* IS query/queries of interest in fasta/multifasta format
 * reference genome to compare to in genbank format
 
 Basic usage for ISMapper:
@@ -109,8 +109,6 @@ The final _table.txt file contains the following columns:
 * right_gene - information about the right most feature to the IS location (default is locus_tag, gene, product for CDS features or locus_tag and product for tRNA and rRNA features)  
 * right_strand - direction of the right most feature to the IS location  
 * right_distance - distance of the IS location from the start codon of the right most feature   
-* functional_prediction - states 'Gene interrupted' if both the left and right flanking genes are the same, indicating that the IS is in the middle of this feature
-
 
 The individual _table.txt files for each isolate can be compiled together to generate one large table showing all possible IS query locations in all isolates as well as the reference genome by using the compiled_table script. Options required are shown below, further options are detailed in the section 'Other options for compiled_table'.
 
@@ -134,7 +132,7 @@ The final seven rows indicate:
 
 Input files:
 * short read sequence data in fastq format (can be gzipped)
-* IS query/queries of interest in fasta format
+* IS query/queries of interest in fasta/multifasta format
 * assemblies for each of your isolates, either in fasta or genbank format
 
 Basic usage:
@@ -152,7 +150,7 @@ Multiple read sets can be supplied one after the other, separated by spaces, aft
 Multiple IS queries can also be supplied, seperated by spaces, after --queries. ISMapper will run queries sequentially in the same output folder.
 
 `
-ismap --reads [isolateA_1.fastq.gz] [isolateA_2.fastq.gz] [isolateB_1.fastq.gz] [isolateB_2.fastq.gz] --queries IS_query1.fasta IS_query2.fasta --assemblies [isolateA_assembly.fasta] [isolateB_assembly.fasta] --assemblyid _assembly --extension .fasta --type fasta --runtype improvement --output prefix_out
+ismap --reads [isolateA_1.fastq.gz] [isolateA_2.fastq.gz] [isolateB_1.fastq.gz] [isolateB_2.fastq.gz] --queries allQueries.fasta --assemblies [isolateA_assembly.fasta] [isolateB_assembly.fasta] --assemblyid _assembly --extension .fasta --type fasta --runtype improvement --output prefix_out
 `
 
 Once ISMapper has finished running, multiple output files will be generated, the most interesting of which will be the *_table.txt file. The table file contains the names of contigs that have either a left or a right end in them.
@@ -208,7 +206,7 @@ eg:
 If using the slurm_ismap.py script, `--path` can be supplied inside `--other_args`, but slurm_ismap.py also requires the path to the actual ismap.py script as well.
 
 eg:  
-`slurm_ismap.py --reads x_2.fastq.gz x_2.fastq.gz --queries is_query.fasta --script /path/to/IS_mapper/scripts/ismap.py --other_args "--path /path/to/IS_mapper/scripts"`  
+`slurm_ismap.py --reads x_1.fastq.gz x_2.fastq.gz --queries is_query.fasta --script /path/to/IS_mapper/scripts/ismap.py --other_args "--path /path/to/IS_mapper/scripts --typingRef path/to/reference/genome.gbk"`  
 
 ## Running multiple jobs on a SLURM queing system
 

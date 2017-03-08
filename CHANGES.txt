@@ -1,3 +1,12 @@
+v0.1.5 Wed 8 March 2017
+    * ISMapper now works with all current versions of SAMtools (Issue #11, thanks to Anders Gonçalves da Silva for the fix)
+    * Deletion of intermediate files when no hits are found (Issue #10, thanks to Ryan Wick for this fix)
+    * Multiple query sequences must now be supplied using a multi-entry fasta file (Issue #9)
+    * ISMapper now catches segmentation fault errors thrown by Bedtools when one or more bedfiles are empty (Issue #16, Issue #19)
+    * Documentation now provides link to published paper (Issue #22)
+    * SLURM script no longer prints that it was unable to run the following samples if there are no samples that were unable to run
+    * compiled_table.py now does a final check for any overlapping positions, and merges them if necessary
+    * --output flag no longer required, if not supplied the prefix will default to the current date and time (format: ddmmyy_hourMinute)
 v0.1.4, Wed 7 Oct 2015
     * can now supply output directory using --directory command
     * can now ask BWA to use multiple threads using --t command
@@ -8,11 +17,11 @@ v0.1.4, Wed 7 Oct 2015
     * possible related IS call must now meet 50% ID and 50% coverage threshold
       otherwise the hit is discarded
 v0.1.3, Mon 10 Aug 2015
-    * fixed soft clipped read selection (Special thanks to Katie Cox for helping with this one)
+    * fixed soft clipped read selection (Thanks to Katie Cox)
     * bam files now deleted by default, can be kept using the --bam flag
     * IGV compatible bed files now created if --igv flag used (again thanks to Katie Cox)
 v0.1.2, Mon 18 May 2015
     * removed functional prediction as currently buggy
     * corrected some intermediate file names
 v0.1.1, Fri 24 April 2015, -- updated compiled_table to correctly collapse hits
-v0.1.0, Tues 14 Oct 2014, -- Inital release.
+v0.1.0, Tues 14 Oct 2014, -- Initial release.
