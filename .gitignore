@@ -19,8 +19,5 @@ ismap_bedtools.py
 ismap.txt
 slurm_ismap.txt
 compiledTables.pyc
-<<<<<<< HEAD
 *.DS_Store
-=======
 *.json
->>>>>>> andersgs-samtools
