@@ -169,7 +169,7 @@ def main():
         cmd += '\nmodule load BEDTools/2.25.0-iccifort-2015.2.164-GCC-4.9.2'
         cmd += '\nmodule load SAMblaster/0.1.22-iccifort-2015.2.164-GCC-4.9.2'
 
-        cmd += '\npython ' + args.script
+        cmd += '\n ' + args.script
         cmd += ' --queries ' + args.queries
         if args.runtype == 'typing':
             cmd += ' --runtype typing --reads ' + fileSets[sample][0] + ' ' + fileSets[sample][1]

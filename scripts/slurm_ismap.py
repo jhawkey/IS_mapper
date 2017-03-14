@@ -167,7 +167,7 @@ def main():
         cmd += '\nmodule load bedtools-intel/2.20.1'
         cmd += '\nmodule load samblaster-gcc/0.1.21'
 
-        cmd += '\npython ' + args.script
+        cmd += '\n ' + args.script
         cmd += ' --queries ' + args.queries
         if args.runtype == 'typing':
             cmd += ' --runtype typing --reads ' + fileSets[sample][0] + ' ' + fileSets[sample][1]
