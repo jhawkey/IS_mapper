@@ -36,6 +36,24 @@ ismap --version
 compiled_table.py -h
 ```
 
+Alternatively, you can install ISMapper directly from github with pip.
+
+```
+pip install git+https://github.com/jhawkey/IS_mapper
+```
+
+To install locally:
+
+```
+pip install --user git+https://github.com/jhawkey/IS_mapper
+```
+
+To install a specific release:
+
+```
+pip install git+https://github.com/jhawkey/IS_mapper@my_tag
+```
+
 ### Running a test case
 
 To check that all dependencies are working correctly and outputs are as expected:
