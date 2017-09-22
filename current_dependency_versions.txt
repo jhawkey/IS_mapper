@@ -1,0 +1,9 @@
+For current testing, versions:
+
+Python3: 3.6.1
+Python2: 2.7.13
+BioPython: 
+BWA: 0.7.16a
+SAMtools: 1.4.1
+BLAST+: 2.6.0
+BEDtools: 2.26.0
