@@ -2,14 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f362a202-b55d-4e14-bd4f-3ac14f1bafb9" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/scripts/ismap_v2_unittests.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/scripts/mapping_to_query.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/scripts/mapping_to_ref.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/scripts/run_commands.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/current_dependency_versions.txt" afterPath="$PROJECT_DIR$/current_dependency_versions.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scripts/create_typing_out.py" afterPath="$PROJECT_DIR$/scripts/create_typing_out.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scripts/ismap_v2.py" afterPath="$PROJECT_DIR$/scripts/ismap_v2.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scripts/read_grouping.py" afterPath="$PROJECT_DIR$/scripts/read_grouping.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scripts/ismap_v2_unittests.py" afterPath="$PROJECT_DIR$/scripts/ismap_v2_unittests.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scripts/mapping_to_ref.py" afterPath="$PROJECT_DIR$/scripts/mapping_to_ref.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -23,8 +18,8 @@
       <file leaf-file-name="ismap.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/scripts/ismap.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="864">
-              <caret line="746" column="68" lean-forward="true" selection-start-line="746" selection-start-column="68" selection-end-line="746" selection-end-column="68" />
+            <state relative-caret-position="454">
+              <caret line="331" column="0" lean-forward="false" selection-start-line="331" selection-start-column="0" selection-end-line="343" selection-end-column="18" />
               <folding>
                 <element signature="e#1249#3043#0" expanded="false" />
                 <element signature="e#8339#9083#0" expanded="false" />
@@ -34,7 +29,6 @@
                 <element signature="e#11823#12326#0" expanded="false" />
                 <element signature="e#12358#16576#0" expanded="false" />
                 <element signature="e#16614#16807#0" expanded="false" />
-                <element signature="e#16865#17219#0" expanded="false" />
                 <element signature="e#17258#17656#0" expanded="false" />
                 <element signature="e#17696#17849#0" expanded="false" />
                 <element signature="e#17899#19613#0" expanded="false" />
@@ -49,7 +43,7 @@
       <file leaf-file-name="ismap_v2.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/scripts/ismap_v2.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="803">
+            <state relative-caret-position="649">
               <caret line="146" column="21" lean-forward="true" selection-start-line="146" selection-start-column="21" selection-end-line="146" selection-end-column="57" />
               <folding>
                 <element signature="e#23#37#0" expanded="true" />
@@ -74,8 +68,8 @@
       <file leaf-file-name="mapping_to_query.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/scripts/mapping_to_query.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="705">
-              <caret line="187" column="0" lean-forward="true" selection-start-line="187" selection-start-column="0" selection-end-line="187" selection-end-column="0" />
+            <state relative-caret-position="315">
+              <caret line="161" column="53" lean-forward="false" selection-start-line="161" selection-start-column="53" selection-end-line="161" selection-end-column="53" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
                 <element signature="e#274#2068#0" expanded="false" />
@@ -84,28 +78,30 @@
                 <element signature="e#2590#2983#0" expanded="false" />
                 <element signature="e#3051#4473#0" expanded="false" />
                 <element signature="e#4568#7266#0" expanded="false" />
+                <element signature="e#7327#10125#0" expanded="false" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="mapping_to_ref.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="mapping_to_ref.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/scripts/mapping_to_ref.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="336">
-              <caret line="62" column="18" lean-forward="false" selection-start-line="62" selection-start-column="4" selection-end-line="62" selection-end-column="18" />
+            <state relative-caret-position="285">
+              <caret line="70" column="7" lean-forward="true" selection-start-line="70" selection-start-column="7" selection-end-line="70" selection-end-column="7" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
+                <element signature="e#394#3363#0" expanded="false" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ismap_v2_unittests.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="ismap_v2_unittests.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/scripts/ismap_v2_unittests.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="924">
-              <caret line="92" column="0" lean-forward="true" selection-start-line="92" selection-start-column="0" selection-end-line="92" selection-end-column="0" />
+            <state relative-caret-position="731">
+              <caret line="122" column="0" lean-forward="true" selection-start-line="122" selection-start-column="0" selection-end-line="122" selection-end-column="0" />
               <folding>
                 <element signature="e#0#15#0" expanded="true" />
               </folding>
@@ -153,9 +149,9 @@
         <option value="$PROJECT_DIR$/scripts/ismap.py" />
         <option value="$PROJECT_DIR$/scripts/run_commands.py" />
         <option value="$PROJECT_DIR$/scripts/mapping_to_query.py" />
-        <option value="$PROJECT_DIR$/scripts/mapping_to_ref.py" />
         <option value="$PROJECT_DIR$/scripts/ismap_v2.py" />
         <option value="$PROJECT_DIR$/scripts/ismap_v2_unittests.py" />
+        <option value="$PROJECT_DIR$/scripts/mapping_to_ref.py" />
       </list>
     </option>
   </component>
@@ -237,7 +233,63 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.ismap_v2">
+  <component name="RunManager" selected="Python tests.Unittests for ismap_v2_unittests.TestCreateBedFiles.test_create_bed_files_01">
+    <configuration name="Unittests for ismap_v2_unittests.TestCreateBedFiles" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/scripts" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="IS_mapper" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;ismap_v2_unittests.TestCreateBedFiles&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+    </configuration>
+    <configuration name="Unittests for ismap_v2_unittests.TestCreateBedFiles.test_create_bed_files_01" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/scripts" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="IS_mapper" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;ismap_v2_unittests.TestCreateBedFiles.test_create_bed_files_01&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+    </configuration>
+    <configuration name="Unittests for ismap_v2_unittests.TestRefMapping" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/scripts" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="IS_mapper" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;ismap_v2_unittests.TestRefMapping&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+    </configuration>
+    <configuration name="Unittests for ismap_v2_unittests.TestRefMapping.test_map_to_ref_seq" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/scripts" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="IS_mapper" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;ismap_v2_unittests.TestRefMapping.test_map_to_ref_seq&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+    </configuration>
     <configuration name="Unittests in ismap_v2_unittests.py" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -253,50 +305,20 @@
       <option name="_new_target" value="&quot;$PROJECT_DIR$/scripts/ismap_v2_unittests.py&quot;" />
       <option name="_new_targetType" value="&quot;PATH&quot;" />
     </configuration>
-    <configuration name="ismap_v2" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/scripts" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="IS_mapper" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/ismap_v2.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-    </configuration>
-    <configuration name="read_grouping" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/scripts" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="IS_mapper" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/read_grouping.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-    </configuration>
-    <list size="3">
-      <item index="0" class="java.lang.String" itemvalue="Python.read_grouping" />
-      <item index="1" class="java.lang.String" itemvalue="Python.ismap_v2" />
-      <item index="2" class="java.lang.String" itemvalue="Python tests.Unittests in ismap_v2_unittests.py" />
+    <list size="5">
+      <item index="0" class="java.lang.String" itemvalue="Python tests.Unittests in ismap_v2_unittests.py" />
+      <item index="1" class="java.lang.String" itemvalue="Python tests.Unittests for ismap_v2_unittests.TestRefMapping.test_map_to_ref_seq" />
+      <item index="2" class="java.lang.String" itemvalue="Python tests.Unittests for ismap_v2_unittests.TestRefMapping" />
+      <item index="3" class="java.lang.String" itemvalue="Python tests.Unittests for ismap_v2_unittests.TestCreateBedFiles.test_create_bed_files_01" />
+      <item index="4" class="java.lang.String" itemvalue="Python tests.Unittests for ismap_v2_unittests.TestCreateBedFiles" />
     </list>
     <recent_temporary>
-      <list size="3">
-        <item index="0" class="java.lang.String" itemvalue="Python.ismap_v2" />
-        <item index="1" class="java.lang.String" itemvalue="Python tests.Unittests in ismap_v2_unittests.py" />
-        <item index="2" class="java.lang.String" itemvalue="Python.read_grouping" />
+      <list size="5">
+        <item index="0" class="java.lang.String" itemvalue="Python tests.Unittests for ismap_v2_unittests.TestCreateBedFiles.test_create_bed_files_01" />
+        <item index="1" class="java.lang.String" itemvalue="Python tests.Unittests for ismap_v2_unittests.TestCreateBedFiles" />
+        <item index="2" class="java.lang.String" itemvalue="Python tests.Unittests for ismap_v2_unittests.TestRefMapping" />
+        <item index="3" class="java.lang.String" itemvalue="Python tests.Unittests for ismap_v2_unittests.TestRefMapping.test_map_to_ref_seq" />
+        <item index="4" class="java.lang.String" itemvalue="Python tests.Unittests in ismap_v2_unittests.py" />
       </list>
     </recent_temporary>
   </component>
@@ -314,38 +336,46 @@
       <option name="presentableId" value="Default" />
       <updated>1506037850600</updated>
     </task>
+    <task id="LOCAL-00001" summary="checked that map_to_ref is working">
+      <created>1517803921288</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1517803921288</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="Unittests_in_ismap_v2_unittests_py - 2017.10.09 at 16h 23m 18s.xml">
-      <configuration name="Unittests in ismap_v2_unittests.py" configurationId="tests" />
+    <history-entry file="Unittests_for_ismap_v2_unittests_TestCreateBedFiles - 2018.02.05 at 15h 16m 44s.xml">
+      <configuration name="Unittests for ismap_v2_unittests.TestCreateBedFiles" configurationId="tests" />
     </history-entry>
-    <history-entry file="Unittests_in_ismap_v2_unittests_py - 2017.10.09 at 16h 27m 41s.xml">
-      <configuration name="Unittests in ismap_v2_unittests.py" configurationId="tests" />
+    <history-entry file="Unittests_for_ismap_v2_unittests_TestCreateBedFiles_test_create_bed_files_01 - 2018.02.05 at 15h 16m 30s.xml">
+      <configuration name="Unittests for ismap_v2_unittests.TestCreateBedFiles.test_create_bed_files_01" configurationId="tests" />
     </history-entry>
-    <history-entry file="Unittests_in_ismap_v2_unittests_py - 2017.10.09 at 16h 30m 40s.xml">
-      <configuration name="Unittests in ismap_v2_unittests.py" configurationId="tests" />
+    <history-entry file="Unittests_for_ismap_v2_unittests_TestCreateBedFiles_test_create_bed_files_01 - 2018.02.05 at 15h 17m 11s.xml">
+      <configuration name="Unittests for ismap_v2_unittests.TestCreateBedFiles.test_create_bed_files_01" configurationId="tests" />
     </history-entry>
-    <history-entry file="Unittests_in_ismap_v2_unittests_py - 2017.10.09 at 16h 43m 28s.xml">
-      <configuration name="Unittests in ismap_v2_unittests.py" configurationId="tests" />
+    <history-entry file="Unittests_for_ismap_v2_unittests_TestCreateBedFiles_test_create_bed_files_01 - 2018.02.05 at 15h 17m 31s.xml">
+      <configuration name="Unittests for ismap_v2_unittests.TestCreateBedFiles.test_create_bed_files_01" configurationId="tests" />
     </history-entry>
-    <history-entry file="Unittests_in_ismap_v2_unittests_py - 2017.10.12 at 15h 39m 38s.xml">
-      <configuration name="Unittests in ismap_v2_unittests.py" configurationId="tests" />
+    <history-entry file="Unittests_for_ismap_v2_unittests_TestCreateBedFiles_test_create_bed_files_01 - 2018.02.05 at 15h 18m 18s.xml">
+      <configuration name="Unittests for ismap_v2_unittests.TestCreateBedFiles.test_create_bed_files_01" configurationId="tests" />
     </history-entry>
-    <history-entry file="Unittests_in_ismap_v2_unittests_py - 2017.10.12 at 15h 39m 53s.xml">
-      <configuration name="Unittests in ismap_v2_unittests.py" configurationId="tests" />
+    <history-entry file="Unittests_for_ismap_v2_unittests_TestCreateBedFiles_test_create_bed_files_01 - 2018.02.05 at 15h 18m 39s.xml">
+      <configuration name="Unittests for ismap_v2_unittests.TestCreateBedFiles.test_create_bed_files_01" configurationId="tests" />
     </history-entry>
-    <history-entry file="Unittests_in_ismap_v2_unittests_py - 2017.10.12 at 15h 43m 23s.xml">
-      <configuration name="Unittests in ismap_v2_unittests.py" configurationId="tests" />
+    <history-entry file="Unittests_for_ismap_v2_unittests_TestCreateBedFiles_test_create_bed_files_01 - 2018.02.05 at 15h 19m 08s.xml">
+      <configuration name="Unittests for ismap_v2_unittests.TestCreateBedFiles.test_create_bed_files_01" configurationId="tests" />
     </history-entry>
-    <history-entry file="Unittests_in_ismap_v2_unittests_py - 2017.10.12 at 15h 47m 46s.xml">
-      <configuration name="Unittests in ismap_v2_unittests.py" configurationId="tests" />
+    <history-entry file="Unittests_for_ismap_v2_unittests_TestRefMapping - 2018.02.05 at 15h 09m 14s.xml">
+      <configuration name="Unittests for ismap_v2_unittests.TestRefMapping" configurationId="tests" />
     </history-entry>
-    <history-entry file="Unittests_in_ismap_v2_unittests_py - 2017.10.12 at 15h 51m 40s.xml">
-      <configuration name="Unittests in ismap_v2_unittests.py" configurationId="tests" />
+    <history-entry file="Unittests_for_ismap_v2_unittests_TestRefMapping - 2018.02.05 at 15h 10m 20s.xml">
+      <configuration name="Unittests for ismap_v2_unittests.TestRefMapping" configurationId="tests" />
     </history-entry>
-    <history-entry file="Unittests_in_ismap_v2_unittests_py - 2018.01.09 at 10h 19m 03s.xml">
-      <configuration name="Unittests in ismap_v2_unittests.py" configurationId="tests" />
+    <history-entry file="Unittests_for_ismap_v2_unittests_TestRefMapping - 2018.02.05 at 15h 11m 23s.xml">
+      <configuration name="Unittests for ismap_v2_unittests.TestRefMapping" configurationId="tests" />
     </history-entry>
   </component>
   <component name="ToolWindowManager">
@@ -357,11 +387,11 @@
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.332342" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.332342" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.16654275" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.16654275" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -374,6 +404,10 @@
   </component>
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="checked that map_to_ref is working" />
+    <option name="LAST_COMMIT_MESSAGE" value="checked that map_to_ref is working" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -407,7 +441,6 @@
             <element signature="e#11823#12326#0" expanded="false" />
             <element signature="e#12358#16576#0" expanded="false" />
             <element signature="e#16614#16807#0" expanded="false" />
-            <element signature="e#16865#17219#0" expanded="false" />
             <element signature="e#17258#17656#0" expanded="false" />
             <element signature="e#17696#17849#0" expanded="false" />
             <element signature="e#17899#19613#0" expanded="false" />
@@ -464,7 +497,6 @@
             <element signature="e#11823#12326#0" expanded="false" />
             <element signature="e#12358#16576#0" expanded="false" />
             <element signature="e#16614#16807#0" expanded="false" />
-            <element signature="e#16865#17219#0" expanded="false" />
             <element signature="e#17258#17656#0" expanded="false" />
             <element signature="e#17696#17849#0" expanded="false" />
             <element signature="e#17899#19613#0" expanded="false" />
@@ -521,7 +553,6 @@
             <element signature="e#11823#12326#0" expanded="false" />
             <element signature="e#12358#16576#0" expanded="false" />
             <element signature="e#16614#16807#0" expanded="false" />
-            <element signature="e#16865#17219#0" expanded="false" />
             <element signature="e#17258#17656#0" expanded="false" />
             <element signature="e#17696#17849#0" expanded="false" />
             <element signature="e#17899#19613#0" expanded="false" />
@@ -578,7 +609,6 @@
             <element signature="e#11823#12326#0" expanded="false" />
             <element signature="e#12358#16576#0" expanded="false" />
             <element signature="e#16614#16807#0" expanded="false" />
-            <element signature="e#16865#17219#0" expanded="false" />
             <element signature="e#17258#17656#0" expanded="false" />
             <element signature="e#17696#17849#0" expanded="false" />
             <element signature="e#17899#19613#0" expanded="false" />
@@ -635,7 +665,6 @@
             <element signature="e#11823#12326#0" expanded="false" />
             <element signature="e#12358#16576#0" expanded="false" />
             <element signature="e#16614#16807#0" expanded="false" />
-            <element signature="e#16865#17219#0" expanded="false" />
             <element signature="e#17258#17656#0" expanded="false" />
             <element signature="e#17696#17849#0" expanded="false" />
             <element signature="e#17899#19613#0" expanded="false" />
@@ -692,7 +721,6 @@
             <element signature="e#11823#12326#0" expanded="false" />
             <element signature="e#12358#16576#0" expanded="false" />
             <element signature="e#16614#16807#0" expanded="false" />
-            <element signature="e#16865#17219#0" expanded="false" />
             <element signature="e#17258#17656#0" expanded="false" />
             <element signature="e#17696#17849#0" expanded="false" />
             <element signature="e#17899#19613#0" expanded="false" />
@@ -774,22 +802,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/mapping_to_query.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="705">
-          <caret line="187" column="0" lean-forward="true" selection-start-line="187" selection-start-column="0" selection-end-line="187" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-            <element signature="e#274#2068#0" expanded="false" />
-            <element signature="e#302#1239#0" expanded="false" />
-            <element signature="e#2097#2528#0" expanded="false" />
-            <element signature="e#2590#2983#0" expanded="false" />
-            <element signature="e#3051#4473#0" expanded="false" />
-            <element signature="e#4568#7266#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/run_commands.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="435">
@@ -816,10 +828,38 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/ismap_v2.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="649">
+          <caret line="146" column="21" lean-forward="true" selection-start-line="146" selection-start-column="21" selection-end-line="146" selection-end-column="57" />
+          <folding>
+            <element signature="e#23#37#0" expanded="true" />
+            <element signature="e#654#5847#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/mapping_to_query.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="315">
+          <caret line="161" column="53" lean-forward="false" selection-start-line="161" selection-start-column="53" selection-end-line="161" selection-end-column="53" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+            <element signature="e#274#2068#0" expanded="false" />
+            <element signature="e#302#1239#0" expanded="false" />
+            <element signature="e#2097#2528#0" expanded="false" />
+            <element signature="e#2590#2983#0" expanded="false" />
+            <element signature="e#3051#4473#0" expanded="false" />
+            <element signature="e#4568#7266#0" expanded="false" />
+            <element signature="e#7327#10125#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/ismap.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="864">
-          <caret line="746" column="68" lean-forward="true" selection-start-line="746" selection-start-column="68" selection-end-line="746" selection-end-column="68" />
+        <state relative-caret-position="454">
+          <caret line="331" column="0" lean-forward="false" selection-start-line="331" selection-start-column="0" selection-end-line="343" selection-end-column="18" />
           <folding>
             <element signature="e#1249#3043#0" expanded="false" />
             <element signature="e#8339#9083#0" expanded="false" />
@@ -829,7 +869,6 @@
             <element signature="e#11823#12326#0" expanded="false" />
             <element signature="e#12358#16576#0" expanded="false" />
             <element signature="e#16614#16807#0" expanded="false" />
-            <element signature="e#16865#17219#0" expanded="false" />
             <element signature="e#17258#17656#0" expanded="false" />
             <element signature="e#17696#17849#0" expanded="false" />
             <element signature="e#17899#19613#0" expanded="false" />
@@ -840,33 +879,23 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/mapping_to_ref.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="336">
-          <caret line="62" column="18" lean-forward="false" selection-start-line="62" selection-start-column="4" selection-end-line="62" selection-end-column="18" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/ismap_v2.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="803">
-          <caret line="146" column="21" lean-forward="true" selection-start-line="146" selection-start-column="21" selection-end-line="146" selection-end-column="57" />
-          <folding>
-            <element signature="e#23#37#0" expanded="true" />
-            <element signature="e#654#5847#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/ismap_v2_unittests.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="924">
-          <caret line="92" column="0" lean-forward="true" selection-start-line="92" selection-start-column="0" selection-end-line="92" selection-end-column="0" />
+        <state relative-caret-position="731">
+          <caret line="122" column="0" lean-forward="true" selection-start-line="122" selection-start-column="0" selection-end-line="122" selection-end-column="0" />
           <folding>
             <element signature="e#0#15#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/mapping_to_ref.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="285">
+          <caret line="70" column="7" lean-forward="true" selection-start-line="70" selection-start-column="7" selection-end-line="70" selection-end-column="7" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+            <element signature="e#394#3363#0" expanded="false" />
           </folding>
         </state>
       </provider>

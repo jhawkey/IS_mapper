@@ -93,10 +93,32 @@ class TestRefMapping(unittest.TestCase):
          self.out_folder = '/Users/jane/Desktop/ismap_v2/9262_1#29/ISAba1/'
 
 
-    def test_map_to_ref_seq(self):
+    def test_map_to_ref_seq_01(self):
 
         test_left_sorted, test_right_sorted = mapping_to_ref.map_to_ref_seq(self.ref, self.sample, self.left_flanking,
                                                                             self.right_flanking, self.tmp_folder, self.out_folder, '1')
 
         self.assertTrue(os.path.isfile(test_left_sorted))
         self.assertTrue(os.path.isfile(test_right_sorted))
+
+class TestCreateBedFiles(unittest.TestCase):
+
+    def setUp(self):
+        pass
+
+        self.ref_name = 'CP010781.1'
+        self.sample = '9262_1#29'
+        self.tmp_folder = '/Users/jane/Desktop/ismap_v2/9262_1#29/ISAba1/tmp'
+        self.out_folder = '/Users/jane/Desktop/ismap_v2/9262_1#29/ISAba1/'
+
+        output_filenames = mapping_to_ref.set_ref_output_filenames(self.sample, self.ref_name, self.tmp_folder, self.out_folder)
+
+        self.left_sorted = output_filenames['left_sorted']
+        self.right_sorted = output_filenames['right_sorted']
+        self.filenames = output_filenames
+
+    def test_create_bed_files_01(self):
+
+        test_intersect_file = mapping_to_ref.create_bed_files(self.left_sorted, self.right_sorted, self.filenames, 6, '100')
+
+        self.assertTrue(os.path.isfile(test_intersect_file))

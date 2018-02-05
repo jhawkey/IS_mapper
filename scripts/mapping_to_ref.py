@@ -63,6 +63,20 @@ def set_ref_output_filenames(prefix, ref_name, tmp_folder, out_dir):
     '''
 
 
+def filter_on_depth(cov_file, out_bed, cov_cutoff):
+    '''
+    Takes a bed coverage file and removes lines that
+    do not meet the coverage cutoff.
+    Saves output to a new file.
+    '''
+
+    output = open(out_bed, 'w')
+    with open(cov_file) as depth_info:
+        for line in depth_info:
+            if int(line.strip().split('\t')[3]) >= cov_cutoff:
+                output.write(line)
+    output.close()
+
 def map_to_ref_seq(ref_seq, sample_name, left_flanking, right_flanking, tmp, out, bwa_threads):
 
     filenames = set_ref_output_filenames(sample_name, ref_seq.id, tmp, out)
@@ -101,8 +115,8 @@ def create_bed_files(left_sorted, right_sorted, filenames, cutoff, merging):
     # Create BED files with coverage information
     run_command(['bedtools', 'genomecov', '-ibam', left_sorted + '.bam', '-bg', '>', filenames['left_cov']], shell=True)
     run_command(['bedtools', 'genomecov', '-ibam', right_sorted + '.bam', '-bg', '>', filenames['right_cov']], shell=True)
-    run_command(['bedtools', 'merge', '-d', args.merging, '-i', filenames['left_cov'], '>', filenames['left_merged']], shell=True)
-    run_command(['bedtools', 'merge', '-d', args.merging, '-i', filenames['right_cov'], '>', filenames['right_merged']], shell=True)
+    run_command(['bedtools', 'merge', '-d', merging, '-i', filenames['left_cov'], '>', filenames['left_merged']], shell=True)
+    run_command(['bedtools', 'merge', '-d', merging, '-i', filenames['right_cov'], '>', filenames['right_merged']], shell=True)
     # Filter coveraged BED files on coverage cutoff (so only take
     # high coverage regions for further analysis)
     filter_on_depth(filenames['left_cov'], filenames['left_final_cov'], cutoff)
