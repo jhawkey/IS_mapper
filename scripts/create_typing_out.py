@@ -52,7 +52,7 @@ def insertion_length(insertion):
 
 def doBlast(blast_input, blast_output, database):
     '''
-    Perform a BLAST using the NCBI command line tools 
+    Perform a BLAST using the NCBI command line tools
     in BioPython.
     '''
     blastn_cline = NcbiblastnCommandline(query=blast_input, db=database, outfmt="'6 qseqid qlen sacc pident length slen sstart send evalue bitscore qcovs'", out=blast_output)
@@ -75,14 +75,14 @@ def check_seq_between(gb, insertion, start, end, name, temp):
     doBlast(temp + name + '.fasta', temp + name + '_out.txt', insertion)
     # Only want the top hit, so set count variable to 0
     first_result = 0
-    # Open the BLAST output file 
+    # Open the BLAST output file
     with open(temp + name + '_out.txt') as summary:
         for line in summary:
             # Get coverage and % ID for top hit
             if first_result == 0:
                 info = line.strip().split('\t')
                 coverage = float(info[4]) / float(info[5]) * 100
-                hit = [info[3], coverage]
+                hit = [float(info[3]), coverage]
                 first_result += 1
             return hit
     # If there is not hit, just return an empty list
@@ -126,7 +126,7 @@ def novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, ref, cds, trna, rrna, gap, orie
     '''
     Get flanking gene information for novel hits.
     '''
-    
+
     # Create features for genbank
     note = 'Novel hit'
     if unpaired == True:
@@ -137,7 +137,7 @@ def novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, ref, cds, trna, rrna, gap, orie
     # Add features to genbank
     genbank.features.append(left_feature)
     genbank.features.append(right_feature)
-    
+
     # Get the genes flanking the left and right ends
     gene_left, gene_right = get_flanking_genes(features, feature_list, x, y, cds, trna, rrna, len(genbank.seq))
     #print gene_left
@@ -148,7 +148,7 @@ def novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, ref, cds, trna, rrna, gap, orie
     else:
         func_pred = ''
     func_pred = ''
-    
+
     # This is a confident hit
     if unpaired == False:
         call = 'Novel'
@@ -158,7 +158,7 @@ def novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, ref, cds, trna, rrna, gap, orie
     # This hit is imprecise, as gap size is larger than expected
     if star == True:
         call = 'Novel*'
-    
+
     # Store all information for final table output
     results['region_' + str(region)] = [orient, str(x), str(y), gap, call, '', '', gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1], func_pred]
 
@@ -184,7 +184,7 @@ def add_known(x_L, x_R, y_L, y_R, gap, genbank, ref, seq, temp, cds, trna, rrna,
     seq_results = check_seq_between(ref, seq, start, end, 'region_' + str(region), temp)
     # This is a known site of coverage and %ID above 80
     if len(seq_results) != 0 and seq_results[0] >= 80 and seq_results[1] >= 80:
-        # Taking all four coordinates and finding min and max to avoid coordinates 
+        # Taking all four coordinates and finding min and max to avoid coordinates
         # that overlap the actual IS (don't want to return those in gene calls)
         # Mark as a known call to improve accuracy of gene calling
         gene_left, gene_right = get_flanking_genes(features, feature_list, start, end, cds, trna, rrna, len(genbank.seq))
@@ -207,7 +207,7 @@ def add_known(x_L, x_R, y_L, y_R, gap, genbank, ref, seq, temp, cds, trna, rrna,
         else:
             call = 'Known'
         results['region_' + str(region)] = [orient, str(start), str(end), gap, call, str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1], func_pred]
-    elif len(seq_results) != 0 and seq_results[0] >=50 and seq_results[1] >= 50:   
+    elif len(seq_results) != 0 and seq_results[0] >=50 and seq_results[1] >= 50:
         # Calling it a possible related IS if there is 50% nucleotide ID and 50% coverage
         gene_left, gene_right = get_flanking_genes(features, feature_list, start, end, cds, trna, rrna, len(genbank.seq))
         if 'unpaired' in file_loc:
@@ -218,7 +218,7 @@ def add_known(x_L, x_R, y_L, y_R, gap, genbank, ref, seq, temp, cds, trna, rrna,
         results['region_' + str(region)] = [orient, str(start), str(end), gap, call, str(seq_results[0]), str('%.2f' % seq_results[1]), gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1], func_pred]
     else:
     # otherwise this a suprious result
-        removed_results['region_' + str(region)] = line.strip() + '\t' + file_loc +'\n'          
+        removed_results['region_' + str(region)] = line.strip() + '\t' + file_loc +'\n'
 
 def gbk_to_fasta(genbank, fasta):
     '''
@@ -233,14 +233,14 @@ def main():
     args = parse_args()
 
     # Setup variables: results - for final table, removed_results - table showing
-    # results which didn't pass cutoff tests, 
+    # results which didn't pass cutoff tests,
     # region - , lines - , header - header for final table
     results = {}
     removed_results = {}
     region = 1
     lines = 0
     header = ["region", "orientation", "x", "y", "gap", "call", "Percent_ID", "Percent_Cov", "left_gene", "left_strand", "left_distance", "right_gene", "right_strand", "right_distance", "functional_prediction"]
-    
+
     # If both intersect and bed files are empty, there are no hits
     if os.stat(args.intersect)[6] == 0 and os.stat(args.closest)[6] == 0:
         output = open(args.output + '_table.txt', 'w')
@@ -262,7 +262,7 @@ def main():
             feature_count_list += 1
         else:
             feature_count_list += 1
-    
+
     feature_list = sorted(feature_list, key=itemgetter(0))
     # Initialise feature count
     feature_count = 0
@@ -277,10 +277,10 @@ def main():
             for line in bed_merged:
                 info = line.strip().split('\t')
                 intersect_left.append(info[0:3])
-                intersect_right.append(info[3:6])  
-                # Set up coordinates for checking: L is the left end of the IS (5') 
+                intersect_right.append(info[3:6])
+                # Set up coordinates for checking: L is the left end of the IS (5')
                 # and R is the right end of the IS (3')
-                # Eg: x_L and y_L are the x and y coordinates of the bed block that 
+                # Eg: x_L and y_L are the x and y coordinates of the bed block that
                 # matches to the region which is flanking the left end or 5' of the IS
                 x_L = int(info[1])
                 y_L = int(info[2])
@@ -373,7 +373,7 @@ def main():
                     novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, genbank.features, feature_list, unpaired=False,star=True)
                     region +=1
                     feature_count += 2
-                # This is something else altogether - either the gap 
+                # This is something else altogether - either the gap
                 # is really large or something, place it in removed_results
                 else:
                     removed_results['region_' + str(region)] = line.strip() + '\tclosest.bed\n'
@@ -478,7 +478,7 @@ def main():
                             feature_count += 2
                         #a known hit
                         elif float(info[6]) / is_length >= args.min_range and float(info[6]) / is_length <= args.max_range:
-                            add_known(x_L, x_R, y_L, y_R, info[6], genbank, args.ref, args.seq, args.temp, args.cds, args.trna, args.rrna, region, feature_count, results, genbank.features, feature_list, removed_results, line, 'right_unpaired.bed')               
+                            add_known(x_L, x_R, y_L, y_R, info[6], genbank, args.ref, args.seq, args.temp, args.cds, args.trna, args.rrna, region, feature_count, results, genbank.features, feature_list, removed_results, line, 'right_unpaired.bed')
                             region += 1
                             feature_count += 2
                         #could possibly be a novel hit but the gap size is too large
@@ -510,7 +510,7 @@ def main():
     elif arr == 0:
         output.write('No hits found.')
     output.close()
-    
+
     # Write out the found hits to bed file for viewing in IGV
     with open(args.output + '_hits.bed', 'w') as outfile:
         if arr != 0:
@@ -539,6 +539,5 @@ def main():
     #return(lines, len(removed_results))
 
 if __name__ == "__main__":
-    
+
     main()
-    
