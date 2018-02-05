@@ -36,7 +36,8 @@ def set_ref_output_filenames(prefix, ref_name, tmp_folder, out_dir):
     output_filenames['intersect'] = os.path.join(out_dir, prefix + '_' + ref_name + '_intersect.bed')
     output_filenames['closest'] = os.path.join(out_dir, prefix + '_' + ref_name + '_intersect.bed')
 
-    return(output_filenames)
+    # set up table.txt
+    output_filenames['table'] = os.path.join(out_dir, prefix + '_' + ref_name + '_table.txt')
 
     '''
     # Set up file names for output files
@@ -61,6 +62,8 @@ def set_ref_output_filenames(prefix, ref_name, tmp_folder, out_dir):
     bed_intersect = current_dir + sample + '_' + typingName + '_' + query_name + '_intersect.bed'
     bed_closest = current_dir + sample + '_' + typingName + '_' + query_name + '_closest.bed'
     '''
+
+    return(output_filenames)
 
 
 def filter_on_depth(cov_file, out_bed, cov_cutoff):
@@ -125,8 +128,34 @@ def create_bed_files(left_sorted, right_sorted, filenames, cutoff, merging):
     run_command(['bedtools', 'merge', '-d', merging, '-i', filenames['left_final_cov'], '>', filenames['left_merged_bed']], shell=True)
     run_command(['bedtools', 'merge', '-d', merging, '-i', filenames['right_final_cov'], '>', filenames['right_merged_bed']], shell=True)
 
-    # Find intersects and closest points of regions
+    # Find intersects of regions
     run_command(['bedtools', 'intersect', '-a', filenames['left_merged_bed'], '-b', filenames['right_merged_bed'], '-wo', '>',
                  filenames['intersect']], shell=True)
-
-    return(filenames['intersect'])
+    
+    # Find regions that are close but not overlapping
+    try:
+        run_command(['closestBed', '-a', filenames['left_merged_bed'], '-b', filenames['right_merged_bed'], '-d', '>', filenames['closest']], shell=True)
+    except BedtoolsError:
+        with open(filenames['table'], 'w') as f:
+            header = ["region", "orientation", "x", "y", "gap", "call", "%ID", "%Cov", "left_gene", "left_strand",
+                      "left_distance", "right_gene", "right_strand", "right_distance", "functional_prediction"]
+            f.write('\t'.join(header) + '\nNo hits found')
+            #continue
+    
+    # Check all unpaired hits to see if there are any that should be paired up
+    # If any of these fail because there are no hits, just make empty unapired files to pass to create_typing_out
+    try:
+        run_command(['closestBed', '-a', filenames['left_merged_bed'], '-b', filenames['right_merged'], '-d', '>', filenames['left_unpaired']],
+                    shell=True)
+    except BedtoolsError:
+        if not os.path.isfile(filenames['left_unpaired']) or os.stat(filenames['left_unpaired'])[6] == 0:
+            open(filenames['left_unpaired'], 'w').close()
+    try:
+        run_command(['closestBed', '-a', filenames['left_merged'], '-b', filenames['right_merged_bed'], '-d', '>', filenames['right_unpaired']],
+                    shell=True)
+    except BedtoolsError:
+        if not os.path.isfile(filenames['right_unpaired']) or os.stat(filenames['right_unpaired'])[6] == 0:
+            open(filenames['right_unpaired'], 'w').close()
+            
+    # return the closest, intersect, left and right unpaired bed files to create a table with
+    return(filenames['intersect'], filenames['closest'], filenames['left_unpaired'], filenames['right_unpaired'])

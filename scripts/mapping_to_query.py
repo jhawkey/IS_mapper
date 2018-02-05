@@ -6,7 +6,7 @@ from Bio.Seq import Seq
 from Bio.Alphabet import generic_dna
 import logging
 from subprocess import Popen, PIPE
-from run_commands import run_command, BedtoolsError, CommandError, make_directories
+from run_commands import run_command, CommandError, make_directories
 
 class RunSamtools:
     def __init__(self):
@@ -109,10 +109,6 @@ def set_output_filenames(tmp_folder, prefix, query, out_dir):
     # set up final reads output
     output_filenames['left_final'] = os.path.join(out_dir, prefix + '_' + query + '_left_final.fastq')
     output_filenames['right_final'] = os.path.join(out_dir, prefix + '_' + query + '_right_final.fastq')
-    # set up table.txt
-    output_filenames['table'] = os.path.join(out_dir, prefix + '_' + query + '_table.txt')
-
-    print(output_filenames)
 
     return(output_filenames)
 

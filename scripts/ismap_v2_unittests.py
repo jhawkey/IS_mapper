@@ -119,6 +119,9 @@ class TestCreateBedFiles(unittest.TestCase):
 
     def test_create_bed_files_01(self):
 
-        test_intersect_file = mapping_to_ref.create_bed_files(self.left_sorted, self.right_sorted, self.filenames, 6, '100')
+        test_intersect_file, test_closest_file, test_left_up, test_right_up = mapping_to_ref.create_bed_files(self.left_sorted, self.right_sorted, self.filenames, 6, '100')
 
         self.assertTrue(os.path.isfile(test_intersect_file))
+        self.assertTrue(os.path.isfile(test_closest_file))
+        self.assertTrue(os.path.isfile(test_left_up))
+        self.assertTrue(os.path.isfile(test_right_up))

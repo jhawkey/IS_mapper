@@ -168,19 +168,6 @@ def main():
                     create_bed_files()
 
 
-                # Set up file names for output files
-
-
-                # if it's a genbank, convert to fasta
-                # can just be a fasta also - we just won't get gene annotations
-
-                # Map reads to reference, sort
-
-                # Create BED files with coverage information
-
-                # Filter coveraged BED files on coverage cutoff (so only take
-                # high coverage regions for further analysis)
-
                 # Find intersects and closest points of regions
 
                 # Create all possible closest bed files for checking unpaired hits
