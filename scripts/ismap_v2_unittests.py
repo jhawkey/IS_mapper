@@ -37,7 +37,7 @@ class TestGetSeqs(unittest.TestCase):
             ismap_v2.get_sequences([], 'fasta')
 
 
-
+'''
 class TestMapToISQuery(unittest.TestCase):
 
     def setUp(self):
@@ -68,7 +68,7 @@ class TestMapToISQuery(unittest.TestCase):
 
         #self.assertEqual(ismap_v2.map_to_is_query(self.sample, self.is_query, self.output), ['/Users/jane/Desktop/ismap_v2/test_results/9262_1#29/ISAba1/9262_1#29_ISAba1_left_final.fastq',
                                              #'/Users/jane/Desktop/ismap_v2/test_results/9262_1#29/ISAba1/9262_1#29_ISAba1_right_final.fastq'])
-
+'''
 class TestSetOutputFilenames(unittest.TestCase):
     def setUp(self):
         self.tmp_folder = '/Users/jane/Desktop/ismap_v2/test_results/9262_1#29/ISAba1/tmp'
@@ -84,14 +84,19 @@ class TestRefMapping(unittest.TestCase):
     def setUp(self):
 
          self.left_flanking = '/Users/jane/Desktop/ismap_v2/9262_1#29/ISAba1/9262_1#29_ISAba1_left_final.fastq'
-         self.right_flanking '/Users/jane/Desktop/ismap_v2/9262_1#29/ISAba1/9262_1#29_ISAba1_right_final.fastq'
+         self.right_flanking = '/Users/jane/Desktop/ismap_v2/9262_1#29/ISAba1/9262_1#29_ISAba1_right_final.fastq'
 
-         ref_seqs = ismap_v2.get_sequences('/Users/jane/Desktop/ismap_v2/refs/CP010781.gbk', 'genbank')
+         ref_seqs = ismap_v2.get_sequences(['/Users/jane/Desktop/ismap_v2/refs/CP010781.gbk'], 'genbank')
          self.ref = ref_seqs[0]
+         self.sample = '9262_1#29'
+         self.tmp_folder = '/Users/jane/Desktop/ismap_v2/9262_1#29/ISAba1/tmp'
+         self.out_folder = '/Users/jane/Desktop/ismap_v2/9262_1#29/ISAba1/'
+
 
     def test_map_to_ref_seq(self):
 
-        test_left_sorted, test_right_sorted = mapping_to_ref.map_to_ref_seq(ref, left_flanking, right_flanking, 1)
+        test_left_sorted, test_right_sorted = mapping_to_ref.map_to_ref_seq(self.ref, self.sample, self.left_flanking,
+                                                                            self.right_flanking, self.tmp_folder, self.out_folder, '1')
 
         self.assertTrue(os.path.isfile(test_left_sorted))
         self.assertTrue(os.path.isfile(test_right_sorted))

@@ -7,7 +7,7 @@ from Bio.Alphabet import generic_dna
 import logging
 from subprocess import Popen, PIPE
 from run_commands import run_command, BedtoolsError, CommandError, make_directories
-from mapping_to_query import create_tmp_file
+from mapping_to_query import create_tmp_file, bwa_index, RunSamtools
 
 def set_ref_output_filenames(prefix, ref_name, tmp_folder, out_dir):
 
@@ -17,7 +17,7 @@ def set_ref_output_filenames(prefix, ref_name, tmp_folder, out_dir):
     output_filenames['ref_tmp'] = os.path.join(tmp_folder, ref_name + '.fasta')
 
     extensions_tmp = {'sam': '.sam', 'bam': '.bam', 'cov': '_cov.bed', 'merged': '_cov_merged.sorted.bed'}
-    extensions_final = {'sorted': '.sorted', 'final_cov': '_finalcov.bed', 'merged_bed': '_merged.sorted.bed',
+    extensions_final = {'sorted': '.sorted.bam', 'final_cov': '_finalcov.bed', 'merged_bed': '_merged.sorted.bed',
                         'unpaired': '_unpaired.bed'}
 
     for type, ext in extensions_tmp.items():
@@ -32,6 +32,13 @@ def set_ref_output_filenames(prefix, ref_name, tmp_folder, out_dir):
         output_filenames['left_' + type] = left
         output_filenames['right_' + type] = right
 
+
+    output_filenames['intersect'] = os.path.join(out_dir, prefix + '_' + ref_name + '_intersect.bed')
+    output_filenames['closest'] = os.path.join(out_dir, prefix + '_' + ref_name + '_intersect.bed')
+
+    return(output_filenames)
+
+    '''
     # Set up file names for output files
     left_header = sample + '_left_' + typingName
     right_header = sample + '_right_' + typingName
@@ -51,24 +58,24 @@ def set_ref_output_filenames(prefix, ref_name, tmp_folder, out_dir):
     right_merged_bed = current_dir + right_header + '_' + query_name + '_merged.sorted.bed'
     bed_unpaired_left = current_dir + sample + '_' + typingName + '_' + query_name + '_left_unpaired.bed'
     bed_unpaired_right = current_dir + sample + '_' + typingName + '_' + query_name + '_right_unpaired.bed'
-
-    output_filenames['intersect'] = os.path.join(out_dir, prefix + '_' + ref_name + '_intersect.bed')
-    output_filenames['closest'] = os.path.join(out_dir, prefix + '_' + ref_name + '_intersect.bed')
     bed_intersect = current_dir + sample + '_' + typingName + '_' + query_name + '_intersect.bed'
     bed_closest = current_dir + sample + '_' + typingName + '_' + query_name + '_closest.bed'
+    '''
 
-    return(output_filenames)
 
+def map_to_ref_seq(ref_seq, sample_name, left_flanking, right_flanking, tmp, out, bwa_threads):
 
-def map_to_ref_seq(ref_seq, left_flanking, right_flanking, bwa_threads):
-
-    filenames = set_ref_output_filenames(sample.prefix, ref_name, tmp, out)
+    filenames = set_ref_output_filenames(sample_name, ref_seq.id, tmp, out)
+    print(filenames)
 
     # make temp file
     ref_seq_file = create_tmp_file(ref_seq, filenames['ref_tmp'], 'fasta')
 
     # index the ref seq
     bwa_index(ref_seq_file)
+
+    # set up samtools
+    samtools_runner = RunSamtools()
 
     # Map reads to reference, sort
     #TODO: add bwa -a option
