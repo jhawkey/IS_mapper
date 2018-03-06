@@ -17,6 +17,7 @@ import read_grouping
 from run_commands import run_command, CommandError, BedtoolsError, make_directories
 from mapping_to_query import map_to_is_query
 from mapping_to_ref import map_to_ref_seq, create_bed_files
+from create_outputs import create_typing_output
 
 
 def parse_args():
@@ -162,18 +163,12 @@ def main():
                 # we need to loop through each reference:
                 for ref_seq in reference_seqs:
                     # map our flanking reads to this
-                    map_to_ref_seq(ref_seq, left_flanking_reads, right_flanking_reads)
+                    filenames = map_to_ref_seq(ref_seq, left_flanking_reads, right_flanking_reads)
 
-                    # make the bed files
-                    create_bed_files()
+                    # make the bed files, find intersects and closest points of regions
+                    intersect, closest, left_up, right_up = create_bed_files(filenames, args.cutoff, args.merging)
 
-
-                # Find intersects and closest points of regions
-
-                # Create all possible closest bed files for checking unpaired hits
-                # If any of these fail, just make empty unapired files to pass to create_typing_out
-
-                # Create table and annotate genbank with hits
+                    # Create table and annotated genbank with hits
                 pass
 
 

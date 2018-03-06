@@ -12,6 +12,33 @@ import os, sys, re, collections, operator
 import numpy as np
 from collections import OrderedDict
 from compiled_table import get_flanking_genes, get_qualifiers
+import logging
+from compiled_table import Position
+
+class ISHit(Position):
+    def __init__(self):
+        # hit type will either be novel or known
+        self.hit_type = None
+        # will have an object with is the left and right feature
+        # for the genbank
+        self.left_feature = None
+        self.right_feature = None
+        # these are the genes closest to the IS hit
+        self.gene_left = None
+        self.gene_right = None
+        # interrupted only becomes true if gene left and right are the same
+        self.interrupted = False
+        # confidence level is either confident, imprecise (*) or unpaired (?)
+        self.confidnce_level = None
+
+
+        self.left_pos = None
+        self.right_pos = None
+
+        # will be either forward or reverse
+        self.orientation = None
+
+
 
 def parse_args():
 
@@ -228,9 +255,9 @@ def gbk_to_fasta(genbank, fasta):
     sequences = SeqIO.parse(genbank, "genbank")
     SeqIO.write(sequences, fasta, "fasta")
 
-def main():
+def create_typing_output(intersect_file, closest_file, left_unp, right_unp, final_table_file, ref_gbk, left_bedfile, right_bedfile):
 
-    args = parse_args()
+    #args = parse_args()
 
     # Setup variables: results - for final table, removed_results - table showing
     # results which didn't pass cutoff tests,
@@ -242,8 +269,8 @@ def main():
     header = ["region", "orientation", "x", "y", "gap", "call", "Percent_ID", "Percent_Cov", "left_gene", "left_strand", "left_distance", "right_gene", "right_strand", "right_distance", "functional_prediction"]
 
     # If both intersect and bed files are empty, there are no hits
-    if os.stat(args.intersect)[6] == 0 and os.stat(args.closest)[6] == 0:
-        output = open(args.output + '_table.txt', 'w')
+    if os.stat(intersect_file)[6] == 0 and os.stat(closest_file)[6] == 0:
+        output = open(final_table_file, 'w')
         output.write('\t'.join(header) + '\n')
         output.write('No hits found')
         output.close()
@@ -251,7 +278,7 @@ def main():
         sys.exit()
 
     # Read in genbank and create feature list for searching
-    genbank = SeqIO.read(args.ref, 'genbank')
+    genbank = SeqIO.read(ref_gbk, 'genbank')
     feature_list = []
     feature_count_list = 0
     feature_types = ["CDS", "tRNA", "rRNA"]
@@ -272,8 +299,8 @@ def main():
     closest_left = []
     closest_right = []
     # Start with the intersect file (novel hits)
-    if os.stat(args.intersect)[6] != 0:
-        with open(args.intersect) as bed_merged:
+    if os.stat(intersect_file)[6] != 0:
+        with open(intersect_file) as bed_merged:
             for line in bed_merged:
                 info = line.strip().split('\t')
                 intersect_left.append(info[0:3])
@@ -308,7 +335,7 @@ def main():
                             pass
                         # Create result
                         # Gap size is -ve because the regions are intersecting
-                        novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, '-' + info[6], orient, feature_count, region, results, genbank.features, feature_list, unpaired=False)
+                        novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, ref_gbk, args.cds, args.trna, args.rrna, '-' + info[6], orient, feature_count, region, results, genbank.features, feature_list, unpaired=False)
                         region += 1
                         feature_count += 2
                     # Otherwise we're removing this region, but keeping the information
@@ -319,14 +346,14 @@ def main():
     # Get size of IS query
     is_length = insertion_length(args.seq)
     # Look inside the closest file (known or imprecise hits)
-    with open(args.closest) as bed_closest:
+    with open(closest_file) as bed_closest:
         for line in bed_closest:
             info = line.strip().split('\t')
             closest_left.append(info[0:3])
             closest_right.append(info[3:6])
             # If the fourth column contains -1, there are no closest hits
             if info[3] == '-1':
-                output = open(args.output + '_table.txt', 'w')
+                output = open(final_table_file, 'w')
                 output.write('\t'.join(header) + '\n')
                 output.write('No hits found')
                 output.close()
@@ -358,7 +385,7 @@ def main():
                     pass
                 # This is probably a novel hit where there was no overlap detected
                 elif int(info[6]) <= 10:
-                    novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, genbank.features, feature_list, unpaired=False)
+                    novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, ref_gbk, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, genbank.features, feature_list, unpaired=False)
                     region += 1
                     feature_count += 2
                 # This is probably a known hit, but need to check with BLAST
@@ -370,7 +397,7 @@ def main():
                     feature_count += 2
                 # Could possibly be a novel hit but the gap size is too large
                 elif float(info[6]) / is_length <= args.min_range and float(info[6]) / is_length < args.max_range:
-                    novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, genbank.features, feature_list, unpaired=False,star=True)
+                    novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, ref_gbk, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, genbank.features, feature_list, unpaired=False,star=True)
                     region +=1
                     feature_count += 2
                 # This is something else altogether - either the gap
@@ -383,12 +410,12 @@ def main():
     # Possibly unpaired because the pair is low coverage and didn't pass
     # depth cutoff
     line_check = []
-    with open(args.left_bed) as left_bed:
+    with open(left_bedfile) as left_bed:
         for line in left_bed:
             if line.strip().split('\t') not in intersect_left and line.strip().split('\t') not in closest_left:
                 line_check.append(line.strip().split('\t'))
     if len(line_check) != 0:
-        with open(args.left_unpaired) as left_unpaired:
+        with open(left_unp) as left_unpaired:
             for line in left_unpaired:
                 info = line.strip().split('\t')
                 # This is an unpaired hit
@@ -418,18 +445,18 @@ def main():
                             y = y_R
                         # This ia novel hit
                         if float(info[6]) <= 10:
-                            novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, genbank.features, feature_list, unpaired=True)
+                            novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, ref_gbk, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, genbank.features, feature_list, unpaired=True)
                             region += 1
                             feature_count += 2
                         # This is a known hit
                         elif float(info[6]) / is_length >= args.min_range and float(info[6]) / is_length <= args.max_range:
-                            add_known(x_L, x_R, y_L, y_R, info[6], genbank, args.ref, args.seq, args.temp, args.cds, args.trna, args.rrna, region, feature_count, results, genbank.features, feature_list, removed_results, line, 'left_unpaired.bed')
+                            add_known(x_L, x_R, y_L, y_R, info[6], genbank, ref_gbk, args.seq, args.temp, args.cds, args.trna, args.rrna, region, feature_count, results, genbank.features, feature_list, removed_results, line, 'left_unpaired.bed')
                             region += 1
                             feature_count += 2
                         # Could possibly be a novel hit but the gap size is too large
                         elif float(info[6]) / is_length <= args.min_range and float(info[6]) / is_length < args.max_range:
                             # Add to results file
-                            novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, genbank.features, feature_list, unpaired=True)
+                            novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, ref_gbk, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, genbank.features, feature_list, unpaired=True)
                             region +=1
                             feature_count += 2
                         # This is something else altogether - either the gap is
@@ -438,12 +465,12 @@ def main():
                             removed_results['region_' + str(region)] = line.strip() + '\tleft_unpaired.bed\n'
                             region += 1
     line_check = []
-    with open(args.right_bed) as right_bed:
+    with open(right_bedfile) as right_bed:
         for line in right_bed:
             if line.strip().split('\t') not in intersect_right and line.strip().split('\t') not in closest_right:
                 line_check.append(line.strip().split('\t'))
     if len(line_check) != 0:
-        with open(args.right_unpaired) as right_unpaired:
+        with open(right_unp) as right_unpaired:
             for line in right_unpaired:
                 info = line.strip().split('\t')
                 #this is an unpaired hit
@@ -473,17 +500,17 @@ def main():
                             y = y_R
                         #a novel hit
                         if float(info[6]) <= 10:
-                            novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, genbank.features, feature_list, unpaired=True)
+                            novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, ref_gbk, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, genbank.features, feature_list, unpaired=True)
                             region += 1
                             feature_count += 2
                         #a known hit
                         elif float(info[6]) / is_length >= args.min_range and float(info[6]) / is_length <= args.max_range:
-                            add_known(x_L, x_R, y_L, y_R, info[6], genbank, args.ref, args.seq, args.temp, args.cds, args.trna, args.rrna, region, feature_count, results, genbank.features, feature_list, removed_results, line, 'right_unpaired.bed')
+                            add_known(x_L, x_R, y_L, y_R, info[6], genbank, ref_gbk, args.seq, args.temp, args.cds, args.trna, args.rrna, region, feature_count, results, genbank.features, feature_list, removed_results, line, 'right_unpaired.bed')
                             region += 1
                             feature_count += 2
                         #could possibly be a novel hit but the gap size is too large
                         elif float(info[6]) / is_length <= args.min_range and float(info[6]) / is_length < args.max_range:
-                            novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, args.ref, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, genbank.features, feature_list, unpaired=True)
+                            novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, ref_gbk, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, genbank.features, feature_list, unpaired=True)
                             region +=1
                             feature_count += 2
                         #this is something else altogether - either the gap is really large or something, place it in removed_results
@@ -491,7 +518,7 @@ def main():
                             removed_results['region_' + str(region)] = line.strip() + '\tright_unpaired.bed\n'
                             region += 1
     # Open the output file and write in the header
-    output = open(args.output + '_table.txt', 'w')
+    output = open(final_table_file, 'w')
     output.write('\t'.join(header) + '\n')
     # Sort regions into the correct order
     table_keys = []
@@ -515,7 +542,7 @@ def main():
     with open(args.output + '_hits.bed', 'w') as outfile:
         if arr != 0:
             if args.chr_name == 'not_specified':
-                args.chr_name = SeqIO.read(args.ref, 'genbank').id
+                args.chr_name = SeqIO.read(ref_gbk, 'genbank').id
             if args.igv == 1:
                 outfile.write('#gffTags \n')
                 for key in sorted_keys[:,0]:

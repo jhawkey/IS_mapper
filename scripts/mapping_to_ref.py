@@ -111,10 +111,12 @@ def map_to_ref_seq(ref_seq, sample_name, left_flanking, right_flanking, tmp, out
     run_command(samtools_runner.index(filenames['left_sorted']), shell=True)
     run_command(samtools_runner.index(filenames['right_sorted']), shell=True)
 
-    return(filenames['left_sorted'], filenames['right_sorted'])
+    return(filenames)
 
-def create_bed_files(left_sorted, right_sorted, filenames, cutoff, merging):
+def create_bed_files(filenames, cutoff, merging):
 
+    left_sorted = filenames['left_sorted']
+    right_sorted = filenames['right_sorted']
     # Create BED files with coverage information
     run_command(['bedtools', 'genomecov', '-ibam', left_sorted + '.bam', '-bg', '>', filenames['left_cov']], shell=True)
     run_command(['bedtools', 'genomecov', '-ibam', right_sorted + '.bam', '-bg', '>', filenames['right_cov']], shell=True)
