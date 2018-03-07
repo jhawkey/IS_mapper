@@ -328,12 +328,12 @@ def get_flanking_genes(features, feature_list, left, right, cds_features, trna_f
     right_feature_index = binary_search(feature_list, right, 'R')
     # Print out information if returning one of the error codes
     if type(left_feature_index) != int or type(right_feature_index) != int:
-        print 'left index'
-        print left_feature_index
-        print 'right index'
-        print right_feature_index
-        print 'left position: ' + str(left)
-        print 'right position: ' + str(right)
+        print('left index')
+        print(left_feature_index)
+        print('right index')
+        print(right_feature_index)
+        print('left position: ' + str(left))
+        print('right position: ' + str(right))
     # Extract the SeqFeature object that corresponds to that index
     left_feature = features[left_feature_index]
     right_feature = features[right_feature_index]
@@ -451,20 +451,20 @@ def main():
 
     reference_fasta = args.reference_gbk.split('.g')[0]
     # Create a fasta file of the reference for BLAST
-    print 'Creating fasta file and database of reference ...'
+    print('Creating fasta file and database of reference ...')
     gbk_to_fasta(args.reference_gbk, reference_fasta)
     # Make a BLAST database
     blast_db(reference_fasta)
     # Get the reference positions and orientations for this IS query
-    print '\nGetting query positions in reference ...'
+    print('\nGetting query positions in reference ...')
     list_of_positions, ref_name = get_ref_positions(reference_fasta, args.seq, list_of_positions)
 
     elapsed_time = time.time() - start_time
-    print 'Time taken: ' + str(elapsed_time)
+    print('Time taken: ' + str(elapsed_time))
     #print list_of_positions
     #print ref_name
     # Loop through each table give to --tables
-    print 'Collating results files ...'
+    print('Collating results files ...')
     for result_file in unique_results_files:
         # Get isolate name
         isolate = result_file.split('_table.txt')[0]
@@ -551,10 +551,10 @@ def main():
     list_of_positions = final_ranges_check(list_of_positions, args.gap)
 
     elapsed_time = time.time() - start_time
-    print 'Time taken: ' + str(elapsed_time)
+    print('Time taken: ' + str(elapsed_time))
 
     # Get the flanking genes for each position now they've all been merged
-    print 'Getting flanking genes for each position (this step is the longest and could take some time) ...'
+    print('Getting flanking genes for each position (this step is the longest and could take some time) ...')
     # key = (start, end), valye = [left_gene, right_gene]
     position_genes = {}
 
@@ -580,13 +580,13 @@ def main():
 
 
     elapsed_time = time.time() - start_time
-    print 'Time taken: ' + str(elapsed_time)
+    print('Time taken: ' + str(elapsed_time))
 
     # Order positions from smallest to largest for final table output
     list_of_positions.sort(key=lambda x: x.x)
 
     # Write out table
-    print 'Writing output table to ' + args.output + ' ...'
+    print('Writing output table to ' + args.output + ' ...')
     with open(args.output, 'w') as out:
         header = ['isolate']
         for pos in list_of_positions:
@@ -647,7 +647,7 @@ def main():
         out.write('\t'.join(str(i) for i in row_r_prod) + '\n')
 
     elapsed_time = time.time() - start_time
-    print 'Table compilation finished in ' + str(elapsed_time)
+    print('Table compilation finished in ' + str(elapsed_time))
 
 if __name__ == "__main__":
     main()

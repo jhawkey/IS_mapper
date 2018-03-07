@@ -17,7 +17,7 @@ import read_grouping
 from run_commands import run_command, CommandError, BedtoolsError, make_directories
 from mapping_to_query import map_to_is_query
 from mapping_to_ref import map_to_ref_seq, create_bed_files
-from create_outputs import create_typing_output
+from create_typing_out import create_typing_output
 
 
 def parse_args():
@@ -34,11 +34,11 @@ def parse_args():
     parser.add_argument('--reads', nargs='+', type=pathlib.Path, required=False, help='Paired end reads for analysing (can be gzipped)')
     parser.add_argument('--forward', type=str, required=False, default='_1', help='Identifier for forward reads if not in MiSeq format (default _1)')
     parser.add_argument('--reverse', type=str, required=False, default='_2', help='Identifier for reverse reads if not in MiSeq format (default _2)')
-    parser.add_argument('--queries', type=str, required=False, help='Multifasta file for query gene(s) (eg: insertion sequence) that will be mapped to.')
+    parser.add_argument('--queries', type=str, nargs='+', required=False, help='Multifasta file for query gene(s) (eg: insertion sequence) that will be mapped to.')
     parser.add_argument('--assemblies', nargs='+', type=str, required=False, help='Contig assemblies, one for each read set')
     parser.add_argument('--assemblyid', type=str, required=False, help='Identifier for assemblies eg: sampleName_contigs (specify _contigs) or sampleName_assembly (specify _assembly). Do not specify extension.')
     parser.add_argument('--extension', type=str, required=False, help='Extension for assemblies (eg: .fasta, .fa, .gbk, default is .fasta)', default='.fasta')
-    parser.add_argument('--typingRef', type=str, required=False, help='Reference genome for typing against in genbank format')
+    parser.add_argument('--typingRef', type=str, nargs='+', required=False, help='Reference genome for typing against in genbank format')
     parser.add_argument('--type', type=str, required=False, default='fasta', help='Indicator for contig assembly type, genbank or fasta (default fasta)')
     parser.add_argument('--path', type=str, required=False, default='', help='Path to folder where scripts are (only required for development, default is VLSCI path).')
     # Parameters
@@ -59,7 +59,7 @@ def parse_args():
     parser.add_argument('--chr_name', type=str, required=False, default='not_specified', help='chromosome name for bedfile - must match genome name to load in IGV (default = genbank accession)')
     # Reporting options
     parser.add_argument('--log', action='store_true', required=False, help='Switch on logging to file (otherwise log to stdout')
-    parser.add_argument('--output', type=str, required=False, help='Prefix for output files. If not supplied, prefix will be current date and time.', default='~/Desktop/ismap_v2/')
+    parser.add_argument('--output', type=str, required=False, help='Prefix for output files. If not supplied, prefix will be current date and time.', default='')
     parser.add_argument('--temp', action='store_true', required=False, help='Switch on keeping the temp folder instead of deleting it at the end of the program')
     parser.add_argument('--bam', action='store_true', required=False, help='Switch on keeping the final bam files instead of deleting them at the end of the program')
     parser.add_argument('--directory', type=str, required=False, default='', help='Output directory for all output files.')
@@ -96,10 +96,8 @@ def main():
 
     if args.output != '':
         working_dir = os.path.expanduser(args.output)
-   # else:
-        #working_dir = os.getcwd()
-
-    print(working_dir)
+    else:
+        working_dir = os.getcwd()
 
     # set up logfile
     logging.basicConfig(
@@ -110,15 +108,15 @@ def main():
         datefmt='%m/%d/%Y %H:%M:%S')
     logging.info('program started')
     logging.info('command line: {0}'.format(' '.join(sys.argv)))
+    logging.info(working_dir)
 
     #TODO: make a function that checks the input files are correct
 
     #TODO: make a function that checks all dependencies are correct
 
     # group reads
-    #read_groups = read_grouping.group_reads(args.reads)
-    test_reads = [pathlib.Path("/Users/jane/Desktop/ismap_v2/reads/9262_1#29_1.fastq.gz"), pathlib.Path("/Users/jane/Desktop/ismap_v2/reads/9262_1#29_2.fastq.gz")]
-    read_groups = read_grouping.group_reads(test_reads)
+    read_groups = read_grouping.group_reads(args.reads)
+
 
     # print out unpaired reads
     if read_groups.unpaired:
@@ -128,24 +126,16 @@ def main():
             logging.info(unpaired.prefix)
     # print out paired reads
     for paired in read_groups.paired:
-        print(paired.prefix)
+        logging.info(paired.prefix)
         forward_read = paired.forward
         reverse_read = paired.reverse
+        logging.info(str(forward_read.filepath), str(reverse_read.filepath))
 
     # parse queries
-    query_single = ["/Users/jane/Desktop/ismap_v2/queries/ISAba1.fasta"]
-    query_records = get_sequences(query_single, 'fasta')
-    #query_list = ["/Users/jane/Desktop/ismap_v2/queries/IS26.fasta", "/Users/jane/Desktop/ismap_v2/queries/ISAba1.fasta"]
-    #query_records = get_queries(query_list)
-    #query_multi = ["/Users/jane/Desktop/ismap_v2/queries/two_ISqueries.fasta"]
-    #query_records = get_queries(query_multi)
-
-    single_ref = ["/Users/jane/Desktop/ismap_v2/refs/CP010781.gbk"]
-
-    tmp_folder = "/Users/jane/Desktop/ismap_v2/test_results/tmp"
+    query_records = get_sequences(args.queries, 'fasta')
 
     # read in the reference genomes to type against
-    reference_seqs = get_sequences(single_ref, 'genbank')
+    reference_seqs = get_sequences(args.typingRef, 'genbank')
 
     for sample in read_groups.paired:
 
@@ -156,19 +146,22 @@ def main():
         # regardless of which mode we're in, we need to do the following, for each query:
         for is_query in query_records:
 
-            left_flanking_reads, right_flanking_reads = map_to_is_query(sample, is_query, output_sample)
+            left_flanking_reads, right_flanking_reads, is_output_folder, tmp_output_folder = map_to_is_query(sample, is_query, output_sample)
 
             # typing mode first
             if args.runtype == 'typing':
                 # we need to loop through each reference:
                 for ref_seq in reference_seqs:
                     # map our flanking reads to this
-                    filenames = map_to_ref_seq(ref_seq, left_flanking_reads, right_flanking_reads)
+                    #map_to_ref_seq(ref_seq, sample_name, left_flanking, right_flanking, tmp, out, bwa_threads)
+                    filenames = map_to_ref_seq(ref_seq, sample.prefix, left_flanking_reads, right_flanking_reads, tmp_output_folder, is_output_folder, args.t)
 
                     # make the bed files, find intersects and closest points of regions
-                    intersect, closest, left_up, right_up = create_bed_files(filenames, args.cutoff, args.merging)
+                    filenames_bedfiles = create_bed_files(filenames, args.cutoff, args.merging)
 
                     # Create table and annotated genbank with hits
+                    #create_typing_output(filenames, ref_gbk, is_query, sample_name, cds, trna, rrna)
+                    create_typing_output(filenames_bedfiles, ref_seq, is_query, sample.prefix, args.cds, args.trna, args.rrna, args.min_range, args.max_range)
                 pass
 
 

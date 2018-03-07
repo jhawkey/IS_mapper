@@ -112,7 +112,6 @@ def set_output_filenames(tmp_folder, prefix, query, out_dir):
 
     return(output_filenames)
 
-
 def extract_clipped_reads(sam_file, min_size, max_size, out_left_file, out_right_file):
     with open(sam_file, 'r') as in_file, open(out_left_file, 'w') as out_left, open(out_right_file, 'w') as out_right:
         print("extracting clip reads into" + out_left_file + out_right_file)
@@ -176,11 +175,11 @@ def map_to_is_query(sample, is_query, output_sample):
 
     # set up output folders
     is_query_out = os.path.join(output_sample, is_query.id)
-    is_query_tmp = os.path.join(output_sample, is_query.id, 'tmp')
-    make_directories([is_query_out, is_query_tmp])
+    is_query_tmp_folder = os.path.join(output_sample, is_query.id, 'tmp')
+    make_directories([is_query_out, is_query_tmp_folder])
 
     # set up output file names
-    filenames = set_output_filenames(is_query_tmp, sample.prefix, is_query.id, is_query_out)
+    filenames = set_output_filenames(is_query_tmp_folder, sample.prefix, is_query.id, is_query_out)
 
     # create temp file of IS query
     is_query_tmp = create_tmp_file(is_query, filenames['query_tmp'], 'fasta')
@@ -213,4 +212,4 @@ def map_to_is_query(sample, is_query, output_sample):
     run_command(['cat', filenames['right_clipped'], filenames['right_reads'], '>', filenames['right_final']], shell=True)
 
     # return the paths to these reads
-    return filenames['left_final'], filenames['right_final']
+    return filenames['left_final'], filenames['right_final'], is_query_out, is_query_tmp_folder

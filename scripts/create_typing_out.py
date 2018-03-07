@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+#TODO: OPEN NEW FILE AND START AGAIN THIS CODE IS A DISASTER
 from argparse import (ArgumentParser, FileType)
 from Bio import SeqIO
 from Bio import SeqFeature
@@ -40,7 +40,7 @@ class ISHit(Position):
 
 
 
-def parse_args():
+'''def parse_args():
 
     parser = ArgumentParser(description="Create a table of features for ISMapper (typing pathway)")
     # Input files
@@ -65,17 +65,7 @@ def parse_args():
     parser.add_argument('--igv', type=int, required=True, help='format of output bedfile - if 1, adds IGV trackline and formats 4th column for hovertext display')
     parser.add_argument('--chr_name', type=str, required=True, help='chromosome name for bedfile - must match genome name to load in IGV (default = genbank accession)')
 
-    return parser.parse_args()
-
-def insertion_length(insertion):
-    '''
-    Find the size of the IS query.
-    '''
-
-    sequence = SeqIO.read(insertion, "fasta")
-    length = len(sequence.seq)
-
-    return length
+    return parser.parse_args()'''
 
 def doBlast(blast_input, blast_output, database):
     '''
@@ -85,21 +75,21 @@ def doBlast(blast_input, blast_output, database):
     blastn_cline = NcbiblastnCommandline(query=blast_input, db=database, outfmt="'6 qseqid qlen sacc pident length slen sstart send evalue bitscore qcovs'", out=blast_output)
     stdout, stderr = blastn_cline()
 
-def check_seq_between(gb, insertion, start, end, name, temp):
+def check_seq_between(genbank_seq, insertion, start, end, name, temp):
     '''
     Check the sequence between two ends to see
     if it matches the IS query or not, and what
     the coverage and %ID to the query.
     '''
 
-    genbank = SeqIO.read(gb, 'genbank')
     # Get sequence between left and right ends
-    seq_between = genbank.seq[start:end]
+    seq_between = genbank_seq[start:end]
     # Turn the sequence into a fasta file
     seq_between = SeqRecord(Seq(str(seq_between), generic_dna), id=name)
     SeqIO.write(seq_between, temp + name + '.fasta', 'fasta')
+    SeqIO.write(insertion, temp + name + 'ISseq.fasta', 'fasta')
     # Perform the BLAST
-    doBlast(temp + name + '.fasta', temp + name + '_out.txt', insertion)
+    doBlast(temp + name + '.fasta', temp + name + '_out.txt', temp + name + 'ISseq.fasta')
     # Only want the top hit, so set count variable to 0
     first_result = 0
     # Open the BLAST output file
@@ -189,7 +179,7 @@ def novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, ref, cds, trna, rrna, gap, orie
     # Store all information for final table output
     results['region_' + str(region)] = [orient, str(x), str(y), gap, call, '', '', gene_left[-1][:-1], gene_left[-1][-1], gene_left[1], gene_right[-1][:-1], gene_right[-1][-1], gene_right[1], func_pred]
 
-def add_known(x_L, x_R, y_L, y_R, gap, genbank, ref, seq, temp, cds, trna, rrna, region, feature_count, results, features, feature_list, removed_results, line, file_loc):
+def add_known(x_L, x_R, y_L, y_R, gap, genbank, seq, temp, cds, trna, rrna, region, feature_count, results, features, feature_list, removed_results, line, file_loc):
     '''
     Adds a value to the table that is a known hit
     '''
@@ -208,15 +198,13 @@ def add_known(x_L, x_R, y_L, y_R, gap, genbank, ref, seq, temp, cds, trna, rrna,
     genbank.features.append(left_feature)
     genbank.features.append(right_feature)
     # Check to see if the sequence between actually belongs to the IS query
-    seq_results = check_seq_between(ref, seq, start, end, 'region_' + str(region), temp)
+    seq_results = check_seq_between(genbank.seq, seq, start, end, 'region_' + str(region), temp)
     # This is a known site of coverage and %ID above 80
     if len(seq_results) != 0 and seq_results[0] >= 80 and seq_results[1] >= 80:
         # Taking all four coordinates and finding min and max to avoid coordinates
         # that overlap the actual IS (don't want to return those in gene calls)
         # Mark as a known call to improve accuracy of gene calling
         gene_left, gene_right = get_flanking_genes(features, feature_list, start, end, cds, trna, rrna, len(genbank.seq))
-        #gene_left = get_other_gene(ref, min(y_L, y_R, x_R, x_L), "left", cds, trna, rrna, known=True)
-        #gene_right = get_other_gene(ref, max(y_L, y_R, x_R, x_L), "right", cds, trna, rrna, known=True)
 
         # If the genes are the same, then this gene must be interrupted by the known site
         if gene_left[0] == gene_right[0]:
@@ -255,13 +243,21 @@ def gbk_to_fasta(genbank, fasta):
     sequences = SeqIO.parse(genbank, "genbank")
     SeqIO.write(sequences, fasta, "fasta")
 
-def create_typing_output(intersect_file, closest_file, left_unp, right_unp, final_table_file, ref_gbk, left_bedfile, right_bedfile):
+def create_typing_output(filenames, ref_gbk, is_query, sample_name, cds, trna, rrna, min_range, max_range):
 
     #args = parse_args()
 
     # Setup variables: results - for final table, removed_results - table showing
     # results which didn't pass cutoff tests,
     # region - , lines - , header - header for final table
+    intersect_file = filenames['intersect']
+    closest_file = filenames['closest']
+    left_unp = filenames['left_unpaired']
+    right_unp = filenames['right_unpaired']
+    left_bedfile = filenames['left_merged_bed']
+    right_bedfile = filenames['right_merged_bed']
+    final_table_file = filenames['table']
+
     results = {}
     removed_results = {}
     region = 1
@@ -274,16 +270,16 @@ def create_typing_output(intersect_file, closest_file, left_unp, right_unp, fina
         output.write('\t'.join(header) + '\n')
         output.write('No hits found')
         output.close()
-        # Exit ISMapper
+        # Exit ISMapper: maybe not inside this function, but in the main function
+        # TODO: add something useful to log file stating that this sample had no hits
         sys.exit()
 
     # Read in genbank and create feature list for searching
-    genbank = SeqIO.read(ref_gbk, 'genbank')
     feature_list = []
     feature_count_list = 0
     feature_types = ["CDS", "tRNA", "rRNA"]
 
-    for feature in genbank.features:
+    for feature in ref_gbk.features:
         if feature.type in feature_types:
             feature_list.append([int(feature.location.start), int(feature.location.end), feature_count_list])
             feature_count_list += 1
@@ -335,7 +331,7 @@ def create_typing_output(intersect_file, closest_file, left_unp, right_unp, fina
                             pass
                         # Create result
                         # Gap size is -ve because the regions are intersecting
-                        novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, ref_gbk, args.cds, args.trna, args.rrna, '-' + info[6], orient, feature_count, region, results, genbank.features, feature_list, unpaired=False)
+                        novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, ref_gbk, cds, trna, rrna, '-' + info[6], orient, feature_count, region, results, genbank.features, feature_list, unpaired=False)
                         region += 1
                         feature_count += 2
                     # Otherwise we're removing this region, but keeping the information
@@ -344,7 +340,7 @@ def create_typing_output(intersect_file, closest_file, left_unp, right_unp, fina
                     removed_results['region_' + str(lines)] = line.strip() + '\tintersect.bed\n'
                 lines += 1
     # Get size of IS query
-    is_length = insertion_length(args.seq)
+    is_length = len(is_query.seq)
     # Look inside the closest file (known or imprecise hits)
     with open(closest_file) as bed_closest:
         for line in bed_closest:
@@ -384,20 +380,21 @@ def create_typing_output(intersect_file, closest_file, left_unp, right_unp, fina
                 if int(info[6]) == 0:
                     pass
                 # This is probably a novel hit where there was no overlap detected
+                #todo: fix all the arg calls in each of these elif statements
                 elif int(info[6]) <= 10:
-                    novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, ref_gbk, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, genbank.features, feature_list, unpaired=False)
+                    novel_hit(x_L, y_L, x_R, y_R, x, y, ref_gbk, cds, trna, rrna, info[6], orient, feature_count, region, results, genbank.features, feature_list, unpaired=False)
                     region += 1
                     feature_count += 2
                 # This is probably a known hit, but need to check with BLAST
                 # Only a known hit if we're in the a range between (default 0.5 and 1.5) the size
                 # of the IS query
-                elif float(info[6]) / is_length >= args.min_range and float(info[6]) / is_length <= args.max_range:
-                    add_known(x_L, x_R, y_L, y_R, info[6], genbank, args.ref, args.seq, args.temp, args.cds, args.trna, args.rrna, region, feature_count, results, genbank.features, feature_list, removed_results, line, 'closest.bed')
+                elif float(info[6]) / is_length >= min_range and float(info[6]) / is_length <= max_range:
+                    add_known(x_L, x_R, y_L, y_R, info[6], genbank, is_query, args.temp, cds, trna, rrna, region, feature_count, results, genbank.features, feature_list, removed_results, line, 'closest.bed')
                     region += 1
                     feature_count += 2
                 # Could possibly be a novel hit but the gap size is too large
-                elif float(info[6]) / is_length <= args.min_range and float(info[6]) / is_length < args.max_range:
-                    novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, ref_gbk, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, genbank.features, feature_list, unpaired=False,star=True)
+                elif float(info[6]) / is_length <= min_range and float(info[6]) / is_length < max_range:
+                    novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, ref_gbk, cds, trna, rrna, info[6], orient, feature_count, region, results, genbank.features, feature_list, unpaired=False,star=True)
                     region +=1
                     feature_count += 2
                 # This is something else altogether - either the gap
@@ -444,19 +441,20 @@ def create_typing_output(intersect_file, closest_file, left_unp, right_unp, fina
                             x = x_L
                             y = y_R
                         # This ia novel hit
+                        # todo: fix all the args calls in the following if statements
                         if float(info[6]) <= 10:
-                            novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, ref_gbk, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, genbank.features, feature_list, unpaired=True)
+                            novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, ref_gbk, cds, trna, rrna, info[6], orient, feature_count, region, results, genbank.features, feature_list, unpaired=True)
                             region += 1
                             feature_count += 2
                         # This is a known hit
-                        elif float(info[6]) / is_length >= args.min_range and float(info[6]) / is_length <= args.max_range:
-                            add_known(x_L, x_R, y_L, y_R, info[6], genbank, ref_gbk, args.seq, args.temp, args.cds, args.trna, args.rrna, region, feature_count, results, genbank.features, feature_list, removed_results, line, 'left_unpaired.bed')
+                        elif float(info[6]) / is_length >= min_range and float(info[6]) / is_length <= max_range:
+                            add_known(x_L, x_R, y_L, y_R, info[6], genbank, ref_gbk, args.seq, args.temp, cds, trna, rrna, region, feature_count, results, genbank.features, feature_list, removed_results, line, 'left_unpaired.bed')
                             region += 1
                             feature_count += 2
                         # Could possibly be a novel hit but the gap size is too large
-                        elif float(info[6]) / is_length <= args.min_range and float(info[6]) / is_length < args.max_range:
+                        elif float(info[6]) / is_length <= min_range and float(info[6]) / is_length < max_range:
                             # Add to results file
-                            novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, ref_gbk, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, genbank.features, feature_list, unpaired=True)
+                            novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, ref_gbk, cds, trna, rrna, info[6], orient, feature_count, region, results, genbank.features, feature_list, unpaired=True)
                             region +=1
                             feature_count += 2
                         # This is something else altogether - either the gap is
@@ -499,18 +497,19 @@ def create_typing_output(intersect_file, closest_file, left_unp, right_unp, fina
                             x = x_L
                             y = y_R
                         #a novel hit
+                        # todo: fix all the args calls in the following if statements
                         if float(info[6]) <= 10:
-                            novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, ref_gbk, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, genbank.features, feature_list, unpaired=True)
+                            novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, ref_gbk, cds, trna, rrna, info[6], orient, feature_count, region, results, genbank.features, feature_list, unpaired=True)
                             region += 1
                             feature_count += 2
                         #a known hit
-                        elif float(info[6]) / is_length >= args.min_range and float(info[6]) / is_length <= args.max_range:
-                            add_known(x_L, x_R, y_L, y_R, info[6], genbank, ref_gbk, args.seq, args.temp, args.cds, args.trna, args.rrna, region, feature_count, results, genbank.features, feature_list, removed_results, line, 'right_unpaired.bed')
+                        elif float(info[6]) / is_length >= min_range and float(info[6]) / is_length <= max_range:
+                            add_known(x_L, x_R, y_L, y_R, info[6], genbank, ref_gbk, args.seq, args.temp, cds, trna, rrna, region, feature_count, results, genbank.features, feature_list, removed_results, line, 'right_unpaired.bed')
                             region += 1
                             feature_count += 2
                         #could possibly be a novel hit but the gap size is too large
-                        elif float(info[6]) / is_length <= args.min_range and float(info[6]) / is_length < args.max_range:
-                            novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, ref_gbk, args.cds, args.trna, args.rrna, info[6], orient, feature_count, region, results, genbank.features, feature_list, unpaired=True)
+                        elif float(info[6]) / is_length <= min_range and float(info[6]) / is_length < max_range:
+                            novel_hit(x_L, y_L, x_R, y_R, x, y, genbank, ref_gbk, cds, trna, rrna, info[6], orient, feature_count, region, results, genbank.features, feature_list, unpaired=True)
                             region +=1
                             feature_count += 2
                         #this is something else altogether - either the gap is really large or something, place it in removed_results
@@ -534,11 +533,13 @@ def create_typing_output(intersect_file, closest_file, left_unp, right_unp, fina
         for key in sorted_keys[:,0]:
             output.write(key + '\t' + '\t'.join(str(i) for i in results[key]) + '\n')
     # If all the hits failed, write out that no hits were found
+    #todo: put this in the log file
     elif arr == 0:
         output.write('No hits found.')
     output.close()
 
     # Write out the found hits to bed file for viewing in IGV
+    # todo: fix all the arg calls here
     with open(args.output + '_hits.bed', 'w') as outfile:
         if arr != 0:
             if args.chr_name == 'not_specified':
@@ -562,9 +563,4 @@ def create_typing_output(intersect_file, closest_file, left_unp, right_unp, fina
 
     SeqIO.write(genbank, args.output + '_annotated.gbk', 'genbank')
     print('Added ' + str(feature_count) + ' features to ' + args.output + '_annotated.gbk')
-
-    #return(lines, len(removed_results))
-
-if __name__ == "__main__":
-
-    main()
+    #todo: do we need to return anything??

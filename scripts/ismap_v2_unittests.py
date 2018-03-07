@@ -95,8 +95,10 @@ class TestRefMapping(unittest.TestCase):
 
     def test_map_to_ref_seq_01(self):
 
-        test_left_sorted, test_right_sorted = mapping_to_ref.map_to_ref_seq(self.ref, self.sample, self.left_flanking,
+        test_filenames = mapping_to_ref.map_to_ref_seq(self.ref, self.sample, self.left_flanking,
                                                                             self.right_flanking, self.tmp_folder, self.out_folder, '1')
+        test_left_sorted = test_filenames['left_merged_bed']
+        test_right_sorted = test_filenames['right_merged_bed']
 
         self.assertTrue(os.path.isfile(test_left_sorted))
         self.assertTrue(os.path.isfile(test_right_sorted))

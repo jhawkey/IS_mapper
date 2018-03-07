@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="f362a202-b55d-4e14-bd4f-3ac14f1bafb9" name="Default" comment="">
+    <list default="true" id="f362a202-b55d-4e14-bd4f-3ac14f1bafb9" name="Default" comment="ismapper now running through to create_output step">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scripts/compiled_table.py" afterPath="$PROJECT_DIR$/scripts/compiled_table.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scripts/create_typing_out.py" afterPath="$PROJECT_DIR$/scripts/create_typing_out.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scripts/ismap_v2.py" afterPath="$PROJECT_DIR$/scripts/ismap_v2.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scripts/ismap_v2_unittests.py" afterPath="$PROJECT_DIR$/scripts/ismap_v2_unittests.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scripts/mapping_to_query.py" afterPath="$PROJECT_DIR$/scripts/mapping_to_query.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scripts/mapping_to_ref.py" afterPath="$PROJECT_DIR$/scripts/mapping_to_ref.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -14,111 +18,41 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="ismap.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/scripts/ismap.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="454">
-              <caret line="331" column="0" lean-forward="false" selection-start-line="331" selection-start-column="0" selection-end-line="343" selection-end-column="18" />
-              <folding>
-                <element signature="e#1249#3043#0" expanded="false" />
-                <element signature="e#8339#9083#0" expanded="false" />
-                <element signature="e#9111#9575#0" expanded="false" />
-                <element signature="e#9674#10961#0" expanded="false" />
-                <element signature="e#11014#11772#0" expanded="false" />
-                <element signature="e#11823#12326#0" expanded="false" />
-                <element signature="e#12358#16576#0" expanded="false" />
-                <element signature="e#16614#16807#0" expanded="false" />
-                <element signature="e#17258#17656#0" expanded="false" />
-                <element signature="e#17696#17849#0" expanded="false" />
-                <element signature="e#17899#19613#0" expanded="false" />
-                <element signature="e#22461#22538#0" expanded="false" />
-                <element signature="e#22606#22776#0" expanded="false" />
-                <element signature="e#29495#34033#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
+    <leaf>
       <file leaf-file-name="ismap_v2.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/scripts/ismap_v2.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="649">
-              <caret line="146" column="21" lean-forward="true" selection-start-line="146" selection-start-column="21" selection-end-line="146" selection-end-column="57" />
+            <state relative-caret-position="367">
+              <caret line="163" column="0" lean-forward="false" selection-start-line="163" selection-start-column="0" selection-end-line="163" selection-end-column="0" />
               <folding>
                 <element signature="e#23#37#0" expanded="true" />
-                <element signature="e#654#5847#0" expanded="false" />
+                <element signature="e#6044#6721#0" expanded="false" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="run_commands.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/scripts/run_commands.py">
+      <file leaf-file-name="create_typing_out.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/scripts/create_typing_out.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="435">
-              <caret line="29" column="20" lean-forward="false" selection-start-line="29" selection-start-column="4" selection-end-line="29" selection-end-column="20" />
+            <state relative-caret-position="1525">
+              <caret line="329" column="38" lean-forward="true" selection-start-line="329" selection-start-column="38" selection-end-line="329" selection-end-column="38" />
               <folding>
-                <element signature="e#0#27#0" expanded="true" />
+                <element signature="e#4063#4357#0" expanded="false" />
+                <element signature="e#5642#6624#0" expanded="false" />
+                <element signature="e#6799#8196#0" expanded="false" />
+                <element signature="e#11246#11399#0" expanded="false" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="mapping_to_query.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/scripts/mapping_to_query.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="315">
-              <caret line="161" column="53" lean-forward="false" selection-start-line="161" selection-start-column="53" selection-end-line="161" selection-end-column="53" />
-              <folding>
-                <element signature="e#0#9#0" expanded="true" />
-                <element signature="e#274#2068#0" expanded="false" />
-                <element signature="e#302#1239#0" expanded="false" />
-                <element signature="e#2097#2528#0" expanded="false" />
-                <element signature="e#2590#2983#0" expanded="false" />
-                <element signature="e#3051#4473#0" expanded="false" />
-                <element signature="e#4568#7266#0" expanded="false" />
-                <element signature="e#7327#10125#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="mapping_to_ref.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/scripts/mapping_to_ref.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="285">
-              <caret line="70" column="7" lean-forward="true" selection-start-line="70" selection-start-column="7" selection-end-line="70" selection-end-column="7" />
-              <folding>
-                <element signature="e#0#9#0" expanded="true" />
-                <element signature="e#394#3363#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ismap_v2_unittests.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="ismap_v2_unittests.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/scripts/ismap_v2_unittests.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="731">
-              <caret line="122" column="0" lean-forward="true" selection-start-line="122" selection-start-column="0" selection-end-line="122" selection-end-column="0" />
-              <folding>
-                <element signature="e#0#15#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="read_grouping.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/scripts/read_grouping.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1020">
-              <caret line="68" column="25" lean-forward="false" selection-start-line="68" selection-start-column="25" selection-end-line="68" selection-end-column="25" />
-              <folding>
-                <element signature="e#22#31#0" expanded="true" />
-                <element signature="e#2405#3470#0" expanded="false" />
-                <element signature="e#3510#4370#0" expanded="false" />
-              </folding>
+            <state relative-caret-position="261">
+              <caret line="88" column="25" lean-forward="true" selection-start-line="88" selection-start-column="25" selection-end-line="88" selection-end-column="25" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -135,7 +69,17 @@
   <component name="FindInProjectRecents">
     <findStrings>
       <find>samtools</find>
+      <find>args</find>
+      <find>print</find>
+      <find>pri</find>
     </findStrings>
+    <replaceStrings>
+      <replace>cds</replace>
+      <replace>trna</replace>
+      <replace>rrna</replace>
+      <replace>min_range</replace>
+      <replace>max_range</replace>
+    </replaceStrings>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -148,17 +92,19 @@
         <option value="$PROJECT_DIR$/scripts/read_grouping.py" />
         <option value="$PROJECT_DIR$/scripts/ismap.py" />
         <option value="$PROJECT_DIR$/scripts/run_commands.py" />
+        <option value="$PROJECT_DIR$/scripts/create_typing_out.py" />
         <option value="$PROJECT_DIR$/scripts/mapping_to_query.py" />
+        <option value="$PROJECT_DIR$/scripts/compiled_table.py" />
+        <option value="$PROJECT_DIR$/scripts/mapping_to_ref.py" />
         <option value="$PROJECT_DIR$/scripts/ismap_v2.py" />
         <option value="$PROJECT_DIR$/scripts/ismap_v2_unittests.py" />
-        <option value="$PROJECT_DIR$/scripts/mapping_to_ref.py" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds">
+  <component name="ProjectFrameBounds" extendedState="6">
     <option name="y" value="23" />
     <option name="width" value="2548" />
-    <option name="height" value="1417" />
+    <option name="height" value="877" />
   </component>
   <component name="ProjectInspectionProfilesVisibleTreeState">
     <entry key="Project Default">
@@ -191,8 +137,8 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scratches" />
       <pane id="Scope" />
+      <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -215,6 +161,22 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
     <property name="com.intellij.ide.scratch.LRUPopupBuilder$2/Languages" value="Python" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth0" value="633" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatOrder0" value="0" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth1" value="632" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatOrder1" value="1" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth2" value="633" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatOrder2" value="2" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth3" value="632" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatOrder3" value="3" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth0" value="408" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeOrder0" value="0" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth1" value="422" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeOrder1" value="1" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth2" value="487" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeOrder2" value="2" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth3" value="1213" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeOrder3" value="3" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -233,8 +195,8 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python tests.Unittests for ismap_v2_unittests.TestCreateBedFiles.test_create_bed_files_01">
-    <configuration name="Unittests for ismap_v2_unittests.TestCreateBedFiles" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="Python tests.Unittests in ismap_v2_unittests.py">
+    <configuration name="Unittests for ismap_v2_unittests.TestCreateBedFiles" type="tests" factoryName="Unittests" nameIsGenerated="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs />
@@ -248,7 +210,7 @@
       <option name="_new_target" value="&quot;ismap_v2_unittests.TestCreateBedFiles&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
     </configuration>
-    <configuration name="Unittests for ismap_v2_unittests.TestCreateBedFiles.test_create_bed_files_01" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+    <configuration name="Unittests for ismap_v2_unittests.TestCreateBedFiles.test_create_bed_files_01" type="tests" factoryName="Unittests" nameIsGenerated="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs />
@@ -262,7 +224,7 @@
       <option name="_new_target" value="&quot;ismap_v2_unittests.TestCreateBedFiles.test_create_bed_files_01&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
     </configuration>
-    <configuration name="Unittests for ismap_v2_unittests.TestRefMapping" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+    <configuration name="Unittests for ismap_v2_unittests.TestRefMapping" type="tests" factoryName="Unittests" nameIsGenerated="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs />
@@ -276,7 +238,7 @@
       <option name="_new_target" value="&quot;ismap_v2_unittests.TestRefMapping&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
     </configuration>
-    <configuration name="Unittests for ismap_v2_unittests.TestRefMapping.test_map_to_ref_seq" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+    <configuration name="Unittests for ismap_v2_unittests.TestRefMapping.test_map_to_ref_seq" type="tests" factoryName="Unittests" nameIsGenerated="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs />
@@ -290,7 +252,7 @@
       <option name="_new_target" value="&quot;ismap_v2_unittests.TestRefMapping.test_map_to_ref_seq&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
     </configuration>
-    <configuration name="Unittests in ismap_v2_unittests.py" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+    <configuration name="Unittests in ismap_v2_unittests.py" type="tests" factoryName="Unittests" nameIsGenerated="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs />
@@ -305,22 +267,31 @@
       <option name="_new_target" value="&quot;$PROJECT_DIR$/scripts/ismap_v2_unittests.py&quot;" />
       <option name="_new_targetType" value="&quot;PATH&quot;" />
     </configuration>
-    <list size="5">
-      <item index="0" class="java.lang.String" itemvalue="Python tests.Unittests in ismap_v2_unittests.py" />
-      <item index="1" class="java.lang.String" itemvalue="Python tests.Unittests for ismap_v2_unittests.TestRefMapping.test_map_to_ref_seq" />
-      <item index="2" class="java.lang.String" itemvalue="Python tests.Unittests for ismap_v2_unittests.TestRefMapping" />
-      <item index="3" class="java.lang.String" itemvalue="Python tests.Unittests for ismap_v2_unittests.TestCreateBedFiles.test_create_bed_files_01" />
-      <item index="4" class="java.lang.String" itemvalue="Python tests.Unittests for ismap_v2_unittests.TestCreateBedFiles" />
+    <configuration name="testrun" type="PythonConfigurationType" factoryName="Python">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="$USER_HOME$/Python3/bin/python" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/scripts" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="IS_mapper" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/ismap_v2.py" />
+      <option name="PARAMETERS" value="--queries $USER_HOME$/Desktop/ismap_v2/queries/ISAba1.fasta --reads $USER_HOME$/Desktop/ismap_v2/reads/9262_1#29_sub_1.fastq.gz $USER_HOME$/Desktop/ismap_v2/reads/9262_1#29_sub_2.fastq.gz --typingRef $USER_HOME$/Desktop/ismap_v2/refs/CP010781.gbk --output $USER_HOME$/Desktop/ismap_v2/" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+    </configuration>
+    <list size="6">
+      <item index="0" class="java.lang.String" itemvalue="Python.testrun" />
+      <item index="1" class="java.lang.String" itemvalue="Python tests.Unittests in ismap_v2_unittests.py" />
+      <item index="2" class="java.lang.String" itemvalue="Python tests.Unittests for ismap_v2_unittests.TestRefMapping.test_map_to_ref_seq" />
+      <item index="3" class="java.lang.String" itemvalue="Python tests.Unittests for ismap_v2_unittests.TestRefMapping" />
+      <item index="4" class="java.lang.String" itemvalue="Python tests.Unittests for ismap_v2_unittests.TestCreateBedFiles.test_create_bed_files_01" />
+      <item index="5" class="java.lang.String" itemvalue="Python tests.Unittests for ismap_v2_unittests.TestCreateBedFiles" />
     </list>
-    <recent_temporary>
-      <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Python tests.Unittests for ismap_v2_unittests.TestCreateBedFiles.test_create_bed_files_01" />
-        <item index="1" class="java.lang.String" itemvalue="Python tests.Unittests for ismap_v2_unittests.TestCreateBedFiles" />
-        <item index="2" class="java.lang.String" itemvalue="Python tests.Unittests for ismap_v2_unittests.TestRefMapping" />
-        <item index="3" class="java.lang.String" itemvalue="Python tests.Unittests for ismap_v2_unittests.TestRefMapping.test_map_to_ref_seq" />
-        <item index="4" class="java.lang.String" itemvalue="Python tests.Unittests in ismap_v2_unittests.py" />
-      </list>
-    </recent_temporary>
   </component>
   <component name="ShelveChangesManager" show_recycled="false">
     <option name="remove_strategy" value="false" />
@@ -343,13 +314,24 @@
       <option name="project" value="LOCAL" />
       <updated>1517803921288</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="bed file creation is tested">
+      <created>1517804421774</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1517804421774</updated>
+    </task>
+    <task id="LOCAL-00003" summary="all bed files created">
+      <created>1517804891430</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1517804891430</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="Unittests_for_ismap_v2_unittests_TestCreateBedFiles - 2018.02.05 at 15h 16m 44s.xml">
-      <configuration name="Unittests for ismap_v2_unittests.TestCreateBedFiles" configurationId="tests" />
-    </history-entry>
     <history-entry file="Unittests_for_ismap_v2_unittests_TestCreateBedFiles_test_create_bed_files_01 - 2018.02.05 at 15h 16m 30s.xml">
       <configuration name="Unittests for ismap_v2_unittests.TestCreateBedFiles.test_create_bed_files_01" configurationId="tests" />
     </history-entry>
@@ -368,37 +350,48 @@
     <history-entry file="Unittests_for_ismap_v2_unittests_TestCreateBedFiles_test_create_bed_files_01 - 2018.02.05 at 15h 19m 08s.xml">
       <configuration name="Unittests for ismap_v2_unittests.TestCreateBedFiles.test_create_bed_files_01" configurationId="tests" />
     </history-entry>
-    <history-entry file="Unittests_for_ismap_v2_unittests_TestRefMapping - 2018.02.05 at 15h 09m 14s.xml">
-      <configuration name="Unittests for ismap_v2_unittests.TestRefMapping" configurationId="tests" />
-    </history-entry>
-    <history-entry file="Unittests_for_ismap_v2_unittests_TestRefMapping - 2018.02.05 at 15h 10m 20s.xml">
-      <configuration name="Unittests for ismap_v2_unittests.TestRefMapping" configurationId="tests" />
+    <history-entry file="Unittests_for_ismap_v2_unittests_TestCreateBedFiles_test_create_bed_files_01 - 2018.02.05 at 15h 27m 04s.xml">
+      <configuration name="Unittests for ismap_v2_unittests.TestCreateBedFiles.test_create_bed_files_01" configurationId="tests" />
     </history-entry>
     <history-entry file="Unittests_for_ismap_v2_unittests_TestRefMapping - 2018.02.05 at 15h 11m 23s.xml">
       <configuration name="Unittests for ismap_v2_unittests.TestRefMapping" configurationId="tests" />
     </history-entry>
+    <history-entry file="Unittests_in_ismap_v2_unittests_py - 2018.03.07 at 16h 49m 07s.xml">
+      <configuration name="Unittests in ismap_v2_unittests.py" configurationId="tests" />
+    </history-entry>
+    <history-entry file="Unittests_in_ismap_v2_unittests_py - 2018.03.07 at 16h 50m 53s.xml">
+      <configuration name="Unittests in ismap_v2_unittests.py" configurationId="tests" />
+    </history-entry>
+  </component>
+  <component name="TodoView" selected-index="4">
+    <todo-panel id="selected-file">
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="all">
+      <are-packages-shown value="true" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="23" width="2548" height="1417" extended-state="0" />
-    <editor active="true" />
+    <frame x="0" y="23" width="1440" height="877" extended-state="6" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.17307693" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2326389" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="TODO" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32919255" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32922536" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2658385" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32936803" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.332342" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2658385" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.16654275" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32922536" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
@@ -407,15 +400,18 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="checked that map_to_ref is working" />
-    <option name="LAST_COMMIT_MESSAGE" value="checked that map_to_ref is working" />
+    <MESSAGE value="bed file creation is tested" />
+    <MESSAGE value="all bed files created" />
+    <MESSAGE value="ismapper now running through to create_output step" />
+    <option name="LAST_COMMIT_MESSAGE" value="ismapper now running through to create_output step" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/scripts/read_grouping.py</url>
-          <line>150</line>
-          <option name="timeStamp" value="21" />
+          <url>file://$PROJECT_DIR$/scripts/ismap_v2.py</url>
+          <line>163</line>
+          <option name="timeStamp" value="51" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -423,31 +419,107 @@
           <properties exception="BaseException" />
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="39" />
+      <option name="time" value="52" />
     </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/scripts/ismap.py">
       <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="5070">
+          <caret line="737" column="59" lean-forward="false" selection-start-line="737" selection-start-column="42" selection-end-line="737" selection-end-column="59" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/compiled_table.py">
+      <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/run_commands.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="420">
+          <caret line="29" column="20" lean-forward="false" selection-start-line="29" selection-start-column="4" selection-end-line="29" selection-end-column="20" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/ismap_v2.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1890">
+          <caret line="170" column="66" lean-forward="false" selection-start-line="170" selection-start-column="66" selection-end-line="170" selection-end-column="66" />
           <folding>
-            <element signature="e#1249#3043#0" expanded="false" />
-            <element signature="e#8339#9083#0" expanded="false" />
-            <element signature="e#9111#9575#0" expanded="false" />
-            <element signature="e#9674#10961#0" expanded="false" />
-            <element signature="e#11014#11772#0" expanded="false" />
-            <element signature="e#11823#12326#0" expanded="false" />
-            <element signature="e#12358#16576#0" expanded="false" />
-            <element signature="e#16614#16807#0" expanded="false" />
-            <element signature="e#17258#17656#0" expanded="false" />
-            <element signature="e#17696#17849#0" expanded="false" />
-            <element signature="e#17899#19613#0" expanded="false" />
-            <element signature="e#22461#22538#0" expanded="false" />
-            <element signature="e#22606#22776#0" expanded="false" />
-            <element signature="e#29495#34033#0" expanded="false" />
+            <element signature="e#23#37#0" expanded="true" />
+            <element signature="e#6044#6721#0" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/mapping_to_query.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="660">
+          <caret line="110" column="104" lean-forward="false" selection-start-line="110" selection-start-column="104" selection-end-line="110" selection-end-column="104" />
+          <folding>
+            <element signature="e#259#2053#0" expanded="false" />
+            <element signature="e#287#1224#0" expanded="false" />
+            <element signature="e#2082#2513#0" expanded="false" />
+            <element signature="e#3036#4315#0" expanded="false" />
+            <element signature="e#4409#7107#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/mapping_to_ref.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="780">
+          <caret line="118" column="44" lean-forward="false" selection-start-line="118" selection-start-column="44" selection-end-line="118" selection-end-column="44" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+            <element signature="e#1651#2005#0" expanded="false" />
+            <element signature="e#3435#6482#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/ismap_v2_unittests.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1005">
+          <caret line="73" column="51" lean-forward="false" selection-start-line="73" selection-start-column="51" selection-end-line="73" selection-end-column="51" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/read_grouping.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1020">
+          <caret line="68" column="25" lean-forward="false" selection-start-line="68" selection-start-column="25" selection-end-line="68" selection-end-column="25" />
+          <folding>
+            <element signature="e#2405#3470#0" expanded="false" />
+            <element signature="e#3510#4370#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/create_typing_out.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="60">
+          <caret line="17" column="22" lean-forward="false" selection-start-line="17" selection-start-column="22" selection-end-line="17" selection-end-column="22" />
+          <folding>
+            <element signature="e#4063#4357#0" expanded="false" />
+            <element signature="e#5642#6624#0" expanded="false" />
+            <element signature="e#6799#8196#0" expanded="false" />
+            <element signature="e#11246#11399#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/ismap.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
         </state>
       </provider>
     </entry>
@@ -457,7 +529,7 @@
           <caret line="375" column="0" lean-forward="false" selection-start-line="375" selection-start-column="0" selection-end-line="375" selection-end-column="0" />
           <folding>
             <element signature="e#23#37#0" expanded="true" />
-            <element signature="e#654#5847#0" expanded="false" />
+            <element signature="e#6044#6721#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -466,9 +538,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="60">
           <caret line="4" column="9" lean-forward="false" selection-start-line="4" selection-start-column="9" selection-end-line="4" selection-end-column="9" />
-          <folding>
-            <element signature="e#0#15#0" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -477,7 +547,6 @@
         <state relative-caret-position="1020">
           <caret line="68" column="25" lean-forward="false" selection-start-line="68" selection-start-column="25" selection-end-line="68" selection-end-column="25" />
           <folding>
-            <element signature="e#22#31#0" expanded="true" />
             <element signature="e#2405#3470#0" expanded="false" />
             <element signature="e#3510#4370#0" expanded="false" />
           </folding>
@@ -488,22 +557,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1530">
           <caret line="412" column="0" lean-forward="false" selection-start-line="412" selection-start-column="0" selection-end-line="452" selection-end-column="118" />
-          <folding>
-            <element signature="e#1249#3043#0" expanded="false" />
-            <element signature="e#8339#9083#0" expanded="false" />
-            <element signature="e#9111#9575#0" expanded="false" />
-            <element signature="e#9674#10961#0" expanded="false" />
-            <element signature="e#11014#11772#0" expanded="false" />
-            <element signature="e#11823#12326#0" expanded="false" />
-            <element signature="e#12358#16576#0" expanded="false" />
-            <element signature="e#16614#16807#0" expanded="false" />
-            <element signature="e#17258#17656#0" expanded="false" />
-            <element signature="e#17696#17849#0" expanded="false" />
-            <element signature="e#17899#19613#0" expanded="false" />
-            <element signature="e#22461#22538#0" expanded="false" />
-            <element signature="e#22606#22776#0" expanded="false" />
-            <element signature="e#29495#34033#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -511,9 +564,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="60">
           <caret line="4" column="9" lean-forward="false" selection-start-line="4" selection-start-column="9" selection-end-line="4" selection-end-column="9" />
-          <folding>
-            <element signature="e#0#15#0" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -523,7 +574,7 @@
           <caret line="375" column="0" lean-forward="false" selection-start-line="375" selection-start-column="0" selection-end-line="375" selection-end-column="0" />
           <folding>
             <element signature="e#23#37#0" expanded="true" />
-            <element signature="e#654#5847#0" expanded="false" />
+            <element signature="e#6044#6721#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -533,7 +584,6 @@
         <state relative-caret-position="1020">
           <caret line="68" column="25" lean-forward="false" selection-start-line="68" selection-start-column="25" selection-end-line="68" selection-end-column="25" />
           <folding>
-            <element signature="e#22#31#0" expanded="true" />
             <element signature="e#2405#3470#0" expanded="false" />
             <element signature="e#3510#4370#0" expanded="false" />
           </folding>
@@ -544,22 +594,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1710">
           <caret line="412" column="0" lean-forward="false" selection-start-line="412" selection-start-column="0" selection-end-line="452" selection-end-column="118" />
-          <folding>
-            <element signature="e#1249#3043#0" expanded="false" />
-            <element signature="e#8339#9083#0" expanded="false" />
-            <element signature="e#9111#9575#0" expanded="false" />
-            <element signature="e#9674#10961#0" expanded="false" />
-            <element signature="e#11014#11772#0" expanded="false" />
-            <element signature="e#11823#12326#0" expanded="false" />
-            <element signature="e#12358#16576#0" expanded="false" />
-            <element signature="e#16614#16807#0" expanded="false" />
-            <element signature="e#17258#17656#0" expanded="false" />
-            <element signature="e#17696#17849#0" expanded="false" />
-            <element signature="e#17899#19613#0" expanded="false" />
-            <element signature="e#22461#22538#0" expanded="false" />
-            <element signature="e#22606#22776#0" expanded="false" />
-            <element signature="e#29495#34033#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -569,7 +603,7 @@
           <caret line="249" column="12" lean-forward="false" selection-start-line="249" selection-start-column="12" selection-end-line="249" selection-end-column="12" />
           <folding>
             <element signature="e#23#37#0" expanded="true" />
-            <element signature="e#654#5847#0" expanded="false" />
+            <element signature="e#6044#6721#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -579,7 +613,6 @@
         <state relative-caret-position="1020">
           <caret line="68" column="25" lean-forward="true" selection-start-line="68" selection-start-column="25" selection-end-line="68" selection-end-column="25" />
           <folding>
-            <element signature="e#22#31#0" expanded="true" />
             <element signature="e#2405#3470#0" expanded="false" />
             <element signature="e#3510#4370#0" expanded="false" />
           </folding>
@@ -590,9 +623,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="450">
           <caret line="34" column="0" lean-forward="true" selection-start-line="34" selection-start-column="0" selection-end-line="34" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#15#0" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -600,22 +631,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1710">
           <caret line="412" column="0" lean-forward="false" selection-start-line="412" selection-start-column="0" selection-end-line="452" selection-end-column="118" />
-          <folding>
-            <element signature="e#1249#3043#0" expanded="false" />
-            <element signature="e#8339#9083#0" expanded="false" />
-            <element signature="e#9111#9575#0" expanded="false" />
-            <element signature="e#9674#10961#0" expanded="false" />
-            <element signature="e#11014#11772#0" expanded="false" />
-            <element signature="e#11823#12326#0" expanded="false" />
-            <element signature="e#12358#16576#0" expanded="false" />
-            <element signature="e#16614#16807#0" expanded="false" />
-            <element signature="e#17258#17656#0" expanded="false" />
-            <element signature="e#17696#17849#0" expanded="false" />
-            <element signature="e#17899#19613#0" expanded="false" />
-            <element signature="e#22461#22538#0" expanded="false" />
-            <element signature="e#22606#22776#0" expanded="false" />
-            <element signature="e#29495#34033#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -625,7 +640,7 @@
           <caret line="249" column="12" lean-forward="false" selection-start-line="249" selection-start-column="12" selection-end-line="249" selection-end-column="12" />
           <folding>
             <element signature="e#23#37#0" expanded="true" />
-            <element signature="e#654#5847#0" expanded="false" />
+            <element signature="e#6044#6721#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -634,9 +649,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="450">
           <caret line="34" column="0" lean-forward="true" selection-start-line="34" selection-start-column="0" selection-end-line="34" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#15#0" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -645,7 +658,6 @@
         <state relative-caret-position="1020">
           <caret line="68" column="25" lean-forward="true" selection-start-line="68" selection-start-column="25" selection-end-line="68" selection-end-column="25" />
           <folding>
-            <element signature="e#22#31#0" expanded="true" />
             <element signature="e#2405#3470#0" expanded="false" />
             <element signature="e#3510#4370#0" expanded="false" />
           </folding>
@@ -656,22 +668,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#1249#3043#0" expanded="false" />
-            <element signature="e#8339#9083#0" expanded="false" />
-            <element signature="e#9111#9575#0" expanded="false" />
-            <element signature="e#9674#10961#0" expanded="false" />
-            <element signature="e#11014#11772#0" expanded="false" />
-            <element signature="e#11823#12326#0" expanded="false" />
-            <element signature="e#12358#16576#0" expanded="false" />
-            <element signature="e#16614#16807#0" expanded="false" />
-            <element signature="e#17258#17656#0" expanded="false" />
-            <element signature="e#17696#17849#0" expanded="false" />
-            <element signature="e#17899#19613#0" expanded="false" />
-            <element signature="e#22461#22538#0" expanded="false" />
-            <element signature="e#22606#22776#0" expanded="false" />
-            <element signature="e#29495#34033#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -681,7 +677,7 @@
           <caret line="330" column="49" lean-forward="true" selection-start-line="330" selection-start-column="49" selection-end-line="330" selection-end-column="49" />
           <folding>
             <element signature="e#23#37#0" expanded="true" />
-            <element signature="e#654#5847#0" expanded="false" />
+            <element signature="e#6044#6721#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -690,9 +686,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="525">
           <caret line="38" column="20" lean-forward="true" selection-start-line="38" selection-start-column="20" selection-end-line="38" selection-end-column="20" />
-          <folding>
-            <element signature="e#0#15#0" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -701,7 +695,6 @@
         <state relative-caret-position="1485">
           <caret line="150" column="41" lean-forward="false" selection-start-line="150" selection-start-column="41" selection-end-line="150" selection-end-column="41" />
           <folding>
-            <element signature="e#22#31#0" expanded="true" />
             <element signature="e#2405#3470#0" expanded="false" />
             <element signature="e#3510#4370#0" expanded="false" />
           </folding>
@@ -712,22 +705,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#1249#3043#0" expanded="false" />
-            <element signature="e#8339#9083#0" expanded="false" />
-            <element signature="e#9111#9575#0" expanded="false" />
-            <element signature="e#9674#10961#0" expanded="false" />
-            <element signature="e#11014#11772#0" expanded="false" />
-            <element signature="e#11823#12326#0" expanded="false" />
-            <element signature="e#12358#16576#0" expanded="false" />
-            <element signature="e#16614#16807#0" expanded="false" />
-            <element signature="e#17258#17656#0" expanded="false" />
-            <element signature="e#17696#17849#0" expanded="false" />
-            <element signature="e#17899#19613#0" expanded="false" />
-            <element signature="e#22461#22538#0" expanded="false" />
-            <element signature="e#22606#22776#0" expanded="false" />
-            <element signature="e#29495#34033#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -737,7 +714,7 @@
           <caret line="98" column="0" lean-forward="false" selection-start-line="98" selection-start-column="0" selection-end-line="98" selection-end-column="0" />
           <folding>
             <element signature="e#23#37#0" expanded="true" />
-            <element signature="e#654#5847#0" expanded="false" />
+            <element signature="e#6044#6721#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -747,7 +724,6 @@
         <state relative-caret-position="1455">
           <caret line="148" column="23" lean-forward="false" selection-start-line="148" selection-start-column="23" selection-end-line="148" selection-end-column="148" />
           <folding>
-            <element signature="e#22#31#0" expanded="true" />
             <element signature="e#2405#3470#0" expanded="false" />
             <element signature="e#3510#4370#0" expanded="false" />
           </folding>
@@ -783,18 +759,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/read_grouping.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1020">
-          <caret line="68" column="25" lean-forward="false" selection-start-line="68" selection-start-column="25" selection-end-line="68" selection-end-column="25" />
-          <folding>
-            <element signature="e#22#31#0" expanded="true" />
-            <element signature="e#2405#3470#0" expanded="false" />
-            <element signature="e#3510#4370#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/tmp_log.log">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -802,101 +766,102 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/run_commands.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="435">
-          <caret line="29" column="20" lean-forward="false" selection-start-line="29" selection-start-column="4" selection-end-line="29" selection-end-column="20" />
-          <folding>
-            <element signature="e#0#27#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/create_genbank_table.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/create_typing_out.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1755">
-          <caret line="128" column="0" lean-forward="true" selection-start-line="128" selection-start-column="0" selection-end-line="128" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/ismap_v2.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="649">
-          <caret line="146" column="21" lean-forward="true" selection-start-line="146" selection-start-column="21" selection-end-line="146" selection-end-column="57" />
-          <folding>
-            <element signature="e#23#37#0" expanded="true" />
-            <element signature="e#654#5847#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/mapping_to_query.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="315">
-          <caret line="161" column="53" lean-forward="false" selection-start-line="161" selection-start-column="53" selection-end-line="161" selection-end-column="53" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-            <element signature="e#274#2068#0" expanded="false" />
-            <element signature="e#302#1239#0" expanded="false" />
-            <element signature="e#2097#2528#0" expanded="false" />
-            <element signature="e#2590#2983#0" expanded="false" />
-            <element signature="e#3051#4473#0" expanded="false" />
-            <element signature="e#4568#7266#0" expanded="false" />
-            <element signature="e#7327#10125#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/scripts/ismap.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="454">
-          <caret line="331" column="0" lean-forward="false" selection-start-line="331" selection-start-column="0" selection-end-line="343" selection-end-column="18" />
+        <state relative-caret-position="5070">
+          <caret line="737" column="59" lean-forward="false" selection-start-line="737" selection-start-column="42" selection-end-line="737" selection-end-column="59" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/run_commands.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="381">
+          <caret line="29" column="20" lean-forward="false" selection-start-line="29" selection-start-column="4" selection-end-line="29" selection-end-column="20" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/compiled_table.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="367">
+          <caret line="649" column="63" lean-forward="false" selection-start-line="649" selection-start-column="63" selection-end-line="649" selection-end-column="63" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/mapping_to_query.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="209">
+          <caret line="181" column="56" lean-forward="false" selection-start-line="181" selection-start-column="56" selection-end-line="181" selection-end-column="56" />
           <folding>
-            <element signature="e#1249#3043#0" expanded="false" />
-            <element signature="e#8339#9083#0" expanded="false" />
-            <element signature="e#9111#9575#0" expanded="false" />
-            <element signature="e#9674#10961#0" expanded="false" />
-            <element signature="e#11014#11772#0" expanded="false" />
-            <element signature="e#11823#12326#0" expanded="false" />
-            <element signature="e#12358#16576#0" expanded="false" />
-            <element signature="e#16614#16807#0" expanded="false" />
-            <element signature="e#17258#17656#0" expanded="false" />
-            <element signature="e#17696#17849#0" expanded="false" />
-            <element signature="e#17899#19613#0" expanded="false" />
-            <element signature="e#22461#22538#0" expanded="false" />
-            <element signature="e#22606#22776#0" expanded="false" />
-            <element signature="e#29495#34033#0" expanded="false" />
+            <element signature="e#259#2053#0" expanded="false" />
+            <element signature="e#287#1224#0" expanded="false" />
+            <element signature="e#2082#2513#0" expanded="false" />
+            <element signature="e#3036#4315#0" expanded="false" />
+            <element signature="e#4409#7107#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/ismap_v2_unittests.py">
+    <entry file="file://$PROJECT_DIR$/scripts/read_grouping.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="731">
-          <caret line="122" column="0" lean-forward="true" selection-start-line="122" selection-start-column="0" selection-end-line="122" selection-end-column="0" />
+        <state relative-caret-position="942">
+          <caret line="68" column="25" lean-forward="false" selection-start-line="68" selection-start-column="25" selection-end-line="68" selection-end-column="25" />
           <folding>
-            <element signature="e#0#15#0" expanded="true" />
+            <element signature="e#2405#3470#0" expanded="false" />
+            <element signature="e#3510#4370#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/ismap_v2.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="367">
+          <caret line="163" column="0" lean-forward="false" selection-start-line="163" selection-start-column="0" selection-end-line="163" selection-end-column="0" />
+          <folding>
+            <element signature="e#23#37#0" expanded="true" />
+            <element signature="e#6044#6721#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/create_typing_out.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1525">
+          <caret line="329" column="38" lean-forward="true" selection-start-line="329" selection-start-column="38" selection-end-line="329" selection-end-column="38" />
+          <folding>
+            <element signature="e#4063#4357#0" expanded="false" />
+            <element signature="e#5642#6624#0" expanded="false" />
+            <element signature="e#6799#8196#0" expanded="false" />
+            <element signature="e#11246#11399#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/scripts/mapping_to_ref.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="285">
-          <caret line="70" column="7" lean-forward="true" selection-start-line="70" selection-start-column="7" selection-end-line="70" selection-end-column="7" />
+        <state relative-caret-position="-176">
+          <caret line="29" column="91" lean-forward="false" selection-start-line="29" selection-start-column="91" selection-end-line="29" selection-end-column="91" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
-            <element signature="e#394#3363#0" expanded="false" />
+            <element signature="e#1651#2005#0" expanded="false" />
+            <element signature="e#3435#6482#0" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/ismap_v2_unittests.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="261">
+          <caret line="88" column="25" lean-forward="true" selection-start-line="88" selection-start-column="25" selection-end-line="88" selection-end-column="25" />
+          <folding />
         </state>
       </provider>
     </entry>
