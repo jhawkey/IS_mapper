@@ -23,12 +23,12 @@ class RunSamtools:
         if len(version_string) == 0:
             print("Could not find Samtools")
             raise IOError
-        if len(re.findall('1\.[0-9]\.[0-9]', version_string)):
-            version_id=re.findall('1\.[0-9]\.[0-9]{1,2}', version_string)[0]
+        if len(re.findall('1\.[0-9]\.?[0-9]{0,2}', version_string)):
+            version_id=re.findall('1\.[0-9]\.?[0-9]{0,2}', version_string)[0]
             print("Found samtools version {}".format(version_id))
             self.version=1
         else:
-            version_id=re.findall('0\.[0-9]\.[0-9]{1,2}', version_string)[0]
+            version_id=re.findall('0\.[0-9]\.?[0-9]{1,2}', version_string)[0]
             print("Found samtools version {}".format(version_id))
             self.version=0
     def view(self, output_bam, input_sam, bigF=None, smallF=None):
