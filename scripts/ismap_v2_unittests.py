@@ -5,6 +5,8 @@ import read_grouping
 import mapping_to_ref
 import mapping_to_query
 import os
+import create_output
+from Bio import SeqIO
 
 #TODO: have tests that use already created fastq files/bam files etc to speed up testing
 
@@ -35,6 +37,18 @@ class TestGetSeqs(unittest.TestCase):
         # check that if the list is empty, we print a useful error
         with self.assertRaises(ismap_v2.NoSeqError):
             ismap_v2.get_sequences([], 'fasta')
+
+
+class TestCreate_typing_output(unittest.TestCase):
+
+
+    def setUp(self):
+        self.filenames = {'intersect':'/Users/jane/Desktop/ismap_v2/9262_1#29/ISAba1/9262_1#29_CP010781.1_intersect.bed',
+                          'closest': '/Users/jane/Desktop/ismap_v2/9262_1#29/ISAba1/9262_1#29_CP010781.1_closest.bed'}
+        self.ref_gbk_obj = SeqIO.read('/Users/jane/Desktop/ismap_v2/refs/CP010781.gbk', 'genbank')
+
+    def test_create_typing_output(self):
+        hit_list = create_output.create_typing_output(self.filenames, self.ref_gbk_obj)
 
 
 '''
