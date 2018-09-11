@@ -2,7 +2,11 @@
 
 import os, logging
 import operator
-
+from Bio import SeqIO
+from Bio.SeqRecord import SeqRecord
+from Bio.Seq import Seq
+from Bio.Alphabet import generic_dna
+from run_commands import run_command
 
 class ISHit(object):
     def __init__(self, left_pos, right_pos):
@@ -33,6 +37,170 @@ class ISHit(object):
         self.right_pos = right_pos
         # will be either forward or reverse
         self.orientation = None
+        # the distance between the coordinates
+        self.gap = None
+
+    def get_flanking_genes(self, genbank_obj, feature_list):
+        '''
+        :param genbank_obj: The parsed genbank object
+        :param feature_list: The parsed features list from the genbank file for easy searching
+        :param is_hit: The IS hit object
+        :return: The modified IS hit object containing the features of the left and right genes, their strand, and
+        the distance from the IS hit to each gene
+        '''
+
+        # Find the correct indexes
+        left_feature_index = self.binary_search(feature_list, 'L')
+        right_feature_index = self.binary_search(feature_list, 'R')
+        # Print out information if returning one of the error codes
+        if type(left_feature_index) != int or type(right_feature_index) != int:
+            print('left index')
+            print(left_feature_index)
+            print('right index')
+            print(right_feature_index)
+            print('left position: ' + str(self.left_pos))
+            print('right position: ' + str(self.right_pos))
+        # Extract the SeqFeature object that corresponds to that index
+        left_feature = genbank_obj.features[left_feature_index]
+        right_feature = genbank_obj.features[right_feature_index]
+
+        # Add the SeqFeatures to the IS hit object, and strand information
+        self.left_feature = left_feature
+        self.right_feature = right_feature
+        self.left_strand = left_feature.strand
+        self.right_strand = right_feature.strand
+
+        # Get the distances from the IS hit to the left and right genes
+
+        # The distance to the left gene is the endmost position of the feature - the left IS coord
+        left_dist = abs(max(left_feature.location.start, left_feature.location.end) - self.left_pos)
+        # The distance to the right gene is the startmost position of the feature - the right IS coord
+        right_dist = abs(min(right_feature.location.start, right_feature.location.end) - self.right_pos)
+
+        # Here is probably a good place to check if we've got a position that wraps around from start
+        # to end of the reference
+        # Get the size of the reference genome
+        genome_size = len(genbank_obj.seq)
+        # If we've got a distance that is close to the size of the reference, then we know we need to
+        # alter it
+        if left_dist in range(int(round(genome_size * 0.9)), int(round(genome_size * 1.1))):
+            # The the left hand feature is at the end of the genome
+            # Distance from IS position to start of the genome is the
+            # position itself
+            dist_to_start = self.left_pos
+            # Distance from the end of the final gene to the end of the
+            # genome
+            dist_to_end = abs(left_feature.location.end - genome_size)
+            # So the total distance is those two added together
+            left_dist = dist_to_start + dist_to_end
+
+        elif right_dist in range(int(round(genome_size * 0.9)), int(round(genome_size * 1.1))):
+            # Then the right hand feature is at the start of the genome
+            # Distance from the IS position to the end of the genome
+            dist_to_end = abs(genome_size - self.right_pos)
+            # Distance from the start of the genome to the start of the first feature
+            # is the start position of the first feature
+            dist_to_feature = right_feature.location.start
+            # So the total distance is those two added together
+            right_dist = dist_to_end + dist_to_feature
+
+        self.left_distance = left_dist
+        self.right_distance = right_dist
+
+        # add the gene names
+        self.gene_left = self.left_feature.qualifiers['locus_tag'][0]
+        self.gene_right = self.right_feature.qualifiers['locus_tag'][0]
+
+        return self
+
+    def binary_search(self, features, direction):
+        if direction == 'R':
+            isPosition = self.right_pos
+        else:
+            isPosition = self.left_pos
+        min = 0
+        max = len(features) - 1
+
+        while True:
+
+            # If the min has exceeded the max, then the IS position is not
+            # inside a feature, and m will now be pointing to a
+            # feature next to the IS position.
+            if max < min:
+                if direction == 'R':
+                    return self.findFeatureAfterPosition(features, isPosition, m)
+                else:
+                    return self.findFeatureBeforePosition(features, isPosition, m)
+
+            # Find the midpoint and save the feature attributes
+            m = (min + max) // 2
+            featureStart = features[m][0]
+            featureEnd = features[m][1]
+            featureIndex = features[m][2]
+
+            # If the IS position is after the feature, move the minimum to
+            # be after the feature.
+            if featureEnd < isPosition:
+                min = m + 1
+
+            # If the IS position is before the feature, move the maximum to
+            # be before the feature.
+            elif featureStart > isPosition:
+                max = m - 1
+
+            # If the IS position is inside the feature, return only that feature
+            elif isPosition >= featureStart and isPosition <= featureEnd:
+                return featureIndex
+
+            else:
+                return "1 - THIS SHOULDN'T HAPPEN!"
+
+    def findFeatureBeforePosition(self, features, isPosition, m):
+        # If we are looking for the feature to the left of the
+        # IS position, then either m-1 or m is our answer
+
+        # If the start of the m feature is after the IS position,
+        # then m is after the IS and m-1 is the correct feature
+        if features[m][0] > isPosition:
+            return features[m - 1][2]
+
+        # If both m and m+1 features are before the IS position,
+        # then m will be closer to the IS and is the correct feature
+        elif features[m - 1][1] < isPosition and features[m][1] < isPosition:
+            return features[m][2]
+
+        else:
+            return "2 - THIS SHOULDN'T HAPPEN!"
+
+    def findFeatureAfterPosition(self, features, isPosition, m):
+        # If we are looking for the feature to the right of the
+        # IS position, then either m or m+1 is our answer
+
+        # an index error will occur if m is the final feature, so just check that the first part is true
+        # and return m
+        try:
+            features[m + 1]
+        except IndexError:
+            if features[m][0] > isPosition:
+                return features[m][2]
+            # otherwise we must be after the final position, so need to
+            # return the start position of the very first feature
+            else:
+                return features[0][2]
+        # If the end of the m feature is before the IS position,
+        # then m is before the IS and m+1 is the correct feature
+        if features[m][1] < isPosition:
+            index = m + 1
+            if index >= len(features):
+                return features[0][2]
+            return features[m + 1][2]
+
+        # If both m and m+1 features are after the IS position,
+        # then m will be closer to the IS and is the correct feature
+        elif features[m][0] > isPosition and features[m + 1][0] > isPosition:
+            return features[m][2]
+        else:
+            return "3 - THIS SHOULDN'T HAPPEN!"
 
 def get_features(genbank_object):
 
@@ -73,201 +241,160 @@ def get_qualifiers(cds_qualifiers, trna_qualifiers, rrna_qualifiers, feature):
             pass
     return return_quals
 
-def get_flanking_genes(genbank_obj, feature_list, is_hit):
+def get_orientation(left_coords, right_coords):
     '''
-    :param genbank_obj: The parsed genbank object
-    :param feature_list: The parsed features list from the genbank file for easy searching
-    :param is_hit: The IS hit object
-    :return: The modified IS hit object containing the features of the left and right genes, their strand, and
-    the distance from the IS hit to each gene
+    :param left_coords: list of coordinates for left end of hit
+    :param right_coords: list of coordinates for right end of hit
+    :return: return ISHit object, intialised with orienation and left/right positions
+    '''
+    if left_coords[0] < right_coords[0] or left_coords[1] < right_coords[1]:
+        new_hit = ISHit(left_coords[1], right_coords[0])
+        new_hit.orientation = 'F'
+    else:
+        new_hit = ISHit(right_coords[1], left_coords[0])
+        new_hit.orientation = 'R'
+
+    return new_hit
+
+def doBlast(blast_input, blast_output, database):
+    '''
+    Perform a BLAST using the NCBI command line tools
+    in BioPython.
+    '''
+    run_command(['makeblastdb', '-dbtype nucl', '-in', database], shell=True)
+    run_command(['blastn', '-query', blast_input, '-db', database, '-outfmt "6 qseqid qlen sacc pident length slen sstart send evalue bitscore qcovs"', '>', blast_output], shell=True)
+    #blastn_cline = NcbiblastnCommandline(query=blast_input, db=database, outfmt="'6 qseqid qlen sacc pident length slen sstart send evalue bitscore qcovs'", out=blast_output)
+    #stdout, stderr = blastn_cline()
+
+def check_seq_between(genbank_seq, insertion, start, end, name, temp):
+    '''
+    Check the sequence between two ends to see
+    if it matches the IS query or not, and what
+    the coverage and %ID to the query.
+
+    :param genbank_seq: Whole sequence from genbank file
+    :param insertion: IS query object to BLAST against
+    :param start: Smallest coordinate, to extract sequence
+    :param end: Largest coordinate, to extract sequence
+    :param name: prefix for the file of this sequence
+    :param temp: folder for the file of this sequence to go to
+    :return: If there is a BLAST hit, return a dictionary with the 'coverage' and 'per_id' values, else return
+            an empty dict
     '''
 
-    # Find the correct indexes
-    left_feature_index = binary_search(feature_list, is_hit.left_pos, 'L')
-    right_feature_index = binary_search(feature_list, is_hit.right_pos, 'R')
-    # Print out information if returning one of the error codes
-    if type(left_feature_index) != int or type(right_feature_index) != int:
-        print('left index')
-        print(left_feature_index)
-        print('right index')
-        print(right_feature_index)
-        print('left position: ' + str(is_hit.left_pos))
-        print('right position: ' + str(is_hit.right_pos))
-    # Extract the SeqFeature object that corresponds to that index
-    left_feature = genbank_obj.features[left_feature_index]
-    right_feature = genbank_obj.features[right_feature_index]
+    # Get sequence between left and right ends
+    seq_between = genbank_seq[start:end]
+    # Turn the sequence into a fasta file
+    seq_between = SeqRecord(Seq(str(seq_between), generic_dna), id=name)
+    SeqIO.write(seq_between, temp + name + '.fasta', 'fasta')
+    SeqIO.write(insertion, temp + name + 'ISseq.fasta', 'fasta')
+    # Perform the BLAST
+    doBlast(temp + name + '.fasta', temp + name + '_out.txt', temp + name + 'ISseq.fasta')
+    # Only want the top hit, so set count variable to 0
+    first_result = 0
+    # Open the BLAST output file
+    with open(temp + name + '_out.txt') as summary:
+        for line in summary:
+            # Get coverage and % ID for top hit
+            if first_result == 0:
+                info = line.strip().split('\t')
+                hit = {'coverage': float(info[-1]), 'per_id': float(info[3])}
+                first_result += 1
+            return hit
+    # If there is no hit, just return an empty dict
+    return {}
 
-    # Add the SeqFeatures to the IS hit object, and strand information
-    is_hit.left_feature = left_feature
-    is_hit.right_feature = right_feature
-    is_hit.left_strand = left_feature.strand
-    is_hit.right_strand = right_feature.strand
+def check_unpaired_hits(line_check, ref_gbk_obj, ref_feature_list, is_query_length, min_range, max_range,
+                        tmp_output_folder):
 
-    # The info we require is:
-    # [geneid, distance, [locus_tag, (gene), product, strand]]
-    #left_values = get_qualifiers(cds_features, trna_features, rrna_features, left_feature)
-    #right_values = get_qualifiers(cds_features, trna_features, rrna_features, right_feature)
+    # intialise a list of all the hits found in this file
+    IS_hit_list = []
 
-    # Get the distances from the IS hit to the left and right genes
-
-    # The distance to the left gene is the endmost position of the feature - the left IS coord
-    left_dist = abs(max(left_feature.location.start, left_feature.location.end) - is_hit.left_pos)
-    # The distance to the right gene is the startmost position of the feature - the right IS coord
-    right_dist = abs(min(right_feature.location.start, right_feature.location.end) - is_hit.right_pos)
-
-    # Here is probably a good place to check if we've got a position that wraps around from start
-    # to end of the reference
-    # Get the size of the reference genome
-    genome_size = len(genbank_obj.seq)
-    # If we've got a distance that is close to the size of the reference, then we know we need to
-    # alter it
-    if left_dist in range(int(round(genome_size * 0.9)), int(round(genome_size * 1.1))):
-        # The the left hand feature is at the end of the genome
-        # Distance from IS position to start of the genome is the
-        # position itself
-        dist_to_start = is_hit.left_pos
-        # Distance from the end of the final gene to the end of the
-        # genome
-        dist_to_end = abs(left_feature.location.end - genome_size)
-        # So the total distance is those two added together
-        left_dist = dist_to_start + dist_to_end
-
-    elif right_dist in range(int(round(genome_size * 0.9)), int(round(genome_size * 1.1))):
-        # Then the right hand feature is at the start of the genome
-        # Distance from the IS position to the end of the genome
-        dist_to_end = abs(genome_size - is_hit.right_pos)
-        # Distance from the start of the genome to the start of the first feature
-        # is the start position of the first feature
-        dist_to_feature = right_feature.location.start
-        # So the total distance is those two added together
-        right_dist = dist_to_end + dist_to_feature
-
-    is_hit.left_distance = left_dist
-    is_hit.right_distance = right_dist
-
-    return is_hit
-
-def binary_search(features, isPosition, direction):
-    min = 0
-    max = len(features) - 1
-
-    while True:
-
-        # If the min has exceeded the max, then the IS position is not
-        # inside a feature, and m will now be pointing to a
-        # feature next to the IS position.
-        if max < min:
-            if direction == 'R':
-                return findFeatureAfterPosition(features, isPosition, m)
+    # go through each line
+    for line in line_check:
+        # get the fields
+        info = line.strip().split('\t')
+        # get the distance between the hits
+        gap = int(info[6])
+        # separate out info on the left and right sides of the hit
+        intersect_left = [int(info[1]), int(info[2])]
+        intersect_right = [int(info[4]), int(info[5])]
+        # TODO: check_hit_within_hit
+        # get the orientation and the IS hit object
+        new_hit = get_orientation(intersect_left, intersect_right)
+        # if the gap is small, it's a novel hit
+        if gap <= 15:
+            new_hit.hit_type = 'novel'
+            new_hit.confidence_level = 'unpaired'
+            new_hit.get_flanking_genes(ref_gbk_obj, ref_feature_list)
+            IS_hit_list.append(new_hit)
+        # if the gap is big enough, could be the IS itself, so do a BLAST check
+        elif float(gap) / is_query_length >= min_range and float(gap) / is_query_length <= max_range:
+            new_hit = get_orientation(intersect_left, intersect_right)
+            seq_check_results = check_seq_between(ref_gbk_obj.seq, is_query_obj, new_hit.left_pos,
+                                                  new_hit.right_pos, 'tmp_seq', tmp_output_folder)
+            # if it's a good hit, add it
+            if len(seq_check_results) != 0 and seq_check_results['per_id'] >= 80 and seq_check_results[
+                'coverage'] >= 80:
+                # get the flanking genes
+                new_hit.get_flanking_genes(ref_gbk_obj, ref_feature_list)
+                # make sure its a confident, novel hit
+                new_hit.hit_type = 'known'
+                new_hit.confidence_level = 'unpaired'
+                # add it to the list
+                IS_hit_list.append(new_hit)
+            # if the thresholds are low, then mark it as a possible related IS
+            elif len(seq_check_results) != 0 and seq_check_results['per_id'] >= 50 and seq_check_results[
+                'coverage'] >= 50:
+                new_hit.get_flanking_genes(ref_gbk_obj, ref_feature_list)
+                # mark it as a possible related IS, but confident
+                new_hit.hit_type = 'possible related IS'
+                new_hit.confidence_level = 'unpaired'
+                # add it to the list
+                IS_hit_list.append(new_hit)
+            # otherwise this is a spurious result, remove
             else:
-                return findFeatureBeforePosition(features, isPosition, m)
-
-        # Find the midpoint and save the feature attributes
-        m = (min + max) // 2
-        featureStart = features[m][0]
-        featureEnd = features[m][1]
-        featureIndex = features[m][2]
-
-        # If the IS position is after the feature, move the minimum to
-        # be after the feature.
-        if featureEnd < isPosition:
-            min = m + 1
-
-        # If the IS position is before the feature, move the maximum to
-        # be before the feature.
-        elif featureStart > isPosition:
-            max = m - 1
-
-        # If the IS position is inside the feature, return only that feature
-        elif isPosition >= featureStart and isPosition <= featureEnd:
-            return featureIndex
-
+                # TODO: remove this hit
+                pass
+        # the gap is too small to be the IS, but larger than a novel hit
+        elif float(gap) / is_query_length <= min_range and float(gap) / is_query_length < max_range:
+            new_hit = get_orientation(intersect_left, intersect_right)
+            # add the relevant information
+            new_hit.hit_type = 'novel'
+            new_hit.confidence_level = 'unpaired'
+            new_hit.get_flanking_genes(ref_gbk_obj, ref_feature_list)
+            # add it to the list
+            IS_hit_list.append(new_hit)
+        # otherwise remove!
         else:
-            return "1 - THIS SHOULDN'T HAPPEN!"
+            # TODO: remove this hit
+            pass
 
-def findFeatureBeforePosition(features, isPosition, m):
-    # If we are looking for the feature to the left of the
-    # IS position, then either m-1 or m is our answer
+    return IS_hit_list
 
-    # If the start of the m feature is after the IS position,
-    # then m is after the IS and m-1 is the correct feature
-    if features[m][0] > isPosition:
-        return features[m-1][2]
-
-    # If both m and m+1 features are before the IS position,
-    # then m will be closer to the IS and is the correct feature
-    elif features[m-1][1] < isPosition and features[m][1] < isPosition:
-        return features[m][2]
-
-    else:
-        return "2 - THIS SHOULDN'T HAPPEN!"
-
-def findFeatureAfterPosition(features, isPosition, m):
-    # If we are looking for the feature to the right of the
-    # IS position, then either m or m+1 is our answer
-
-    # an index error will occur if m is the final feature, so just check that the first part is true
-    # and return m
-    try:
-        features[m+1]
-    except IndexError:
-        if features[m][0] > isPosition:
-            return features[m][2]
-        # otherwise we must be after the final position, so need to
-        # return the start position of the very first feature
-        else:
-            return features[0][2]
-    # If the end of the m feature is before the IS position,
-    # then m is before the IS and m+1 is the correct feature
-    if features[m][1] < isPosition:
-        index = m + 1
-        if index >= len(features):
-            return features[0][2]
-        return features[m+1][2]
-
-    # If both m and m+1 features are after the IS position,
-    # then m will be closer to the IS and is the correct feature
-    elif features[m][0] > isPosition and features[m+1][0] > isPosition:
-        return features[m][2]
-    else:
-        return "3 - THIS SHOULDN'T HAPPEN!"
-
-def novel_hit(is_hit_obj, genbank_features):
-    '''
-
-    :param is_hit_obj:
-    :param genbank_features:
-    :return:
-    '''
-
-    # The hit is novel
-
-
-
-def create_typing_output(filenames, ref_gbk_obj, is_query_obj, min_range, max_range):
+def create_typing_output(filenames, ref_gbk_obj, is_query_obj, min_range, max_range, tmp_output_folder):
 
     # first we need all the input files so we can match hits up
     intersect_file = filenames['intersect']
     closest_file = filenames['closest']
-    #left_unp = filenames['left_unpaired']
-    #right_unp = filenames['right_unpaired']
-    #left_bedfile = filenames['left_merged_bed']
-    #right_bedfile = filenames['right_merged_bed']
+    left_unp = filenames['left_unpaired']
+    right_unp = filenames['right_unpaired']
+    left_bedfile = filenames['left_merged_bed']
+    right_bedfile = filenames['right_merged_bed']
 
     # we also need to know the name of the table file where we'll write the final output to
     #final_table_file = filenames['table']
 
-    # this is the dictionary of results
-    results = {}
     # these are the results which are being excluded based on some criteria
     removed_results = {}
     # we're starting at the first region, line 0
     region = 1
     lines = 0
     # this is the header of the table output
-    header = ["region", "orientation", "x", "y", "gap", "call", "Percent_ID", "Percent_Cov", "left_gene", "left_strand", "left_distance", "right_gene", "right_strand", "right_distance", "functional_prediction"]
+    #header = ["region", "orientation", "x", "y", "gap", "call", "Percent_ID", "Percent_Cov", "left_gene", "left_strand", "left_distance", "right_gene", "right_strand", "right_distance", "functional_prediction"]
 
     # If both intersect and closest bed files are empty, there are no hits
+    # TODO: fix this
     if os.stat(intersect_file)[6] == 0 and os.stat(closest_file)[6] == 0:
         output = open(final_table_file, 'w')
         output.write('\t'.join(header) + '\n')
@@ -277,19 +404,19 @@ def create_typing_output(filenames, ref_gbk_obj, is_query_obj, min_range, max_ra
         logging.info('No hits found for sample XX')
         return('No hits')
 
-    # Now we need to read in the genbank file we're mapping to,
+    # If there are hits, read in the genbank file we're mapping to,
     # and create feature list for searching
     ref_feature_list = get_features(ref_gbk_obj)
 
     # Initialise feature count
     feature_count = 0
 
-    intersect_left = []
-    intersect_right = []
-    closest_left = []
-    closest_right = []
+    all_intersect_left = []
+    all_intersect_right = []
+    all_closest_left = []
+    all_closest_right = []
 
-    # final list of IS hit objects
+    # final list of IS hit objects to make into a table at the end
     IS_hits = []
 
     # Start with the intersect file (novel hits)
@@ -302,34 +429,35 @@ def create_typing_output(filenames, ref_gbk_obj, is_query_obj, min_range, max_ra
                 # separate out info on the left and right sides of the hit
                 intersect_left = [int(info[1]), int(info[2])]
                 intersect_right = [int(info[4]), int(info[5])]
+                # add this information to the master lists, for checking against unpaired hits later
+                all_intersect_left.append(intersect_left)
+                all_intersect_right.append(intersect_right)
                 # get the gap between the hits, as determined by bedtools
                 gap = int(info[6])
                 # if the gap is small, then lets process this hit
                 if gap <= 15:
                     # check if one hit is actually within the other hit
                     # if it is we need to remove it
+                    # TODO: make this a function (check_hit_within_hit)
                     left_range = range(min(intersect_left), max(intersect_left))
                     right_range = range(min(intersect_right), max(intersect_right))
                     if (intersect_left[0] in right_range and intersect_left[1] in right_range) or (intersect_right[0] in left_range and intersect_right[1] in left_range):
                         # TODO: remove this hit
+                        # set 'removed' variable to True
                         pass
                     # otherwise we need to process the hit
                     else:
                         # determine orientation and coordinates of hit
                         # process hit
-                        if intersect_left[0] < intersect_right[0] or intersect_left[1] < intersect_right[1]:
-                            orientation = 'F'
-                            new_hit = ISHit(intersect_left[1], intersect_right[0])
-                        else:
-                            orientation = 'R'
-                            new_hit = ISHit(intersect_right[1], intersect_left[0])
+                        new_hit = get_orientation(intersect_left, intersect_right)
                         # add the relevant information to the hit that we already know
                         new_hit.hit_type = 'novel'
                         new_hit.confidence_level = 'confident'
-                        new_hit.orientation = orientation
 
                         # determine the features flanking the hit, and add the details to the hit object
-                        new_hit = get_flanking_genes(ref_gbk_obj, ref_feature_list, new_hit)
+                        new_hit.get_flanking_genes(ref_gbk_obj, ref_feature_list)
+                        # TODO: determine gap, write a specific method for the class
+                        #new_hit.get_gap_distance()
                         # append the hit to our list
                         IS_hits.append(new_hit)
                 # If the gap is too big, we need to remove this hit
@@ -351,24 +479,99 @@ def create_typing_output(filenames, ref_gbk_obj, is_query_obj, min_range, max_ra
                     break
                 # get the distance between the hits
                 gap = int(info[6])
+                # separate out info on the left and right sides of the hit
+                intersect_left = [int(info[1]), int(info[2])]
+                intersect_right = [int(info[4]), int(info[5])]
+                # add this information to the master lists, for checking against unpaired hits later
+                all_closest_left.append(intersect_left)
+                all_closest_right.append(intersect_right)
                 # If the gap distance is 0, then this hit will be in the intersect file, so ignore
                 if gap == 0:
                     pass
                 # If the gap distance is small, this is likely a novel hit where no overlap was detected
                 # TODO: make this gap size changeable in IS Mapper parameters
                 elif gap <= 10:
-                    pass
+                    new_hit = get_orientation(intersect_left, intersect_right)
+                    # add the relevant information to the hit that we already know
+                    new_hit.hit_type = 'novel'
+                    new_hit.confidence_level = 'confident'
+                    # determine the features flanking the hit, and add the details to the hit object
+                    new_hit.get_flanking_genes(ref_gbk_obj, ref_feature_list)
+                    # TODO: determine gap, write a specific method for the class
+                    # new_hit.get_gap_distance()
+                    # append the hit to our list
+                    IS_hits.append(new_hit)
                 # The gap size is within the range of the actual IS query size, and so probably indicates a known hit
                 # Need to BLAST the sequence here to check it matches the IS
                 elif float(gap) / is_query_length >= min_range and float(gap) / is_query_length <= max_range:
-                    pass
+                    new_hit = get_orientation(intersect_left, intersect_right)
+                    #genbank_seq, insertion, start, end, name, temp
+                    seq_check_results = check_seq_between(ref_gbk_obj.seq, is_query_obj, new_hit.left_pos,
+                                                          new_hit.right_pos, 'tmp_seq', tmp_output_folder)
+                    # if it's a good hit, add it
+                    if len(seq_check_results) != 0 and seq_check_results['per_id'] >= 80 and seq_check_results['coverage'] >= 80:
+                        # get the flanking genes
+                        new_hit.get_flanking_genes(ref_gbk_obj, ref_feature_list)
+                        # make sure its a confident, novel hit
+                        new_hit.hit_type = 'known'
+                        new_hit.confidence_level = 'confident'
+                        # add it to the list
+                        IS_hits.append(new_hit)
+                    # if the thresholds are low, then mark it as a possible related IS
+                    elif len(seq_check_results) != 0 and seq_check_results['per_id'] >=50 and seq_check_results['coverage'] >= 50:
+                        new_hit.get_flanking_genes(ref_gbk_obj, ref_feature_list)
+                        # mark it as a possible related IS, but confident
+                        new_hit.hit_type = 'possible related IS'
+                        new_hit.confidence_level = 'confident'
+                        # add it to the list
+                        IS_hits.append(new_hit)
+                    # otherwise this is a spurious result, remove
+                    else:
+                        # TODO: remove this hit
+                        pass
                 # The gap size here is smaller than the actual IS query, but larger than expected for a novel hit
                 # This is an imprecise hit
                 elif float(gap) / is_query_length <= min_range and float(gap) / is_query_length < max_range:
-                    pass
+                    new_hit = get_orientation(intersect_left, intersect_right)
+                    # add the relevant information
+                    new_hit.hit_type = 'novel'
+                    new_hit.confidence_level = 'imprecise'
+                    new_hit.get_flanking_genes(ref_gbk_obj, ref_feature_list)
+                    # add it to the list
+                    IS_hits.append(new_hit)
                 # This hit is way too big and doesn't fit any of the other criteria, so needs to be recorded as removed
                 else:
                     # TODO: remove this hit
                     pass
 
-    return is_hits
+    # Looking for unpaired hits which are not in the merged/closest bed files
+    # Possibly unpaired because the pair is low coverage and didn't pass
+    # depth cutoff
+
+    # Start with the left hand unpaired file
+    # FIRST, remove any positions which match regions we have ALREADY processed, by comparing to the left hand
+    # master lists
+    line_check = []
+    with open(left_unp) as left_bed:
+        for line in left_bed:
+            if line.strip().split('\t') not in all_intersect_left and line.strip().split('\t') not in all_closest_left:
+                line_check.append(line.strip().split('\t'))
+    if len(line_check) != 0:
+        all_new_hits = check_unpaired_hits(line_check, ref_gbk_obj, ref_feature_list, is_query_length,
+                                           min_range, max_range, tmp_output_folder)
+        # add them to our current list
+        IS_hits = IS_hits + all_new_hits
+
+    # Then check the right hand unpaired file, again removing positions already processed
+    line_check = []
+    with open(right_unp) as right_bed:
+        for line in right_bed:
+            if line.strip().split('\t') not in all_intersect_right and line.strip().split('\t') not in all_closest_right:
+                line_check.append(line.strip().split('\t'))
+    if len(line_check) != 0:
+        all_new_hits = check_unpaired_hits(line_check, ref_gbk_obj, ref_feature_list, is_query_length,
+                                           min_range, max_range, tmp_output_folder)
+
+        # add them to our current list
+        IS_hits = IS_hits + all_new_hits
+    return IS_hits

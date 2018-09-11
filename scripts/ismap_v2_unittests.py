@@ -43,12 +43,18 @@ class TestCreate_typing_output(unittest.TestCase):
 
 
     def setUp(self):
-        self.filenames = {'intersect':'/Users/jane/Desktop/ismap_v2/9262_1#29/ISAba1/9262_1#29_CP010781.1_intersect.bed',
-                          'closest': '/Users/jane/Desktop/ismap_v2/9262_1#29/ISAba1/9262_1#29_CP010781.1_closest.bed'}
-        self.ref_gbk_obj = SeqIO.read('/Users/jane/Desktop/ismap_v2/refs/CP010781.gbk', 'genbank')
+        #self.filenames = {'intersect':'/Users/jane/Desktop/ismap_v2/9262_1#29/ISAba1/9262_1#29_CP010781.1_intersect.bed',
+        #                  'closest': '/Users/jane/Desktop/ismap_v2/9262_1#29/ISAba1/9262_1#29_CP010781.1_closest.bed'}
+        #self.ref_gbk_obj = SeqIO.read('/Users/jane/Desktop/ismap_v2/refs/CP010781.gbk', 'genbank')
+        self.filenames = {'intersect':'/Users/jane/Desktop/ismap_v2/9262_1#29/ISAba1/9262_1#29_CP001921.1_intersect.bed',
+                          'closest': '/Users/jane/Desktop/ismap_v2/9262_1#29/ISAba1/9262_1#29_CP001921.1_closest.bed'}
+        self.ref_gbk_obj = SeqIO.read('/Users/jane/Desktop/ismap_v2/refs/CP001921.gbk', 'genbank')
+        self.is_query_obj = SeqIO.read('/Users/jane/Desktop/ismap_v2/queries/ISAba1.fasta', 'fasta')
+        self.min_range = 0.9
+        self.max_range = 1.1
 
     def test_create_typing_output(self):
-        hit_list = create_output.create_typing_output(self.filenames, self.ref_gbk_obj)
+        hit_list = create_output.create_typing_output(self.filenames, self.ref_gbk_obj, self.is_query_obj, self.min_range, self.max_range)
 
 
 '''

@@ -160,7 +160,7 @@ def main():
                     filenames_bedfiles = create_bed_files(filenames, args.cutoff, args.merging)
 
                     # Create table and annotated genbank with hits
-                    #create_typing_output(filenames, ref_gbk, is_query, sample_name, cds, trna, rrna)
+                    #create_typing_output(filenames, ref_gbk, is_query, tmp_output_folder, sample_name, cds, trna, rrna)
                     create_typing_output(filenames_bedfiles, ref_seq, is_query, sample.prefix, args.cds, args.trna, args.rrna, args.min_range, args.max_range)
                 pass
 
