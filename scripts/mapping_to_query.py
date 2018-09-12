@@ -54,7 +54,9 @@ class RunSamtools:
         if self.version == 1:
             cmd = cmd + ' -O SAM {} > {}'.format(input_bam, output_sam)
             return(shlex.split(cmd))
-        #TODO: fix this function for samtools pre v1
+        else:
+            cmd = cmd + ' {} > {}'.format(input_bam, output_sam)
+            return(shlex.split(cmd))
 
 def bwa_index(fasta):
 
@@ -159,7 +161,7 @@ def extract_clipped_reads(sam_file, min_size, max_size, out_left_file, out_right
                     else:
                         out_right.write('@' + read_name + '\n' + str(soft_clipped_seq) + '\n+\n' + qual_scores + '\n')
 
-def map_to_is_query(sample, is_query, output_sample):
+def map_to_is_query(sample, is_query, output_sample, min_clip, max_clip, threads):
 
     """
     Take the sample object (containing paths to reads and read prefix), the IS query (fasta file) and the
@@ -175,13 +177,13 @@ def map_to_is_query(sample, is_query, output_sample):
 
     Return the file names of the clipped reads for subsequent analysis.
     """
-
     samtools_runner = RunSamtools()
 
     # set up output folders
     is_query_out = os.path.join(output_sample, is_query.id)
     is_query_tmp_folder = os.path.join(output_sample, is_query.id, 'tmp')
     make_directories([is_query_out, is_query_tmp_folder])
+    logging.info('Created output folder %s', is_query_out)
 
     # set up output file names
     filenames = set_output_filenames(is_query_tmp_folder, sample.prefix, is_query.id, is_query_out)
@@ -192,8 +194,7 @@ def map_to_is_query(sample, is_query, output_sample):
     # index the query
     bwa_index(is_query_tmp)
     # map to the query
-    # TODO: add argument for args.t functionality
-    run_command(['bwa', 'mem', '-t', '1', is_query_tmp, str(sample.forward), str(sample.reverse), '>', filenames['sam']], shell=True)
+    run_command(['bwa', 'mem', '-t', threads, is_query_tmp, str(sample.forward), str(sample.reverse), '>', filenames['sam']], shell=True)
 
     # pull out unmapped reads flanking IS
     run_command(samtools_runner.view(filenames['left_bam'], filenames['sam'], smallF=36), shell=True)
@@ -204,17 +205,14 @@ def map_to_is_query(sample, is_query, output_sample):
     run_command(['bedtools', 'bamtofastq', '-i', filenames['right_bam'], '-fq', filenames['right_reads']], shell=True)
 
     # Extract clipped reads
-    # TODO: work out how to add to log file from function
-    #logging.info(
-    #    'Extracting soft clipped reads, selecting reads that are <= ' + str(args.max_clip) + 'bp and >= ' + str(
-    #        args.min_clip) + 'bp')
-    # TODO: add argument for args.min_clip and args.max_clip functionality
-    # TODO: update min and max clips to be integer not string
-    extract_clipped_reads(filenames['sam'], 10, 30, filenames['left_clipped'], filenames['right_clipped'])
+    logging.info('Extracting soft clipped reads that are <= %s bp and >= %s bp', str(max_clip), str(min_clip))
+    extract_clipped_reads(filenames['sam'], min_clip, max_clip, filenames['left_clipped'], filenames['right_clipped'])
 
     # Add clipped reads to the final fastq files
     run_command(['cat', filenames['left_clipped'], filenames['left_reads'], '>', filenames['left_final']], shell=True)
     run_command(['cat', filenames['right_clipped'], filenames['right_reads'], '>', filenames['right_final']], shell=True)
+
+    logging.info('Successfully extracted reads flanking left and right end of IS query')
 
     # return the paths to these reads
     return filenames['left_final'], filenames['right_final'], is_query_out, is_query_tmp_folder

@@ -49,7 +49,7 @@ def parse_args():
     parser.add_argument('--a', action='store_true', required=False, help='Switch on all alignment reporting for bwa.')
     parser.add_argument('--T', type=str, required=False, default='30', help='Mapping quality score for bwa (default 30).')
     parser.add_argument('--t', type=str, required=False, default='1', help='Number of threads for bwa (default 1).')
-    parser.add_argument('--min_clip', type=int, required=False, default='10', help='Minimum size for softclipped region to be extracted from initial mapping (default 10).')
+    parser.add_argument('--min_clip', type=int, required=False, default=10, help='Minimum size for softclipped region to be extracted from initial mapping (default 10).')
     parser.add_argument('--max_clip', type=int, required=False, default=30, help='Maximum size for softclipped regions to be included (default 30).')
     # Options for table output (typing)
     parser.add_argument('--cds', nargs='+', type=str, required=False, default=['locus_tag', 'gene', 'product'], help='qualifiers to look for in reference genbank for CDS features (default locus_tag gene product)')
@@ -127,27 +127,28 @@ def main():
             logging.info(unpaired.prefix)
     # print out paired reads
     for paired in read_groups.paired:
-        logging.info(paired.prefix)
-        forward_read = paired.forward
-        reverse_read = paired.reverse
-        logging.info(str(forward_read.filepath), str(reverse_read.filepath))
+        logging.info('Found paired reads for sample %s: %s %s', paired.prefix, str(paired.forward.filepath), str(paired.reverse.filepath))
 
     # parse queries
     query_records = get_sequences(args.queries, 'fasta')
+    for record in query_records:
+        logging.info('Found query %s', record.id)
 
     # read in the reference genomes to type against
     reference_seqs = get_sequences(args.typingRef, 'genbank')
+    for record in reference_seqs:
+        logging.info('Found reference sequence %s', record.id)
 
     for sample in read_groups.paired:
 
+        logging.info('Processing sample %s', sample.prefix)
         # set up output folder for each strain:
         output_sample = os.path.join(working_dir, sample.prefix)
-        #make_directories(output_sample)
 
         # regardless of which mode we're in, we need to do the following, for each query:
         for is_query in query_records:
-
-            left_flanking_reads, right_flanking_reads, is_output_folder, tmp_output_folder = map_to_is_query(sample, is_query, output_sample)
+            logging.info('Processing IS query %s against sample %s', is_query.id, sample.prefix)
+            left_flanking_reads, right_flanking_reads, is_output_folder, tmp_output_folder = map_to_is_query(sample, is_query, output_sample, args.min_clip, args.max_clip, args.t)
 
             # typing mode first
             if args.runtype == 'typing':
