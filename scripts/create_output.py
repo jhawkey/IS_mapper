@@ -32,13 +32,38 @@ class ISHit(object):
         self.interrupted = False
         # confidence level is either confident, imprecise (*) or unpaired (?)
         self.confidence_level = None
-        # left and right coordinates of the hit
-        self.left_pos = left_pos
-        self.right_pos = right_pos
+        # x and y coordinates of the hit
+        # x is always the smaller and y the larger, REGARDLESS of orientation!
+        self.x = left_pos
+        self.y = right_pos
+        # set this to true when the hit has come from the intersect file
+        self.overlap = False
         # will be either forward or reverse
         self.orientation = None
         # the distance between the coordinates
         self.gap = None
+
+        # store the blast values if its a known hit
+        self.per_id = ''
+        self.coverage = ''
+
+    def get_gap_distance(self):
+
+        self.gap = self.y - self.x
+
+        if self.overlap:
+            self.gap = -self.gap
+
+        return self
+
+    def determine_interrupted(self):
+
+        if self.gene_left == self.gene_right:
+            self.interrupted = True
+
+        return self
+
+
 
     def get_flanking_genes(self, genbank_obj, feature_list):
         '''
@@ -73,9 +98,9 @@ class ISHit(object):
         # Get the distances from the IS hit to the left and right genes
 
         # The distance to the left gene is the endmost position of the feature - the left IS coord
-        left_dist = abs(max(left_feature.location.start, left_feature.location.end) - self.left_pos)
+        left_dist = abs(max(left_feature.location.start, left_feature.location.end) - self.x)
         # The distance to the right gene is the startmost position of the feature - the right IS coord
-        right_dist = abs(min(right_feature.location.start, right_feature.location.end) - self.right_pos)
+        right_dist = abs(min(right_feature.location.start, right_feature.location.end) - self.y)
 
         # Here is probably a good place to check if we've got a position that wraps around from start
         # to end of the reference
@@ -87,7 +112,7 @@ class ISHit(object):
             # The the left hand feature is at the end of the genome
             # Distance from IS position to start of the genome is the
             # position itself
-            dist_to_start = self.left_pos
+            dist_to_start = self.x
             # Distance from the end of the final gene to the end of the
             # genome
             dist_to_end = abs(left_feature.location.end - genome_size)
@@ -97,7 +122,7 @@ class ISHit(object):
         elif right_dist in range(int(round(genome_size * 0.9)), int(round(genome_size * 1.1))):
             # Then the right hand feature is at the start of the genome
             # Distance from the IS position to the end of the genome
-            dist_to_end = abs(genome_size - self.right_pos)
+            dist_to_end = abs(genome_size - self.y)
             # Distance from the start of the genome to the start of the first feature
             # is the start position of the first feature
             dist_to_feature = right_feature.location.start
@@ -115,9 +140,9 @@ class ISHit(object):
 
     def binary_search(self, features, direction):
         if direction == 'R':
-            isPosition = self.right_pos
+            isPosition = self.y
         else:
-            isPosition = self.left_pos
+            isPosition = self.x
         min = 0
         max = len(features) - 1
 
@@ -247,11 +272,20 @@ def get_orientation(left_coords, right_coords):
     :param right_coords: list of coordinates for right end of hit
     :return: return ISHit object, intialised with orienation and left/right positions
     '''
+
+    # x must always be the smallest position, and y the largest position
+    # regardless of orientation
     if left_coords[0] < right_coords[0] or left_coords[1] < right_coords[1]:
-        new_hit = ISHit(left_coords[1], right_coords[0])
+        smallest = min(right_coords[0], left_coords[1])
+        biggest = max(right_coords[0], left_coords[1])
+        new_hit = ISHit(smallest, biggest)
+        # we are in forward orientation
         new_hit.orientation = 'F'
     else:
-        new_hit = ISHit(right_coords[1], left_coords[0])
+        smallest = min(left_coords[0], right_coords[1])
+        biggest = max(left_coords[0], right_coords[1])
+        new_hit = ISHit(smallest, biggest)
+        # we are in reverse orientation
         new_hit.orientation = 'R'
 
     return new_hit
@@ -262,9 +296,8 @@ def doBlast(blast_input, blast_output, database):
     in BioPython.
     '''
     run_command(['makeblastdb', '-dbtype nucl', '-in', database], shell=True)
+    #print(' '.join(['blastn', '-query', blast_input, '-db', database, '-outfmt "6 qseqid qlen sacc pident length slen sstart send evalue bitscore qcovs"', '>', blast_output]))
     run_command(['blastn', '-query', blast_input, '-db', database, '-outfmt "6 qseqid qlen sacc pident length slen sstart send evalue bitscore qcovs"', '>', blast_output], shell=True)
-    #blastn_cline = NcbiblastnCommandline(query=blast_input, db=database, outfmt="'6 qseqid qlen sacc pident length slen sstart send evalue bitscore qcovs'", out=blast_output)
-    #stdout, stderr = blastn_cline()
 
 def check_seq_between(genbank_seq, insertion, start, end, name, temp):
     '''
@@ -304,16 +337,16 @@ def check_seq_between(genbank_seq, insertion, start, end, name, temp):
     # If there is no hit, just return an empty dict
     return {}
 
-def check_unpaired_hits(line_check, ref_gbk_obj, ref_feature_list, is_query_length, min_range, max_range,
+def check_unpaired_hits(line_check, ref_gbk_obj, ref_feature_list, is_query_obj, min_range, max_range,
                         tmp_output_folder):
 
     # intialise a list of all the hits found in this file
     IS_hit_list = []
+    # get length of IS
+    is_query_length = len(is_query_obj.seq)
 
     # go through each line
-    for line in line_check:
-        # get the fields
-        info = line.strip().split('\t')
+    for info in line_check:
         # get the distance between the hits
         gap = int(info[6])
         # separate out info on the left and right sides of the hit
@@ -331,8 +364,8 @@ def check_unpaired_hits(line_check, ref_gbk_obj, ref_feature_list, is_query_leng
         # if the gap is big enough, could be the IS itself, so do a BLAST check
         elif float(gap) / is_query_length >= min_range and float(gap) / is_query_length <= max_range:
             new_hit = get_orientation(intersect_left, intersect_right)
-            seq_check_results = check_seq_between(ref_gbk_obj.seq, is_query_obj, new_hit.left_pos,
-                                                  new_hit.right_pos, 'tmp_seq', tmp_output_folder)
+            seq_check_results = check_seq_between(ref_gbk_obj.seq, is_query_obj, new_hit.x,
+                                                  new_hit.y, 'tmp_seq', tmp_output_folder)
             # if it's a good hit, add it
             if len(seq_check_results) != 0 and seq_check_results['per_id'] >= 80 and seq_check_results[
                 'coverage'] >= 80:
@@ -341,6 +374,8 @@ def check_unpaired_hits(line_check, ref_gbk_obj, ref_feature_list, is_query_leng
                 # make sure its a confident, novel hit
                 new_hit.hit_type = 'known'
                 new_hit.confidence_level = 'unpaired'
+                new_hit.per_id = str(seq_check_results['per_id'])
+                new_hit.coverage = str(seq_check_results['coverage'])
                 # add it to the list
                 IS_hit_list.append(new_hit)
             # if the thresholds are low, then mark it as a possible related IS
@@ -350,6 +385,8 @@ def check_unpaired_hits(line_check, ref_gbk_obj, ref_feature_list, is_query_leng
                 # mark it as a possible related IS, but confident
                 new_hit.hit_type = 'possible related IS'
                 new_hit.confidence_level = 'unpaired'
+                new_hit.per_id = str(seq_check_results['per_id'])
+                new_hit.coverage = str(seq_check_results['coverage'])
                 # add it to the list
                 IS_hit_list.append(new_hit)
             # otherwise this is a spurious result, remove
@@ -372,6 +409,56 @@ def check_unpaired_hits(line_check, ref_gbk_obj, ref_feature_list, is_query_leng
 
     return IS_hit_list
 
+def write_typing_output(IShits, output_table):
+
+    with open(output_table, 'w') as out:
+
+        # set the header and write it to the output file
+        header = ["region", "orientation", "x", "y", "gap", "call", "percent_ID", "percent_cov", "left_gene", "left_description", "left_strand",
+                  "left_distance", "right_gene", "right_description", "right_strand", "right_distance", "gene_interruption"]
+        out.write('\t'.join(header) + '\n')
+
+        # if there are no hits, record this and exit the function
+        if len(IShits) == 0:
+            out.write('No hits found')
+            out.close()
+            return
+
+        # sort IS hits by left position, ascending order
+        IShits.sort(key=lambda x: x.x)
+
+        # loop through each hit
+        region = 1
+        for IShit in IShits:
+            region_num = 'region_%s' % region
+            region += 1
+            call_type = IShit.hit_type
+            if IShit.confidence_level == 'imprecise':
+                call_type = call_type + '*'
+            elif IShit.confidence_level == 'unpaired':
+                call_type = call_type + '?'
+            # calculate gap distance
+            IShit.get_gap_distance()
+            # determine if gene is interrupted or not
+            IShit.determine_interrupted()
+            # get qualifiers for left and right genes
+            # TODO: make sure this qualifier call is robust
+            left_description = IShit.left_feature.qualifiers['product'][0]
+            right_description = IShit.right_feature.qualifiers['product'][0]
+            # put together row
+            line_list = [region_num, IShit.orientation, str(IShit.x), str(IShit.y), str(IShit.gap),
+                         call_type, IShit.per_id, IShit.coverage, IShit.gene_left, left_description,
+                         str(IShit.left_strand), str(IShit.left_distance), IShit.gene_right,
+                         right_description, str(IShit.right_strand), str(IShit.right_distance),
+                         str(IShit.interrupted)]
+            # write out the information
+            out.write('\t'.join(line_list) + '\n')
+
+        # close the file and exit the function
+        out.close()
+        return
+
+
 def create_typing_output(filenames, ref_gbk_obj, is_query_obj, min_range, max_range, tmp_output_folder):
 
     # first we need all the input files so we can match hits up
@@ -379,45 +466,31 @@ def create_typing_output(filenames, ref_gbk_obj, is_query_obj, min_range, max_ra
     closest_file = filenames['closest']
     left_unp = filenames['left_unpaired']
     right_unp = filenames['right_unpaired']
-    left_bedfile = filenames['left_merged_bed']
-    right_bedfile = filenames['right_merged_bed']
+    #left_bedfile = filenames['left_merged_bed']
+    #right_bedfile = filenames['right_merged_bed']
 
     # we also need to know the name of the table file where we'll write the final output to
-    #final_table_file = filenames['table']
+    final_table_file = filenames['table']
 
-    # these are the results which are being excluded based on some criteria
-    removed_results = {}
-    # we're starting at the first region, line 0
-    region = 1
-    lines = 0
-    # this is the header of the table output
-    #header = ["region", "orientation", "x", "y", "gap", "call", "Percent_ID", "Percent_Cov", "left_gene", "left_strand", "left_distance", "right_gene", "right_strand", "right_distance", "functional_prediction"]
+    # final list of IS hit objects to make into a table at the end
+    IS_hits = []
 
     # If both intersect and closest bed files are empty, there are no hits
-    # TODO: fix this
+    # write out an empty file and record this in the log file
     if os.stat(intersect_file)[6] == 0 and os.stat(closest_file)[6] == 0:
-        output = open(final_table_file, 'w')
-        output.write('\t'.join(header) + '\n')
-        output.write('No hits found')
-        output.close()
+        write_typing_output(IS_hits, final_table_file)
         # TODO: add sample name here
         logging.info('No hits found for sample XX')
-        return('No hits')
+        return
 
     # If there are hits, read in the genbank file we're mapping to,
     # and create feature list for searching
     ref_feature_list = get_features(ref_gbk_obj)
 
-    # Initialise feature count
-    feature_count = 0
-
     all_intersect_left = []
     all_intersect_right = []
     all_closest_left = []
     all_closest_right = []
-
-    # final list of IS hit objects to make into a table at the end
-    IS_hits = []
 
     # Start with the intersect file (novel hits)
     if os.stat(intersect_file)[6] != 0:
@@ -453,6 +526,9 @@ def create_typing_output(filenames, ref_gbk_obj, is_query_obj, min_range, max_ra
                         # add the relevant information to the hit that we already know
                         new_hit.hit_type = 'novel'
                         new_hit.confidence_level = 'confident'
+                        # make sure we note that this is overlapping if distance is 0
+                        if gap == 0:
+                            new_hit.overlap = True
 
                         # determine the features flanking the hit, and add the details to the hit object
                         new_hit.get_flanking_genes(ref_gbk_obj, ref_feature_list)
@@ -506,8 +582,8 @@ def create_typing_output(filenames, ref_gbk_obj, is_query_obj, min_range, max_ra
                 elif float(gap) / is_query_length >= min_range and float(gap) / is_query_length <= max_range:
                     new_hit = get_orientation(intersect_left, intersect_right)
                     #genbank_seq, insertion, start, end, name, temp
-                    seq_check_results = check_seq_between(ref_gbk_obj.seq, is_query_obj, new_hit.left_pos,
-                                                          new_hit.right_pos, 'tmp_seq', tmp_output_folder)
+                    seq_check_results = check_seq_between(ref_gbk_obj.seq, is_query_obj, new_hit.x,
+                                                          new_hit.y, 'tmp_seq', tmp_output_folder)
                     # if it's a good hit, add it
                     if len(seq_check_results) != 0 and seq_check_results['per_id'] >= 80 and seq_check_results['coverage'] >= 80:
                         # get the flanking genes
@@ -515,6 +591,8 @@ def create_typing_output(filenames, ref_gbk_obj, is_query_obj, min_range, max_ra
                         # make sure its a confident, novel hit
                         new_hit.hit_type = 'known'
                         new_hit.confidence_level = 'confident'
+                        new_hit.per_id = str(seq_check_results['per_id'])
+                        new_hit.coverage = str(seq_check_results['coverage'])
                         # add it to the list
                         IS_hits.append(new_hit)
                     # if the thresholds are low, then mark it as a possible related IS
@@ -523,6 +601,8 @@ def create_typing_output(filenames, ref_gbk_obj, is_query_obj, min_range, max_ra
                         # mark it as a possible related IS, but confident
                         new_hit.hit_type = 'possible related IS'
                         new_hit.confidence_level = 'confident'
+                        new_hit.per_id = str(seq_check_results['per_id'])
+                        new_hit.coverage = str(seq_check_results['coverage'])
                         # add it to the list
                         IS_hits.append(new_hit)
                     # otherwise this is a spurious result, remove
@@ -554,10 +634,12 @@ def create_typing_output(filenames, ref_gbk_obj, is_query_obj, min_range, max_ra
     line_check = []
     with open(left_unp) as left_bed:
         for line in left_bed:
-            if line.strip().split('\t') not in all_intersect_left and line.strip().split('\t') not in all_closest_left:
+            info = line.strip().split('\t')
+            left_coords = [int(info[1]), int(info[2])]
+            if left_coords not in all_intersect_left and left_coords not in all_closest_left:
                 line_check.append(line.strip().split('\t'))
     if len(line_check) != 0:
-        all_new_hits = check_unpaired_hits(line_check, ref_gbk_obj, ref_feature_list, is_query_length,
+        all_new_hits = check_unpaired_hits(line_check, ref_gbk_obj, ref_feature_list, is_query_obj,
                                            min_range, max_range, tmp_output_folder)
         # add them to our current list
         IS_hits = IS_hits + all_new_hits
@@ -566,12 +648,17 @@ def create_typing_output(filenames, ref_gbk_obj, is_query_obj, min_range, max_ra
     line_check = []
     with open(right_unp) as right_bed:
         for line in right_bed:
-            if line.strip().split('\t') not in all_intersect_right and line.strip().split('\t') not in all_closest_right:
+            info = line.strip().split('\t')
+            right_coords = [int(info[4]), int(info[5])]
+            if right_coords not in all_intersect_right and right_coords not in all_closest_right:
                 line_check.append(line.strip().split('\t'))
     if len(line_check) != 0:
-        all_new_hits = check_unpaired_hits(line_check, ref_gbk_obj, ref_feature_list, is_query_length,
+        all_new_hits = check_unpaired_hits(line_check, ref_gbk_obj, ref_feature_list, is_query_obj,
                                            min_range, max_range, tmp_output_folder)
 
         # add them to our current list
         IS_hits = IS_hits + all_new_hits
+
+    write_typing_output(IS_hits, final_table_file)
+
     return IS_hits
