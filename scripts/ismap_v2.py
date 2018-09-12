@@ -91,6 +91,7 @@ def get_sequences(seq_files, seq_format):
     return seq_records
 
 def main():
+
     # get arguments
     args = parse_args()
 

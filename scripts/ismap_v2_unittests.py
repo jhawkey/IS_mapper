@@ -11,7 +11,16 @@ from Bio import SeqIO
 import filecmp
 import shutil
 
-#TODO: have tests that use already created fastq files/bam files etc to speed up testing
+#TODO: Provide empty bed files (try all combinations) and ensure error messages are correct, temp files deleted, program exits nicely
+#TODO: provide one or more empty flanking fastq files, ensure error message correct, temp files deleted, program exits
+#TODO: provide misformatted gbk ref (LOCUS too long, qualifiers wrong) -> error messages, tmp dir, program exits
+#TODO: provide misformatted fasta query or queries
+#TODO: provide read names which can't be paired
+#TODO: provide read names formatted differently to check pairing
+
+#TODO: run example test set and check it returns correct result
+#TODO: run all 8 Ab samples with ISAba1, compare against version 1 (coords, flanking gene IDs, orientations, distances, gap sizes, call types, num hits)
+#TODO: run all 8 Ab samples with each ref gbk, try a run where both gbks provided as either multi-genbank or two entries
 
 class TestGetSeqs(unittest.TestCase):
 
