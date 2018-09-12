@@ -42,14 +42,19 @@ class RunSamtools:
     def sort(self, output_bam, input_bam):
         cmd = self.samtools_cmd + ' sort'
         if self.version == 1:
-            output_bam = output_bam + '.bam'
             cmd = cmd + ' -T tmp -o {} {}'.format(output_bam, input_bam)
         else:
             cmd = cmd + ' {} {}'.format(input_bam, output_bam)
         return(shlex.split(cmd))
     def index(self, input_bam):
-        cmd = self.samtools_cmd + ' index {}.bam'.format(input_bam)
+        cmd = self.samtools_cmd + ' index {}'.format(input_bam)
         return(shlex.split(cmd))
+    def view_bam_to_sam(self, input_bam, output_sam):
+        cmd = self.samtools_cmd + ' view'
+        if self.version == 1:
+            cmd = cmd + ' -O SAM {} > {}'.format(input_bam, output_sam)
+            return(shlex.split(cmd))
+        #TODO: fix this function for samtools pre v1
 
 def bwa_index(fasta):
 

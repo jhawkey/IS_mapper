@@ -105,6 +105,7 @@ def create_bed_files(filenames, cutoff, merging):
     try:
         run_command(['closestBed', '-a', filenames['left_merged_bed'], '-b', filenames['right_merged_bed'], '-d', '>', filenames['closest']], shell=True)
     except BedtoolsError:
+        #TODO: call the actual write output function here
         with open(filenames['table'], 'w') as f:
             header = ["region", "orientation", "x", "y", "gap", "call", "%ID", "%Cov", "left_gene", "left_strand",
                       "left_distance", "right_gene", "right_strand", "right_distance", "functional_prediction"]
