@@ -7,6 +7,8 @@ import mapping_to_query
 import os
 import create_output
 from Bio import SeqIO
+import filecmp
+import shutil
 
 #TODO: have tests that use already created fastq files/bam files etc to speed up testing
 
@@ -38,26 +40,6 @@ class TestGetSeqs(unittest.TestCase):
         with self.assertRaises(ismap_v2.NoSeqError):
             ismap_v2.get_sequences([], 'fasta')
 
-
-class TestCreate_typing_output(unittest.TestCase):
-
-
-    def setUp(self):
-        #self.filenames = {'intersect':'/Users/jane/Desktop/ismap_v2/9262_1#29/ISAba1/9262_1#29_CP010781.1_intersect.bed',
-        #                  'closest': '/Users/jane/Desktop/ismap_v2/9262_1#29/ISAba1/9262_1#29_CP010781.1_closest.bed'}
-        #self.ref_gbk_obj = SeqIO.read('/Users/jane/Desktop/ismap_v2/refs/CP010781.gbk', 'genbank')
-        self.filenames = {'intersect':'/Users/jane/Desktop/ismap_v2/9262_1#29/ISAba1/9262_1#29_CP001921.1_intersect.bed',
-                          'closest': '/Users/jane/Desktop/ismap_v2/9262_1#29/ISAba1/9262_1#29_CP001921.1_closest.bed'}
-        self.ref_gbk_obj = SeqIO.read('/Users/jane/Desktop/ismap_v2/refs/CP001921.gbk', 'genbank')
-        self.is_query_obj = SeqIO.read('/Users/jane/Desktop/ismap_v2/queries/ISAba1.fasta', 'fasta')
-        self.min_range = 0.9
-        self.max_range = 1.1
-
-    def test_create_typing_output(self):
-        hit_list = create_output.create_typing_output(self.filenames, self.ref_gbk_obj, self.is_query_obj, self.min_range, self.max_range)
-
-
-'''
 class TestMapToISQuery(unittest.TestCase):
 
     def setUp(self):
@@ -77,18 +59,26 @@ class TestMapToISQuery(unittest.TestCase):
 
     def test_map_to_is_query_01(self):
 
-        test_left, test_right= ismap_v2.map_to_is_query(self.sample, self.is_query, self.output)
+        test_left, test_right, is_output_folder, tmp_output_folder = ismap_v2.map_to_is_query(self.sample, self.is_query, self.output)
 
+        # verify that the read files are actually being made
         self.assertTrue(os.path.isfile(test_left))
         self.assertTrue(os.path.isfile(test_right))
 
-        # verify right number
+        # verify that we have the same number of reads, and the reads are what we expect using filecmp
+        # increase the buffersize so we check more than the first 8Kb of the file, check first 8Mb
+        filecmp.BUFSIZE = 1024 * 10
+        # set shallow to be false so that it actually checks the contents of the file, not just os.stat
+        self.assertTrue(filecmp.cmp(test_left, '/Users/jane/Desktop/ismap_v2/gold_standard_files/9262_1#29_ISAba1_left_final.fastq' ,shallow=False))
+        self.assertTrue(filecmp.cmp(test_right, '/Users/jane/Desktop/ismap_v2/gold_standard_files/9262_1#29_ISAba1_right_final.fastq', shallow=False))
 
-        # verify correct reads
+    def tearDown(self):
 
-        #self.assertEqual(ismap_v2.map_to_is_query(self.sample, self.is_query, self.output), ['/Users/jane/Desktop/ismap_v2/test_results/9262_1#29/ISAba1/9262_1#29_ISAba1_left_final.fastq',
-                                             #'/Users/jane/Desktop/ismap_v2/test_results/9262_1#29/ISAba1/9262_1#29_ISAba1_right_final.fastq'])
-'''
+        # remove directory containing files after test
+        shutil.rmtree(self.output)
+
+
+
 class TestSetOutputFilenames(unittest.TestCase):
     def setUp(self):
         self.tmp_folder = '/Users/jane/Desktop/ismap_v2/test_results/9262_1#29/ISAba1/tmp'
@@ -111,7 +101,6 @@ class TestRefMapping(unittest.TestCase):
          self.sample = '9262_1#29'
          self.tmp_folder = '/Users/jane/Desktop/ismap_v2/9262_1#29/ISAba1/tmp'
          self.out_folder = '/Users/jane/Desktop/ismap_v2/9262_1#29/ISAba1/'
-
 
     def test_map_to_ref_seq_01(self):
 
@@ -147,3 +136,20 @@ class TestCreateBedFiles(unittest.TestCase):
         self.assertTrue(os.path.isfile(test_closest_file))
         self.assertTrue(os.path.isfile(test_left_up))
         self.assertTrue(os.path.isfile(test_right_up))
+
+class TestCreate_typing_output(unittest.TestCase):
+
+
+    def setUp(self):
+        #self.filenames = {'intersect':'/Users/jane/Desktop/ismap_v2/9262_1#29/ISAba1/9262_1#29_CP010781.1_intersect.bed',
+        #                  'closest': '/Users/jane/Desktop/ismap_v2/9262_1#29/ISAba1/9262_1#29_CP010781.1_closest.bed'}
+        #self.ref_gbk_obj = SeqIO.read('/Users/jane/Desktop/ismap_v2/refs/CP010781.gbk', 'genbank')
+        self.filenames = {'intersect':'/Users/jane/Desktop/ismap_v2/9262_1#29/ISAba1/9262_1#29_CP001921.1_intersect.bed',
+                          'closest': '/Users/jane/Desktop/ismap_v2/9262_1#29/ISAba1/9262_1#29_CP001921.1_closest.bed'}
+        self.ref_gbk_obj = SeqIO.read('/Users/jane/Desktop/ismap_v2/refs/CP001921.gbk', 'genbank')
+        self.is_query_obj = SeqIO.read('/Users/jane/Desktop/ismap_v2/queries/ISAba1.fasta', 'fasta')
+        self.min_range = 0.9
+        self.max_range = 1.1
+
+    def test_create_typing_output(self):
+        hit_list = create_output.create_typing_output(self.filenames, self.ref_gbk_obj, self.is_query_obj, self.min_range, self.max_range)
