@@ -15,7 +15,7 @@ from Bio.Alphabet import generic_dna
 import resource
 import time
 import read_grouping
-from run_commands import run_command, CommandError, BedtoolsError, make_directories
+from run_commands import run_command, CommandError, BedtoolsError, make_directories, check_command
 from mapping_to_query import map_to_is_query
 from mapping_to_ref import map_to_ref_seq, create_bed_files
 from create_output import create_typing_output
@@ -116,6 +116,11 @@ def main():
     #TODO: make a function that checks the input files are correct
 
     #TODO: make a function that checks all dependencies are correct
+    # Checks that the correct programs are installed
+    check_command('bwa', 'BWA')
+    check_command('samtools', 'SAMtools')
+    check_command('makeblastdb', 'BLAST')
+    check_command('bedtools', 'BedTools')
 
     # group reads
     read_groups = read_grouping.group_reads(args.reads)
@@ -124,12 +129,18 @@ def main():
     # print out unpaired reads
     if read_groups.unpaired:
         # report unpaired reads
-        logging.info('The following reads were identified as unpaired: ISMapper can only use paired reads.')
+        logging.info('ISMapper can only use paired reads. The following reads were identified as unpaired:')
         for unpaired in read_groups.unpaired:
             logging.info(unpaired.prefix)
     # print out paired reads
-    for paired in read_groups.paired:
-        logging.info('Found paired reads for sample %s: %s %s', paired.prefix, str(paired.forward.filepath), str(paired.reverse.filepath))
+    if read_groups.paired:
+        logging.info('Found %s sets of paired reads', len(read_groups.paired))
+        for paired in read_groups.paired:
+            logging.info('Found paired reads for sample %s: %s %s', paired.prefix, str(paired.forward.filepath), str(paired.reverse.filepath))
+    # if there were no paired read sets found, raise an exception and quit
+    else:
+        logging.error('No paired read sets found, ISMapper exiting')
+        raise NoSeqError('No paired read sets found, ISMapper exiting')
 
     # parse queries
     query_records = get_sequences(args.queries, 'fasta')
