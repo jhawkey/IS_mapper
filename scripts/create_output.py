@@ -319,8 +319,10 @@ def check_seq_between(genbank_seq, insertion, start, end, name, temp):
     seq_between = genbank_seq[start:end]
     # Turn the sequence into a fasta file
     seq_between = SeqRecord(Seq(str(seq_between), generic_dna), id=name)
-    SeqIO.write(seq_between, temp + name + '.fasta', 'fasta')
-    SeqIO.write(insertion, temp + name + 'ISseq.fasta', 'fasta')
+    out_seq_between = os.path.join(temp, name + '.fasta')
+    out_insertion = os.path.join(temp, name + 'ISseq.fasta')
+    SeqIO.write(seq_between, out_seq_between, 'fasta')
+    SeqIO.write(insertion, out_insertion, 'fasta')
     # Perform the BLAST
     doBlast(temp + name + '.fasta', temp + name + '_out.txt', temp + name + 'ISseq.fasta')
     # Only want the top hit, so set count variable to 0
@@ -457,7 +459,6 @@ def write_typing_output(IShits, output_table):
         # close the file and exit the function
         out.close()
         return
-
 
 def create_typing_output(filenames, ref_gbk_obj, is_query_obj, min_range, max_range, tmp_output_folder):
 

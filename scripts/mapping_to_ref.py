@@ -1,6 +1,7 @@
 import os
 from run_commands import run_command, BedtoolsError, CommandError, make_directories
 from mapping_to_query import create_tmp_file, bwa_index, RunSamtools
+from create_output import create_typing_output
 
 def set_ref_output_filenames(prefix, ref_name, tmp_folder, out_dir):
 
@@ -48,7 +49,7 @@ def filter_on_depth(cov_file, out_bed, cov_cutoff):
                 output.write(line)
     output.close()
 
-def map_to_ref_seq(ref_seq, sample_name, left_flanking, right_flanking, tmp, out, bwa_threads):
+def map_to_ref_seq(ref_seq, sample_name, left_flanking, right_flanking, tmp, out, bwa_threads, bwa_all):
 
     filenames = set_ref_output_filenames(sample_name, ref_seq.id, tmp, out)
 
@@ -61,8 +62,12 @@ def map_to_ref_seq(ref_seq, sample_name, left_flanking, right_flanking, tmp, out
     # set up samtools
     samtools_runner = RunSamtools()
 
-    # Map reads to reference, sort
-    #TODO: add bwa -a option
+    # Map reads to reference, reporting all alignments
+    if bwa_all:
+        run_command(['bwa', 'mem', '-t', bwa_threads, '-a', ref_seq_file, left_flanking, '>', filenames['left_sam']],
+                    shell=True)
+        run_command(['bwa', 'mem', '-t', bwa_threads, '-a', ref_seq_file, right_flanking, '>', filenames['right_sam']],
+                    shell=True)
 
     # map reads to the reference sequence
     run_command(['bwa', 'mem', '-t', bwa_threads, ref_seq_file, left_flanking, '>', filenames['left_sam']], shell=True)
@@ -85,8 +90,8 @@ def create_bed_files(filenames, cutoff, merging):
     left_sorted = filenames['left_sorted']
     right_sorted = filenames['right_sorted']
     # Create BED files with coverage information
-    run_command(['bedtools', 'genomecov', '-ibam', left_sorted + '.bam', '-bg', '>', filenames['left_cov']], shell=True)
-    run_command(['bedtools', 'genomecov', '-ibam', right_sorted + '.bam', '-bg', '>', filenames['right_cov']], shell=True)
+    run_command(['bedtools', 'genomecov', '-ibam', left_sorted, '-bg', '>', filenames['left_cov']], shell=True)
+    run_command(['bedtools', 'genomecov', '-ibam', right_sorted, '-bg', '>', filenames['right_cov']], shell=True)
     run_command(['bedtools', 'merge', '-d', merging, '-i', filenames['left_cov'], '>', filenames['left_merged']], shell=True)
     run_command(['bedtools', 'merge', '-d', merging, '-i', filenames['right_cov'], '>', filenames['right_merged']], shell=True)
     # Filter coveraged BED files on coverage cutoff (so only take
@@ -104,12 +109,16 @@ def create_bed_files(filenames, cutoff, merging):
     # Find regions that are close but not overlapping
     try:
         run_command(['closestBed', '-a', filenames['left_merged_bed'], '-b', filenames['right_merged_bed'], '-d', '>', filenames['closest']], shell=True)
+    # One or more of these files are empty so we need to quit and report no hits
     except BedtoolsError:
-        #TODO: call the actual write output function here
-        with open(filenames['table'], 'w') as f:
-            header = ["region", "orientation", "x", "y", "gap", "call", "%ID", "%Cov", "left_gene", "left_strand",
-                      "left_distance", "right_gene", "right_strand", "right_distance", "functional_prediction"]
-            f.write('\t'.join(header) + '\nNo hits found')
+        #TODO: TEST THIS WORKS WHEN THIS ERROR IS THROWN
+        #(filenames, ref_gbk_obj, is_query_obj, min_range, max_range, tmp_output_folder)
+        create_typing_output(filenames, None, None, None, None, None)
+        return(filenames)
+        #with open(filenames['table'], 'w') as f:
+            #header = ["region", "orientation", "x", "y", "gap", "call", "%ID", "%Cov", "left_gene", "left_strand",
+            #          "left_distance", "right_gene", "right_strand", "right_distance", "functional_prediction"]
+            #f.write('\t'.join(header) + '\nNo hits found')
             #continue
     
     # Check all unpaired hits to see if there are any that should be paired up

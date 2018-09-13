@@ -5,6 +5,7 @@ import sys, re, os
 from argparse import ArgumentParser
 from subprocess import call, check_output, CalledProcessError, STDOUT, Popen, PIPE
 import pathlib
+import datetime
 from Bio import SeqIO
 from Bio import SeqFeature
 from Bio.SeqFeature import SeqFeature, FeatureLocation
@@ -17,7 +18,7 @@ import read_grouping
 from run_commands import run_command, CommandError, BedtoolsError, make_directories
 from mapping_to_query import map_to_is_query
 from mapping_to_ref import map_to_ref_seq, create_bed_files
-from create_typing_out import create_typing_output
+from create_output import create_typing_output
 
 
 def parse_args():
@@ -43,8 +44,8 @@ def parse_args():
     #parser.add_argument('--path', type=str, required=False, default='', help='Path to folder where scripts are (only required for development, default is VLSCI path).')
     # Parameters
     parser.add_argument('--cutoff', type=int, required=False, default=6, help='Minimum depth for mapped region to be kept in bed file (default 6)')
-    parser.add_argument('--min_range', type=str, required=False, default='0.2', help='Minimum percent size of the gap to be called a known hit (default 0.2, or 20 percent)')
-    parser.add_argument('--max_range', type=str, required=False, default='1.1', help='Maximum percent size of the gap to be called a known hit (default 1.1, or 110 percent)')
+    parser.add_argument('--min_range', type=str, required=False, default=0.9, help='Minimum percent size of the gap to be called a known hit (default 0.9, or 90 percent)')
+    parser.add_argument('--max_range', type=str, required=False, default=1.1, help='Maximum percent size of the gap to be called a known hit (default 1.1, or 110 percent)')
     parser.add_argument('--merging', type=str, required=False, default='100', help='Value for merging left and right hits in bed files together to simply calculation of closest and intersecting regions (default 100).')
     parser.add_argument('--a', action='store_true', required=False, help='Switch on all alignment reporting for bwa.')
     parser.add_argument('--T', type=str, required=False, default='30', help='Mapping quality score for bwa (default 30).')
@@ -59,10 +60,10 @@ def parse_args():
     parser.add_argument('--chr_name', type=str, required=False, default='not_specified', help='chromosome name for bedfile - must match genome name to load in IGV (default = genbank accession)')
     # Reporting options
     parser.add_argument('--log', action='store_true', required=False, help='Switch on logging to file (otherwise log to stdout')
-    parser.add_argument('--output', type=str, required=False, help='Prefix for output files. If not supplied, prefix will be current date and time.', default='')
+    parser.add_argument('--log_name', type=str, required=False, help='Prefix for log file. If not supplied, prefix will be current date and time.', default=datetime.datetime.now().strftime('%Y%m%d_%H%M%S'))
     parser.add_argument('--temp', action='store_true', required=False, help='Switch on keeping the temp folder instead of deleting it at the end of the program')
     parser.add_argument('--bam', action='store_true', required=False, help='Switch on keeping the final bam files instead of deleting them at the end of the program')
-    parser.add_argument('--directory', type=str, required=False, default='', help='Output directory for all output files.')
+    parser.add_argument('--output', type=str, required=False, default='', help='Output location for all output files.')
 
     return parser.parse_args()
 
@@ -100,13 +101,14 @@ def main():
     else:
         working_dir = os.getcwd()
 
+    # TODO: don't set up logfile if log isn't set to true - default should be logfile, turning off logfile prints to stdout
     # set up logfile
     logging.basicConfig(
-        filename=working_dir + 'tmp_log.log',
+        filename=args.log_name + '.log',
         level=logging.DEBUG,
         filemode='w',
         format='%(asctime)s %(message)s',
-        datefmt='%m/%d/%Y %H:%M:%S')
+        datefmt='%d/%m/%Y %H:%M:%S')
     logging.info('program started')
     logging.info('command line: {0}'.format(' '.join(sys.argv)))
     logging.info(working_dir)
@@ -156,16 +158,18 @@ def main():
                 for ref_seq in reference_seqs:
                     # map our flanking reads to this
                     #map_to_ref_seq(ref_seq, sample_name, left_flanking, right_flanking, tmp, out, bwa_threads)
-                    filenames = map_to_ref_seq(ref_seq, sample.prefix, left_flanking_reads, right_flanking_reads, tmp_output_folder, is_output_folder, args.t)
+                    filenames = map_to_ref_seq(ref_seq, sample.prefix, left_flanking_reads, right_flanking_reads, tmp_output_folder, is_output_folder, args.t, args.a)
 
                     # make the bed files, find intersects and closest points of regions
                     filenames_bedfiles = create_bed_files(filenames, args.cutoff, args.merging)
 
                     # Create table and annotated genbank with hits
-                    #create_typing_output(filenames, ref_gbk, is_query, tmp_output_folder, sample_name, cds, trna, rrna)
-                    create_typing_output(filenames_bedfiles, ref_seq, is_query, sample.prefix, args.cds, args.trna, args.rrna, args.min_range, args.max_range)
-                pass
+                    #(filenames, ref_gbk_obj, is_query_obj, min_range, max_range, tmp_output_folder)
+                    create_typing_output(filenames_bedfiles, ref_seq, is_query, args.min_range, args.max_range, tmp_output_folder)
+                    logging.info('ISMapper has completed successfully for sample %s', sample.prefix)
 
+    # TODO: add time taken here
+    logging.info('ISMapper has finished')
 
 
 if __name__ == '__main__':
