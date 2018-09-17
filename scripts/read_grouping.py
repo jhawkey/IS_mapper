@@ -42,7 +42,7 @@ class ReadGroup():
 
         # Check that we don't have conflicting arguments
         if bool(forward) ^ bool(reverse):
-            raise ValueError('You must pass both forward and reverse')
+            raise ValueError('You must pass both forward and reverse reads')
 
         if unpaired and forward:
             raise ValueError('You cannot pass both unpaired and forward/ reverse reads')
@@ -132,7 +132,7 @@ def create_prefix_map(read_fps):
                 break
         else:
             # If no valid regex found, exit and report
-            raise ValueError('No regex found for %s (%s)' % (read_fp.name, read_fp))
+            raise ValueError('No regex found for %s (%s), unable to pair reads' % (read_fp.name, read_fp))
 
         # Create and add read_attr to read_pairs using the common prefix as a key
         read_set = ReadSet(re_result.group(1), re_result.group(2), read_fp)

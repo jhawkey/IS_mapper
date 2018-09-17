@@ -11,11 +11,6 @@ from Bio import SeqIO
 import filecmp
 import shutil
 
-#TODO: provide misformatted gbk ref (LOCUS too long, qualifiers wrong) -> error messages, tmp dir, program exits
-#TODO: provide misformatted fasta query or queries
-#TODO: provide read names which can't be paired
-#TODO: provide read names formatted differently to check pairing
-
 #TODO: run all 8 Ab samples with each ref gbk, try a run where both gbks provided as either multi-genbank or two entries
 
 class TestGetSeqs(unittest.TestCase):

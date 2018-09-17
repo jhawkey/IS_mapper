@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="f362a202-b55d-4e14-bd4f-3ac14f1bafb9" name="Default" comment="an empty flanking read file runs and gives correct response">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/create_output.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/create_output.py" afterDir="false" />
+    <list default="true" id="f362a202-b55d-4e14-bd4f-3ac14f1bafb9" name="Default" comment="if one or more of the input read files are &lt;100 bytes, quit and raise error">
       <change beforePath="$PROJECT_DIR$/scripts/ismap_v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/ismap_v2.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scripts/ismap_v2_unittests.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/ismap_v2_unittests.py" afterDir="false" />
     </list>
@@ -37,15 +35,15 @@
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="Python Console" value="1603" />
-          <entry key="py" value="25539" />
+          <entry key="py" value="26044" />
           <entry key="regexp" value="7" />
-          <entry key="txt" value="1256" />
+          <entry key="txt" value="1349" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="PLAIN_TEXT" value="805" />
-          <entry key="Python" value="27120" />
+          <entry key="PLAIN_TEXT" value="898" />
+          <entry key="Python" value="27625" />
           <entry key="RegExp" value="7" />
           <entry key="Scratch" value="473" />
         </counts>
@@ -58,12 +56,12 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/scripts/ismap_v2.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="401">
-              <caret line="137" selection-start-line="137" selection-end-line="137" />
+            <state relative-caret-position="529">
+              <caret line="89" column="47" selection-start-line="89" selection-start-column="47" selection-end-line="89" selection-end-column="47" />
               <folding>
                 <element signature="e#23#37#0" expanded="true" />
+                <element signature="e#705#5901#0" />
                 <element signature="e#5937#5996#0" />
-                <element signature="e#6044#6721#0" />
               </folding>
             </state>
           </provider>
@@ -98,7 +96,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/scripts/mapping_to_ref.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="484">
+            <state relative-caret-position="131">
               <caret line="93" column="64" selection-start-line="93" selection-start-column="64" selection-end-line="93" selection-end-column="64" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
@@ -111,7 +109,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/scripts/create_output.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="85">
+            <state relative-caret-position="-2509">
               <caret line="353" lean-forward="true" selection-start-line="353" selection-end-line="353" />
               <folding>
                 <element signature="e#23#41#0" expanded="true" />
@@ -135,33 +133,6 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$USER_HOME$/miniconda3/envs/ismapper_latest/lib/python3.6/codecs.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="357">
-              <caret line="323" selection-start-line="323" selection-end-line="323" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$APPLICATION_HOME_DIR$/helpers/pycharm/teamcity/common.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="394">
-              <caret line="48" selection-start-line="48" selection-end-line="48" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$APPLICATION_HOME_DIR$/helpers/pycharm/teamcity/unittestpy.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="575">
-              <caret line="241" selection-start-line="241" selection-end-line="241" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/scripts/degugging.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="330">
@@ -176,8 +147,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/scripts/ismap_v2_unittests.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="420">
-              <caret line="174" selection-start-line="174" selection-end-line="174" />
+            <state relative-caret-position="180">
+              <caret line="12" selection-start-line="12" selection-end-line="12" />
               <folding>
                 <element signature="e#0#15#0" expanded="true" />
                 <element signature="e#258#1758#0" />
@@ -188,10 +159,10 @@
                 <element signature="e#4336#4647#0" />
                 <element signature="e#5844#6836#0" />
                 <element signature="e#5794#6833#0" />
-                <marker date="1537163459350" expanded="true" signature="5541:6120" ph="..." />
-                <marker date="1537163459350" expanded="true" signature="6139:6148" ph="..." />
-                <marker date="1537163459350" expanded="true" signature="8871:8880" ph="..." />
-                <marker date="1537163459350" expanded="true" signature="8970:8972" ph="..." />
+                <marker date="1537164410442" expanded="true" signature="5407:5986" ph="..." />
+                <marker date="1537164410442" expanded="true" signature="6005:6014" ph="..." />
+                <marker date="1537164410442" expanded="true" signature="8737:8746" ph="..." />
+                <marker date="1537164410442" expanded="true" signature="8836:8838" ph="..." />
               </folding>
             </state>
           </provider>
@@ -243,8 +214,8 @@
         <option value="$PROJECT_DIR$/scripts/mapping_to_ref.py" />
         <option value="$PROJECT_DIR$/scripts/degugging.py" />
         <option value="$PROJECT_DIR$/scripts/run_commands.py" />
-        <option value="$PROJECT_DIR$/scripts/ismap_v2_unittests.py" />
         <option value="$PROJECT_DIR$/scripts/create_output.py" />
+        <option value="$PROJECT_DIR$/scripts/ismap_v2_unittests.py" />
         <option value="$PROJECT_DIR$/scripts/ismap_v2.py" />
       </list>
     </option>
@@ -364,7 +335,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/ismap_v2.py" />
-      <option name="PARAMETERS" value="--queries $USER_HOME$/Desktop/ismap_v2/queries/ISAba1.fasta --reads $USER_HOME$/Desktop/ismap_v2/gold_standard_files/empty_files/9262_1#29_1.fastq.gz $USER_HOME$/Desktop/ismap_v2/gold_standard_files/empty_files/9262_1#29_2.fastq.gz --typingRef $USER_HOME$/Desktop/ismap_v2/refs/CP001921.gbk --output $USER_HOME$/Desktop/ismap_v2/testing_functions --log --log_name testing" />
+      <option name="PARAMETERS" value="--queries $USER_HOME$/Desktop/ismap_v2/gold_standard_files/broken_files/ISAba1.fasta --reads $USER_HOME$/Desktop/ismap_v2/gold_standard_files/empty_files/9262_1#29_forward.fastq.gz $USER_HOME$/Desktop/ismap_v2/gold_standard_files/empty_files/9262_1#29_reverse.fastq.gz --typingRef $USER_HOME$/Desktop/ismap_v2/refs/CP001921.gbk --output $USER_HOME$/Desktop/ismap_v2/testing_functions --log --log_name testing" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -731,7 +702,14 @@
       <option name="project" value="LOCAL" />
       <updated>1537163335723</updated>
     </task>
-    <option name="localTasksCounter" value="19" />
+    <task id="LOCAL-00019" summary="if one or more of the input read files are &lt;100 bytes, quit and raise error">
+      <created>1537164054911</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1537164054912</updated>
+    </task>
+    <option name="localTasksCounter" value="20" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -777,19 +755,20 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="2560" height="1417" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.12445845" />
       <window_info id="Structure" order="1" weight="0.24970461" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32830188" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.26566038" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.26566038" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.30867925" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.2754717" />
       <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" />
-      <window_info active="true" anchor="bottom" id="Python Console" order="8" visible="true" weight="0.32981133" />
+      <window_info anchor="bottom" id="Python Console" order="8" weight="0.32981133" />
       <window_info anchor="bottom" id="Terminal" order="9" weight="0.32981133" />
       <window_info anchor="bottom" id="Version Control" order="10" weight="0.32830188" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
@@ -846,17 +825,11 @@
     <MESSAGE value="ran all Ab genomes and fixed bugs that arose" />
     <MESSAGE value="added code to remove hits and write out record of these" />
     <MESSAGE value="an empty flanking read file runs and gives correct response" />
-    <option name="LAST_COMMIT_MESSAGE" value="an empty flanking read file runs and gives correct response" />
+    <MESSAGE value="if one or more of the input read files are &lt;100 bytes, quit and raise error" />
+    <option name="LAST_COMMIT_MESSAGE" value="if one or more of the input read files are &lt;100 bytes, quit and raise error" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/scripts/ismap_v2.py</url>
-          <line>140</line>
-          <option name="timeStamp" value="122" />
-        </line-breakpoint>
-      </breakpoints>
       <default-breakpoints>
         <breakpoint suspend="NONE" type="python-exception">
           <properties exception="BaseException" />
@@ -1069,17 +1042,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/mapping_to_ref.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="484">
-          <caret line="93" column="64" selection-start-line="93" selection-start-column="64" selection-end-line="93" selection-end-column="64" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-            <element signature="e#1651#2005#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/degugging.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="330">
@@ -1111,31 +1073,20 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/ismap_v2_unittests.py">
+    <entry file="file://$PROJECT_DIR$/scripts/mapping_to_ref.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="420">
-          <caret line="174" selection-start-line="174" selection-end-line="174" />
+        <state relative-caret-position="131">
+          <caret line="93" column="64" selection-start-line="93" selection-start-column="64" selection-end-line="93" selection-end-column="64" />
           <folding>
-            <element signature="e#0#15#0" expanded="true" />
-            <element signature="e#258#1758#0" />
-            <element signature="e#1880#3563#0" />
-            <element signature="e#3557#3625#0" />
-            <element signature="e#4586#6116#0" />
-            <element signature="e#4003#6095#0" />
-            <element signature="e#4336#4647#0" />
-            <element signature="e#5844#6836#0" />
-            <element signature="e#5794#6833#0" />
-            <marker date="1537163459350" expanded="true" signature="5541:6120" ph="..." />
-            <marker date="1537163459350" expanded="true" signature="6139:6148" ph="..." />
-            <marker date="1537163459350" expanded="true" signature="8871:8880" ph="..." />
-            <marker date="1537163459350" expanded="true" signature="8970:8972" ph="..." />
+            <element signature="e#0#9#0" expanded="true" />
+            <element signature="e#1651#2005#0" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/scripts/create_output.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="85">
+        <state relative-caret-position="-2509">
           <caret line="353" lean-forward="true" selection-start-line="353" selection-end-line="353" />
           <folding>
             <element signature="e#23#41#0" expanded="true" />
@@ -1157,14 +1108,36 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/ismap_v2_unittests.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="12" selection-start-line="12" selection-end-line="12" />
+          <folding>
+            <element signature="e#0#15#0" expanded="true" />
+            <element signature="e#258#1758#0" />
+            <element signature="e#1880#3563#0" />
+            <element signature="e#3557#3625#0" />
+            <element signature="e#4586#6116#0" />
+            <element signature="e#4003#6095#0" />
+            <element signature="e#4336#4647#0" />
+            <element signature="e#5844#6836#0" />
+            <element signature="e#5794#6833#0" />
+            <marker date="1537164410442" expanded="true" signature="5407:5986" ph="..." />
+            <marker date="1537164410442" expanded="true" signature="6005:6014" ph="..." />
+            <marker date="1537164410442" expanded="true" signature="8737:8746" ph="..." />
+            <marker date="1537164410442" expanded="true" signature="8836:8838" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/ismap_v2.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="401">
-          <caret line="137" selection-start-line="137" selection-end-line="137" />
+        <state relative-caret-position="529">
+          <caret line="89" column="47" selection-start-line="89" selection-start-column="47" selection-end-line="89" selection-end-column="47" />
           <folding>
             <element signature="e#23#37#0" expanded="true" />
+            <element signature="e#705#5901#0" />
             <element signature="e#5937#5996#0" />
-            <element signature="e#6044#6721#0" />
           </folding>
         </state>
       </provider>
