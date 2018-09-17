@@ -8,6 +8,19 @@ from Bio.Seq import Seq
 from Bio.Alphabet import generic_dna
 from run_commands import run_command
 
+class RemovedHit(object):
+    def __init__(self, left_flank, right_flank):
+        # reason for removal
+        self.reason = ''
+        # coordinates of left and right flanks
+        self.left_flank = str(left_flank[0]) + '-' + str(left_flank[1])
+        self.right_flank = str(right_flank[0]) + '-' + str(right_flank[1])
+        # BED comparison that this removal has come from
+        self.comparison_type = ''
+        # put in percent ID and coverage if this was a BLAST check
+        self.per_id = ''
+        self.coverage = ''
+
 class ISHit(object):
     def __init__(self, left_pos, right_pos):
         # hit type will either be novel or known
@@ -344,6 +357,8 @@ def check_unpaired_hits(line_check, ref_gbk_obj, ref_feature_list, is_query_obj,
 
     # intialise a list of all the hits found in this file
     IS_hit_list = []
+    # intialise list of hits to remove
+    removed_hit_list = []
     # get length of IS
     is_query_length = len(is_query_obj.seq)
 
@@ -393,8 +408,12 @@ def check_unpaired_hits(line_check, ref_gbk_obj, ref_feature_list, is_query_obj,
                 IS_hit_list.append(new_hit)
             # otherwise this is a spurious result, remove
             else:
-                # TODO: remove this hit
-                pass
+                removed_hit = RemovedHit(intersect_left, intersect_right)
+                removed_hit.reason = 'Sequence between does not match IS query'
+                removed_hit.comparison_type = 'BED closest, unpaired'
+                removed_hit.per_id = str(seq_check_results['per_id'])
+                removed_hit.coverage = str(seq_check_results['coverage'])
+                removed_hit_list.append(removed_hit)
         # the gap is too small to be the IS, but larger than a novel hit
         elif float(gap) / is_query_length <= min_range and float(gap) / is_query_length < max_range:
             new_hit = get_orientation(intersect_left, intersect_right)
@@ -406,12 +425,14 @@ def check_unpaired_hits(line_check, ref_gbk_obj, ref_feature_list, is_query_obj,
             IS_hit_list.append(new_hit)
         # otherwise remove!
         else:
-            # TODO: remove this hit
-            pass
+            removed_hit = RemovedHit(intersect_left, intersect_right)
+            removed_hit.reason = 'Sequence between is not large enough to be IS query'
+            removed_hit.comparison_type = 'BED closest, unpaired'
+            removed_hit_list.append(removed_hit)
 
-    return IS_hit_list
+    return IS_hit_list, removed_hit_list
 
-def write_typing_output(IShits, output_table):
+def write_typing_output(IShits, removedhits, output_table):
 
     with open(output_table, 'w') as out:
 
@@ -456,9 +477,27 @@ def write_typing_output(IShits, output_table):
             # write out the information
             out.write('\t'.join(line_list) + '\n')
 
-        # close the file and exit the function
+        # close the file
         out.close()
-        return
+
+    # if there are hits that have been removed, then write them out
+    if len(removedhits) != 0:
+        removed_hits_file = output_table.split('.txt')[0]
+        with open(removed_hits_file, 'w') as removed_out:
+            # write the header
+            header = ['left_flank', 'right_flank', 'removal_reason', 'per_id', 'coverage', 'comparison_type']
+            removed_out.write('\t'.join(header) + '\n')
+
+            # loop through each hit and write out
+            for removedhit in removedhits:
+                line_list = [removedhit.left_flank, removedhit.right_flank, removedhit.reason, removedhit.per_id,
+                             removedhit.coverage, removedhit.comparison_type]
+                removed_out.write('\t'.join(line_list) + '\n')
+
+            # close the file
+            removed_out.close()
+    # exit the function
+    return
 
 def create_typing_output(filenames, ref_gbk_obj, is_query_obj, min_range, max_range, tmp_output_folder):
 
@@ -475,6 +514,8 @@ def create_typing_output(filenames, ref_gbk_obj, is_query_obj, min_range, max_ra
 
     # final list of IS hit objects to make into a table at the end
     IS_hits = []
+    # list of removed hits
+    removed_hits = []
 
     # If both intersect and closest bed files are empty, there are no hits
     # write out an empty file and record this in the log file
@@ -516,9 +557,10 @@ def create_typing_output(filenames, ref_gbk_obj, is_query_obj, min_range, max_ra
                     left_range = range(min(intersect_left), max(intersect_left))
                     right_range = range(min(intersect_right), max(intersect_right))
                     if (intersect_left[0] in right_range and intersect_left[1] in right_range) or (intersect_right[0] in left_range and intersect_right[1] in left_range):
-                        # TODO: remove this hit
-                        # set 'removed' variable to True
-                        pass
+                        removed_hit = RemovedHit(intersect_left, intersect_right)
+                        removed_hit.reason = 'one flank entirely within other flank'
+                        removed_hit.comparison_type = 'BED intersect'
+                        removed_hits.append(removed_hit)
                     # otherwise we need to process the hit
                     else:
                         # determine orientation and coordinates of hit
@@ -532,14 +574,15 @@ def create_typing_output(filenames, ref_gbk_obj, is_query_obj, min_range, max_ra
 
                         # determine the features flanking the hit, and add the details to the hit object
                         new_hit.get_flanking_genes(ref_gbk_obj, ref_feature_list)
-                        # TODO: determine gap, write a specific method for the class
-                        #new_hit.get_gap_distance()
                         # append the hit to our list
                         IS_hits.append(new_hit)
                 # If the gap is too big, we need to remove this hit
                 else:
-                    #TODO: remove this hit
-                    pass
+                    removed_hit = RemovedHit(intersect_left, intersect_right)
+                    removed_hit.reason = 'gap too large'
+                    removed_hit.comparison_type = 'BED intersect'
+                    removed_hits.append(removed_hit)
+
     # For the next section, grab the IS query length
     is_query_length = len(is_query_obj.seq)
     # Move on to the hits found in the closest bed file (known or imprecise hits)
@@ -573,8 +616,6 @@ def create_typing_output(filenames, ref_gbk_obj, is_query_obj, min_range, max_ra
                     new_hit.confidence_level = 'confident'
                     # determine the features flanking the hit, and add the details to the hit object
                     new_hit.get_flanking_genes(ref_gbk_obj, ref_feature_list)
-                    # TODO: determine gap, write a specific method for the class
-                    # new_hit.get_gap_distance()
                     # append the hit to our list
                     IS_hits.append(new_hit)
                 # The gap size is within the range of the actual IS query size, and so probably indicates a known hit
@@ -607,8 +648,13 @@ def create_typing_output(filenames, ref_gbk_obj, is_query_obj, min_range, max_ra
                         IS_hits.append(new_hit)
                     # otherwise this is a spurious result, remove
                     else:
-                        # TODO: remove this hit
-                        pass
+                        removed_hit = RemovedHit(intersect_left, intersect_right)
+                        removed_hit.reason = 'Sequence between was not a match for IS query'
+                        removed_hit.comparison_type = 'BED closest'
+                        removed_hit.per_id = str(seq_check_results['per_id'])
+                        removed_hit.coverage = str(seq_check_results['coverage'])
+                        removed_hits.append(removed_hit)
+
                 # The gap size here is smaller than the actual IS query, but larger than expected for a novel hit
                 # This is an imprecise hit
                 elif float(gap) / is_query_length <= min_range and float(gap) / is_query_length < max_range:
@@ -621,8 +667,10 @@ def create_typing_output(filenames, ref_gbk_obj, is_query_obj, min_range, max_ra
                     IS_hits.append(new_hit)
                 # This hit is way too big and doesn't fit any of the other criteria, so needs to be recorded as removed
                 else:
-                    # TODO: remove this hit
-                    pass
+                    removed_hit = RemovedHit(intersect_left, intersect_right)
+                    removed_hit.reason = 'Sequence between is not large enough to be IS query'
+                    removed_hit.comparison_type = 'BED closest'
+                    removed_hits.append(removed_hit)
 
     # Looking for unpaired hits which are not in the merged/closest bed files
     # Possibly unpaired because the pair is low coverage and didn't pass
@@ -639,10 +687,11 @@ def create_typing_output(filenames, ref_gbk_obj, is_query_obj, min_range, max_ra
             if left_coords not in all_intersect_left and left_coords not in all_closest_left:
                 line_check.append(line.strip().split('\t'))
     if len(line_check) != 0:
-        all_new_hits = check_unpaired_hits(line_check, ref_gbk_obj, ref_feature_list, is_query_obj,
+        all_new_hits, new_removed_hits = check_unpaired_hits(line_check, ref_gbk_obj, ref_feature_list, is_query_obj,
                                            min_range, max_range, tmp_output_folder)
         # add them to our current list
         IS_hits = IS_hits + all_new_hits
+        removed_hits = removed_hits + new_removed_hits
 
     # Then check the right hand unpaired file, again removing positions already processed
     line_check = []
@@ -653,12 +702,13 @@ def create_typing_output(filenames, ref_gbk_obj, is_query_obj, min_range, max_ra
             if right_coords not in all_intersect_right and right_coords not in all_closest_right:
                 line_check.append(line.strip().split('\t'))
     if len(line_check) != 0:
-        all_new_hits = check_unpaired_hits(line_check, ref_gbk_obj, ref_feature_list, is_query_obj,
+        all_new_hits, new_removed_hits = check_unpaired_hits(line_check, ref_gbk_obj, ref_feature_list, is_query_obj,
                                            min_range, max_range, tmp_output_folder)
 
         # add them to our current list
         IS_hits = IS_hits + all_new_hits
+        removed_hits = removed_hits + new_removed_hits
 
-    write_typing_output(IS_hits, final_table_file)
+    write_typing_output(IS_hits, removed_hits, final_table_file)
 
     return IS_hits

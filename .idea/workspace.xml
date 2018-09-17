@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="f362a202-b55d-4e14-bd4f-3ac14f1bafb9" name="Default" comment="code for checking dependencies">
+    <list default="true" id="f362a202-b55d-4e14-bd4f-3ac14f1bafb9" name="Default" comment="ran all Ab genomes and fixed bugs that arose">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scripts/create_output.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/create_output.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/ismap_v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/ismap_v2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/ismap_v2_unittests.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/ismap_v2_unittests.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/run_commands.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/run_commands.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -38,15 +35,15 @@
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="Python Console" value="1537" />
-          <entry key="py" value="20964" />
+          <entry key="py" value="23973" />
           <entry key="regexp" value="7" />
-          <entry key="txt" value="1075" />
+          <entry key="txt" value="1119" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="PLAIN_TEXT" value="624" />
-          <entry key="Python" value="22479" />
+          <entry key="PLAIN_TEXT" value="668" />
+          <entry key="Python" value="25488" />
           <entry key="RegExp" value="7" />
           <entry key="Scratch" value="473" />
         </counts>
@@ -59,7 +56,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/scripts/ismap_v2.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="346">
+            <state relative-caret-position="-177">
               <caret line="94" column="91" selection-start-line="94" selection-start-column="91" selection-end-line="94" selection-end-column="91" />
               <folding>
                 <element signature="e#23#37#0" expanded="true" />
@@ -70,7 +67,7 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/scripts/run_commands.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="15">
@@ -118,11 +115,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/scripts/create_output.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-617">
-              <caret line="529" column="39" lean-forward="true" selection-start-line="529" selection-start-column="39" selection-end-line="529" selection-end-column="39" />
+            <state relative-caret-position="1128">
+              <caret line="498" column="23" selection-start-line="498" selection-start-column="23" selection-end-line="498" selection-end-column="23" />
               <folding>
                 <element signature="e#23#41#0" expanded="true" />
                 <element signature="e#240#8861#0" />
@@ -135,9 +132,10 @@
                 <element signature="e#9454#10117#0" />
                 <element signature="e#9834#10118#0" />
                 <element signature="e#11482#12004#0" />
-                <element signature="e#13127#16241#0" />
-                <element signature="e#16980#18555#0" />
-                <marker date="1536817380138" expanded="false" signature="2014:2120" ph="..." />
+                <element signature="e#10622#12162#0" />
+                <element signature="e#14615#18602#0" />
+                <element signature="e#19830#30981#0" />
+                <marker date="1537161058052" expanded="false" signature="2548:2654" ph="..." />
               </folding>
             </state>
           </provider>
@@ -221,10 +219,10 @@
         <option value="$PROJECT_DIR$/scripts/mapping_to_query.py" />
         <option value="$PROJECT_DIR$/scripts/mapping_to_ref.py" />
         <option value="$PROJECT_DIR$/scripts/degugging.py" />
-        <option value="$PROJECT_DIR$/scripts/create_output.py" />
         <option value="$PROJECT_DIR$/scripts/run_commands.py" />
         <option value="$PROJECT_DIR$/scripts/ismap_v2_unittests.py" />
         <option value="$PROJECT_DIR$/scripts/ismap_v2.py" />
+        <option value="$PROJECT_DIR$/scripts/create_output.py" />
       </list>
     </option>
   </component>
@@ -660,7 +658,14 @@
       <option name="project" value="LOCAL" />
       <updated>1536816449365</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="ran all Ab genomes and fixed bugs that arose">
+      <created>1537159809516</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1537159809516</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -773,7 +778,8 @@
     <MESSAGE value="completed all current todos in mapping_to_query.py" />
     <MESSAGE value="ismapper runs through for 1 sample and all files go to correct places" />
     <MESSAGE value="code for checking dependencies" />
-    <option name="LAST_COMMIT_MESSAGE" value="code for checking dependencies" />
+    <MESSAGE value="ran all Ab genomes and fixed bugs that arose" />
+    <option name="LAST_COMMIT_MESSAGE" value="ran all Ab genomes and fixed bugs that arose" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1010,41 +1016,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/ismap_v2.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="346">
-          <caret line="94" column="91" selection-start-line="94" selection-start-column="91" selection-end-line="94" selection-end-column="91" />
-          <folding>
-            <element signature="e#23#37#0" expanded="true" />
-            <element signature="e#5937#5996#0" />
-            <element signature="e#6044#6721#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/create_output.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-617">
-          <caret line="529" column="39" lean-forward="true" selection-start-line="529" selection-start-column="39" selection-end-line="529" selection-end-column="39" />
-          <folding>
-            <element signature="e#23#41#0" expanded="true" />
-            <element signature="e#240#8861#0" />
-            <element signature="e#1776#1823#0" />
-            <element signature="e#1634#5367#0" />
-            <element signature="e#5406#6874#0" />
-            <element signature="e#7181#7808#0" />
-            <element signature="e#7877#9076#0" />
-            <element signature="e#982#1438#0" />
-            <element signature="e#9454#10117#0" />
-            <element signature="e#9834#10118#0" />
-            <element signature="e#11482#12004#0" />
-            <element signature="e#13127#16241#0" />
-            <element signature="e#16980#18555#0" />
-            <marker date="1536817380138" expanded="false" signature="2014:2120" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/ismap_v2_unittests.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1245">
@@ -1068,6 +1039,42 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="15">
           <caret line="1" column="63" selection-start-line="1" selection-start-column="63" selection-end-line="1" selection-end-column="63" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/ismap_v2.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-177">
+          <caret line="94" column="91" selection-start-line="94" selection-start-column="91" selection-end-line="94" selection-end-column="91" />
+          <folding>
+            <element signature="e#23#37#0" expanded="true" />
+            <element signature="e#5937#5996#0" />
+            <element signature="e#6044#6721#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/create_output.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1128">
+          <caret line="498" column="23" selection-start-line="498" selection-start-column="23" selection-end-line="498" selection-end-column="23" />
+          <folding>
+            <element signature="e#23#41#0" expanded="true" />
+            <element signature="e#240#8861#0" />
+            <element signature="e#1776#1823#0" />
+            <element signature="e#1634#5367#0" />
+            <element signature="e#5406#6874#0" />
+            <element signature="e#7181#7808#0" />
+            <element signature="e#7877#9076#0" />
+            <element signature="e#982#1438#0" />
+            <element signature="e#9454#10117#0" />
+            <element signature="e#9834#10118#0" />
+            <element signature="e#11482#12004#0" />
+            <element signature="e#10622#12162#0" />
+            <element signature="e#14615#18602#0" />
+            <element signature="e#19830#30981#0" />
+            <marker date="1537161058052" expanded="false" signature="2548:2654" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>
