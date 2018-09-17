@@ -527,9 +527,8 @@ def create_typing_output(filenames, ref_gbk_obj, is_query_obj, min_range, max_ra
                         # add the relevant information to the hit that we already know
                         new_hit.hit_type = 'novel'
                         new_hit.confidence_level = 'confident'
-                        # make sure we note that this is overlapping if distance is 0
-                        if gap == 0:
-                            new_hit.overlap = True
+                        # make sure we note that this is overlapping because it's the intersect file
+                        new_hit.overlap = True
 
                         # determine the features flanking the hit, and add the details to the hit object
                         new_hit.get_flanking_genes(ref_gbk_obj, ref_feature_list)

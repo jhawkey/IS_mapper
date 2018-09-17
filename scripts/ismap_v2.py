@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import logging
-import sys, re, os
+import sys, os
 from argparse import ArgumentParser
 from subprocess import call, check_output, CalledProcessError, STDOUT, Popen, PIPE
 import pathlib
@@ -92,7 +92,7 @@ def get_sequences(seq_files, seq_format):
     return seq_records
 
 def main():
-
+    # TODO: look for all instances where ISMapper exits. Ensure that same subset of message is given (to easily search for)
     # get arguments
     args = parse_args()
 
@@ -115,7 +115,6 @@ def main():
 
     #TODO: make a function that checks the input files are correct
 
-    #TODO: make a function that checks all dependencies are correct
     # Checks that the correct programs are installed
     check_command('bwa', 'BWA')
     check_command('samtools', 'SAMtools')
