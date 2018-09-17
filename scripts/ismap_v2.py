@@ -19,6 +19,8 @@ def parse_args():
     Parse the input arguments, use -h for help.
     """
     ## TODO: sort through arguments and put in sensible order, hide some arguments by default
+    # TODO: remove typing option and related if statement
+    # TODO: remove all arguments related to improvement mode
     # go back and fix these when running on command line
     parser = ArgumentParser(description='IS mapper')
 
@@ -92,7 +94,6 @@ def get_sequences(seq_files, seq_format):
     return seq_records
 
 def main():
-    # TODO: look for all instances where ISMapper exits. Ensure that same subset of message is given (to easily search for)
     # get arguments
     args = parse_args()
 
@@ -187,6 +188,7 @@ def main():
                     logging.info('ISMapper has completed successfully for sample %s', sample.prefix)
 
     # TODO: add time taken here
+    # TODO: remove temp directory unless specifically asked not to
     logging.info('ISMapper has finished')
 
 
