@@ -3,16 +3,9 @@
 import logging
 import sys, os
 from argparse import ArgumentParser
-from subprocess import call, check_output, CalledProcessError, STDOUT, Popen, PIPE
 import pathlib
 import datetime
 from Bio import SeqIO
-from Bio import SeqFeature
-from Bio.SeqFeature import SeqFeature, FeatureLocation
-from Bio.Seq import Seq
-from Bio.SeqRecord import SeqRecord
-from Bio.Alphabet import generic_dna
-import resource
 import time
 import read_grouping
 from run_commands import run_command, CommandError, BedtoolsError, make_directories, check_command
@@ -85,9 +78,16 @@ def get_sequences(seq_files, seq_format):
             seq_records.append(record)
 
     # if the list is empty, raise an error
-    if len(seq_records) == 0:
-        #TODO: make this error more informative as to which files contained no sequence
-        raise NoSeqError('No sequences were found in one of your input files, please check both your IS queries file(s) and your reference genome file(s).')
+    if len(seq_records) == 0 and seq_format == 'fasta':
+        logging.error('One of your IS queries contained no sequence, please check')
+        logging.info('ISMapper exiting')
+        raise NoSeqError('No sequence was found in one of your IS query file(s).')
+
+    # if the list is empty, raise an error
+    if len(seq_records) == 0 and seq_format == 'genbank':
+        logging.error('No entry was found in your reference genbank(s), please check')
+        logging.info('ISMapper exiting')
+        raise NoSeqError('No entry was found in your reference genbank file(s).')
 
     return seq_records
 
@@ -113,8 +113,6 @@ def main():
     logging.info('command line: {0}'.format(' '.join(sys.argv)))
     logging.info(working_dir)
 
-    #TODO: make a function that checks the input files are correct
-
     # Checks that the correct programs are installed
     check_command('bwa', 'BWA')
     check_command('samtools', 'SAMtools')
@@ -124,7 +122,6 @@ def main():
     # group reads
     read_groups = read_grouping.group_reads(args.reads)
 
-
     # print out unpaired reads
     if read_groups.unpaired:
         # report unpaired reads
@@ -133,16 +130,19 @@ def main():
             logging.info(unpaired.prefix)
     # print out paired reads
     if read_groups.paired:
-        logging.info('Found %s sets of paired reads', len(read_groups.paired))
+        if len(read_groups.paired) == 1:
+            logging.info('Found %s set of paired reads', len(read_groups.paired))
+        else:
+            logging.info('Found %s sets of paired reads', len(read_groups.paired))
         for paired in read_groups.paired:
             logging.info('Found paired reads for sample %s: %s %s', paired.prefix, str(paired.forward.filepath), str(paired.reverse.filepath))
             # check none of the input read files are empty
             # if they are, raise an error
             if os.stat(str(paired.forward.filepath))[6] <= 100:
-                logging.info('Forward read %s is empty! ISMapper exiting', str(paired.forward.filepath))
+                logging.error('Forward read %s is empty! ISMapper exiting', str(paired.forward.filepath))
                 raise NoSeqError('Forward read file is empty, ISMapper exiting')
             if os.stat(str(paired.reverse.filepath))[6] <= 100:
-                logging.info('Reverse read %s is empty! ISMapper exiting', str(paired.forward.filepath))
+                logging.error('Reverse read %s is empty! ISMapper exiting', str(paired.forward.filepath))
                 raise NoSeqError('Reverse read file is empty, ISMapper exiting')
     # if there were no paired read sets found, raise an exception and quit
     else:

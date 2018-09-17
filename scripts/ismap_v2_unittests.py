@@ -11,7 +11,6 @@ from Bio import SeqIO
 import filecmp
 import shutil
 
-#TODO: Provide empty bed files (try all combinations) and ensure error messages are correct, temp files deleted, program exits nicely
 #TODO: provide misformatted gbk ref (LOCUS too long, qualifiers wrong) -> error messages, tmp dir, program exits
 #TODO: provide misformatted fasta query or queries
 #TODO: provide read names which can't be paired
