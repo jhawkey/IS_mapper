@@ -175,7 +175,7 @@ def main():
 
                     # Create table and annotated genbank with hits
                     #(filenames, ref_gbk_obj, is_query_obj, min_range, max_range, tmp_output_folder)
-                    create_typing_output(filenames_bedfiles, ref_seq, is_query, args.min_range, args.max_range, tmp_output_folder)
+                    create_typing_output(filenames_bedfiles, ref_seq, is_query, args.min_range, args.max_range, tmp_output_folder, sample.prefix)
                     logging.info('ISMapper has completed successfully for sample %s', sample.prefix)
 
     # TODO: add time taken here

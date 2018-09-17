@@ -12,7 +12,6 @@ import filecmp
 import shutil
 
 #TODO: Provide empty bed files (try all combinations) and ensure error messages are correct, temp files deleted, program exits nicely
-#TODO: provide one or more empty flanking fastq files, ensure error message correct, temp files deleted, program exits
 #TODO: provide misformatted gbk ref (LOCUS too long, qualifiers wrong) -> error messages, tmp dir, program exits
 #TODO: provide misformatted fasta query or queries
 #TODO: provide read names which can't be paired
@@ -91,6 +90,41 @@ class TestMapToISQuery(unittest.TestCase):
         # remove directory containing files after test
         shutil.rmtree(self.output)
 
+class TestEmptyFiles(unittest.TestCase):
+
+    def setUp(self):
+        self.left_flanking = '/Users/jane/Desktop/ismap_v2/gold_standard_files/9262_1#29_ISAba1_left_final.fastq'
+        self.empty_right_flanking = '/Users/jane/Desktop/ismap_v2/gold_standard_files/empty_files/9262_1#29_ISAba1_right_final.fastq'
+
+        ref_seqs = ismap_v2.get_sequences(['/Users/jane/Desktop/ismap_v2/refs/CP010781.gbk'], 'genbank')
+        self.ref = ref_seqs[0]
+
+        self.query_single = ['/Users/jane/Desktop/ismap_v2/queries/ISAba1.fasta']
+        self.query_records = ismap_v2.get_sequences(self.query_single, 'fasta')
+        self.is_query = self.query_records[0]
+
+        self.sample = '9262_1#29'
+        self.main_out_folder = '/Users/jane/Desktop/ismap_v2/test_results/9262_1#29/'
+        self.tmp_folder = '/Users/jane/Desktop/ismap_v2/test_results/9262_1#29/ISAba1/tmp'
+        self.out_folder = '/Users/jane/Desktop/ismap_v2/test_results/9262_1#29/ISAba1/'
+        # make the output directories
+        if not os.path.exists(self.tmp_folder):
+            os.makedirs(self.tmp_folder)
+
+    def test_empty_read_file(self):
+        # providing one empty read file from the query stage
+        # test should just run and return no errors if everything works fine
+        test_filenames = mapping_to_ref.map_to_ref_seq(self.ref, self.sample, self.left_flanking,
+                                                       self.empty_right_flanking, self.tmp_folder, self.out_folder, '1', False)
+
+        test_filenames = mapping_to_ref.create_bed_files(test_filenames, 6, '100')
+
+        create_output.create_typing_output(test_filenames, self.ref, self.is_query, 0.9, 1.1, self.tmp_folder, self.sample)
+
+    def tearDown(self):
+        # remove directory containing files after test
+        shutil.rmtree(self.main_out_folder)
+
 class TestRefMapping(unittest.TestCase):
 
     def setUp(self):
@@ -101,6 +135,7 @@ class TestRefMapping(unittest.TestCase):
          ref_seqs = ismap_v2.get_sequences(['/Users/jane/Desktop/ismap_v2/refs/CP010781.gbk'], 'genbank')
          self.ref = ref_seqs[0]
          self.sample = '9262_1#29'
+         self.main_out_folder = '/Users/jane/Desktop/ismap_v2/test_results/9262_1#29/'
          self.tmp_folder = '/Users/jane/Desktop/ismap_v2/test_results/9262_1#29/ISAba1/tmp'
          self.out_folder = '/Users/jane/Desktop/ismap_v2/test_results/9262_1#29/ISAba1/'
          # make the output directories
@@ -109,8 +144,9 @@ class TestRefMapping(unittest.TestCase):
 
     def test_map_to_ref_seq_01(self):
 
+        # test that after mapping to ref the reads in the sorted bam files are correct
         test_filenames = mapping_to_ref.map_to_ref_seq(self.ref, self.sample, self.left_flanking,
-                                                       self.right_flanking, self.tmp_folder, self.out_folder, '1')
+                                                       self.right_flanking, self.tmp_folder, self.out_folder, '1', False)
         test_left_sorted_bam = test_filenames['left_sorted']
         test_right_sorted_bam = test_filenames['right_sorted']
 
@@ -135,7 +171,7 @@ class TestRefMapping(unittest.TestCase):
 
     def tearDown(self):
         # remove directory containing files after test
-        shutil.rmtree(self.out_folder)
+        shutil.rmtree(self.main_out_folder)
 
 class TestCreateBedFiles(unittest.TestCase):
 

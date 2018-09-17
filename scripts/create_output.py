@@ -499,7 +499,7 @@ def write_typing_output(IShits, removedhits, output_table):
     # exit the function
     return
 
-def create_typing_output(filenames, ref_gbk_obj, is_query_obj, min_range, max_range, tmp_output_folder):
+def create_typing_output(filenames, ref_gbk_obj, is_query_obj, min_range, max_range, tmp_output_folder, sample_prefix):
 
     # first we need all the input files so we can match hits up
     intersect_file = filenames['intersect']
@@ -522,7 +522,8 @@ def create_typing_output(filenames, ref_gbk_obj, is_query_obj, min_range, max_ra
     if os.stat(intersect_file)[6] == 0 and os.stat(closest_file)[6] == 0:
         write_typing_output(IS_hits, final_table_file)
         # TODO: add sample name here
-        logging.info('No hits found for sample XX')
+        logging.info('Both the intersect and closest BED files were empty.')
+        logging.info('No hits found for sample %s', sample_prefix)
         return
 
     # If there are hits, read in the genbank file we're mapping to,
@@ -593,9 +594,12 @@ def create_typing_output(filenames, ref_gbk_obj, is_query_obj, min_range, max_ra
                 # extract all the information
                 info = line.strip().split('\t')
                 # if the fourth column contains a -1, there are no hits in this file
-                if info[3] == '-1':
+                # sometimes the fourth column is actually an empty string as there is an extra \t delimiter
+                if info[3] == '-1' or info[3] == '':
                     # exit the file and do not process further
-                    break
+                    logging.info('One or more flanking read files were empty, no hits found for sample %s', sample_prefix)
+                    write_typing_output(IS_hits, removed_hits, final_table_file)
+                    return IS_hits
                 # get the distance between the hits
                 gap = int(info[6])
                 # separate out info on the left and right sides of the hit
