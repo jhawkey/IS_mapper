@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="f362a202-b55d-4e14-bd4f-3ac14f1bafb9" name="Default" comment="ran all Ab genomes and fixed bugs that arose">
+    <list default="true" id="f362a202-b55d-4e14-bd4f-3ac14f1bafb9" name="Default" comment="an empty flanking read file runs and gives correct response">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scripts/create_output.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/create_output.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/ismap_v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/ismap_v2.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/ismap_v2_unittests.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/ismap_v2_unittests.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -22,28 +24,28 @@
       <usages-collector id="statistics.file.types.open">
         <counts>
           <entry key="PLAIN_TEXT" value="1" />
-          <entry key="Python" value="27" />
+          <entry key="Python" value="30" />
           <entry key="Scratch" value="2" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="py" value="28" />
+          <entry key="py" value="31" />
           <entry key="txt" value="2" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="Python Console" value="1537" />
-          <entry key="py" value="23973" />
+          <entry key="Python Console" value="1603" />
+          <entry key="py" value="25539" />
           <entry key="regexp" value="7" />
-          <entry key="txt" value="1119" />
+          <entry key="txt" value="1256" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="PLAIN_TEXT" value="668" />
-          <entry key="Python" value="25488" />
+          <entry key="PLAIN_TEXT" value="805" />
+          <entry key="Python" value="27120" />
           <entry key="RegExp" value="7" />
           <entry key="Scratch" value="473" />
         </counts>
@@ -53,11 +55,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/scripts/ismap_v2.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-177">
-              <caret line="94" column="91" selection-start-line="94" selection-start-column="91" selection-end-line="94" selection-end-column="91" />
+            <state relative-caret-position="401">
+              <caret line="137" selection-start-line="137" selection-end-line="137" />
               <folding>
                 <element signature="e#23#37#0" expanded="true" />
                 <element signature="e#5937#5996#0" />
@@ -72,15 +74,6 @@
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="15">
               <caret line="1" column="63" selection-start-line="1" selection-start-column="63" selection-end-line="1" selection-end-column="63" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/scripts/read_grouping.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="15">
-              <caret line="2" column="14" lean-forward="true" selection-start-line="2" selection-start-column="14" selection-end-line="2" selection-end-column="14" />
             </state>
           </provider>
         </entry>
@@ -105,7 +98,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/scripts/mapping_to_ref.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="131">
+            <state relative-caret-position="484">
               <caret line="93" column="64" selection-start-line="93" selection-start-column="64" selection-end-line="93" selection-end-column="64" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
@@ -115,11 +108,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/scripts/create_output.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1128">
-              <caret line="498" column="23" selection-start-line="498" selection-start-column="23" selection-end-line="498" selection-end-column="23" />
+            <state relative-caret-position="85">
+              <caret line="353" lean-forward="true" selection-start-line="353" selection-end-line="353" />
               <folding>
                 <element signature="e#23#41#0" expanded="true" />
                 <element signature="e#240#8861#0" />
@@ -134,9 +127,36 @@
                 <element signature="e#11482#12004#0" />
                 <element signature="e#10622#12162#0" />
                 <element signature="e#14615#18602#0" />
-                <element signature="e#19830#30981#0" />
-                <marker date="1537161058052" expanded="false" signature="2548:2654" ph="..." />
+                <element signature="e#18777#21592#0" />
+                <marker date="1537163663852" expanded="false" signature="2548:2654" ph="..." />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$USER_HOME$/miniconda3/envs/ismapper_latest/lib/python3.6/codecs.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="357">
+              <caret line="323" selection-start-line="323" selection-end-line="323" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$APPLICATION_HOME_DIR$/helpers/pycharm/teamcity/common.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="394">
+              <caret line="48" selection-start-line="48" selection-end-line="48" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$APPLICATION_HOME_DIR$/helpers/pycharm/teamcity/unittestpy.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="575">
+              <caret line="241" selection-start-line="241" selection-end-line="241" />
             </state>
           </provider>
         </entry>
@@ -156,19 +176,22 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/scripts/ismap_v2_unittests.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1245">
-              <caret line="144" column="39" lean-forward="true" selection-start-line="144" selection-start-column="39" selection-end-line="144" selection-end-column="39" />
+            <state relative-caret-position="420">
+              <caret line="174" selection-start-line="174" selection-end-line="174" />
               <folding>
                 <element signature="e#0#15#0" expanded="true" />
                 <element signature="e#258#1758#0" />
-                <element signature="e#2977#3641#0" />
-                <element signature="e#2619#3695#0" />
+                <element signature="e#1880#3563#0" />
                 <element signature="e#3557#3625#0" />
+                <element signature="e#4586#6116#0" />
+                <element signature="e#4003#6095#0" />
                 <element signature="e#4336#4647#0" />
                 <element signature="e#5844#6836#0" />
                 <element signature="e#5794#6833#0" />
-                <marker date="1536818368605" expanded="true" signature="6990:6999" ph="..." />
-                <marker date="1536818368605" expanded="true" signature="7130:7260" ph="..." />
+                <marker date="1537163459350" expanded="true" signature="5541:6120" ph="..." />
+                <marker date="1537163459350" expanded="true" signature="6139:6148" ph="..." />
+                <marker date="1537163459350" expanded="true" signature="8871:8880" ph="..." />
+                <marker date="1537163459350" expanded="true" signature="8970:8972" ph="..." />
               </folding>
             </state>
           </provider>
@@ -221,8 +244,8 @@
         <option value="$PROJECT_DIR$/scripts/degugging.py" />
         <option value="$PROJECT_DIR$/scripts/run_commands.py" />
         <option value="$PROJECT_DIR$/scripts/ismap_v2_unittests.py" />
-        <option value="$PROJECT_DIR$/scripts/ismap_v2.py" />
         <option value="$PROJECT_DIR$/scripts/create_output.py" />
+        <option value="$PROJECT_DIR$/scripts/ismap_v2.py" />
       </list>
     </option>
   </component>
@@ -327,7 +350,28 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.all_Ab_samples">
+  <component name="RunManager" selected="Python.Mismatched reads">
+    <configuration name="Mismatched reads" type="PythonConfigurationType" factoryName="Python">
+      <module name="IS_mapper" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="$USER_HOME$/miniconda3/envs/ismapper_latest/bin/python" />
+      <option name="WORKING_DIRECTORY" value="$USER_HOME$/Desktop/ismap_v2" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/ismap_v2.py" />
+      <option name="PARAMETERS" value="--queries $USER_HOME$/Desktop/ismap_v2/queries/ISAba1.fasta --reads $USER_HOME$/Desktop/ismap_v2/gold_standard_files/empty_files/9262_1#29_1.fastq.gz $USER_HOME$/Desktop/ismap_v2/gold_standard_files/empty_files/9262_1#29_2.fastq.gz --typingRef $USER_HOME$/Desktop/ismap_v2/refs/CP001921.gbk --output $USER_HOME$/Desktop/ismap_v2/testing_functions --log --log_name testing" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="all_Ab_samples" type="PythonConfigurationType" factoryName="Python">
       <module name="IS_mapper" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -342,6 +386,27 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/ismap_v2.py" />
       <option name="PARAMETERS" value="--queries $USER_HOME$/Desktop/ismap_v2/queries/ISAba1.fasta --reads $USER_HOME$/Desktop/ismap_v2/reads/7468_2#71_1.fastq.gz $USER_HOME$/Desktop/ismap_v2/reads/7468_2#71_2.fastq.gz $USER_HOME$/Desktop/ismap_v2/reads/7468_2#72_1.fastq.gz $USER_HOME$/Desktop/ismap_v2/reads/7468_2#72_2.fastq.gz $USER_HOME$/Desktop/ismap_v2/reads/7468_2#92_1.fastq.gz $USER_HOME$/Desktop/ismap_v2/reads/7468_2#92_2.fastq.gz $USER_HOME$/Desktop/ismap_v2/reads/7521_8#36_1.fastq.gz $USER_HOME$/Desktop/ismap_v2/reads/7521_8#36_2.fastq.gz $USER_HOME$/Desktop/ismap_v2/reads/7521_8#37_1.fastq.gz $USER_HOME$/Desktop/ismap_v2/reads/7521_8#37_2.fastq.gz $USER_HOME$/Desktop/ismap_v2/reads/7521_8#48_1.fastq.gz $USER_HOME$/Desktop/ismap_v2/reads/7521_8#48_2.fastq.gz $USER_HOME$/Desktop/ismap_v2/reads/9262_1#29_1.fastq.gz $USER_HOME$/Desktop/ismap_v2/reads/9262_1#29_2.fastq.gz --typingRef $USER_HOME$/Desktop/ismap_v2/refs/CP010781.gbk --output $USER_HOME$/Desktop/ismap_v2/v2_AbSamples_latestVersions --log --log_name all7AbSamples" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="create_output" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="IS_mapper" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/scripts" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/create_output.py" />
+      <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -419,7 +484,7 @@
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="Unittests for ismap_v2_unittests.TestGetSeqs" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+    <configuration name="Unittests for ismap_v2_unittests.TestEmptyFiles" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <module name="IS_mapper" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -429,11 +494,11 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;ismap_v2_unittests.TestGetSeqs&quot;" />
+      <option name="_new_target" value="&quot;ismap_v2_unittests.TestEmptyFiles&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="Unittests for ismap_v2_unittests.TestMapToISQuery" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+    <configuration name="Unittests for ismap_v2_unittests.TestEmptyFiles.test_empty_read_file" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <module name="IS_mapper" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -443,21 +508,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;ismap_v2_unittests.TestMapToISQuery&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
-      <method v="2" />
-    </configuration>
-    <configuration name="Unittests for ismap_v2_unittests.TestMapToISQuery.test_map_to_is_query_01" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
-      <module name="IS_mapper" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/scripts" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;ismap_v2_unittests.TestMapToISQuery.test_map_to_is_query_01&quot;" />
+      <option name="_new_target" value="&quot;ismap_v2_unittests.TestEmptyFiles.test_empty_read_file&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
@@ -520,6 +571,7 @@
     </configuration>
     <list>
       <item itemvalue="Python.testrun" />
+      <item itemvalue="Python.Mismatched reads" />
       <item itemvalue="Python.all_Ab_samples" />
       <item itemvalue="Python tests.Unittests in ismap_v2_unittests.py" />
       <item itemvalue="Python tests.Unittests for ismap_v2_unittests.TestRefMapping.test_map_to_ref_seq" />
@@ -527,18 +579,18 @@
       <item itemvalue="Python tests.Unittests for ismap_v2_unittests.TestCreateBedFiles.test_create_bed_files_01" />
       <item itemvalue="Python tests.Unittests for ismap_v2_unittests.TestCreateBedFiles" />
       <item itemvalue="Python.degugging" />
-      <item itemvalue="Python tests.Unittests for ismap_v2_unittests.TestMapToISQuery" />
-      <item itemvalue="Python tests.Unittests for ismap_v2_unittests.TestMapToISQuery.test_map_to_is_query_01" />
-      <item itemvalue="Python tests.Unittests for ismap_v2_unittests.TestGetSeqs" />
+      <item itemvalue="Python.create_output" />
       <item itemvalue="Python tests.Unittests for ismap_v2_unittests.TestRefMapping.test_map_to_ref_seq_01" />
+      <item itemvalue="Python tests.Unittests for ismap_v2_unittests.TestEmptyFiles.test_empty_read_file" />
+      <item itemvalue="Python tests.Unittests for ismap_v2_unittests.TestEmptyFiles" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python tests.Unittests for ismap_v2_unittests.TestEmptyFiles" />
+        <item itemvalue="Python tests.Unittests for ismap_v2_unittests.TestEmptyFiles.test_empty_read_file" />
+        <item itemvalue="Python.create_output" />
         <item itemvalue="Python.degugging" />
         <item itemvalue="Python tests.Unittests for ismap_v2_unittests.TestRefMapping.test_map_to_ref_seq_01" />
-        <item itemvalue="Python tests.Unittests for ismap_v2_unittests.TestGetSeqs" />
-        <item itemvalue="Python tests.Unittests for ismap_v2_unittests.TestMapToISQuery" />
-        <item itemvalue="Python tests.Unittests for ismap_v2_unittests.TestMapToISQuery.test_map_to_is_query_01" />
       </list>
     </recent_temporary>
   </component>
@@ -665,39 +717,53 @@
       <option name="project" value="LOCAL" />
       <updated>1537159809516</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="added code to remove hits and write out record of these">
+      <created>1537161078505</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1537161078505</updated>
+    </task>
+    <task id="LOCAL-00018" summary="an empty flanking read file runs and gives correct response">
+      <created>1537163335723</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1537163335723</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="Unittests_for_ismap_v2_unittests_TestRefMapping - 2018.09.12 at 15h 11m 25s.xml">
-      <configuration name="Unittests for ismap_v2_unittests.TestRefMapping" configurationId="tests" />
+    <history-entry file="Unittests_for_ismap_v2_unittests_TestEmptyFiles_test_empty_read_file - 2018.09.17 at 15h 30m 58s.xml">
+      <configuration name="Unittests for ismap_v2_unittests.TestEmptyFiles.test_empty_read_file" configurationId="tests" />
     </history-entry>
-    <history-entry file="Unittests_for_ismap_v2_unittests_TestRefMapping - 2018.09.12 at 15h 12m 33s.xml">
-      <configuration name="Unittests for ismap_v2_unittests.TestRefMapping" configurationId="tests" />
+    <history-entry file="Unittests_for_ismap_v2_unittests_TestEmptyFiles_test_empty_read_file - 2018.09.17 at 15h 32m 15s.xml">
+      <configuration name="Unittests for ismap_v2_unittests.TestEmptyFiles.test_empty_read_file" configurationId="tests" />
     </history-entry>
-    <history-entry file="Unittests_for_ismap_v2_unittests_TestRefMapping - 2018.09.12 at 15h 14m 50s.xml">
-      <configuration name="Unittests for ismap_v2_unittests.TestRefMapping" configurationId="tests" />
+    <history-entry file="Unittests_for_ismap_v2_unittests_TestEmptyFiles_test_empty_read_file - 2018.09.17 at 15h 33m 12s.xml">
+      <configuration name="Unittests for ismap_v2_unittests.TestEmptyFiles.test_empty_read_file" configurationId="tests" />
     </history-entry>
-    <history-entry file="Unittests_for_ismap_v2_unittests_TestRefMapping - 2018.09.12 at 15h 15m 29s.xml">
-      <configuration name="Unittests for ismap_v2_unittests.TestRefMapping" configurationId="tests" />
+    <history-entry file="Unittests_for_ismap_v2_unittests_TestEmptyFiles_test_empty_read_file - 2018.09.17 at 15h 33m 26s.xml">
+      <configuration name="Unittests for ismap_v2_unittests.TestEmptyFiles.test_empty_read_file" configurationId="tests" />
     </history-entry>
-    <history-entry file="Unittests_for_ismap_v2_unittests_TestRefMapping - 2018.09.12 at 15h 17m 19s.xml">
-      <configuration name="Unittests for ismap_v2_unittests.TestRefMapping" configurationId="tests" />
+    <history-entry file="Unittests_for_ismap_v2_unittests_TestEmptyFiles_test_empty_read_file - 2018.09.17 at 15h 33m 29s.xml">
+      <configuration name="Unittests for ismap_v2_unittests.TestEmptyFiles.test_empty_read_file" configurationId="tests" />
     </history-entry>
-    <history-entry file="Unittests_for_ismap_v2_unittests_TestRefMapping - 2018.09.12 at 15h 34m 57s.xml">
-      <configuration name="Unittests for ismap_v2_unittests.TestRefMapping" configurationId="tests" />
+    <history-entry file="Unittests_for_ismap_v2_unittests_TestEmptyFiles_test_empty_read_file - 2018.09.17 at 15h 34m 31s.xml">
+      <configuration name="Unittests for ismap_v2_unittests.TestEmptyFiles.test_empty_read_file" configurationId="tests" />
     </history-entry>
-    <history-entry file="Unittests_for_ismap_v2_unittests_TestRefMapping_test_map_to_ref_seq_01 - 2018.09.12 at 15h 36m 01s.xml">
-      <configuration name="Unittests for ismap_v2_unittests.TestRefMapping.test_map_to_ref_seq_01" configurationId="tests" />
+    <history-entry file="Unittests_for_ismap_v2_unittests_TestEmptyFiles_test_empty_read_file - 2018.09.17 at 15h 35m 50s.xml">
+      <configuration name="Unittests for ismap_v2_unittests.TestEmptyFiles.test_empty_read_file" configurationId="tests" />
     </history-entry>
-    <history-entry file="Unittests_for_ismap_v2_unittests_TestRefMapping - 2018.09.12 at 15h 36m 35s.xml">
-      <configuration name="Unittests for ismap_v2_unittests.TestRefMapping" configurationId="tests" />
+    <history-entry file="Unittests_for_ismap_v2_unittests_TestEmptyFiles_test_empty_read_file - 2018.09.17 at 15h 43m 28s.xml">
+      <configuration name="Unittests for ismap_v2_unittests.TestEmptyFiles.test_empty_read_file" configurationId="tests" />
     </history-entry>
-    <history-entry file="Unittests_for_ismap_v2_unittests_TestRefMapping - 2018.09.12 at 15h 36m 52s.xml">
-      <configuration name="Unittests for ismap_v2_unittests.TestRefMapping" configurationId="tests" />
+    <history-entry file="Unittests_for_ismap_v2_unittests_TestEmptyFiles - 2018.09.17 at 15h 43m 57s.xml">
+      <configuration name="Unittests for ismap_v2_unittests.TestEmptyFiles" configurationId="tests" />
     </history-entry>
-    <history-entry file="Unittests_for_ismap_v2_unittests_TestRefMapping - 2018.09.12 at 15h 42m 34s.xml">
-      <configuration name="Unittests for ismap_v2_unittests.TestRefMapping" configurationId="tests" />
+    <history-entry file="Unittests_for_ismap_v2_unittests_TestEmptyFiles - 2018.09.17 at 15h 48m 15s.xml">
+      <configuration name="Unittests for ismap_v2_unittests.TestEmptyFiles" configurationId="tests" />
     </history-entry>
   </component>
   <component name="TodoView" selected-index="1">
@@ -711,7 +777,6 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="2560" height="1417" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.12445845" />
       <window_info id="Structure" order="1" weight="0.24970461" />
@@ -724,7 +789,7 @@
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.2754717" />
       <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" />
-      <window_info anchor="bottom" id="Python Console" order="8" weight="0.32981133" />
+      <window_info active="true" anchor="bottom" id="Python Console" order="8" visible="true" weight="0.32981133" />
       <window_info anchor="bottom" id="Terminal" order="9" weight="0.32981133" />
       <window_info anchor="bottom" id="Version Control" order="10" weight="0.32830188" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
@@ -779,10 +844,19 @@
     <MESSAGE value="ismapper runs through for 1 sample and all files go to correct places" />
     <MESSAGE value="code for checking dependencies" />
     <MESSAGE value="ran all Ab genomes and fixed bugs that arose" />
-    <option name="LAST_COMMIT_MESSAGE" value="ran all Ab genomes and fixed bugs that arose" />
+    <MESSAGE value="added code to remove hits and write out record of these" />
+    <MESSAGE value="an empty flanking read file runs and gives correct response" />
+    <option name="LAST_COMMIT_MESSAGE" value="an empty flanking read file runs and gives correct response" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/scripts/ismap_v2.py</url>
+          <line>140</line>
+          <option name="timeStamp" value="122" />
+        </line-breakpoint>
+      </breakpoints>
       <default-breakpoints>
         <breakpoint suspend="NONE" type="python-exception">
           <properties exception="BaseException" />
@@ -871,13 +945,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$APPLICATION_HOME_DIR$/helpers/pycharm/teamcity/unittestpy.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="560">
-          <caret line="303" selection-start-line="303" selection-end-line="303" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file:///usr/local/Cellar/python3/3.6.1/Frameworks/Python.framework/Versions/3.6/lib/python3.6/unittest/runner.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="251">
@@ -949,16 +1016,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/degugging.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="330">
-          <caret line="22" column="61" selection-start-line="22" selection-start-column="61" selection-end-line="22" selection-end-column="61" />
-          <folding>
-            <element signature="e#0#54#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/ismap.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="345">
@@ -990,6 +1047,13 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/run_commands.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="15">
+          <caret line="1" column="63" selection-start-line="1" selection-start-column="63" selection-end-line="1" selection-end-column="63" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/mapping_to_query.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="150">
@@ -1007,7 +1071,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/scripts/mapping_to_ref.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="131">
+        <state relative-caret-position="484">
           <caret line="93" column="64" selection-start-line="93" selection-start-column="64" selection-end-line="93" selection-end-column="64" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
@@ -1016,48 +1080,63 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/ismap_v2_unittests.py">
+    <entry file="file://$PROJECT_DIR$/scripts/degugging.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1245">
-          <caret line="144" column="39" lean-forward="true" selection-start-line="144" selection-start-column="39" selection-end-line="144" selection-end-column="39" />
+        <state relative-caret-position="330">
+          <caret line="22" column="61" selection-start-line="22" selection-start-column="61" selection-end-line="22" selection-end-column="61" />
           <folding>
-            <element signature="e#0#15#0" expanded="true" />
-            <element signature="e#258#1758#0" />
-            <element signature="e#2977#3641#0" />
-            <element signature="e#2619#3695#0" />
-            <element signature="e#3557#3625#0" />
-            <element signature="e#4336#4647#0" />
-            <element signature="e#5844#6836#0" />
-            <element signature="e#5794#6833#0" />
-            <marker date="1536818368605" expanded="true" signature="6990:6999" ph="..." />
-            <marker date="1536818368605" expanded="true" signature="7130:7260" ph="..." />
+            <element signature="e#0#54#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/run_commands.py">
+    <entry file="file://$APPLICATION_HOME_DIR$/helpers/pycharm/teamcity/unittestpy.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="15">
-          <caret line="1" column="63" selection-start-line="1" selection-start-column="63" selection-end-line="1" selection-end-column="63" />
+        <state relative-caret-position="575">
+          <caret line="241" selection-start-line="241" selection-end-line="241" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/ismap_v2.py">
+    <entry file="file://$APPLICATION_HOME_DIR$/helpers/pycharm/teamcity/common.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-177">
-          <caret line="94" column="91" selection-start-line="94" selection-start-column="91" selection-end-line="94" selection-end-column="91" />
+        <state relative-caret-position="394">
+          <caret line="48" selection-start-line="48" selection-end-line="48" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/miniconda3/envs/ismapper_latest/lib/python3.6/codecs.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="357">
+          <caret line="323" selection-start-line="323" selection-end-line="323" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/ismap_v2_unittests.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="420">
+          <caret line="174" selection-start-line="174" selection-end-line="174" />
           <folding>
-            <element signature="e#23#37#0" expanded="true" />
-            <element signature="e#5937#5996#0" />
-            <element signature="e#6044#6721#0" />
+            <element signature="e#0#15#0" expanded="true" />
+            <element signature="e#258#1758#0" />
+            <element signature="e#1880#3563#0" />
+            <element signature="e#3557#3625#0" />
+            <element signature="e#4586#6116#0" />
+            <element signature="e#4003#6095#0" />
+            <element signature="e#4336#4647#0" />
+            <element signature="e#5844#6836#0" />
+            <element signature="e#5794#6833#0" />
+            <marker date="1537163459350" expanded="true" signature="5541:6120" ph="..." />
+            <marker date="1537163459350" expanded="true" signature="6139:6148" ph="..." />
+            <marker date="1537163459350" expanded="true" signature="8871:8880" ph="..." />
+            <marker date="1537163459350" expanded="true" signature="8970:8972" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/scripts/create_output.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1128">
-          <caret line="498" column="23" selection-start-line="498" selection-start-column="23" selection-end-line="498" selection-end-column="23" />
+        <state relative-caret-position="85">
+          <caret line="353" lean-forward="true" selection-start-line="353" selection-end-line="353" />
           <folding>
             <element signature="e#23#41#0" expanded="true" />
             <element signature="e#240#8861#0" />
@@ -1072,8 +1151,20 @@
             <element signature="e#11482#12004#0" />
             <element signature="e#10622#12162#0" />
             <element signature="e#14615#18602#0" />
-            <element signature="e#19830#30981#0" />
-            <marker date="1537161058052" expanded="false" signature="2548:2654" ph="..." />
+            <element signature="e#18777#21592#0" />
+            <marker date="1537163663852" expanded="false" signature="2548:2654" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/ismap_v2.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="401">
+          <caret line="137" selection-start-line="137" selection-end-line="137" />
+          <folding>
+            <element signature="e#23#37#0" expanded="true" />
+            <element signature="e#5937#5996#0" />
+            <element signature="e#6044#6721#0" />
           </folding>
         </state>
       </provider>

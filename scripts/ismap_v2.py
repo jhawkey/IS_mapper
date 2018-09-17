@@ -136,6 +136,14 @@ def main():
         logging.info('Found %s sets of paired reads', len(read_groups.paired))
         for paired in read_groups.paired:
             logging.info('Found paired reads for sample %s: %s %s', paired.prefix, str(paired.forward.filepath), str(paired.reverse.filepath))
+            # check none of the input read files are empty
+            # if they are, raise an error
+            if os.stat(str(paired.forward.filepath))[6] <= 100:
+                logging.info('Forward read %s is empty! ISMapper exiting', str(paired.forward.filepath))
+                raise NoSeqError('Forward read file is empty, ISMapper exiting')
+            if os.stat(str(paired.reverse.filepath))[6] <= 100:
+                logging.info('Reverse read %s is empty! ISMapper exiting', str(paired.forward.filepath))
+                raise NoSeqError('Reverse read file is empty, ISMapper exiting')
     # if there were no paired read sets found, raise an exception and quit
     else:
         logging.error('No paired read sets found, ISMapper exiting')

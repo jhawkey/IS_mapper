@@ -173,18 +173,6 @@ class TestRefMapping(unittest.TestCase):
         # remove directory containing files after test
         shutil.rmtree(self.main_out_folder)
 
-class TestCreateBedFiles(unittest.TestCase):
-
-    def setUp(self):
-        pass
-
-    def test_create_bed_files_01(self):
-        pass
-
-    def tearDown(self):
-        pass
-
-
 class TestSetOutputFilenames(unittest.TestCase):
     def setUp(self):
         self.tmp_folder = '/Users/jane/Desktop/ismap_v2/test_results/9262_1#29/ISAba1/tmp'
