@@ -111,15 +111,8 @@ def create_bed_files(filenames, cutoff, merging):
         run_command(['closestBed', '-a', filenames['left_merged_bed'], '-b', filenames['right_merged_bed'], '-d', '>', filenames['closest']], shell=True)
     # One or more of these files are empty so we need to quit and report no hits
     except BedtoolsError:
-        #TODO: TEST THIS WORKS WHEN THIS ERROR IS THROWN
-        #(filenames, ref_gbk_obj, is_query_obj, min_range, max_range, tmp_output_folder)
         create_typing_output(filenames, None, None, None, None, None)
         return(filenames)
-        #with open(filenames['table'], 'w') as f:
-            #header = ["region", "orientation", "x", "y", "gap", "call", "%ID", "%Cov", "left_gene", "left_strand",
-            #          "left_distance", "right_gene", "right_strand", "right_distance", "functional_prediction"]
-            #f.write('\t'.join(header) + '\nNo hits found')
-            #continue
     
     # Check all unpaired hits to see if there are any that should be paired up
     # If any of these fail because there are no hits, just make empty unapired files to pass to create_typing_out

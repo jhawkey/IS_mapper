@@ -521,7 +521,6 @@ def create_typing_output(filenames, ref_gbk_obj, is_query_obj, min_range, max_ra
     # write out an empty file and record this in the log file
     if os.stat(intersect_file)[6] == 0 and os.stat(closest_file)[6] == 0:
         write_typing_output(IS_hits, removed_hits, final_table_file)
-        # TODO: add sample name here
         logging.info('Both the intersect and closest BED files were empty.')
         logging.info('No hits found for sample %s', sample_prefix)
         return
