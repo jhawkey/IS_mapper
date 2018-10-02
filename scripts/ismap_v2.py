@@ -36,9 +36,7 @@ def parse_args():
                                help='Reference genome for typing against in genbank format')
     parser_script.add_argument('--output_dir', type=str, required=False, default=os.getcwd(),
                                help='Location for all output files (default is current directory).')
-    parser_script.add_argument('--log', action='store_true', required=False,
-                               help='Switch on logging to file (otherwise log to stdout)')
-    parser_script.add_argument('--log_name', type=str, required=False,
+    parser_script.add_argument('--log', type=str, required=False,
                                  help='Prefix for log file. If not supplied, prefix will be current date and time.',
                                  default=datetime.datetime.now().strftime('%Y%m%d_%H%M%S'))
 
@@ -151,7 +149,7 @@ def main():
     # TODO: don't set up logfile if log isn't set to true - default should be logfile, turning off logfile prints to stdout
     # set up logfile
     logging.basicConfig(
-        filename=args.log_name + '.log',
+        filename=args.log + '.log',
         level=logging.DEBUG,
         filemode='w',
         format='%(asctime)s %(message)s',
