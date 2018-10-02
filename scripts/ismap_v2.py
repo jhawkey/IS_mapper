@@ -2,7 +2,7 @@
 
 import logging
 import sys, os
-from argparse import ArgumentParser
+import argparse
 import pathlib
 import datetime
 from Bio import SeqIO
@@ -19,14 +19,14 @@ def parse_args():
     Parse the input arguments, use -h for help.
     """
     # go back and fix these when running on command line
-    parser_parent = ArgumentParser()
-    parser_script = parser_parent.add_argument_group('ISMapper options')
-    parser_extended = parser_parent.add_argument_group('Advanced options')
-    parser_table = parser_parent.add_argument_group('Options for final table')
-    parser_output = parser_parent.add_argument_group('Options for output')
+    parser_parent = argparse.ArgumentParser()
+    parser_script = parser_parent.add_argument_group('Basic ISMapper options')
+    parser_hits = parser_parent.add_argument_group('Parameters for defining hits')
+    parser_bwa = parser_parent.add_argument_group('BWA parameters')
+    parser_table = parser_parent.add_argument_group('Parameters for output table')
+    parser_output = parser_parent.add_argument_group('Reporting parameters')
 
-
-    #parser.add_argument("--version", action='version', version='%(prog)s ' + ismap_version)
+    #parser_parent.add_argument("--version", action='version', version='%(prog)s ' + ismap_version)
     # Inputs
     parser_script.add_argument('--reads', nargs='+', type=pathlib.Path, required=True,
                                help='Paired end reads for analysing (can be gzipped)')
@@ -47,30 +47,33 @@ def parse_args():
     # List of arguments to show in quick help
     quick_help_args = ('--reads', '--queries', '--reference', '--output', '--log', '--log_name')
 
-    # Advanced parameters
-    parser_extended.add_argument('--forward', type=str, required=False, default='_1',
-                                 help='Identifier for forward reads if ISMapper is unable to pair (default is Miseq format _1)')
-    parser_extended.add_argument('--reverse', type=str, required=False, default='_2',
-                                 help='Identifier for forward reads if ISMapper is unable to pair (default is Miseq format _2)')
-    parser_extended.add_argument('--cutoff', type=int, required=False, default=6,
-                                 help='Minimum depth for mapped region to be kept in bed file (default 6)')
-    parser_extended.add_argument('--min_range', type=str, required=False, default=0.9,
-                                 help='Minimum percent size of the gap to be called a known hit (default 0.9, or 90 percent)')
-    parser_extended.add_argument('--max_range', type=str, required=False, default=1.1,
-                                 help='Maximum percent size of the gap to be called a known hit (default 1.1, or 110 percent)')
-    parser_extended.add_argument('--merging', type=str, required=False, default='100',
-                                 help='Value for merging left and right hits in bed files together to simply calculation of closest and intersecting regions (default 100).')
-    parser_extended.add_argument('--a', action='store_true', required=False,
-                                 help='Switch on all alignment reporting for bwa.')
-    parser_extended.add_argument('--T', type=str, required=False, default='30',
-                                 help='Mapping quality score for bwa (default 30).')
-    parser_extended.add_argument('--t', type=str, required=False, default='1',
-                                 help='Number of threads for bwa (default 1).')
-    parser_extended.add_argument('--min_clip', type=int, required=False, default=10,
+    # Parameters for defining hits
+    parser_hits.add_argument('--min_clip', type=int, required=False, default=10,
                                  help='Minimum size for softclipped region to be extracted from initial mapping (default 10).')
-    parser_extended.add_argument('--max_clip', type=int, required=False, default=30,
+    parser_hits.add_argument('--max_clip', type=int, required=False, default=30,
                                  help='Maximum size for softclipped regions to be included (default 30).')
-    # Options for table output (typing)
+    parser_hits.add_argument('--cutoff', type=int, required=False, default=6,
+                                 help='Minimum depth for mapped region to be kept in bed file (default 6)')
+    parser_hits.add_argument('--min_range', type=str, required=False, default=0.9,
+                                 help='Minimum percent size of the gap to be called a known hit (default 0.9, or 90 percent)')
+    parser_hits.add_argument('--max_range', type=str, required=False, default=1.1,
+                                 help='Maximum percent size of the gap to be called a known hit (default 1.1, or 110 percent)')
+    parser_hits.add_argument('--merging', type=str, required=False, default='100',
+                                 help='Value for merging left and right hits in bed files together to simply calculation of closest and intersecting regions (default 100).')
+
+    # BWA/read grouping parameters
+    parser_bwa.add_argument('--a', action='store_true', required=False,
+                                 help='Switch on all alignment reporting for bwa.')
+    parser_bwa.add_argument('--T', type=str, required=False, default='30',
+                                 help='Mapping quality score for bwa (default 30).')
+    parser_bwa.add_argument('--t', type=str, required=False, default='1',
+                                 help='Number of threads for bwa (default 1).')
+    parser_bwa.add_argument('--forward', type=str, required=False, default='_1',
+                                 help='Identifier for forward reads if ISMapper is unable to pair (default is Miseq format _1)')
+    parser_bwa.add_argument('--reverse', type=str, required=False, default='_2',
+                                 help='Identifier for forward reads if ISMapper is unable to pair (default is Miseq format _2)')
+
+    # Output table parameters
     parser_table.add_argument('--cds', nargs='+', type=str, required=False, default=['locus_tag', 'gene', 'product'],
                                  help='qualifiers to look for in reference genbank for CDS features (default locus_tag gene product)')
     parser_table.add_argument('--trna', nargs='+', type=str, required=False, default=['locus_tag', 'product'],
@@ -81,7 +84,8 @@ def parse_args():
                                  help='format of output bedfile - if True, adds IGV trackline and formats 4th column for hovertext display')
     parser_table.add_argument('--chr_name', type=str, required=False, default='not_specified',
                                  help='chromosome name for bedfile - must match genome name to load in IGV (default = genbank accession)')
-    # Reporting options
+
+    # Reporting parameters
     parser_output.add_argument('--temp', action='store_true', required=False,
                                help='Switch on keeping the temp folder instead of deleting it at the end of the run')
     parser_output.add_argument('--bam', action='store_true', required=False,
