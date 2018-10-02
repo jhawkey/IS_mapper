@@ -50,9 +50,15 @@ def check_command(command_call, command_name):
         logging.info('Found dependency %s', command_name)
 
 def make_directories(dir_list):
-
     """
     Take a list of folders and make each directory.
     """
     for directory in dir_list:
         run_command(['mkdir', '-p', directory], shell=True)
+
+def remove_files(file_list):
+    """
+    Take a directory name or list of files and remove them
+    """
+    for file in file_list:
+        run_command(['rm -rf', file], shell=True)

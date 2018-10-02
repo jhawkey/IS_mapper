@@ -8,7 +8,7 @@ import datetime
 from Bio import SeqIO
 import time
 import read_grouping
-from run_commands import run_command, CommandError, BedtoolsError, make_directories, check_command
+from run_commands import run_command, CommandError, BedtoolsError, make_directories, check_command, remove_files
 from mapping_to_query import map_to_is_query
 from mapping_to_ref import map_to_ref_seq, create_bed_files
 from create_output import create_typing_output
@@ -136,6 +136,10 @@ def get_sequences(seq_files, seq_format):
     return seq_records
 
 def main():
+
+    # intialise the start time
+    start_time = time.time()
+
     # get arguments
     args = parse_args()
 
@@ -217,20 +221,24 @@ def main():
             # we need to loop through each reference:
             for ref_seq in reference_seqs:
                 # map our flanking reads to this
-                #map_to_ref_seq(ref_seq, sample_name, left_flanking, right_flanking, tmp, out, bwa_threads)
                 filenames = map_to_ref_seq(ref_seq, sample.prefix, left_flanking_reads, right_flanking_reads, tmp_output_folder, is_output_folder, args.t, args.a)
 
                 # make the bed files, find intersects and closest points of regions
                 filenames_bedfiles = create_bed_files(filenames, args.cutoff, args.merging)
 
                 # Create table and annotated genbank with hits
-                #(filenames, ref_gbk_obj, is_query_obj, min_range, max_range, tmp_output_folder)
                 create_typing_output(filenames_bedfiles, ref_seq, is_query, args.min_range, args.max_range, tmp_output_folder, sample.prefix)
                 logging.info('ISMapper has completed successfully for sample %s', sample.prefix)
 
-    # TODO: add time taken here
-    # TODO: remove temp directory unless specifically asked not to
-    logging.info('ISMapper has finished')
+                # TODO: remove temp directory unless specifically asked not to
+                if not args.temp:
+                    remove_files([tmp_output_folder])
+                if not args.bam:
+                    remove_files([filenames['left_sorted'], filenames['right_sorted']])
+
+    total_time = time.time() - start_time
+    time_mins = float(total_time) / 60
+    logging.info('ISMapper finished in ' + str(time_mins) + ' mins.')
 
 
 if __name__ == '__main__':
