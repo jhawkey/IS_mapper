@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="f362a202-b55d-4e14-bd4f-3ac14f1bafb9" name="Default" comment="removed finished todos">
+    <list default="true" id="f362a202-b55d-4e14-bd4f-3ac14f1bafb9" name="Default" comment="added more todos">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scripts/ismap_v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/ismap_v2.py" afterDir="false" />
     </list>
@@ -35,15 +35,15 @@
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="Python Console" value="1603" />
-          <entry key="py" value="26260" />
+          <entry key="py" value="26879" />
           <entry key="regexp" value="7" />
-          <entry key="txt" value="1467" />
+          <entry key="txt" value="1483" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="PLAIN_TEXT" value="1016" />
-          <entry key="Python" value="27841" />
+          <entry key="PLAIN_TEXT" value="1032" />
+          <entry key="Python" value="28460" />
           <entry key="RegExp" value="7" />
           <entry key="Scratch" value="473" />
         </counts>
@@ -56,8 +56,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/scripts/ismap_v2.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2458">
-              <caret line="190" column="66" selection-start-line="190" selection-start-column="66" selection-end-line="190" selection-end-column="66" />
+            <state relative-caret-position="-122">
+              <caret line="19" column="7" selection-start-line="19" selection-start-column="7" selection-end-line="19" selection-end-column="7" />
               <folding>
                 <element signature="e#23#37#0" expanded="true" />
                 <element signature="e#5937#5996#0" />
@@ -138,8 +138,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/scripts/ismap_v2_unittests.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="180">
-              <caret line="12" lean-forward="true" selection-start-line="12" selection-end-line="12" />
+            <state relative-caret-position="405">
+              <caret line="219" column="138" lean-forward="true" selection-start-line="219" selection-start-column="138" selection-end-line="219" selection-end-column="138" />
               <folding>
                 <element signature="e#0#15#0" expanded="true" />
                 <element signature="e#258#1758#0" />
@@ -721,7 +721,14 @@
       <option name="project" value="LOCAL" />
       <updated>1537165380894</updated>
     </task>
-    <option name="localTasksCounter" value="23" />
+    <task id="LOCAL-00023" summary="added more todos">
+      <created>1537165553438</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1537165553438</updated>
+    </task>
+    <option name="localTasksCounter" value="24" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -769,7 +776,7 @@
     <frame x="0" y="23" width="2560" height="1417" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.12445845" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.12445845" />
       <window_info id="Structure" order="1" weight="0.24970461" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -778,7 +785,7 @@
       <window_info anchor="bottom" id="Debug" order="3" weight="0.30867925" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info active="true" anchor="bottom" id="TODO" order="6" visible="true" weight="0.2754717" />
+      <window_info anchor="bottom" id="TODO" order="6" weight="0.2754717" />
       <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" />
       <window_info anchor="bottom" id="Python Console" order="8" weight="0.32981133" />
       <window_info anchor="bottom" id="Terminal" order="9" weight="0.32981133" />
@@ -841,7 +848,8 @@
     <MESSAGE value="checking for misformatted input queries and genbanks" />
     <MESSAGE value="checked for reads which can't be paired" />
     <MESSAGE value="removed finished todos" />
-    <option name="LAST_COMMIT_MESSAGE" value="removed finished todos" />
+    <MESSAGE value="added more todos" />
+    <option name="LAST_COMMIT_MESSAGE" value="added more todos" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1088,28 +1096,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/ismap_v2_unittests.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
-          <caret line="12" lean-forward="true" selection-start-line="12" selection-end-line="12" />
-          <folding>
-            <element signature="e#0#15#0" expanded="true" />
-            <element signature="e#258#1758#0" />
-            <element signature="e#1880#3563#0" />
-            <element signature="e#3557#3625#0" />
-            <element signature="e#4586#6116#0" />
-            <element signature="e#4003#6095#0" />
-            <element signature="e#4336#4647#0" />
-            <element signature="e#5844#6836#0" />
-            <element signature="e#5794#6833#0" />
-            <marker date="1537165224916" expanded="true" signature="5129:5708" ph="..." />
-            <marker date="1537165224916" expanded="true" signature="5727:5736" ph="..." />
-            <marker date="1537165224916" expanded="true" signature="8459:8468" ph="..." />
-            <marker date="1537165224916" expanded="true" signature="8558:8560" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/create_output.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="593">
@@ -1145,10 +1131,32 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/ismap_v2_unittests.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="405">
+          <caret line="219" column="138" lean-forward="true" selection-start-line="219" selection-start-column="138" selection-end-line="219" selection-end-column="138" />
+          <folding>
+            <element signature="e#0#15#0" expanded="true" />
+            <element signature="e#258#1758#0" />
+            <element signature="e#1880#3563#0" />
+            <element signature="e#3557#3625#0" />
+            <element signature="e#4586#6116#0" />
+            <element signature="e#4003#6095#0" />
+            <element signature="e#4336#4647#0" />
+            <element signature="e#5844#6836#0" />
+            <element signature="e#5794#6833#0" />
+            <marker date="1537165224916" expanded="true" signature="5129:5708" ph="..." />
+            <marker date="1537165224916" expanded="true" signature="5727:5736" ph="..." />
+            <marker date="1537165224916" expanded="true" signature="8459:8468" ph="..." />
+            <marker date="1537165224916" expanded="true" signature="8558:8560" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/ismap_v2.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2458">
-          <caret line="190" column="66" selection-start-line="190" selection-start-column="66" selection-end-line="190" selection-end-column="66" />
+        <state relative-caret-position="-122">
+          <caret line="19" column="7" selection-start-line="19" selection-start-column="7" selection-end-line="19" selection-end-column="7" />
           <folding>
             <element signature="e#23#37#0" expanded="true" />
             <element signature="e#5937#5996#0" />

@@ -18,49 +18,87 @@ def parse_args():
     """
     Parse the input arguments, use -h for help.
     """
-    ## TODO: sort through arguments and put in sensible order, hide some arguments by default
-    # TODO: remove typing option and related if statement
-    # TODO: remove all arguments related to improvement mode
     # go back and fix these when running on command line
-    parser = ArgumentParser(description='IS mapper')
+    parser_parent = ArgumentParser()
+    parser_script = parser_parent.add_argument_group('ISMapper options')
+    parser_extended = parser_parent.add_argument_group('Advanced options')
+    parser_table = parser_parent.add_argument_group('Options for final table')
+    parser_output = parser_parent.add_argument_group('Options for output')
+
 
     #parser.add_argument("--version", action='version', version='%(prog)s ' + ismap_version)
     # Inputs
-    parser.add_argument('--runtype', type=str, required=False, help='"typing" or "improvement"', default='typing')
-    parser.add_argument('--reads', nargs='+', type=pathlib.Path, required=False, help='Paired end reads for analysing (can be gzipped)')
-    parser.add_argument('--forward', type=str, required=False, default='_1', help='Identifier for forward reads if not in MiSeq format (default _1)')
-    parser.add_argument('--reverse', type=str, required=False, default='_2', help='Identifier for reverse reads if not in MiSeq format (default _2)')
-    parser.add_argument('--queries', type=str, nargs='+', required=False, help='Multifasta file for query gene(s) (eg: insertion sequence) that will be mapped to.')
-    parser.add_argument('--assemblies', nargs='+', type=str, required=False, help='Contig assemblies, one for each read set')
-    parser.add_argument('--assemblyid', type=str, required=False, help='Identifier for assemblies eg: sampleName_contigs (specify _contigs) or sampleName_assembly (specify _assembly). Do not specify extension.')
-    parser.add_argument('--extension', type=str, required=False, help='Extension for assemblies (eg: .fasta, .fa, .gbk, default is .fasta)', default='.fasta')
-    parser.add_argument('--typingRef', type=str, nargs='+', required=False, help='Reference genome for typing against in genbank format')
-    parser.add_argument('--type', type=str, required=False, default='fasta', help='Indicator for contig assembly type, genbank or fasta (default fasta)')
-    #parser.add_argument('--path', type=str, required=False, default='', help='Path to folder where scripts are (only required for development, default is VLSCI path).')
-    # Parameters
-    parser.add_argument('--cutoff', type=int, required=False, default=6, help='Minimum depth for mapped region to be kept in bed file (default 6)')
-    parser.add_argument('--min_range', type=str, required=False, default=0.9, help='Minimum percent size of the gap to be called a known hit (default 0.9, or 90 percent)')
-    parser.add_argument('--max_range', type=str, required=False, default=1.1, help='Maximum percent size of the gap to be called a known hit (default 1.1, or 110 percent)')
-    parser.add_argument('--merging', type=str, required=False, default='100', help='Value for merging left and right hits in bed files together to simply calculation of closest and intersecting regions (default 100).')
-    parser.add_argument('--a', action='store_true', required=False, help='Switch on all alignment reporting for bwa.')
-    parser.add_argument('--T', type=str, required=False, default='30', help='Mapping quality score for bwa (default 30).')
-    parser.add_argument('--t', type=str, required=False, default='1', help='Number of threads for bwa (default 1).')
-    parser.add_argument('--min_clip', type=int, required=False, default=10, help='Minimum size for softclipped region to be extracted from initial mapping (default 10).')
-    parser.add_argument('--max_clip', type=int, required=False, default=30, help='Maximum size for softclipped regions to be included (default 30).')
-    # Options for table output (typing)
-    parser.add_argument('--cds', nargs='+', type=str, required=False, default=['locus_tag', 'gene', 'product'], help='qualifiers to look for in reference genbank for CDS features (default locus_tag gene product)')
-    parser.add_argument('--trna', nargs='+', type=str, required=False, default=['locus_tag', 'product'], help='qualifiers to look for in reference genbank for tRNA features (default locus_tag product)')
-    parser.add_argument('--rrna', nargs='+', type=str, required=False, default=['locus_tag', 'product'], help='qualifiers to look for in reference genbank for rRNA features (default locus_tag product)')
-    parser.add_argument('--igv', action='store_true', help='format of output bedfile - if True, adds IGV trackline and formats 4th column for hovertext display')
-    parser.add_argument('--chr_name', type=str, required=False, default='not_specified', help='chromosome name for bedfile - must match genome name to load in IGV (default = genbank accession)')
-    # Reporting options
-    parser.add_argument('--log', action='store_true', required=False, help='Switch on logging to file (otherwise log to stdout')
-    parser.add_argument('--log_name', type=str, required=False, help='Prefix for log file. If not supplied, prefix will be current date and time.', default=datetime.datetime.now().strftime('%Y%m%d_%H%M%S'))
-    parser.add_argument('--temp', action='store_true', required=False, help='Switch on keeping the temp folder instead of deleting it at the end of the program')
-    parser.add_argument('--bam', action='store_true', required=False, help='Switch on keeping the final bam files instead of deleting them at the end of the program')
-    parser.add_argument('--output', type=str, required=False, default='', help='Output location for all output files.')
+    parser_script.add_argument('--reads', nargs='+', type=pathlib.Path, required=True,
+                               help='Paired end reads for analysing (can be gzipped)')
+    parser_script.add_argument('--queries', type=str, nargs='+', required=True,
+                               help='Multifasta file for query gene(s) (eg: insertion sequence) that will be mapped to.')
+    parser_script.add_argument('--reference', type=str, nargs='+', required=True,
+                               help='Reference genome for typing against in genbank format')
+    parser_script.add_argument('--output', type=str, required=False, default=os.getcwd(),
+                               help='Location for all output files (default is current directory).')
+    parser_script.add_argument('--log', action='store_true', required=False,
+                               help='Switch on logging to file (otherwise log to stdout)')
+    parser_script.add_argument('--log_name', type=str, required=False,
+                                 help='Prefix for log file. If not supplied, prefix will be current date and time.',
+                                 default=datetime.datetime.now().strftime('%Y%m%d_%H%M%S'))
 
-    return parser.parse_args()
+    parser_script.add_argument('--help_all', required=False, action=None, help='Display extended help')
+
+    # List of arguments to show in quick help
+    quick_help_args = ('--reads', '--queries', '--reference', '--output', '--log', '--log_name')
+
+    # Advanced parameters
+    parser_extended.add_argument('--forward', type=str, required=False, default='_1',
+                                 help='Identifier for forward reads if ISMapper is unable to pair (default is Miseq format _1)')
+    parser_extended.add_argument('--reverse', type=str, required=False, default='_2',
+                                 help='Identifier for forward reads if ISMapper is unable to pair (default is Miseq format _2)')
+    parser_extended.add_argument('--cutoff', type=int, required=False, default=6,
+                                 help='Minimum depth for mapped region to be kept in bed file (default 6)')
+    parser_extended.add_argument('--min_range', type=str, required=False, default=0.9,
+                                 help='Minimum percent size of the gap to be called a known hit (default 0.9, or 90 percent)')
+    parser_extended.add_argument('--max_range', type=str, required=False, default=1.1,
+                                 help='Maximum percent size of the gap to be called a known hit (default 1.1, or 110 percent)')
+    parser_extended.add_argument('--merging', type=str, required=False, default='100',
+                                 help='Value for merging left and right hits in bed files together to simply calculation of closest and intersecting regions (default 100).')
+    parser_extended.add_argument('--a', action='store_true', required=False,
+                                 help='Switch on all alignment reporting for bwa.')
+    parser_extended.add_argument('--T', type=str, required=False, default='30',
+                                 help='Mapping quality score for bwa (default 30).')
+    parser_extended.add_argument('--t', type=str, required=False, default='1',
+                                 help='Number of threads for bwa (default 1).')
+    parser_extended.add_argument('--min_clip', type=int, required=False, default=10,
+                                 help='Minimum size for softclipped region to be extracted from initial mapping (default 10).')
+    parser_extended.add_argument('--max_clip', type=int, required=False, default=30,
+                                 help='Maximum size for softclipped regions to be included (default 30).')
+    # Options for table output (typing)
+    parser_table.add_argument('--cds', nargs='+', type=str, required=False, default=['locus_tag', 'gene', 'product'],
+                                 help='qualifiers to look for in reference genbank for CDS features (default locus_tag gene product)')
+    parser_table.add_argument('--trna', nargs='+', type=str, required=False, default=['locus_tag', 'product'],
+                                 help='qualifiers to look for in reference genbank for tRNA features (default locus_tag product)')
+    parser_table.add_argument('--rrna', nargs='+', type=str, required=False, default=['locus_tag', 'product'],
+                                 help='qualifiers to look for in reference genbank for rRNA features (default locus_tag product)')
+    parser_table.add_argument('--igv', action='store_true',
+                                 help='format of output bedfile - if True, adds IGV trackline and formats 4th column for hovertext display')
+    parser_table.add_argument('--chr_name', type=str, required=False, default='not_specified',
+                                 help='chromosome name for bedfile - must match genome name to load in IGV (default = genbank accession)')
+    # Reporting options
+    parser_output.add_argument('--temp', action='store_true', required=False,
+                               help='Switch on keeping the temp folder instead of deleting it at the end of the run')
+    parser_output.add_argument('--bam', action='store_true', required=False,
+                               help='Switch on keeping the final bam files instead of deleting them at the end of the run')
+
+    # Suppress all arguments other than quick help unless --help_all is parsed
+    if '--help_all' in sys.argv[1:]:
+        parser_parent.print_help()
+        sys.exit(0)
+    else:
+        for arg in parser_parent._actions:
+            if not any(qarg in arg.option_strings for qarg in quick_help_args):
+                arg.help = argparse.SUPPRESS
+
+    args = parser_parent.parse_args()
+
+    return args
 
 
 class NoSeqError(Exception):
@@ -156,7 +194,7 @@ def main():
         logging.info('Found query %s', record.id)
 
     # read in the reference genomes to type against
-    reference_seqs = get_sequences(args.typingRef, 'genbank')
+    reference_seqs = get_sequences(args.reference, 'genbank')
     for record in reference_seqs:
         logging.info('Found reference sequence %s', record.id)
 
@@ -166,26 +204,25 @@ def main():
         # set up output folder for each strain:
         output_sample = os.path.join(working_dir, sample.prefix)
 
-        # regardless of which mode we're in, we need to do the following, for each query:
+        # we need to do the following, for each query:
         for is_query in query_records:
             logging.info('Processing IS query %s against sample %s', is_query.id, sample.prefix)
             left_flanking_reads, right_flanking_reads, is_output_folder, tmp_output_folder = map_to_is_query(sample, is_query, output_sample, args.min_clip, args.max_clip, args.t)
 
-            # typing mode first
-            if args.runtype == 'typing':
-                # we need to loop through each reference:
-                for ref_seq in reference_seqs:
-                    # map our flanking reads to this
-                    #map_to_ref_seq(ref_seq, sample_name, left_flanking, right_flanking, tmp, out, bwa_threads)
-                    filenames = map_to_ref_seq(ref_seq, sample.prefix, left_flanking_reads, right_flanking_reads, tmp_output_folder, is_output_folder, args.t, args.a)
 
-                    # make the bed files, find intersects and closest points of regions
-                    filenames_bedfiles = create_bed_files(filenames, args.cutoff, args.merging)
+            # we need to loop through each reference:
+            for ref_seq in reference_seqs:
+                # map our flanking reads to this
+                #map_to_ref_seq(ref_seq, sample_name, left_flanking, right_flanking, tmp, out, bwa_threads)
+                filenames = map_to_ref_seq(ref_seq, sample.prefix, left_flanking_reads, right_flanking_reads, tmp_output_folder, is_output_folder, args.t, args.a)
 
-                    # Create table and annotated genbank with hits
-                    #(filenames, ref_gbk_obj, is_query_obj, min_range, max_range, tmp_output_folder)
-                    create_typing_output(filenames_bedfiles, ref_seq, is_query, args.min_range, args.max_range, tmp_output_folder, sample.prefix)
-                    logging.info('ISMapper has completed successfully for sample %s', sample.prefix)
+                # make the bed files, find intersects and closest points of regions
+                filenames_bedfiles = create_bed_files(filenames, args.cutoff, args.merging)
+
+                # Create table and annotated genbank with hits
+                #(filenames, ref_gbk_obj, is_query_obj, min_range, max_range, tmp_output_folder)
+                create_typing_output(filenames_bedfiles, ref_seq, is_query, args.min_range, args.max_range, tmp_output_folder, sample.prefix)
+                logging.info('ISMapper has completed successfully for sample %s', sample.prefix)
 
     # TODO: add time taken here
     # TODO: remove temp directory unless specifically asked not to
