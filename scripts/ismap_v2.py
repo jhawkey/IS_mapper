@@ -34,7 +34,7 @@ def parse_args():
                                help='Multifasta file for query gene(s) (eg: insertion sequence) that will be mapped to.')
     parser_script.add_argument('--reference', type=str, nargs='+', required=True,
                                help='Reference genome for typing against in genbank format')
-    parser_script.add_argument('--output', type=str, required=False, default=os.getcwd(),
+    parser_script.add_argument('--output_dir', type=str, required=False, default=os.getcwd(),
                                help='Location for all output files (default is current directory).')
     parser_script.add_argument('--log', action='store_true', required=False,
                                help='Switch on logging to file (otherwise log to stdout)')
@@ -143,8 +143,8 @@ def main():
     # get arguments
     args = parse_args()
 
-    if args.output != '':
-        working_dir = os.path.expanduser(args.output)
+    if args.output_dir != '':
+        working_dir = os.path.expanduser(args.output_dir)
     else:
         working_dir = os.getcwd()
 
@@ -230,11 +230,11 @@ def main():
                 create_typing_output(filenames_bedfiles, ref_seq, is_query, args.min_range, args.max_range, tmp_output_folder, sample.prefix)
                 logging.info('ISMapper has completed successfully for sample %s', sample.prefix)
 
-                # TODO: remove temp directory unless specifically asked not to
+                # Remove temp dir and bam files unless explicitly asked not not
                 if not args.temp:
                     remove_files([tmp_output_folder])
                 if not args.bam:
-                    remove_files([filenames['left_sorted'], filenames['right_sorted']])
+                    remove_files([filenames['left_sorted'], filenames['right_sorted'], filenames['left_sorted'] + '.bai', filenames['right_sorted'] + '.bai'])
 
     total_time = time.time() - start_time
     time_mins = float(total_time) / 60

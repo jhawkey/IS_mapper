@@ -336,12 +336,14 @@ def check_seq_between(genbank_seq, insertion, start, end, name, temp):
     out_insertion = os.path.join(temp, name + 'ISseq.fasta')
     SeqIO.write(seq_between, out_seq_between, 'fasta')
     SeqIO.write(insertion, out_insertion, 'fasta')
+
+    blast_out = os.path.join(temp, name + '_out.txt')
     # Perform the BLAST
-    doBlast(temp + name + '.fasta', temp + name + '_out.txt', temp + name + 'ISseq.fasta')
+    doBlast(out_seq_between, blast_out, out_insertion)
     # Only want the top hit, so set count variable to 0
     first_result = 0
     # Open the BLAST output file
-    with open(temp + name + '_out.txt') as summary:
+    with open(blast_out) as summary:
         for line in summary:
             # Get coverage and % ID for top hit
             if first_result == 0:
