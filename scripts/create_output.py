@@ -434,7 +434,7 @@ def check_unpaired_hits(line_check, ref_gbk_obj, ref_feature_list, is_query_obj,
 
     return IS_hit_list, removed_hit_list
 
-def write_typing_output(IShits, removedhits, output_table):
+def write_typing_output(IShits, removedhits, cds_feature_info, rrna_feature_info, trna_feature_info, output_table):
 
     with open(output_table, 'w') as out:
 
@@ -468,8 +468,19 @@ def write_typing_output(IShits, removedhits, output_table):
             IShit.determine_interrupted()
             # get qualifiers for left and right genes
             # TODO: make sure this qualifier call is robust
-            left_description = IShit.left_feature.qualifiers['product'][0]
-            right_description = IShit.right_feature.qualifiers['product'][0]
+            if IShit.left_feature.type == 'CDS':
+                left_description = IShit.left_feature.qualifiers[cds_feature_info][0]
+            elif IShit.left_feature.type == 'rRNA':
+                left_description = IShit.left_feature.qualifiers[rrna_feature_info][0]
+            elif IShit.left_feature.type == 'tRNA':
+                left_description = IShit.left_feature.qualifiers[trna_feature_info][0]
+
+            if IShit.right_feature.type == 'CDS':
+                right_description = IShit.right_feature.qualifiers[cds_feature_info][0]
+            elif IShit.right_feature.type == 'rRNA':
+                right_description = IShit.right_feature.qualifiers[rrna_feature_info][0]
+            elif IShit.right_feature.type == 'tRNA':
+                right_description = IShit.right_feature.qualifiers[trna_feature_info][0]
             # put together row
             line_list = [region_num, IShit.orientation, str(IShit.x), str(IShit.y), str(IShit.gap),
                          call_type, IShit.per_id, IShit.coverage, IShit.gene_left, left_description,
@@ -501,7 +512,8 @@ def write_typing_output(IShits, removedhits, output_table):
     # exit the function
     return
 
-def create_typing_output(filenames, ref_gbk_obj, is_query_obj, min_range, max_range, novel_gap_size, tmp_output_folder, sample_prefix):
+def create_typing_output(filenames, ref_gbk_obj, is_query_obj, min_range, max_range, novel_gap_size, cds_feature_info,
+                         rrna_feature_info, trna_feature_info, tmp_output_folder, sample_prefix):
 
     # first we need all the input files so we can match hits up
     intersect_file = filenames['intersect']
@@ -713,6 +725,6 @@ def create_typing_output(filenames, ref_gbk_obj, is_query_obj, min_range, max_ra
         IS_hits = IS_hits + all_new_hits
         removed_hits = removed_hits + new_removed_hits
 
-    write_typing_output(IS_hits, removed_hits, final_table_file)
+    write_typing_output(IS_hits, removed_hits, cds_feature_info, rrna_feature_info, trna_feature_info, final_table_file)
 
     return IS_hits

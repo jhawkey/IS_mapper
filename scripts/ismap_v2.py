@@ -74,16 +74,17 @@ def parse_args():
                                  help='Identifier for forward reads if ISMapper is unable to pair (default is Miseq format _2)')
 
     # Output table parameters
-    parser_table.add_argument('--cds', nargs='+', type=str, required=False, default=['locus_tag', 'gene', 'product'],
-                                 help='qualifiers to look for in reference genbank for CDS features (default locus_tag gene product)')
-    parser_table.add_argument('--trna', nargs='+', type=str, required=False, default=['locus_tag', 'product'],
-                                 help='qualifiers to look for in reference genbank for tRNA features (default locus_tag product)')
-    parser_table.add_argument('--rrna', nargs='+', type=str, required=False, default=['locus_tag', 'product'],
-                                 help='qualifiers to look for in reference genbank for rRNA features (default locus_tag product)')
-    parser_table.add_argument('--igv', action='store_true',
-                                 help='format of output bedfile - if True, adds IGV trackline and formats 4th column for hovertext display')
-    parser_table.add_argument('--chr_name', type=str, required=False, default='not_specified',
-                                 help='chromosome name for bedfile - must match genome name to load in IGV (default = genbank accession)')
+    parser_table.add_argument('--cds', type=str, required=False, default='product',
+                                 help='qualifier containing gene information (default product). Also note that all CDS features MUST have a locus_tag')
+    parser_table.add_argument('--trna', type=str, required=False, default='product',
+                                 help='qualifier containing gene information (default product). Also note that all tRNA features MUST have a locus_tag')
+    parser_table.add_argument('--rrna', type=str, required=False, default='product',
+                                 help='qualifier containing gene information (default product). Also note that all rRNA features MUST have a locus_tag')
+    # NOTE: currently not generating IGV compatible bedfiles
+    #parser_table.add_argument('--igv', action='store_true',
+                                 #help='format of output bedfile - if True, adds IGV trackline and formats 4th column for hovertext display')
+    #parser_table.add_argument('--chr_name', type=str, required=False, default='not_specified',
+                                 #help='chromosome name for bedfile - must match genome name to load in IGV (default = genbank accession)')
 
     # Reporting parameters
     parser_output.add_argument('--temp', action='store_true', required=False,
@@ -216,17 +217,18 @@ def main():
             logging.info('Processing IS query %s against sample %s', is_query.id, sample.prefix)
             left_flanking_reads, right_flanking_reads, is_output_folder, tmp_output_folder = map_to_is_query(sample, is_query, output_sample, args.min_clip, args.max_clip, args.t)
 
-
             # we need to loop through each reference:
             for ref_seq in reference_seqs:
                 # map our flanking reads to this
-                filenames = map_to_ref_seq(ref_seq, sample.prefix, left_flanking_reads, right_flanking_reads, tmp_output_folder, is_output_folder, args.t, args.a)
+                filenames = map_to_ref_seq(ref_seq, sample.prefix, left_flanking_reads, right_flanking_reads,
+                                           tmp_output_folder, is_output_folder, args.t, args.a)
 
                 # make the bed files, find intersects and closest points of regions
                 filenames_bedfiles = create_bed_files(filenames, args.cutoff, args.merging)
 
                 # Create table and annotated genbank with hits
-                create_typing_output(filenames_bedfiles, ref_seq, is_query, args.min_range, args.max_range, args.novel_gap_size, tmp_output_folder, sample.prefix)
+                create_typing_output(filenames_bedfiles, ref_seq, is_query, args.min_range, args.max_range,
+                                     args.novel_gap_size, args.cds, args.rrna, args.trna, tmp_output_folder, sample.prefix)
                 logging.info('ISMapper has completed successfully for sample %s', sample.prefix)
 
                 # Remove temp dir and bam files unless explicitly asked not not
