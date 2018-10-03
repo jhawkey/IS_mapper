@@ -231,11 +231,11 @@ def main():
                                      args.novel_gap_size, args.cds, args.rrna, args.trna, tmp_output_folder, sample.prefix)
                 logging.info('ISMapper has completed successfully for sample %s', sample.prefix)
 
-                # Remove temp dir and bam files unless explicitly asked not not
-                if not args.temp:
-                    remove_files([tmp_output_folder])
-                if not args.bam:
-                    remove_files([filenames['left_sorted'], filenames['right_sorted'], filenames['left_sorted'] + '.bai', filenames['right_sorted'] + '.bai'])
+            # Remove temp dir and bam files unless explicitly asked not to (after checking all references)
+            if not args.temp:
+                remove_files([tmp_output_folder])
+            if not args.bam:
+                remove_files([filenames['left_sorted'], filenames['right_sorted'], filenames['left_sorted'] + '.bai', filenames['right_sorted'] + '.bai'])
 
     total_time = time.time() - start_time
     time_mins = float(total_time) / 60
