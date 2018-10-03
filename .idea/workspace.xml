@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="f362a202-b55d-4e14-bd4f-3ac14f1bafb9" name="Default" comment="made gap size for novel hits an argument parameter">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/create_output.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/create_output.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/ismap_v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/ismap_v2.py" afterDir="false" />
+    <list default="true" id="f362a202-b55d-4e14-bd4f-3ac14f1bafb9" name="Default" comment="parameters for cds/trna/rrna features correct">
+      <change beforePath="$PROJECT_DIR$/scripts/binary_table.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/compiled_table.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/create_genbank_table.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/slurm_ismap.py" beforeDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -23,13 +24,13 @@
       <usages-collector id="statistics.file.types.open">
         <counts>
           <entry key="PLAIN_TEXT" value="1" />
-          <entry key="Python" value="39" />
+          <entry key="Python" value="40" />
           <entry key="Scratch" value="2" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="py" value="40" />
+          <entry key="py" value="41" />
           <entry key="txt" value="2" />
         </counts>
       </usages-collector>
@@ -38,12 +39,12 @@
           <entry key="Python Console" value="1603" />
           <entry key="py" value="33454" />
           <entry key="regexp" value="7" />
-          <entry key="txt" value="1854" />
+          <entry key="txt" value="1900" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="PLAIN_TEXT" value="1403" />
+          <entry key="PLAIN_TEXT" value="1449" />
           <entry key="Python" value="35035" />
           <entry key="RegExp" value="7" />
           <entry key="Scratch" value="473" />
@@ -116,8 +117,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/scripts/create_output.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="288">
-              <caret line="481" column="41" selection-start-line="481" selection-start-column="41" selection-end-line="481" selection-end-column="41" />
+            <state relative-caret-position="33">
+              <caret line="464" column="36" lean-forward="true" selection-start-line="464" selection-start-column="36" selection-end-line="464" selection-end-column="36" />
               <folding>
                 <element signature="e#23#41#0" expanded="true" />
                 <element signature="e#245#747#0" />
@@ -133,18 +134,6 @@
                 <element signature="e#10622#12162#0" />
                 <element signature="e#14615#18602#0" />
                 <marker date="1538539244740" expanded="false" signature="2520:2626" ph="..." />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/scripts/degugging.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="330">
-              <caret line="22" column="61" selection-start-line="22" selection-start-column="61" selection-end-line="22" selection-end-column="61" />
-              <folding>
-                <element signature="e#0#54#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -344,7 +333,7 @@
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/ismap_v2.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/ismap.py" />
       <option name="PARAMETERS" value="--queries $USER_HOME$/Desktop/ismap_v2/gold_standard_files/broken_files/ISAba1.fasta --reads $USER_HOME$/Desktop/ismap_v2/gold_standard_files/empty_files/9262_1#29_forward.fastq.gz $USER_HOME$/Desktop/ismap_v2/gold_standard_files/empty_files/9262_1#29_reverse.fastq.gz --typingRef $USER_HOME$/Desktop/ismap_v2/refs/CP001921.gbk --output $USER_HOME$/Desktop/ismap_v2/testing_functions --log --log_name testing" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -365,7 +354,7 @@
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/ismap_v2.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/ismap.py" />
       <option name="PARAMETERS" value="--queries $USER_HOME$/Desktop/ismap_v2/queries/ISAba1.fasta --reads $USER_HOME$/Desktop/ismap_v2/reads/7468_2#71_1.fastq.gz $USER_HOME$/Desktop/ismap_v2/reads/7468_2#71_2.fastq.gz $USER_HOME$/Desktop/ismap_v2/reads/7468_2#72_1.fastq.gz $USER_HOME$/Desktop/ismap_v2/reads/7468_2#72_2.fastq.gz $USER_HOME$/Desktop/ismap_v2/reads/7468_2#92_1.fastq.gz $USER_HOME$/Desktop/ismap_v2/reads/7468_2#92_2.fastq.gz $USER_HOME$/Desktop/ismap_v2/reads/7521_8#36_1.fastq.gz $USER_HOME$/Desktop/ismap_v2/reads/7521_8#36_2.fastq.gz $USER_HOME$/Desktop/ismap_v2/reads/7521_8#37_1.fastq.gz $USER_HOME$/Desktop/ismap_v2/reads/7521_8#37_2.fastq.gz $USER_HOME$/Desktop/ismap_v2/reads/7521_8#48_1.fastq.gz $USER_HOME$/Desktop/ismap_v2/reads/7521_8#48_2.fastq.gz $USER_HOME$/Desktop/ismap_v2/reads/9262_1#29_1.fastq.gz $USER_HOME$/Desktop/ismap_v2/reads/9262_1#29_2.fastq.gz --typingRef $USER_HOME$/Desktop/ismap_v2/refs/CP010781.gbk --output $USER_HOME$/Desktop/ismap_v2/v2_AbSamples_latestVersions --log --log_name all7AbSamples" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -386,7 +375,7 @@
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/compiled_table_v2.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/compiled_table.py" />
       <option name="PARAMETERS" value="--tables $USER_HOME$/Desktop/ismap_v2/v2_AbSamples_latestVersions/7468_2#71/ISAba1/7468_2#71__CP010781.1_table.txt $USER_HOME$/Desktop/ismap_v2/v2_AbSamples_latestVersions/7468_2#72/ISAba1/7468_2#72__CP010781.1_table.txt $USER_HOME$/Desktop/ismap_v2/v2_AbSamples_latestVersions/7468_2#92/ISAba1/7468_2#92__CP010781.1_table.txt $USER_HOME$/Desktop/ismap_v2/v2_AbSamples_latestVersions/7521_8#36/ISAba1/7521_8#36__CP010781.1_table.txt $USER_HOME$/Desktop/ismap_v2/v2_AbSamples_latestVersions/7521_8#37/ISAba1/7521_8#37__CP010781.1_table.txt $USER_HOME$/Desktop/ismap_v2/v2_AbSamples_latestVersions/7521_8#48/ISAba1/7521_8#48__CP010781.1_table.txt $USER_HOME$/Desktop/ismap_v2/v2_AbSamples_latestVersions/9262_1#29/ISAba1/9262_1#29__CP010781.1_table.txt --reference $USER_HOME$/Desktop/ismap_v2/refs/CP010781.gbk --query $USER_HOME$/Desktop/ismap_v2/queries/ISAba1.fasta --out_prefix $USER_HOME$/Desktop/ismap_v2/v2_AbSamples_latestVersions/test_ISAba1" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -449,7 +438,7 @@
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/ismap_v2.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/ismap.py" />
       <option name="PARAMETERS" value="--queries $USER_HOME$/Desktop/ismap_v2/queries/ISAba1.fasta --reads $USER_HOME$/Desktop/ismap_v2/reads/9262_1#29_1.fastq.gz $USER_HOME$/Desktop/ismap_v2/reads/9262_1#29_2.fastq.gz --reference $USER_HOME$/Desktop/ismap_v2/refs/CP001921.gbk --output_dir $USER_HOME$/Desktop/ismap_v2/testing_functions" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -825,7 +814,14 @@
       <option name="project" value="LOCAL" />
       <updated>1538532819622</updated>
     </task>
-    <option name="localTasksCounter" value="32" />
+    <task id="LOCAL-00032" summary="parameters for cds/trna/rrna features correct">
+      <created>1538539453243</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1538539453244</updated>
+    </task>
+    <option name="localTasksCounter" value="33" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -870,15 +866,14 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="23" width="1440" height="877" extended-state="6" />
-    <editor active="true" />
+    <frame x="0" y="23" width="2560" height="1417" extended-state="6" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.22269204" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.12445845" />
       <window_info id="Structure" order="1" weight="0.24970461" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32830188" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.44840765" />
+      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.26566038" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.30867925" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -923,7 +918,6 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="fixed regex to check for samtools version" />
     <MESSAGE value="added parsing of unpaired and closest bed results files" />
     <MESSAGE value="create output now contains all typing funcitonality except for the removal of hits" />
     <MESSAGE value="updated maptoISquery test to check flanking reads are correct" />
@@ -948,7 +942,8 @@
     <MESSAGE value="new compiled table script" />
     <MESSAGE value="updated compiled table to fix isolate names" />
     <MESSAGE value="made gap size for novel hits an argument parameter" />
-    <option name="LAST_COMMIT_MESSAGE" value="made gap size for novel hits an argument parameter" />
+    <MESSAGE value="parameters for cds/trna/rrna features correct" />
+    <option name="LAST_COMMIT_MESSAGE" value="parameters for cds/trna/rrna features correct" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -975,9 +970,6 @@
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
     <entry file="file://$APPLICATION_CONFIG_DIR$/scratches/scratch_1.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/create_genbank_table.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
     <entry file="file://$PROJECT_DIR$/test/test_create_typing_output.py">
@@ -1084,16 +1076,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="255">
           <caret line="17" selection-start-line="17" selection-end-line="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/degugging.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="330">
-          <caret line="22" column="61" selection-start-line="22" selection-start-column="61" selection-end-line="22" selection-end-column="61" />
-          <folding>
-            <element signature="e#0#54#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1271,10 +1253,23 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/create_genbank_table.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/degugging.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="330">
+          <caret line="22" column="61" selection-start-line="22" selection-start-column="61" selection-end-line="22" selection-end-column="61" />
+          <folding>
+            <element signature="e#0#54#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/create_output.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="288">
-          <caret line="481" column="41" selection-start-line="481" selection-start-column="41" selection-end-line="481" selection-end-column="41" />
+        <state relative-caret-position="33">
+          <caret line="464" column="36" lean-forward="true" selection-start-line="464" selection-start-column="36" selection-end-line="464" selection-end-column="36" />
           <folding>
             <element signature="e#23#41#0" expanded="true" />
             <element signature="e#245#747#0" />
