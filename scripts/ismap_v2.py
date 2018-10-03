@@ -146,7 +146,6 @@ def main():
     else:
         working_dir = os.getcwd()
 
-    # TODO: don't set up logfile if log isn't set to true - default should be logfile, turning off logfile prints to stdout
     # set up logfile
     logging.basicConfig(
         filename=args.log + '.log',

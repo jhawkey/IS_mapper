@@ -26,7 +26,7 @@ class ISHit(object):
         # hit type will either be novel or known
         self.hit_type = None
         # left and right features are the actual feature surrounding the hit
-        # 0: locus tag, 1: distance from start site, 2: all other qualifiers
+        # so can access info from the qualifiers
         self.left_feature = None
         self.right_feature = None
         # These will be integers of either 1 or -1 to tell you the strand of the
