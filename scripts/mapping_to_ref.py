@@ -27,11 +27,11 @@ def set_ref_output_filenames(prefix, ref_name, tmp_folder, out_dir):
         output_filenames['right_' + type] = right
 
 
-    output_filenames['intersect'] = os.path.join(out_dir, prefix + '_' + ref_name + '_intersect.bed')
-    output_filenames['closest'] = os.path.join(out_dir, prefix + '_' + ref_name + '_closest.bed')
+    output_filenames['intersect'] = os.path.join(out_dir, prefix + '__' + ref_name + '_intersect.bed')
+    output_filenames['closest'] = os.path.join(out_dir, prefix + '__' + ref_name + '_closest.bed')
 
     # set up table.txt
-    output_filenames['table'] = os.path.join(out_dir, prefix + '_' + ref_name + '_table.txt')
+    output_filenames['table'] = os.path.join(out_dir, prefix + '__' + ref_name + '_table.txt')
 
     return(output_filenames)
 

@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="f362a202-b55d-4e14-bd4f-3ac14f1bafb9" name="Default" comment="updated log settings">
-      <change afterPath="$PROJECT_DIR$/scripts/compiled_table_v2.py" afterDir="false" />
+    <list default="true" id="f362a202-b55d-4e14-bd4f-3ac14f1bafb9" name="Default" comment="new compiled table script">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/create_output.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/create_output.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/create_typing_out.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/ismap_v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/ismap_v2.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/compiled_table_v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/compiled_table_v2.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/mapping_to_ref.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/mapping_to_ref.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -25,28 +23,28 @@
       <usages-collector id="statistics.file.types.open">
         <counts>
           <entry key="PLAIN_TEXT" value="1" />
-          <entry key="Python" value="38" />
+          <entry key="Python" value="39" />
           <entry key="Scratch" value="2" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="py" value="39" />
+          <entry key="py" value="40" />
           <entry key="txt" value="2" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="Python Console" value="1603" />
-          <entry key="py" value="32187" />
+          <entry key="py" value="32400" />
           <entry key="regexp" value="7" />
-          <entry key="txt" value="1719" />
+          <entry key="txt" value="1744" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="PLAIN_TEXT" value="1268" />
-          <entry key="Python" value="33768" />
+          <entry key="PLAIN_TEXT" value="1293" />
+          <entry key="Python" value="33981" />
           <entry key="RegExp" value="7" />
           <entry key="Scratch" value="473" />
         </counts>
@@ -59,12 +57,24 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/scripts/ismap_v2.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1855">
+            <state relative-caret-position="401">
               <caret line="212" column="38" lean-forward="true" selection-start-line="212" selection-start-column="38" selection-end-line="212" selection-end-column="38" />
               <folding>
                 <element signature="e#23#37#0" expanded="true" />
                 <element signature="e#5937#5996#0" />
                 <element signature="e#6044#6721#0" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/scripts/mapping_to_ref.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="435">
+              <caret line="29" column="70" selection-start-line="29" selection-start-column="70" selection-end-line="29" selection-end-column="70" />
+              <folding>
+                <element signature="e#0#9#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -84,33 +94,10 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/scripts/compiled_table.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="375">
-              <caret line="38" column="174" lean-forward="true" selection-start-line="38" selection-start-column="174" selection-end-line="38" selection-end-column="174" />
-              <folding>
-                <element signature="e#23#40#0" expanded="true" />
-                <element signature="e#2187#7099#0" />
-                <element signature="e#7165#9268#0" />
-                <element signature="e#9353#10016#0" />
-                <element signature="e#10069#10368#0" />
-                <element signature="e#10426#11652#0" />
-                <element signature="e#11714#12297#0" />
-                <element signature="e#12358#13457#0" />
-                <element signature="e#13582#16645#0" />
-                <element signature="e#16672#16877#0" />
-                <element signature="e#16917#17070#0" />
-                <element signature="e#17117#18845#0" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/scripts/compiled_table_v2.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="457">
-              <caret line="75" column="4" selection-start-line="75" selection-start-column="4" selection-end-line="75" selection-end-column="4" />
+            <state relative-caret-position="1230">
+              <caret line="311" column="34" selection-start-line="311" selection-start-column="34" selection-end-line="311" selection-end-column="34" />
               <folding>
                 <element signature="e#23#41#0" expanded="true" />
                 <element signature="e#288#493#0" />
@@ -118,9 +105,8 @@
                 <element signature="e#2394#6584#0" />
                 <element signature="e#6694#8477#0" />
                 <element signature="e#8591#12129#0" />
-                <element signature="e#7603#12627#0" />
-                <marker date="1538528168318" expanded="true" signature="250:384" ph="..." />
-                <marker date="1538528168318" expanded="true" signature="14093:19997" ph="..." />
+                <marker date="1538529266752" expanded="true" signature="250:384" ph="..." />
+                <marker date="1538529266752" expanded="true" signature="14169:20083" ph="..." />
               </folding>
             </state>
           </provider>
@@ -233,10 +219,10 @@
         <option value="$PROJECT_DIR$/scripts/degugging.py" />
         <option value="$PROJECT_DIR$/scripts/read_grouping.py" />
         <option value="$PROJECT_DIR$/scripts/ismap_v2_unittests.py" />
-        <option value="$PROJECT_DIR$/scripts/mapping_to_ref.py" />
         <option value="$PROJECT_DIR$/scripts/run_commands.py" />
         <option value="$PROJECT_DIR$/scripts/ismap_v2.py" />
         <option value="$PROJECT_DIR$/scripts/create_output.py" />
+        <option value="$PROJECT_DIR$/scripts/mapping_to_ref.py" />
         <option value="$PROJECT_DIR$/scripts/compiled_table.py" />
         <option value="$PROJECT_DIR$/scripts/compiled_table_v2.py" />
       </list>
@@ -399,7 +385,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/compiled_table_v2.py" />
-      <option name="PARAMETERS" value="--tables $USER_HOME$/Desktop/ismap_v2/v2_AbSamples_latestVersions/7468_2#71/ISAba1/7468_2#71_CP010781.1_table.txt $USER_HOME$/Desktop/ismap_v2/v2_AbSamples_latestVersions/7468_2#72/ISAba1/7468_2#72_CP010781.1_table.txt $USER_HOME$/Desktop/ismap_v2/v2_AbSamples_latestVersions/7468_2#92/ISAba1/7468_2#92_CP010781.1_table.txt $USER_HOME$/Desktop/ismap_v2/v2_AbSamples_latestVersions/7521_8#36/ISAba1/7521_8#36_CP010781.1_table.txt $USER_HOME$/Desktop/ismap_v2/v2_AbSamples_latestVersions/7521_8#37/ISAba1/7521_8#37_CP010781.1_table.txt $USER_HOME$/Desktop/ismap_v2/v2_AbSamples_latestVersions/7521_8#48/ISAba1/7521_8#48_CP010781.1_table.txt $USER_HOME$/Desktop/ismap_v2/v2_AbSamples_latestVersions/9262_1#29/ISAba1/9262_1#29_CP010781.1_table.txt --reference $USER_HOME$/Desktop/ismap_v2/refs/CP010781.gbk --query $USER_HOME$/Desktop/ismap_v2/queries/ISAba1.fasta --out_prefix $USER_HOME$/Desktop/ismap_v2/v2_AbSamples_latestVersions/test_ISAba1" />
+      <option name="PARAMETERS" value="--tables $USER_HOME$/Desktop/ismap_v2/v2_AbSamples_latestVersions/7468_2#71/ISAba1/7468_2#71__CP010781.1_table.txt $USER_HOME$/Desktop/ismap_v2/v2_AbSamples_latestVersions/7468_2#72/ISAba1/7468_2#72__CP010781.1_table.txt $USER_HOME$/Desktop/ismap_v2/v2_AbSamples_latestVersions/7468_2#92/ISAba1/7468_2#92__CP010781.1_table.txt $USER_HOME$/Desktop/ismap_v2/v2_AbSamples_latestVersions/7521_8#36/ISAba1/7521_8#36__CP010781.1_table.txt $USER_HOME$/Desktop/ismap_v2/v2_AbSamples_latestVersions/7521_8#37/ISAba1/7521_8#37__CP010781.1_table.txt $USER_HOME$/Desktop/ismap_v2/v2_AbSamples_latestVersions/7521_8#48/ISAba1/7521_8#48__CP010781.1_table.txt $USER_HOME$/Desktop/ismap_v2/v2_AbSamples_latestVersions/9262_1#29/ISAba1/9262_1#29__CP010781.1_table.txt --reference $USER_HOME$/Desktop/ismap_v2/refs/CP010781.gbk --query $USER_HOME$/Desktop/ismap_v2/queries/ISAba1.fasta --out_prefix $USER_HOME$/Desktop/ismap_v2/v2_AbSamples_latestVersions/test_ISAba1" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -816,7 +802,14 @@
       <option name="project" value="LOCAL" />
       <updated>1538448656840</updated>
     </task>
-    <option name="localTasksCounter" value="29" />
+    <task id="LOCAL-00029" summary="new compiled table script">
+      <created>1538528285855</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1538528285855</updated>
+    </task>
+    <option name="localTasksCounter" value="30" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -914,7 +907,6 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="ismapper now running through to create_output step" />
     <MESSAGE value="skeleton of create_typing_out" />
     <MESSAGE value="began unit tests for create_typing_out" />
     <MESSAGE value="fixed regex to check for samtools version" />
@@ -939,17 +931,11 @@
     <MESSAGE value="added options to remove temp and bam files when run has successfully completed" />
     <MESSAGE value="checked temp and bam files deleted, fixed issues with BLAST" />
     <MESSAGE value="updated log settings" />
-    <option name="LAST_COMMIT_MESSAGE" value="updated log settings" />
+    <MESSAGE value="new compiled table script" />
+    <option name="LAST_COMMIT_MESSAGE" value="new compiled table script" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/scripts/compiled_table_v2.py</url>
-          <line>390</line>
-          <option name="timeStamp" value="125" />
-        </line-breakpoint>
-      </breakpoints>
       <default-breakpoints>
         <breakpoint suspend="NONE" type="python-exception">
           <properties exception="BaseException" />
@@ -1164,17 +1150,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/mapping_to_ref.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="195">
-          <caret line="13" column="29" lean-forward="true" selection-start-line="13" selection-start-column="29" selection-end-line="13" selection-end-column="29" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-            <element signature="e#1651#2005#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/create_typing_out.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="15">
@@ -1194,54 +1169,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/ismap_v2.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1855">
-          <caret line="212" column="38" lean-forward="true" selection-start-line="212" selection-start-column="38" selection-end-line="212" selection-end-column="38" />
-          <folding>
-            <element signature="e#23#37#0" expanded="true" />
-            <element signature="e#5937#5996#0" />
-            <element signature="e#6044#6721#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/run_commands.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="870">
-          <caret line="58" column="28" lean-forward="true" selection-start-line="58" selection-start-column="28" selection-end-line="58" selection-end-column="28" />
-          <folding>
-            <element signature="e#0#27#0" expanded="true" />
-            <marker date="1538440738527" expanded="true" signature="2131:2136" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/binary_table.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="135">
           <caret line="20" selection-start-line="20" selection-end-line="21" selection-end-column="157" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/compiled_table.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="375">
-          <caret line="38" column="174" lean-forward="true" selection-start-line="38" selection-start-column="174" selection-end-line="38" selection-end-column="174" />
-          <folding>
-            <element signature="e#23#40#0" expanded="true" />
-            <element signature="e#2187#7099#0" />
-            <element signature="e#7165#9268#0" />
-            <element signature="e#9353#10016#0" />
-            <element signature="e#10069#10368#0" />
-            <element signature="e#10426#11652#0" />
-            <element signature="e#11714#12297#0" />
-            <element signature="e#12358#13457#0" />
-            <element signature="e#13582#16645#0" />
-            <element signature="e#16672#16877#0" />
-            <element signature="e#16917#17070#0" />
-            <element signature="e#17117#18845#0" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1274,10 +1205,54 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/ismap_v2.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="401">
+          <caret line="212" column="38" lean-forward="true" selection-start-line="212" selection-start-column="38" selection-end-line="212" selection-end-column="38" />
+          <folding>
+            <element signature="e#23#37#0" expanded="true" />
+            <element signature="e#5937#5996#0" />
+            <element signature="e#6044#6721#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/compiled_table.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="296">
+          <caret line="468" column="26" lean-forward="true" selection-start-line="468" selection-start-column="26" selection-end-line="468" selection-end-column="26" />
+          <folding>
+            <element signature="e#23#40#0" expanded="true" />
+            <element signature="e#2187#7099#0" />
+            <element signature="e#7165#9268#0" />
+            <element signature="e#9353#10016#0" />
+            <element signature="e#10069#10368#0" />
+            <element signature="e#10426#11652#0" />
+            <element signature="e#11714#12297#0" />
+            <element signature="e#12358#13457#0" />
+            <element signature="e#13582#16645#0" />
+            <element signature="e#16672#16877#0" />
+            <element signature="e#16917#17070#0" />
+            <element signature="e#17117#18845#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/run_commands.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="870">
+          <caret line="58" column="28" lean-forward="true" selection-start-line="58" selection-start-column="28" selection-end-line="58" selection-end-column="28" />
+          <folding>
+            <element signature="e#0#27#0" expanded="true" />
+            <marker date="1538440738527" expanded="true" signature="2131:2136" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/compiled_table_v2.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="457">
-          <caret line="75" column="4" selection-start-line="75" selection-start-column="4" selection-end-line="75" selection-end-column="4" />
+        <state relative-caret-position="1230">
+          <caret line="311" column="34" selection-start-line="311" selection-start-column="34" selection-end-line="311" selection-end-column="34" />
           <folding>
             <element signature="e#23#41#0" expanded="true" />
             <element signature="e#288#493#0" />
@@ -1285,9 +1260,18 @@
             <element signature="e#2394#6584#0" />
             <element signature="e#6694#8477#0" />
             <element signature="e#8591#12129#0" />
-            <element signature="e#7603#12627#0" />
-            <marker date="1538528168318" expanded="true" signature="250:384" ph="..." />
-            <marker date="1538528168318" expanded="true" signature="14093:19997" ph="..." />
+            <marker date="1538529266752" expanded="true" signature="250:384" ph="..." />
+            <marker date="1538529266752" expanded="true" signature="14169:20083" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/mapping_to_ref.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="435">
+          <caret line="29" column="70" selection-start-line="29" selection-start-column="70" selection-end-line="29" selection-end-column="70" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
           </folding>
         </state>
       </provider>

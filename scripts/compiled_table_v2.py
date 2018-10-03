@@ -309,6 +309,7 @@ def parse_args():
     # Parameters for hits
     parser.add_argument('--gap', type=int, required=False, default=0,
                         help='distance between regions to call overlapping, default is 0')
+    # TODO: Check these parameters work in the cases where they are supposed to
     parser.add_argument('--cds', nargs='+', type=str, required=False, default=['locus_tag', 'gene', 'product'],
                         help='qualifiers to look for in reference genbank for CDS features')
     parser.add_argument('--trna', nargs='+', type=str, required=False, default=['locus_tag', 'product'],
@@ -352,7 +353,7 @@ def main():
     print('Collating results files ...')
     for result_file in unique_results_files:
         # Get isolate name
-        isolate = result_file.split('_table.txt')[0]
+        isolate = os.path.split(result_file)[1].split('__')[0]
         list_of_isolates.append(isolate)
         # Skip the header
         header = 0
