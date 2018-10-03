@@ -542,7 +542,7 @@ def create_typing_output(filenames, ref_gbk_obj, is_query_obj, min_range, max_ra
     # If both intersect and closest bed files are empty, there are no hits
     # write out an empty file and record this in the log file
     if os.stat(intersect_file)[6] == 0 and os.stat(closest_file)[6] == 0:
-        write_typing_output(IS_hits, removed_hits, final_table_file)
+        write_typing_output(IS_hits, removed_hits, cds_feature_info, rrna_feature_info, trna_feature_info, final_table_file)
         logging.info('Both the intersect and closest BED files were empty.')
         logging.info('No hits found for sample %s', sample_prefix)
         return
@@ -619,7 +619,7 @@ def create_typing_output(filenames, ref_gbk_obj, is_query_obj, min_range, max_ra
                 if info[3] == '-1' or info[3] == '':
                     # exit the file and do not process further
                     logging.info('One or more flanking read files were empty, no hits found for sample %s', sample_prefix)
-                    write_typing_output(IS_hits, removed_hits, final_table_file)
+                    write_typing_output(IS_hits, removed_hits, cds_feature_info, rrna_feature_info, trna_feature_info, final_table_file)
                     return IS_hits
                 # get the distance between the hits
                 gap = int(info[6])

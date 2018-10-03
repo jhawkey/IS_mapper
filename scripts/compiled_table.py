@@ -207,7 +207,8 @@ def final_ranges_check(positions, gap):
 
     return(final_positions)
 
-def write_output(pos_list, isolate_list, out_prefix, ref_name, imprecise_value, unconfident_value, binary=False):
+def write_output(pos_list, isolate_list, out_prefix, ref_name, imprecise_value, unconfident_value,
+                 cds_product_info, rrna_product_info, trna_product_info, binary=False):
 
     if not binary:
         out = open(out_prefix + '_full_compiled.txt', 'w')
@@ -282,8 +283,18 @@ def write_output(pos_list, isolate_list, out_prefix, ref_name, imprecise_value, 
             right_distance_row.append(str(pos.right_distance))
             left_strand_row.append(str(pos.left_strand))
             right_strand_row.append(str(pos.right_strand))
-            left_product_row.append(pos.left_feature.qualifiers['product'][0])
-            right_product_row.append(pos.right_feature.qualifiers['product'][0])
+            if pos.left_feature.type == 'CDS':
+                left_product_row.append(pos.left_feature.qualifiers[cds_product_info][0])
+            elif pos.left_feature.type == 'rRNA':
+                left_product_row.append(pos.left_feature.qualifiers[rrna_product_info][0])
+            elif pos.left_feature.type == 'tRNA':
+                left_product_row.append(pos.left_feature.qualifiers[trna_product_info][0])
+            if pos.right_feature.type == 'CDS':
+                right_product_row.append(pos.right_feature.qualifiers[cds_product_info][0])
+            elif pos.right_feature.type == 'rRNA':
+                right_product_row.append(pos.right_feature.qualifiers[rrna_product_info][0])
+            elif pos.right_feature.type == 'tRNA':
+                right_product_row.append(pos.right_feature.qualifiers[trna_product_info][0])
 
         out.write('\t'.join(orientation_row) + '\n')
         out.write('\t'.join(left_locus_row) + '\n')
@@ -309,13 +320,12 @@ def parse_args():
     # Parameters for hits
     parser.add_argument('--gap', type=int, required=False, default=0,
                         help='distance between regions to call overlapping, default is 0')
-    # TODO: Check these parameters work in the cases where they are supposed to
-    parser.add_argument('--cds', nargs='+', type=str, required=False, default=['locus_tag', 'gene', 'product'],
-                        help='qualifiers to look for in reference genbank for CDS features')
-    parser.add_argument('--trna', nargs='+', type=str, required=False, default=['locus_tag', 'product'],
-                        help='qualifiers to look for in reference genbank for tRNA features')
-    parser.add_argument('--rrna', nargs='+', type=str, required=False, default=['locus_tag', 'product'],
-                        help='qualifiers to look for in reference genbank for rRNA features')
+    parser.add_argument('--cds', type=str, required=False, default='product',
+                              help='qualifier containing gene information (default product). Also note that all CDS features MUST have a locus_tag')
+    parser.add_argument('--trna', type=str, required=False, default='product',
+                              help='qualifier containing gene information (default product). Also note that all tRNA features MUST have a locus_tag')
+    parser.add_argument('--rrna', type=str, required=False, default='product',
+                              help='qualifier containing gene information (default product). Also note that all rRNA features MUST have a locus_tag')
     parser.add_argument('--imprecise', type=str, required=False, default='1',
                         help='Binary value for imprecise (*) hit (can be 1, 0 or 0.5), default is 1')
     parser.add_argument('--unconfident', type=str, required=False, default='0',
@@ -378,7 +388,7 @@ def main():
                         if pos.x == is_start and pos.y == is_end and pos.orientation == orientation:
                             # Then this position already exists
                             match = True
-                            # And we want to retreive the position to which it is exactly the same
+                            # And we want to retrieve the position to which it is exactly the same
                             matching_pos = pos
                             # Then we want to add the info about this new position to the list
                             if '?' in call:
@@ -462,8 +472,10 @@ def main():
 
     # Order positions from smallest to largest for final table output
     list_of_positions.sort(key=lambda x: x.x)
-    write_output(list_of_positions, list_of_isolates, args.out_prefix, ref_name, args.imprecise, args.unconfident)
-    write_output(list_of_positions, list_of_isolates, args.out_prefix, ref_name, args.imprecise, args.unconfident, binary=True)
+    write_output(list_of_positions, list_of_isolates, args.out_prefix, ref_name, args.imprecise, args.unconfident,
+                 args.cds, args.rrna, args.trna)
+    write_output(list_of_positions, list_of_isolates, args.out_prefix, ref_name, args.imprecise, args.unconfident,
+                 args.cds, args.rrna, args.trna, binary=True)
 
     elapsed_time = time.time() - start_time
     print('Table compilation finished in ' + str(elapsed_time))
