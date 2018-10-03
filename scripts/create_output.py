@@ -256,6 +256,14 @@ def get_features(genbank_object):
     feature_list = sorted(feature_list, key=operator.itemgetter(0))
     return(feature_list)
 
+def check_hit_within_hit(intersect_left, left_range, intersect_right, right_range):
+    if (intersect_left[0] in right_range and intersect_left[1] in right_range):
+        return True
+    elif (intersect_right[0] in left_range and intersect_right[1] in left_range):
+        return True
+    else:
+        return False
+
 def get_qualifiers(cds_qualifiers, trna_qualifiers, rrna_qualifiers, feature):
     '''
     Takes a list of possible qualifier IDs and attempts
@@ -565,12 +573,12 @@ def create_typing_output(filenames, ref_gbk_obj, is_query_obj, min_range, max_ra
                 gap = int(info[6])
                 # if the gap is small, then lets process this hit
                 if gap <= novel_gap_size:
-                    # check if one hit is actually within the other hit
-                    # if it is we need to remove it
-                    # TODO: make this a function (check_hit_within_hit)
                     left_range = range(min(intersect_left), max(intersect_left))
                     right_range = range(min(intersect_right), max(intersect_right))
-                    if (intersect_left[0] in right_range and intersect_left[1] in right_range) or (intersect_right[0] in left_range and intersect_right[1] in left_range):
+                    # check if one hit is actually within the other hit
+                    # if it is we need to remove it
+                    hit_within_hit = check_hit_within_hit(intersect_left, left_range, intersect_right, right_range)
+                    if hit_within_hit:
                         removed_hit = RemovedHit(intersect_left, intersect_right)
                         removed_hit.reason = 'one flank entirely within other flank'
                         removed_hit.comparison_type = 'BED intersect'

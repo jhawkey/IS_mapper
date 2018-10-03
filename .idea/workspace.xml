@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="f362a202-b55d-4e14-bd4f-3ac14f1bafb9" name="Default" comment="parameters for cds/trna/rrna features correct">
-      <change beforePath="$PROJECT_DIR$/scripts/binary_table.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/compiled_table.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/create_genbank_table.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/slurm_ismap.py" beforeDir="false" />
+    <list default="true" id="f362a202-b55d-4e14-bd4f-3ac14f1bafb9" name="Default" comment="updated script names and removed unnecessary scripts">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/create_output.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/create_output.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -24,28 +22,28 @@
       <usages-collector id="statistics.file.types.open">
         <counts>
           <entry key="PLAIN_TEXT" value="1" />
-          <entry key="Python" value="40" />
+          <entry key="Python" value="42" />
           <entry key="Scratch" value="2" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="py" value="41" />
+          <entry key="py" value="43" />
           <entry key="txt" value="2" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="Python Console" value="1603" />
-          <entry key="py" value="33454" />
+          <entry key="py" value="33992" />
           <entry key="regexp" value="7" />
-          <entry key="txt" value="1900" />
+          <entry key="txt" value="1954" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="PLAIN_TEXT" value="1449" />
-          <entry key="Python" value="35035" />
+          <entry key="PLAIN_TEXT" value="1503" />
+          <entry key="Python" value="35573" />
           <entry key="RegExp" value="7" />
           <entry key="Scratch" value="473" />
         </counts>
@@ -56,15 +54,24 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/scripts/ismap_v2.py">
+        <entry file="file://$PROJECT_DIR$/scripts/ismap.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="507">
-              <caret line="64" column="71" lean-forward="true" selection-start-line="64" selection-start-column="71" selection-end-line="64" selection-end-column="71" />
+              <caret line="64" column="71" selection-start-line="64" selection-start-column="71" selection-end-line="64" selection-end-column="71" />
               <folding>
                 <element signature="e#23#37#0" expanded="true" />
                 <element signature="e#5937#5996#0" />
                 <element signature="e#6044#6721#0" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/setup.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="540">
+              <caret line="36" lean-forward="true" selection-start-line="36" selection-end-line="36" />
             </state>
           </provider>
         </entry>
@@ -95,10 +102,10 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/scripts/compiled_table_v2.py">
+        <entry file="file://$PROJECT_DIR$/scripts/compiled_table.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="917">
-              <caret line="346" column="79" selection-start-line="346" selection-start-column="79" selection-end-line="346" selection-end-column="79" />
+            <state relative-caret-position="317">
+              <caret line="306" column="59" lean-forward="true" selection-start-line="306" selection-start-column="59" selection-end-line="306" selection-end-column="59" />
               <folding>
                 <element signature="e#23#41#0" expanded="true" />
                 <element signature="e#288#493#0" />
@@ -117,8 +124,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/scripts/create_output.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="33">
-              <caret line="464" column="36" lean-forward="true" selection-start-line="464" selection-start-column="36" selection-end-line="464" selection-end-column="36" />
+            <state relative-caret-position="738">
+              <caret line="634" column="64" lean-forward="true" selection-start-line="634" selection-start-column="64" selection-end-line="634" selection-end-column="64" />
               <folding>
                 <element signature="e#23#41#0" expanded="true" />
                 <element signature="e#245#747#0" />
@@ -128,12 +135,15 @@
                 <element signature="e#7181#7808#0" />
                 <element signature="e#7877#9076#0" />
                 <element signature="e#9950#10415#0" />
+                <element signature="e#10477#10705#0" />
                 <element signature="e#9454#10117#0" />
                 <element signature="e#9834#10118#0" />
                 <element signature="e#11482#12004#0" />
                 <element signature="e#10622#12162#0" />
                 <element signature="e#14615#18602#0" />
-                <marker date="1538539244740" expanded="false" signature="2520:2626" ph="..." />
+                <element signature="e#18813#22532#0" />
+                <marker date="1538549210332" expanded="false" signature="2520:2626" ph="..." />
+                <marker date="1538549210332" expanded="true" signature="25701:25722" ph="..." />
               </folding>
             </state>
           </provider>
@@ -821,7 +831,14 @@
       <option name="project" value="LOCAL" />
       <updated>1538539453244</updated>
     </task>
-    <option name="localTasksCounter" value="33" />
+    <task id="LOCAL-00033" summary="updated script names and removed unnecessary scripts">
+      <created>1538548869844</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1538548869844</updated>
+    </task>
+    <option name="localTasksCounter" value="34" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -867,6 +884,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="2560" height="1417" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.12445845" />
       <window_info id="Structure" order="1" weight="0.24970461" />
@@ -918,7 +936,6 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="added parsing of unpaired and closest bed results files" />
     <MESSAGE value="create output now contains all typing funcitonality except for the removal of hits" />
     <MESSAGE value="updated maptoISquery test to check flanking reads are correct" />
     <MESSAGE value="created test to check that bams mapped to ref are correct" />
@@ -943,7 +960,8 @@
     <MESSAGE value="updated compiled table to fix isolate names" />
     <MESSAGE value="made gap size for novel hits an argument parameter" />
     <MESSAGE value="parameters for cds/trna/rrna features correct" />
-    <option name="LAST_COMMIT_MESSAGE" value="parameters for cds/trna/rrna features correct" />
+    <MESSAGE value="updated script names and removed unnecessary scripts" />
+    <option name="LAST_COMMIT_MESSAGE" value="updated script names and removed unnecessary scripts" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1223,10 +1241,23 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/compiled_table_v2.py">
+    <entry file="file://$PROJECT_DIR$/scripts/create_genbank_table.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/degugging.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="917">
-          <caret line="346" column="79" selection-start-line="346" selection-start-column="79" selection-end-line="346" selection-end-column="79" />
+        <state relative-caret-position="330">
+          <caret line="22" column="61" selection-start-line="22" selection-start-column="61" selection-end-line="22" selection-end-column="61" />
+          <folding>
+            <element signature="e#0#54#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/compiled_table.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="317">
+          <caret line="306" column="59" lean-forward="true" selection-start-line="306" selection-start-column="59" selection-end-line="306" selection-end-column="59" />
           <folding>
             <element signature="e#23#41#0" expanded="true" />
             <element signature="e#288#493#0" />
@@ -1241,10 +1272,20 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/ismap_v2.py">
+    <entry file="file://$PROJECT_DIR$/scripts/slurm_ismap_sg.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/setup.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="540">
+          <caret line="36" lean-forward="true" selection-start-line="36" selection-end-line="36" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/ismap.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="507">
-          <caret line="64" column="71" lean-forward="true" selection-start-line="64" selection-start-column="71" selection-end-line="64" selection-end-column="71" />
+          <caret line="64" column="71" selection-start-line="64" selection-start-column="71" selection-end-line="64" selection-end-column="71" />
           <folding>
             <element signature="e#23#37#0" expanded="true" />
             <element signature="e#5937#5996#0" />
@@ -1253,23 +1294,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/create_genbank_table.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/degugging.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="330">
-          <caret line="22" column="61" selection-start-line="22" selection-start-column="61" selection-end-line="22" selection-end-column="61" />
-          <folding>
-            <element signature="e#0#54#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/create_output.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="33">
-          <caret line="464" column="36" lean-forward="true" selection-start-line="464" selection-start-column="36" selection-end-line="464" selection-end-column="36" />
+        <state relative-caret-position="738">
+          <caret line="634" column="64" lean-forward="true" selection-start-line="634" selection-start-column="64" selection-end-line="634" selection-end-column="64" />
           <folding>
             <element signature="e#23#41#0" expanded="true" />
             <element signature="e#245#747#0" />
@@ -1279,12 +1307,15 @@
             <element signature="e#7181#7808#0" />
             <element signature="e#7877#9076#0" />
             <element signature="e#9950#10415#0" />
+            <element signature="e#10477#10705#0" />
             <element signature="e#9454#10117#0" />
             <element signature="e#9834#10118#0" />
             <element signature="e#11482#12004#0" />
             <element signature="e#10622#12162#0" />
             <element signature="e#14615#18602#0" />
-            <marker date="1538539244740" expanded="false" signature="2520:2626" ph="..." />
+            <element signature="e#18813#22532#0" />
+            <marker date="1538549210332" expanded="false" signature="2520:2626" ph="..." />
+            <marker date="1538549210332" expanded="true" signature="25701:25722" ph="..." />
           </folding>
         </state>
       </provider>
