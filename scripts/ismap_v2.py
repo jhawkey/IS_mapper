@@ -52,6 +52,8 @@ def parse_args():
                                  help='Maximum size for softclipped regions to be included (default 30).')
     parser_hits.add_argument('--cutoff', type=int, required=False, default=6,
                                  help='Minimum depth for mapped region to be kept in bed file (default 6)')
+    parser_hits.add_argument('--novel_gap_size', type=int, required=False, default=15,
+                             help='Distance in base pairs between left and right flanks to be called a novel hit (default 15)')
     parser_hits.add_argument('--min_range', type=str, required=False, default=0.9,
                                  help='Minimum percent size of the gap to be called a known hit (default 0.9, or 90 percent)')
     parser_hits.add_argument('--max_range', type=str, required=False, default=1.1,
@@ -224,7 +226,7 @@ def main():
                 filenames_bedfiles = create_bed_files(filenames, args.cutoff, args.merging)
 
                 # Create table and annotated genbank with hits
-                create_typing_output(filenames_bedfiles, ref_seq, is_query, args.min_range, args.max_range, tmp_output_folder, sample.prefix)
+                create_typing_output(filenames_bedfiles, ref_seq, is_query, args.min_range, args.max_range, args.novel_gap_size, tmp_output_folder, sample.prefix)
                 logging.info('ISMapper has completed successfully for sample %s', sample.prefix)
 
                 # Remove temp dir and bam files unless explicitly asked not not

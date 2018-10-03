@@ -354,7 +354,7 @@ def check_seq_between(genbank_seq, insertion, start, end, name, temp):
     # If there is no hit, just return an empty dict
     return {}
 
-def check_unpaired_hits(line_check, ref_gbk_obj, ref_feature_list, is_query_obj, min_range, max_range,
+def check_unpaired_hits(line_check, ref_gbk_obj, ref_feature_list, is_query_obj, min_range, max_range, novel_gap_size,
                         tmp_output_folder):
 
     # intialise a list of all the hits found in this file
@@ -375,7 +375,7 @@ def check_unpaired_hits(line_check, ref_gbk_obj, ref_feature_list, is_query_obj,
         # get the orientation and the IS hit object
         new_hit = get_orientation(intersect_left, intersect_right)
         # if the gap is small, it's a novel hit
-        if gap <= 15:
+        if gap <= novel_gap_size:
             new_hit.hit_type = 'novel'
             new_hit.confidence_level = 'unpaired'
             new_hit.get_flanking_genes(ref_gbk_obj, ref_feature_list)
@@ -501,7 +501,7 @@ def write_typing_output(IShits, removedhits, output_table):
     # exit the function
     return
 
-def create_typing_output(filenames, ref_gbk_obj, is_query_obj, min_range, max_range, tmp_output_folder, sample_prefix):
+def create_typing_output(filenames, ref_gbk_obj, is_query_obj, min_range, max_range, novel_gap_size, tmp_output_folder, sample_prefix):
 
     # first we need all the input files so we can match hits up
     intersect_file = filenames['intersect']
@@ -552,7 +552,7 @@ def create_typing_output(filenames, ref_gbk_obj, is_query_obj, min_range, max_ra
                 # get the gap between the hits, as determined by bedtools
                 gap = int(info[6])
                 # if the gap is small, then lets process this hit
-                if gap <= 15:
+                if gap <= novel_gap_size:
                     # check if one hit is actually within the other hit
                     # if it is we need to remove it
                     # TODO: make this a function (check_hit_within_hit)
@@ -613,8 +613,7 @@ def create_typing_output(filenames, ref_gbk_obj, is_query_obj, min_range, max_ra
                 if gap == 0:
                     pass
                 # If the gap distance is small, this is likely a novel hit where no overlap was detected
-                # TODO: make this gap size changeable in IS Mapper parameters
-                elif gap <= 10:
+                elif gap <= novel_gap_size:
                     new_hit = get_orientation(intersect_left, intersect_right)
                     # add the relevant information to the hit that we already know
                     new_hit.hit_type = 'novel'
@@ -693,7 +692,7 @@ def create_typing_output(filenames, ref_gbk_obj, is_query_obj, min_range, max_ra
                 line_check.append(line.strip().split('\t'))
     if len(line_check) != 0:
         all_new_hits, new_removed_hits = check_unpaired_hits(line_check, ref_gbk_obj, ref_feature_list, is_query_obj,
-                                           min_range, max_range, tmp_output_folder)
+                                           min_range, max_range, novel_gap_size, tmp_output_folder)
         # add them to our current list
         IS_hits = IS_hits + all_new_hits
         removed_hits = removed_hits + new_removed_hits
@@ -708,7 +707,7 @@ def create_typing_output(filenames, ref_gbk_obj, is_query_obj, min_range, max_ra
                 line_check.append(line.strip().split('\t'))
     if len(line_check) != 0:
         all_new_hits, new_removed_hits = check_unpaired_hits(line_check, ref_gbk_obj, ref_feature_list, is_query_obj,
-                                           min_range, max_range, tmp_output_folder)
+                                           min_range, max_range, novel_gap_size, tmp_output_folder)
 
         # add them to our current list
         IS_hits = IS_hits + all_new_hits
