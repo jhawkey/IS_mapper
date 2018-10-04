@@ -21,15 +21,15 @@ class RunSamtools:
         out,err = p.communicate()
         version_string = [l for l in err.decode('UTF-8').split('\n') if re.search('^Version', l)][0]
         if len(version_string) == 0:
-            print("Could not find Samtools")
+            logging.error("Could not find Samtools")
             raise IOError
         if len(re.findall('1\.[0-9]\.?[0-9]{0,2}', version_string)):
             version_id=re.findall('1\.[0-9]\.?[0-9]{0,2}', version_string)[0]
-            print("Found samtools version {}".format(version_id))
+            logging.info("Found samtools version {}".format(version_id))
             self.version=1
         else:
             version_id=re.findall('0\.[0-9]\.?[0-9]{1,2}', version_string)[0]
-            print("Found samtools version {}".format(version_id))
+            logging.info("Found samtools version {}".format(version_id))
             self.version=0
     def view(self, output_bam, input_sam, bigF=None, smallF=None):
         cmd = self.samtools_cmd + ' view -Sb'
@@ -66,7 +66,6 @@ def bwa_index(fasta):
     """
 
     built_index = fasta + '.bwt'
-    print(built_index)
     if os.path.exists(built_index):
         logging.info('Index for {} is already built...'.format(fasta))
     else:
@@ -81,9 +80,6 @@ def create_tmp_file(seq_object, file_path, file_type):
     the sequence with the correct file type (either genbank or fasta).
     Return the name of the file for use downstream.
     """
-    print(seq_object)
-    print(file_path)
-    print(file_type)
     SeqIO.write(seq_object, file_path, file_type)
     return file_path
 
@@ -121,7 +117,7 @@ def set_output_filenames(tmp_folder, prefix, query, out_dir):
 
 def extract_clipped_reads(sam_file, min_size, max_size, out_left_file, out_right_file):
     with open(sam_file, 'r') as in_file, open(out_left_file, 'w') as out_left, open(out_right_file, 'w') as out_right:
-        print("extracting clip reads into" + out_left_file + out_right_file)
+        logging.info("Extracting clip reads into" + out_left_file + out_right_file)
         for line in in_file:
             # split fields
             entries = line.split('\t')

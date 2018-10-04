@@ -43,7 +43,7 @@ def parse_args():
     parser_script.add_argument('--help_all', required=False, action=None, help='Display extended help')
 
     # List of arguments to show in quick help
-    quick_help_args = ('--reads', '--queries', '--reference', '--output', '--log', '--log_name')
+    quick_help_args = ('--reads', '--queries', '--reference', '--output_dir', '--log', '--help_all')
 
     # Parameters for defining hits
     parser_hits.add_argument('--min_clip', type=int, required=False, default=10,

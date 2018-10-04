@@ -317,7 +317,6 @@ def doBlast(blast_input, blast_output, database):
     in BioPython.
     '''
     run_command(['makeblastdb', '-dbtype nucl', '-in', database], shell=True)
-    #print(' '.join(['blastn', '-query', blast_input, '-db', database, '-outfmt "6 qseqid qlen sacc pident length slen sstart send evalue bitscore qcovs"', '>', blast_output]))
     run_command(['blastn', '-query', blast_input, '-db', database, '-outfmt "6 qseqid qlen sacc pident length slen sstart send evalue bitscore qcovs"', '>', blast_output], shell=True)
 
 def check_seq_between(genbank_seq, insertion, start, end, name, temp):
