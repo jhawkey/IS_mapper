@@ -11,8 +11,6 @@ from Bio import SeqIO
 import filecmp
 import shutil
 
-#TODO: run all 8 Ab samples with each ref gbk, try a run where both gbks provided as either multi-genbank or two entries
-
 class TestGetSeqs(unittest.TestCase):
 
     def setUp(self):
