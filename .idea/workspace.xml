@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="f362a202-b55d-4e14-bd4f-3ac14f1bafb9" name="Default" comment="removed excess print statements">
+    <list default="true" id="f362a202-b55d-4e14-bd4f-3ac14f1bafb9" name="Default" comment="updated readme">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
     </list>
@@ -37,16 +37,16 @@
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="Python Console" value="1603" />
-          <entry key="md" value="7865" />
+          <entry key="md" value="8119" />
           <entry key="py" value="34658" />
           <entry key="regexp" value="7" />
-          <entry key="txt" value="2211" />
+          <entry key="txt" value="2227" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Markdown" value="7865" />
-          <entry key="PLAIN_TEXT" value="1760" />
+          <entry key="Markdown" value="8119" />
+          <entry key="PLAIN_TEXT" value="1776" />
           <entry key="Python" value="36239" />
           <entry key="RegExp" value="7" />
           <entry key="Scratch" value="473" />
@@ -75,23 +75,10 @@
         <entry file="file://$PROJECT_DIR$/README.md">
           <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
             <state split_layout="SPLIT">
-              <first_editor relative-caret-position="420">
-                <caret line="25" column="4" selection-start-line="25" selection-start-column="4" selection-end-line="25" selection-end-column="4" />
+              <first_editor relative-caret-position="582">
+                <caret line="275" column="146" selection-start-line="275" selection-start-column="146" selection-end-line="275" selection-end-column="146" />
               </first_editor>
               <second_editor />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/scripts/compiled_table.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="502">
-              <caret line="324" column="78" selection-start-line="324" selection-start-column="78" selection-end-line="324" selection-end-column="78" />
-              <folding>
-                <marker date="1538550484590" expanded="true" signature="250:384" ph="..." />
-                <marker date="1538550484590" expanded="true" signature="14931:20845" ph="..." />
-              </folding>
             </state>
           </provider>
         </entry>
@@ -814,7 +801,14 @@
       <option name="project" value="LOCAL" />
       <updated>1538696492084</updated>
     </task>
-    <option name="localTasksCounter" value="41" />
+    <task id="LOCAL-00041" summary="updated readme">
+      <created>1538966359371</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1538966359371</updated>
+    </task>
+    <option name="localTasksCounter" value="42" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -912,7 +906,6 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="ran all Ab genomes and fixed bugs that arose" />
     <MESSAGE value="added code to remove hits and write out record of these" />
     <MESSAGE value="an empty flanking read file runs and gives correct response" />
     <MESSAGE value="if one or more of the input read files are &lt;100 bytes, quit and raise error" />
@@ -937,7 +930,8 @@
     <MESSAGE value="removed excess print statements" />
     <MESSAGE value="updated test data" />
     <MESSAGE value="removed todos from unittests" />
-    <option name="LAST_COMMIT_MESSAGE" value="removed todos from unittests" />
+    <MESSAGE value="updated readme" />
+    <option name="LAST_COMMIT_MESSAGE" value="updated readme" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1300,8 +1294,8 @@
     <entry file="file://$PROJECT_DIR$/README.md">
       <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
         <state split_layout="SPLIT">
-          <first_editor relative-caret-position="420">
-            <caret line="25" column="4" selection-start-line="25" selection-start-column="4" selection-end-line="25" selection-end-column="4" />
+          <first_editor relative-caret-position="582">
+            <caret line="275" column="146" selection-start-line="275" selection-start-column="146" selection-end-line="275" selection-end-column="146" />
           </first_editor>
           <second_editor />
         </state>

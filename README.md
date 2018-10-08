@@ -1,7 +1,8 @@
 # ISMapper
 
-This program takes paired end Illumina short read sequence data, an IS query/queries of interest and a reference genome and reports the locations of the IS query in the reference genome or the assembly.
-For a more in depth description of how the program works, see **INSERT REFERENCE HERE** below.
+ISMapper searches for IS positions in sequence data using paired end Illumina short reads, an IS query/queries of interest and a reference genome. ISMapper reports the IS positions it has found in each isolate, relative to the provided reference genome.
+
+For a more in depth description of how the program works, see the section [Method](#method) below.
 
 For support, please create an issue in the GitHub issue tracker.
 
@@ -268,14 +269,10 @@ Each of these groups are independently mapped (with BWA) to the reference genome
 
 From this mapping, Bedtools is used to find the depth at each position in the reference genome. We are looking for large peaks of left end and right end reads that indicate a possibly IS query location. Positions where the read depth falls below 6 (default, can be changed using the `cutoff` parameter) are eliminated from further analysis, as these may be incorrect alignments.
 
-<p align="center"><img src="misc/image.png" alt="caption here"></p>
-
 Overlapping, or close, flanking regions are merged using the Bedtools merge function to prevent multiple hits representing the same region in the final output file. By default, close regions are defined as being <= 100 bp apart.
 
 Once left and right flanking regions have been identified, Bedtools is used to find pairs of left and right flanks which either:  
 a) intersect or are <= 15 bp (default) apart, which indicates a novel position that is not present in the reference, or;   
 b) separated by a distance which is approximately equal to the size of the IS query, which indicates a position that is probably in the reference.
-
-<p align="center"><img src="misc/image.png" alt="caption here"></p>
 
 All potential IS positions are then assessed to determine if they are tabulated into the final results file. Any hits which are removed are placed in the `_removedHits.txt` file, with the reason for their removal.
