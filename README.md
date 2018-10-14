@@ -26,7 +26,7 @@ Read more about ISMapper here:
 * [Method](#method)
     
 # Requirements
-* [Python](https://www.python.org/) v2.7+ or v3.6+
+* [Python](https://www.python.org/) v3.6+ (not compatible with Python 2)
 * [BioPython](https://biopython.org/) v1.63 or later
 * [BWA](http://bio-bwa.sourceforge.net/) v0.7.5a or later
 * [SAMtools](http://www.htslib.org/) v0.1.19 or later
