@@ -26,7 +26,7 @@ def parse_args():
     parser_table = parser_parent.add_argument_group('Parameters for output table')
     parser_output = parser_parent.add_argument_group('Reporting parameters')
 
-    #parser_parent.add_argument("--version", action='version', version='%(prog)s ' + ismap_version)
+    parser_script.add_argument("--version", action='version', version='%(prog)s ' + ismap_version)
     # Inputs
     parser_script.add_argument('--reads', nargs='+', type=pathlib.Path, required=True,
                                help='Paired end reads for analysing (can be gzipped)')
