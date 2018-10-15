@@ -284,17 +284,53 @@ def write_output(pos_list, isolate_list, out_prefix, ref_name, imprecise_value, 
             left_strand_row.append(str(pos.left_strand))
             right_strand_row.append(str(pos.right_strand))
             if pos.left_feature.type == 'CDS':
-                left_product_row.append(pos.left_feature.qualifiers[cds_product_info][0])
+                try:
+                    left_product_row.append(pos.left_feature.qualifiers[cds_product_info][0])
+                except KeyError:
+                    left_product_row.append('')
+                    print('No qualifier was found for gene %s. By default, this is the "product" qualifier for the feature. '
+                    'If you would like to use a different qualifier, '
+                    'please supply it to --cds.' % pos.left_feature.qualifiers['locus_tag'][0])
             elif pos.left_feature.type == 'rRNA':
-                left_product_row.append(pos.left_feature.qualifiers[rrna_product_info][0])
+                try:
+                    left_product_row.append(pos.left_feature.qualifiers[rrna_product_info][0])
+                except KeyError:
+                    left_product_row.append('')
+                    print('No qualifier was found for gene %s. By default, this is the "product" qualifier for the feature. '
+                    'If you would like to use a different qualifier, '
+                    'please supply it to --rrna.' % pos.left_feature.qualifiers['locus_tag'][0])
             elif pos.left_feature.type == 'tRNA':
-                left_product_row.append(pos.left_feature.qualifiers[trna_product_info][0])
+                try:
+                    left_product_row.append(pos.left_feature.qualifiers[trna_product_info][0])
+                except KeyError:
+                    left_product_row.append('')
+                    print('No qualifier was found for gene %s. By default, this is the "product" qualifier for the feature. '
+                    'If you would like to use a different qualifier, '
+                    'please supply it to --trna.' % pos.left_feature.qualifiers['locus_tag'][0])
             if pos.right_feature.type == 'CDS':
-                right_product_row.append(pos.right_feature.qualifiers[cds_product_info][0])
+                try:
+                    right_product_row.append(pos.right_feature.qualifiers[cds_product_info][0])
+                except KeyError:
+                    right_product_row.append('')
+                    print('No qualifier was found for gene %s. By default, this is the "product" qualifier for the feature. '
+                    'If you would like to use a different qualifier, '
+                    'please supply it to --cds.' % pos.right_feature.qualifiers['locus_tag'][0])
             elif pos.right_feature.type == 'rRNA':
-                right_product_row.append(pos.right_feature.qualifiers[rrna_product_info][0])
+                try:
+                    right_product_row.append(pos.right_feature.qualifiers[rrna_product_info][0])
+                except KeyError:
+                    right_product_row.append('')
+                    print('No qualifier was found for gene %s. By default, this is the "product" qualifier for the feature. '
+                    'If you would like to use a different qualifier, '
+                    'please supply it to --rrna.' % pos.right_feature.qualifiers['locus_tag'][0])
             elif pos.right_feature.type == 'tRNA':
-                right_product_row.append(pos.right_feature.qualifiers[trna_product_info][0])
+                try:
+                    right_product_row.append(pos.right_feature.qualifiers[trna_product_info][0])
+                except KeyError:
+                    right_product_row.append('')
+                    print('No qualifier was found for gene %s. By default, this is the "product" qualifier for the feature. '
+                    'If you would like to use a different qualifier, '
+                    'please supply it to --trna.' % pos.right_feature.qualifiers['locus_tag'][0])
 
         out.write('\t'.join(orientation_row) + '\n')
         out.write('\t'.join(left_locus_row) + '\n')
