@@ -12,7 +12,7 @@ from run_commands import run_command, CommandError, BedtoolsError, make_director
 from mapping_to_query import map_to_is_query
 from mapping_to_ref import map_to_ref_seq, create_bed_files
 from create_output import create_typing_output
-import pkg_resources  # part of setuptools
+#import pkg_resources  # part of setuptools
 
 def parse_args():
     """
@@ -26,8 +26,8 @@ def parse_args():
     parser_table = parser_parent.add_argument_group('Parameters for output table')
     parser_output = parser_parent.add_argument_group('Reporting parameters')
 
-    ismap_version = pkg_resources.require("ISMapper")[0].version
-    parser_script.add_argument("--version", action='version', version='%(prog)s ' + ismap_version)
+    #ismap_version = pkg_resources.require("ISMapper")[0].version
+    #parser_script.add_argument("--version", action='version', version='%(prog)s ' + ismap_version)
     # Inputs
     parser_script.add_argument('--reads', nargs='+', type=pathlib.Path, required=True,
                                help='Paired end reads for analysing (can be gzipped)')
