@@ -674,8 +674,12 @@ def create_typing_output(filenames, ref_gbk_obj, is_query_obj, min_range, max_ra
                         removed_hit = RemovedHit(intersect_left, intersect_right)
                         removed_hit.reason = 'Sequence between was not a match for IS query'
                         removed_hit.comparison_type = 'BED closest'
-                        removed_hit.per_id = str(seq_check_results['per_id'])
-                        removed_hit.coverage = str(seq_check_results['coverage'])
+                        try:
+                            removed_hit.per_id = str(seq_check_results['per_id'])
+                            removed_hit.coverage = str(seq_check_results['coverage'])
+                        except KeyError:
+                            removed_hit.per_id = 'not a match'
+                            removed_hit.coverage = 'unknown'
                         removed_hits.append(removed_hit)
 
                 # The gap size here is smaller than the actual IS query, but larger than expected for a novel hit
