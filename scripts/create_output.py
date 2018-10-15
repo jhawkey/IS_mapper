@@ -476,18 +476,59 @@ def write_typing_output(IShits, removedhits, cds_feature_info, rrna_feature_info
             # get qualifiers for left and right genes
             # TODO: make sure this qualifier call is robust
             if IShit.left_feature.type == 'CDS':
-                left_description = IShit.left_feature.qualifiers[cds_feature_info][0]
+                try:
+                    left_description = IShit.left_feature.qualifiers[cds_feature_info][0]
+                except KeyError:
+                    left_description = ''
+                    logging.warning('No qualifier was found for gene %s. By default, this is the "product" qualifier for the feature. '
+                                    'If you would like to use a different qualifier, '
+                                    'please supply it to --cds.' % IShit.left_feature.qualifiers['locus_tag'][0])
             elif IShit.left_feature.type == 'rRNA':
-                left_description = IShit.left_feature.qualifiers[rrna_feature_info][0]
+                try:
+                    left_description = IShit.left_feature.qualifiers[rrna_feature_info][0]
+                except KeyError:
+                    left_description = ''
+                    logging.warning(
+                        'No qualifier was found for gene %s. By default, this is the "product" qualifier for the feature. '
+                        'If you would like to use a different qualifier, '
+                        'please supply it to --rrna.' % IShit.left_feature.qualifiers['locus_tag'][0])
             elif IShit.left_feature.type == 'tRNA':
-                left_description = IShit.left_feature.qualifiers[trna_feature_info][0]
+                try:
+                    left_description = IShit.left_feature.qualifiers[trna_feature_info][0]
+                except KeyError:
+                    left_description = ''
+                    logging.warning(
+                    'No qualifier was found for gene %s. By default, this is the "product" qualifier for the feature. '
+                    'If you would like to use a different qualifier, '
+                    'please supply it to --trna.' % IShit.left_feature.qualifiers['locus_tag'][0])
 
             if IShit.right_feature.type == 'CDS':
-                right_description = IShit.right_feature.qualifiers[cds_feature_info][0]
+                try:
+                    right_description = IShit.right_feature.qualifiers[cds_feature_info][0]
+                except KeyError:
+                    right_description = ''
+                    logging.warning(
+                        'No qualifier was found for gene %s. By default, this is the "product" qualifier for the feature. '
+                        'If you would like to use a different qualifier, '
+                        'please supply it to --cds.' % IShit.right_feature.qualifiers['locus_tag'][0])
             elif IShit.right_feature.type == 'rRNA':
-                right_description = IShit.right_feature.qualifiers[rrna_feature_info][0]
+                try:
+                    right_description = IShit.right_feature.qualifiers[rrna_feature_info][0]
+                except KeyError:
+                    right_description = ''
+                    logging.warning(
+                        'No qualifier was found for gene %s. By default, this is the "product" qualifier for the feature. '
+                        'If you would like to use a different qualifier, '
+                        'please supply it to --rrna.' % IShit.right_feature.qualifiers['locus_tag'][0])
             elif IShit.right_feature.type == 'tRNA':
-                right_description = IShit.right_feature.qualifiers[trna_feature_info][0]
+                try:
+                    right_description = IShit.right_feature.qualifiers[trna_feature_info][0]
+                except KeyError:
+                    right_description = ''
+                    logging.warning(
+                        'No qualifier was found for gene %s. By default, this is the "product" qualifier for the feature. '
+                        'If you would like to use a different qualifier, '
+                        'please supply it to --trna.' % IShit.right_feature.qualifiers['locus_tag'][0])
             # put together row
             line_list = [region_num, IShit.orientation, str(IShit.x), str(IShit.y), str(IShit.gap),
                          call_type, IShit.per_id, IShit.coverage, IShit.gene_left, left_description,

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="f362a202-b55d-4e14-bd4f-3ac14f1bafb9" name="Default" comment="removed unwanted files">
+    <list default="true" id="f362a202-b55d-4e14-bd4f-3ac14f1bafb9" name="Default" comment="removed version stuff">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scripts/create_output.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/create_output.py" afterDir="false" />
     </list>
@@ -45,16 +45,16 @@
         <counts>
           <entry key="Python Console" value="1603" />
           <entry key="md" value="8166" />
-          <entry key="py" value="34794" />
+          <entry key="py" value="35218" />
           <entry key="regexp" value="7" />
-          <entry key="txt" value="2280" />
+          <entry key="txt" value="2302" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="Markdown" value="8166" />
-          <entry key="PLAIN_TEXT" value="1829" />
-          <entry key="Python" value="36375" />
+          <entry key="PLAIN_TEXT" value="1851" />
+          <entry key="Python" value="36799" />
           <entry key="RegExp" value="7" />
           <entry key="Scratch" value="473" />
         </counts>
@@ -97,8 +97,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/scripts/ismap.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="675">
-              <caret line="45" column="45" lean-forward="true" selection-start-line="45" selection-start-column="45" selection-end-line="45" selection-end-column="45" />
+            <state relative-caret-position="425">
+              <caret line="57" column="82" lean-forward="true" selection-start-line="57" selection-start-column="82" selection-end-line="57" selection-end-column="82" />
               <folding>
                 <element signature="e#23#37#0" expanded="true" />
               </folding>
@@ -109,8 +109,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/scripts/create_output.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="868">
-              <caret line="680" column="61" selection-start-line="680" selection-start-column="61" selection-end-line="680" selection-end-column="61" />
+            <state relative-caret-position="1018">
+              <caret line="530" column="51" selection-start-line="530" selection-start-column="51" selection-end-line="530" selection-end-column="51" />
             </state>
           </provider>
         </entry>
@@ -876,7 +876,21 @@
       <option name="project" value="LOCAL" />
       <updated>1539559872340</updated>
     </task>
-    <option name="localTasksCounter" value="47" />
+    <task id="LOCAL-00047" summary="removed unwanted files">
+      <created>1539569638855</created>
+      <option name="number" value="00047" />
+      <option name="presentableId" value="LOCAL-00047" />
+      <option name="project" value="LOCAL" />
+      <updated>1539569638856</updated>
+    </task>
+    <task id="LOCAL-00048" summary="removed version stuff">
+      <created>1539571189697</created>
+      <option name="number" value="00048" />
+      <option name="presentableId" value="LOCAL-00048" />
+      <option name="project" value="LOCAL" />
+      <updated>1539571189698</updated>
+    </task>
+    <option name="localTasksCounter" value="49" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -974,7 +988,6 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="if one or more of the input read files are &lt;100 bytes, quit and raise error" />
     <MESSAGE value="checking for misformatted input queries and genbanks" />
     <MESSAGE value="checked for reads which can't be paired" />
     <MESSAGE value="removed finished todos" />
@@ -999,7 +1012,8 @@
     <MESSAGE value="updated readme" />
     <MESSAGE value="added version flag" />
     <MESSAGE value="removed unwanted files" />
-    <option name="LAST_COMMIT_MESSAGE" value="removed unwanted files" />
+    <MESSAGE value="removed version stuff" />
+    <option name="LAST_COMMIT_MESSAGE" value="removed version stuff" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1202,8 +1216,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/scripts/ismap.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="675">
-          <caret line="45" column="45" lean-forward="true" selection-start-line="45" selection-start-column="45" selection-end-line="45" selection-end-column="45" />
+        <state relative-caret-position="425">
+          <caret line="57" column="82" lean-forward="true" selection-start-line="57" selection-start-column="82" selection-end-line="57" selection-end-column="82" />
           <folding>
             <element signature="e#23#37#0" expanded="true" />
           </folding>
@@ -1212,8 +1226,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/scripts/create_output.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="868">
-          <caret line="680" column="61" selection-start-line="680" selection-start-column="61" selection-end-line="680" selection-end-column="61" />
+        <state relative-caret-position="1018">
+          <caret line="530" column="51" selection-start-line="530" selection-start-column="51" selection-end-line="530" selection-end-column="51" />
         </state>
       </provider>
     </entry>
