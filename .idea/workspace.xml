@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="f362a202-b55d-4e14-bd4f-3ac14f1bafb9" name="Default" comment="catch for compiled table when there is no product qualifier">
+    <list default="true" id="f362a202-b55d-4e14-bd4f-3ac14f1bafb9" name="Default" comment="changed cov and per id for no hit to zero">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scripts/create_output.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/create_output.py" afterDir="false" />
     </list>
@@ -46,16 +46,16 @@
         <counts>
           <entry key="Python Console" value="1603" />
           <entry key="md" value="8166" />
-          <entry key="py" value="35425" />
+          <entry key="py" value="35432" />
           <entry key="regexp" value="7" />
-          <entry key="txt" value="2454" />
+          <entry key="txt" value="2547" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="Markdown" value="8166" />
-          <entry key="PLAIN_TEXT" value="2003" />
-          <entry key="Python" value="37006" />
+          <entry key="PLAIN_TEXT" value="2096" />
+          <entry key="Python" value="37013" />
           <entry key="RegExp" value="7" />
           <entry key="Scratch" value="473" />
         </counts>
@@ -110,8 +110,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/scripts/create_output.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1785">
-              <caret line="422" selection-start-line="422" selection-end-line="423" />
+            <state relative-caret-position="331">
+              <caret line="360" column="43" selection-start-line="360" selection-start-column="43" selection-end-line="360" selection-end-column="43" />
               <folding>
                 <element signature="e#245#747#0" />
                 <element signature="e#774#9881#0" />
@@ -164,6 +164,7 @@
       <find>write_typing_output</find>
       <find>create_typing_output</find>
       <find>print</find>
+      <find>check_seq</find>
     </findStrings>
     <replaceStrings>
       <replace>cds</replace>
@@ -581,20 +582,6 @@
       <option name="presentableId" value="Default" />
       <updated>1506037850600</updated>
     </task>
-    <task id="LOCAL-00002" summary="bed file creation is tested">
-      <created>1517804421774</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1517804421774</updated>
-    </task>
-    <task id="LOCAL-00003" summary="all bed files created">
-      <created>1517804891430</created>
-      <option name="number" value="00003" />
-      <option name="presentableId" value="LOCAL-00003" />
-      <option name="project" value="LOCAL" />
-      <updated>1517804891430</updated>
-    </task>
     <task id="LOCAL-00004" summary="ismapper now running through to create_output step">
       <created>1520401967646</created>
       <option name="number" value="00004" />
@@ -924,7 +911,21 @@
       <option name="project" value="LOCAL" />
       <updated>1539572673802</updated>
     </task>
-    <option name="localTasksCounter" value="51" />
+    <task id="LOCAL-00051" summary="catch for when there is no blast hit for the IS">
+      <created>1540115344563</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1540115344565</updated>
+    </task>
+    <task id="LOCAL-00052" summary="changed cov and per id for no hit to zero">
+      <created>1540115542258</created>
+      <option name="number" value="00052" />
+      <option name="presentableId" value="LOCAL-00052" />
+      <option name="project" value="LOCAL" />
+      <updated>1540115542258</updated>
+    </task>
+    <option name="localTasksCounter" value="53" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -1022,8 +1023,6 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="removed finished todos" />
-    <MESSAGE value="added more todos" />
     <MESSAGE value="updated arguments in main script" />
     <MESSAGE value="updated arguments and their order" />
     <MESSAGE value="added options to remove temp and bam files when run has successfully completed" />
@@ -1047,7 +1046,9 @@
     <MESSAGE value="removed version stuff" />
     <MESSAGE value="catch when there is no product qualifier for a feature and print something useful to log file" />
     <MESSAGE value="catch for compiled table when there is no product qualifier" />
-    <option name="LAST_COMMIT_MESSAGE" value="catch for compiled table when there is no product qualifier" />
+    <MESSAGE value="catch for when there is no blast hit for the IS" />
+    <MESSAGE value="changed cov and per id for no hit to zero" />
+    <option name="LAST_COMMIT_MESSAGE" value="changed cov and per id for no hit to zero" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1268,8 +1269,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/scripts/create_output.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1785">
-          <caret line="422" selection-start-line="422" selection-end-line="423" />
+        <state relative-caret-position="331">
+          <caret line="360" column="43" selection-start-line="360" selection-start-column="43" selection-end-line="360" selection-end-column="43" />
           <folding>
             <element signature="e#245#747#0" />
             <element signature="e#774#9881#0" />
