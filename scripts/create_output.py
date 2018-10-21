@@ -359,7 +359,7 @@ def check_seq_between(genbank_seq, insertion, start, end, name, temp):
                 first_result += 1
             return hit
     # If there is no hit, just return an empty dict
-    return {'coverage': 'no hit', 'per_id': 'no hit'}
+    return {'coverage': 0, 'per_id': 0}
 
 def check_unpaired_hits(line_check, ref_gbk_obj, ref_feature_list, is_query_obj, min_range, max_range, novel_gap_size,
                         tmp_output_folder):
