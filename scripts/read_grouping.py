@@ -10,6 +10,10 @@ READ_PAIRING_REGEXS = [
         re.compile(r'^(.+?)_R[12]\.(fastq(?:\.gz)?)$'),
 
         # Matches:
+        #     prefix_R1_001.fastq prefix_R2_001.fastq, or
+        #     prefix_R1_001.fastq.gz prefix_R2_001.fastq.gz
+        re.compile(r'^(.+?)_R[12]_[0-9]+?\.(fastq(?:\.gz)?)$'),
+        # Matches:
         #     prefix_1.fastq prefix_2.fastq, or
         #     prefix_1.fastq.gz prefix_2.fastq.gz
         re.compile(r'^(.+?)_[12]\.(fastq(?:\.gz)?)$'),

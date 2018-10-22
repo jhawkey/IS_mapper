@@ -69,10 +69,6 @@ def parse_args():
                                  help='Mapping quality score for bwa (default 30).')
     parser_bwa.add_argument('--t', type=str, required=False, default='1',
                                  help='Number of threads for bwa (default 1).')
-    parser_bwa.add_argument('--forward', type=str, required=False, default='_1',
-                                 help='Identifier for forward reads if ISMapper is unable to pair (default is Miseq format _1)')
-    parser_bwa.add_argument('--reverse', type=str, required=False, default='_2',
-                                 help='Identifier for forward reads if ISMapper is unable to pair (default is Miseq format _2)')
 
     # Output table parameters
     parser_table.add_argument('--cds', type=str, required=False, default='product',

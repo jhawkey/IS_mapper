@@ -159,10 +159,6 @@ BWA parameters:
   --a                   Switch on all alignment reporting for bwa.
   --T T                 Mapping quality score for bwa (default 30).
   --t T                 Number of threads for bwa (default 1).
-  --forward FORWARD     Identifier for forward reads if ISMapper is unable to
-                        pair (default is Miseq format _1)
-  --reverse REVERSE     Identifier for forward reads if ISMapper is unable to
-                        pair (default is Miseq format _2)
 
 Parameters for output table:
   --cds CDS             qualifier containing gene information (default
