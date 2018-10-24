@@ -18,8 +18,8 @@ def parse_args():
     '''
 
     parser = ArgumentParser(description="Create a table of features for ISMapper (improvement pathway)")
-    parser.add_argument('--five_bed', type=str, required=True, help='five prime end bed file')
-    parser.add_argument('--three_bed', type=str, required=True, help='three prime end bed file')
+    parser.add_argument('--left_bed', type=str, required=True, help='five prime end bed file')
+    parser.add_argument('--right_bed', type=str, required=True, help='three prime end bed file')
     parser.add_argument('--assembly', type=str, required=True, help='assembly file for annotation (can be genbank or fasta)')
     parser.add_argument('--type', type=str, required=True, help='the type of assembly file (is either a genbank or fasta)')
     parser.add_argument('--output', type=str, required=True, help='prefix for output file')
@@ -58,7 +58,7 @@ def main():
     header = ['contig', 'end', 'x', 'y']
     results = collections.defaultdict(dict)
     # If both bed files empty, then no hits found
-    if os.stat(args.five_bed)[6] == 0 and os.stat(args.three_bed)[6] == 0:
+    if os.stat(args.left_bed)[6] == 0 and os.stat(args.right_bed)[6] == 0:
         output = open(args.output + '_table.txt', 'w')
         output.write('\t'.join(header) + '\n')
         output.write('No hits found')
@@ -69,16 +69,16 @@ def main():
     # Start counting hits
     hit_no = 1
     # Check first that there are left end hits
-    if os.stat(args.five_bed)[6] != 0:
-        with open(args.five_bed) as five_bed:
-            for line in five_bed:
+    if os.stat(args.left_bed)[6] != 0:
+        with open(args.left_bed) as left_bed:
+            for line in left_bed:
                 info = line.strip().split('\t')
                 results[info[0]]['hit_' + str(hit_no)] = ['five', info[1], info[2]]
                 hit_no += 1
     # Check first that there are right end hits
-    if os.stat(args.three_bed)[6] != 0:
-        with open(args.three_bed) as three_bed:
-            for line in three_bed:
+    if os.stat(args.right_bed)[6] != 0:
+        with open(args.right_bed) as right_bed:
+            for line in right_bed:
                 info = line.strip().split('\t')
                 results[info[0]]['hit_' + str(hit_no)] = ['three', info[1], info[2]]
                 hit_no += 1
