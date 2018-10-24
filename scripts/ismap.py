@@ -12,10 +12,10 @@ from run_commands import run_command, CommandError, BedtoolsError, make_director
 from mapping_to_query import map_to_is_query
 from mapping_to_ref import map_to_ref_seq, create_bed_files
 from create_output import create_typing_output
-try:
-    from version import ismap_version
-except:
-    ismap_version = 'version unknown'
+#try:
+from version import ismap_version
+#except:
+#    ismap_version = 'version unknown'
 #import pkg_resources  # part of setuptools
 
 def parse_args():
