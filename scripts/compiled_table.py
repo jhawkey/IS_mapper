@@ -1,46 +1,80 @@
 #!/usr/bin/env python
 
-import string, re
-import os, sys
-from argparse import (ArgumentParser, FileType)
+import os
+import operator
 from Bio import SeqIO
-from Bio import SeqFeature
-from Bio.Seq import Seq
-from Bio.SeqRecord import SeqRecord
-from Bio.Alphabet import generic_dna
-from Bio.Blast.Applications import NcbiblastnCommandline
-from operator import itemgetter
-import os, sys, re, collections, operator
+from create_output import ISHit, doBlast, get_features
+from run_commands import run_command
 from collections import OrderedDict
 import time
+import argparse
 
-class Position(object):
-    def __init__(self, x, y, orientation, isolate_dict, left_feature, right_feature):
-        self.x = x
-        self.y = y
-        self.orientation = orientation
-        self.isolate_dict = isolate_dict
-        self.left_feature = left_feature
-        self.right_feature = right_feature
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__
+class Position(ISHit):
 
-def parse_args():
+    def __init__(self, left_pos, right_pos):
 
-    parser = ArgumentParser(description="Create a table of IS hits in all isolates for ISMapper")
-    # Inputs
-    parser.add_argument('--tables', nargs='+', type=str, required=True, help='tables to compile')
-    parser.add_argument('--reference_gbk', type=str, required=True, help='gbk file of reference to report closest genes')
-    parser.add_argument('--seq', type=str, required=True, help='fasta file for insertion sequence looking for in reference')
-    # Parameters for hits
-    parser.add_argument('--gap', type=int, required=False, default=0, help='distance between regions to call overlapping')
-    parser.add_argument('--cds', nargs='+', type=str, required=False, default=['locus_tag', 'gene', 'product'], help='qualifiers to look for in reference genbank for CDS features')
-    parser.add_argument('--trna', nargs='+', type=str, required=False, default=['locus_tag', 'product'], help='qualifiers to look for in reference genbank for tRNA features')
-    parser.add_argument('--rrna', nargs='+', type=str, required=False, default=['locus_tag', 'product'], help='qualifiers to look for in reference genbank for rRNA features')
-    # Output parameters
-    parser.add_argument('--output', type=str, required=True, help='name of output file')
+        self.x = left_pos
+        self.y = right_pos
 
-    return parser.parse_args()
+        self.isolate_dict = {}
+
+def blast_db(fasta):
+    '''
+    Takes a fasta file and creates a BLAST database
+    if one doesn't exist already.
+    '''
+
+    if not os.path.exists(fasta + '.nin'):
+        os.system('makeblastdb -in ' + fasta + ' -dbtype nucl')
+
+def gbk_to_fasta(genbank, fasta):
+    '''
+    Converts a genbank to a fasta using BioPython
+    '''
+
+    sequences = SeqIO.parse(genbank, "genbank")
+    SeqIO.write(sequences, fasta, "fasta")
+
+def get_ref_positions(reference, is_query, positions_list):
+    '''
+    Get the coordinates of known IS sites in the reference.
+
+    Takes the reference genbank, the IS query and the dictionary to add_argument
+    IS query positions into, as well as a dictionary to add orientations
+    of each of these positions.
+    Returns these positions and orientations, as well as the reference name
+    for file naming.
+    '''
+    # Get the name of the IS query to create temp file
+    is_name = os.path.split(is_query)[1]
+    ref_name = os.path.split(reference)[1]
+    blast_output = os.path.join(os.getcwd(), is_name + '_' + ref_name + '.tmp')
+
+    # Do a BLAST of the IS query and the reference
+    doBlast(is_query, blast_output, reference)
+
+    # Open the BLAST output and get IS query sites
+    with open(blast_output) as out:
+        for line in out:
+            fields = line.strip('\n').split('\t')
+            # To be a known site, hast to match query at least 90% with coverage of 95
+            if float(fields[3]) >= 90 and float(fields[10]) >= 95:
+                left_pos = int(fields[6])
+                right_pos = int(fields[7])
+                if left_pos > right_pos:
+                    orientation = 'R'
+                else:
+                    orientation = 'F'
+                new_pos = Position(min(left_pos, right_pos), max(left_pos, right_pos))
+                new_pos.orientation = orientation
+                new_pos.isolate_dict = {ref_name: '+'}
+                positions_list.append(new_pos)
+    # remove the output file
+    run_command(['rm', blast_output], shell=True)
+
+    # return the list of positions and the name of the reference
+
+    return positions_list, ref_name
 
 def check_ranges(positions, range_to_check, gap, orientation):
     '''
@@ -66,7 +100,7 @@ def check_ranges(positions, range_to_check, gap, orientation):
     largest_value = max(list_of_range_tuples, key=operator.itemgetter(1))[1] + gap + 10
 
     # calculate the slice size
-    slice_size = largest_value / len(list_of_range_tuples)
+    slice_size = int(largest_value / len(list_of_range_tuples))
 
     #create our list of boxes
     range_boxes = []
@@ -74,8 +108,8 @@ def check_ranges(positions, range_to_check, gap, orientation):
         range_boxes.append([])
     #populate boxes
     for tup in list_of_range_tuples:
-        index_1 = tup[0] / slice_size
-        index_2 = tup[1] / slice_size
+        index_1 = int(tup[0] / slice_size)
+        index_2 = int(tup[1] / slice_size)
         while index_1 <= index_2:
             try:
                 range_boxes[index_1].append(tup)
@@ -87,11 +121,11 @@ def check_ranges(positions, range_to_check, gap, orientation):
     start = min(range_to_check[0], range_to_check[1])
     stop = max(range_to_check[1], range_to_check[0])
 
-    index_start = start / slice_size
-    index_stop = stop / slice_size
+    index_start = int(start / slice_size)
+    index_stop = int(stop / slice_size)
 
     # check each potential box
-    while index_start <= index_stop and index_stop <= ((largest_value/slice_size) + 1):
+    while index_start <= index_stop and index_stop <= int(((largest_value/slice_size) + 1)):
         if range_boxes[index_start] != []:
             for tup in range_boxes[index_start]:
                 if orientation == tup[2]:
@@ -133,270 +167,9 @@ def check_ranges(positions, range_to_check, gap, orientation):
                             if x == pos.x and y == pos.y:
                                 matched_pos = pos
                         return matched_pos, (new_start, new_end)
-                    '''else:
-                        print 'This is x and y, and then start and stop, then stop + 1'
-                        print x
-                        print y
-                        print start
-                        print stop
-                        print stop + 1
-                        print 'This is the gap'
-                        print gap
-                        print 'These are the x ranges to check'
-                        print range(start - gap, stop + 1)
-                        print range(start, stop + gap + 1)
-                        print 'These are the y ranges to check'
-                        print range(start - gap, stop + 1)
-                        print range(start, stop + gap + 1)'''
-
-
         index_start += 1
 
     return False, False
-
-def get_ref_positions(reference, is_query, positions_list):
-    '''
-    Get the coordinates of known IS sites in the reference.
-
-    Takes the reference genbank, the IS query and the dictionary to add_argument
-    IS query positions into, as well as a dictionary to add orientations
-    of each of these positions.
-    Returns these positions and orientations, as well as the reference name
-    for file naming.
-    '''
-    # Get the name of the IS query to create temp file
-    is_name = os.path.split(is_query)[1]
-    ref_name = os.path.split(reference)[1]
-    blast_output = os.getcwd() + '/' + is_name + '_' + ref_name + '.tmp'
-
-    # Create a BLAST database of the reference if there isn't one already
-    # Should probably use this function - blast_db(reference)
-    if not os.path.exists(reference):
-        os.system('makeblastdb -in ' + reference + ' -dbtype nucl')
-    # Do the BLAST
-    blastn_cline = NcbiblastnCommandline(query=is_query, db=reference, outfmt="'6 qseqid qlen sacc pident length slen sstart send evalue bitscore qcovs'", out=blast_output)
-    stdout, stderr = blastn_cline()
-    # Open the BLAST output and get IS query sites
-    with open(blast_output) as out:
-        for line in out:
-            info = line.strip('\n').split('\t')
-            # To be a known site, hast to match query at least 90% with coverage of 95
-            if float(info[3]) >= 90 and float(info[4])/float(info[1]) * 100 >= 95:
-                x = int(info[6])
-                y = int(info[7])
-                if x > y:
-                    orientation = 'R'
-                else:
-                    orientation = 'F'
-                pos_dict = {ref_name: '+'}
-                new_pos = Position(min(x, y), max(x, y), orientation, pos_dict, None, None)
-                #positions_dict[(min(x, y), max(x, y))][ref_name] = '+'
-                # Get orientation of known site for merging purposes
-                #if x > y:
-                #    orientation_dict[(min(x, y), max(x, y))] = 'R'
-                #else:
-                #    orientation_dict[(min(x, y), max(x, y))] = 'F'
-                positions_list.append(new_pos)
-    return positions_list, ref_name
-
-def get_qualifiers(cds_qualifiers, trna_qualifiers, rrna_qualifiers, feature):
-    '''
-    Takes a list of possible qualifier IDs and attempts
-    to find them in the feature given.
-    If the qualifier is present, appends to a list, otherwise
-    skips and keeps going.
-    Returns a list of qualfiers found in that feature.
-    '''
-
-    return_quals = []
-    if feature.type == 'CDS':
-        qualifier_list = cds_qualifiers
-    elif feature.type == 'tRNA':
-        qualifier_list = trna_qualifiers
-    elif feature.type == 'rRNA':
-        qualifier_list = rrna_qualifiers
-    for qual in qualifier_list:
-        try:
-            return_quals.append(feature.qualifiers[qual][0])
-        except KeyError:
-            pass
-    return return_quals
-
-def get_main_gene_id(qualifier_list, feature):
-    '''
-    Takes a list of qualifiers and a genbank feature.
-    Returns the name of the qualifier that contains
-    the gene id.
-    '''
-
-    for qual in qualifier_list:
-        try:
-            id_name = feature.qualifiers[qual][0]
-            return id_name
-        except KeyError:
-            pass
-
-def binary_search(features, isPosition, direction):
-    min = 0
-    max = len(features) - 1
-
-    while True:
-
-        # If the min has exceeded the max, then the IS position is not
-        # inside a feature, and m will now be pointing to a
-        # feature next to the IS position.
-        if max < min:
-            if direction == 'R':
-                return findFeatureAfterPosition(features, isPosition, m)
-            else:
-                return findFeatureBeforePosition(features, isPosition, m)
-
-        # Find the midpoint and save the feature attributes
-        m = (min + max) // 2
-        featureStart = features[m][0]
-        featureEnd = features[m][1]
-        featureIndex = features[m][2]
-
-        # If the IS position is after the feature, move the minimum to
-        # be after the feature.
-        if featureEnd < isPosition:
-            min = m + 1
-
-        # If the IS position is before the feature, move the maximum to
-        # be before the feature.
-        elif featureStart > isPosition:
-            max = m - 1
-
-        # If the IS position is inside the feature, return only that feature
-        elif isPosition >= featureStart and isPosition <= featureEnd:
-            return featureIndex
-
-        else:
-            return "1 - THIS SHOULDN'T HAPPEN!"
-
-def findFeatureBeforePosition(features, isPosition, m):
-    # If we are looking for the feature to the left of the
-    # IS position, then either m-1 or m is our answer
-
-    # If the start of the m feature is after the IS position,
-    # then m is after the IS and m-1 is the correct feature
-    if features[m][0] > isPosition:
-        return features[m-1][2]
-
-    # If both m and m+1 features are before the IS position,
-    # then m will be closer to the IS and is the correct feature
-    elif features[m-1][1] < isPosition and features[m][1] < isPosition:
-        return features[m][2]
-
-    else:
-        return "2 - THIS SHOULDN'T HAPPEN!"
-
-def findFeatureAfterPosition(features, isPosition, m):
-    # If we are looking for the feature to the right of the
-    # IS position, then either m or m+1 is our answer
-
-    # an index error will occur if m is the final feature, so just check that the first part is true
-    # and return m
-    try:
-        features[m+1]
-    except IndexError:
-        if features[m][0] > isPosition:
-            return features[m][2]
-        # otherwise we must be after the final position, so need to
-        # return the start position of the very first feature
-        else:
-            return features[0][2]
-    # If the end of the m feature is before the IS position,
-    # then m is before the IS and m+1 is the correct feature
-    if features[m][1] < isPosition:
-        index = m + 1
-        if index >= len(features):
-            return features[0][2]
-        return features[m+1][2]
-
-    # If both m and m+1 features are after the IS position,
-    # then m will be closer to the IS and is the correct feature
-    elif features[m][0] > isPosition and features[m+1][0] > isPosition:
-        return features[m][2]
-    else:
-        return "3 - THIS SHOULDN'T HAPPEN!"
-
-def get_flanking_genes(features, feature_list, left, right, cds_features, trna_features, rrna_features, genome_size):
-
-    # Find the correct indexes
-    left_feature_index = binary_search(feature_list, left, 'L')
-    right_feature_index = binary_search(feature_list, right, 'R')
-    # Print out information if returning one of the error codes
-    if type(left_feature_index) != int or type(right_feature_index) != int:
-        print 'left index'
-        print left_feature_index
-        print 'right index'
-        print right_feature_index
-        print 'left position: ' + str(left)
-        print 'right position: ' + str(right)
-    # Extract the SeqFeature object that corresponds to that index
-    left_feature = features[left_feature_index]
-    right_feature = features[right_feature_index]
-
-    # The info we require is:
-    # [geneid, distance, [locus_tag, (gene), product, strand]]
-    left_values = get_qualifiers(cds_features, trna_features, rrna_features, left_feature)
-    right_values = get_qualifiers(cds_features, trna_features, rrna_features, right_feature)
-    # Add the strand information
-    left_values.append(str(left_feature.strand))
-    right_values.append(str(right_feature.strand))
-    # The distance to the left gene is the endmost position of the feature - the left IS coord
-    left_dist = abs(max(left_feature.location.start, left_feature.location.end) - left)
-    # The distance to the right gene is the startmost position of the feature - the right IS coord
-    right_dist = abs(min(right_feature.location.start, right_feature.location.end) - right)
-
-    # Here is probably a good place to check if we've got a position that wraps around from start
-    # to end of the reference
-    # If we've got a distance that is close to the size of the reference, then we know we need to
-    # alter it
-    if left_dist in range(int(round(genome_size * 0.9)), int(round(genome_size * 1.1))):
-        # The the left hand feature is at the end of the genome
-        # Distance from IS position to start of the genome is the
-        # position itself
-        dist_to_start = left
-        # Distance from the end of the final gene to the end of the
-        # genome
-        dist_to_end = abs(left_feature.location.end - genome_size)
-        # So the total distnace is those two added together
-        left_dist = dist_to_start + dist_to_end
-
-    elif right_dist in range(int(round(genome_size * 0.9)), int(round(genome_size * 1.1))):
-        # Then the right hand feature is at the start of the genome
-        # Distance from the IS position to the end of the genome
-        dist_to_end = abs(genome_size - right)
-        # Distance from the start of the genome to the start of the first feature
-        # is the start position of the first feature
-        dist_to_feature = right_feature.location.start
-        # So the total distance is those two added together
-        right_dist = dist_to_end + dist_to_feature
-
-    # The first string in this values list is the main gene id (eg locus_tag)
-    left_gene = [left_values[0], str(left_dist), left_values[1:]]
-    right_gene = [right_values[0], str(right_dist), right_values[1:]]
-
-    return left_gene, right_gene
-
-def blast_db(fasta):
-    '''
-    Takes a fasta file and creates a BLAST database
-    if one doesn't exist already.
-    '''
-
-    if not os.path.exists(fasta + '.nin'):
-        os.system('makeblastdb -in ' + fasta + ' -dbtype nucl')
-
-def gbk_to_fasta(genbank, fasta):
-    '''
-    Converts a genbank to a fasta using BioPython
-    '''
-
-    sequences = SeqIO.parse(genbank, "genbank")
-    SeqIO.write(sequences, fasta, "fasta")
 
 def final_ranges_check(positions, gap):
 
@@ -424,13 +197,179 @@ def final_ranges_check(positions, gap):
             # Remove the matching position from the list
             positions.remove(matching_position)
             # Create the new position and add it to the list of final positions
-            new_pos = Position(new_range[0], new_range[1], pos.orientation, new_isolate_dict, None, None)
+            new_pos = Position(new_range[0], new_range[1])
+            new_pos.orientation = pos.orientation
+            new_pos.isolate_dict = new_isolate_dict
             final_positions.append(new_pos)
         else:
             # just append the position to the list of final positions
             final_positions.append(pos)
 
     return(final_positions)
+
+def write_output(pos_list, isolate_list, out_prefix, ref_name, imprecise_value, unconfident_value,
+                 cds_product_info, rrna_product_info, trna_product_info, binary=False):
+
+    if not binary:
+        out = open(out_prefix + '_full_compiled.txt', 'w')
+        print('Writing full output file to ' + out_prefix + '_full_compiled.txt')
+    else:
+        out = open(out_prefix + '_binary_compiled.txt', 'w')
+        print('Writing binary output file to ' + out_prefix + '_binary_compiled.txt')
+
+    header_line = ['isolate']
+    for pos in pos_list:
+        if pos.orientation == 'F':
+            header_line.append(str(pos.x) + '-' + str(pos.y))
+        else:
+            header_line.append(str(pos.y) + '-' + str(pos.x))
+
+    out.write('\t'.join(header_line) + '\n')
+
+    # add the reference
+    row = [ref_name]
+    for pos in pos_list:
+        if ref_name in pos.isolate_dict.keys():
+            if not binary:
+                row.append(pos.isolate_dict[ref_name])
+            else:
+                row.append('1')
+        else:
+            if not binary:
+                row.append('-')
+            else:
+                row.append('0')
+    out.write('\t'.join(row) + '\n')
+
+    # now loop through each isolate and create each row
+    for isolate in isolate_list:
+        row = [isolate]
+        for pos in pos_list:
+            if isolate in pos.isolate_dict.keys():
+                if not binary:
+                    row.append(pos.isolate_dict[isolate])
+                else:
+                    if pos.isolate_dict[isolate] == '+':
+                        row.append('1')
+                    elif pos.isolate_dict[isolate] == '*':
+                        row.append(imprecise_value)
+                    elif pos.isolate_dict[isolate] == '?':
+                        row.append(unconfident_value)
+            else:
+                if not binary:
+                    row.append('-')
+                else:
+                    row.append('0')
+        out.write('\t'.join(row) + '\n')
+
+    # finally, write out the orientation and flanking gene info
+    # set up these rows, only for the full output file
+    # the binary output file doesn't need this section
+    if not binary:
+        orientation_row = ['orientation']
+        left_locus_row = ['left locus']
+        right_locus_row = ['right locus']
+        left_distance_row = ['left distance']
+        right_distance_row = ['right distance']
+        left_strand_row = ['left strand']
+        right_strand_row = ['right strand']
+        left_product_row = ['left product']
+        right_product_row = ['right product']
+        for pos in pos_list:
+            orientation_row.append(pos.orientation)
+            left_locus_row.append(pos.gene_left)
+            right_locus_row.append(pos.gene_right)
+            left_distance_row.append(str(pos.left_distance))
+            right_distance_row.append(str(pos.right_distance))
+            left_strand_row.append(str(pos.left_strand))
+            right_strand_row.append(str(pos.right_strand))
+            if pos.left_feature.type == 'CDS':
+                try:
+                    left_product_row.append(pos.left_feature.qualifiers[cds_product_info][0])
+                except KeyError:
+                    left_product_row.append('')
+                    print('No qualifier was found for gene %s. By default, this is the "product" qualifier for the feature. '
+                    'If you would like to use a different qualifier, '
+                    'please supply it to --cds.' % pos.left_feature.qualifiers['locus_tag'][0])
+            elif pos.left_feature.type == 'rRNA':
+                try:
+                    left_product_row.append(pos.left_feature.qualifiers[rrna_product_info][0])
+                except KeyError:
+                    left_product_row.append('')
+                    print('No qualifier was found for gene %s. By default, this is the "product" qualifier for the feature. '
+                    'If you would like to use a different qualifier, '
+                    'please supply it to --rrna.' % pos.left_feature.qualifiers['locus_tag'][0])
+            elif pos.left_feature.type == 'tRNA':
+                try:
+                    left_product_row.append(pos.left_feature.qualifiers[trna_product_info][0])
+                except KeyError:
+                    left_product_row.append('')
+                    print('No qualifier was found for gene %s. By default, this is the "product" qualifier for the feature. '
+                    'If you would like to use a different qualifier, '
+                    'please supply it to --trna.' % pos.left_feature.qualifiers['locus_tag'][0])
+            if pos.right_feature.type == 'CDS':
+                try:
+                    right_product_row.append(pos.right_feature.qualifiers[cds_product_info][0])
+                except KeyError:
+                    right_product_row.append('')
+                    print('No qualifier was found for gene %s. By default, this is the "product" qualifier for the feature. '
+                    'If you would like to use a different qualifier, '
+                    'please supply it to --cds.' % pos.right_feature.qualifiers['locus_tag'][0])
+            elif pos.right_feature.type == 'rRNA':
+                try:
+                    right_product_row.append(pos.right_feature.qualifiers[rrna_product_info][0])
+                except KeyError:
+                    right_product_row.append('')
+                    print('No qualifier was found for gene %s. By default, this is the "product" qualifier for the feature. '
+                    'If you would like to use a different qualifier, '
+                    'please supply it to --rrna.' % pos.right_feature.qualifiers['locus_tag'][0])
+            elif pos.right_feature.type == 'tRNA':
+                try:
+                    right_product_row.append(pos.right_feature.qualifiers[trna_product_info][0])
+                except KeyError:
+                    right_product_row.append('')
+                    print('No qualifier was found for gene %s. By default, this is the "product" qualifier for the feature. '
+                    'If you would like to use a different qualifier, '
+                    'please supply it to --trna.' % pos.right_feature.qualifiers['locus_tag'][0])
+
+        out.write('\t'.join(orientation_row) + '\n')
+        out.write('\t'.join(left_locus_row) + '\n')
+        out.write('\t'.join(right_locus_row) + '\n')
+        out.write('\t'.join(left_distance_row) + '\n')
+        out.write('\t'.join(left_strand_row) + '\n')
+        out.write('\t'.join(left_product_row) + '\n')
+        out.write('\t'.join(right_distance_row) + '\n')
+        out.write('\t'.join(right_strand_row) + '\n')
+        out.write('\t'.join(right_product_row) + '\n')
+
+    # close the output file
+    out.close()
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Create a table of IS hits in all isolates for ISMapper")
+    # Inputs
+    parser.add_argument('--tables', nargs='+', type=str, required=True, help='tables to compile')
+    parser.add_argument('--reference', type=str, required=True,
+                        help='gbk file of reference')
+    parser.add_argument('--query', type=str, required=True,
+                        help='fasta file for insertion sequence query for compilation')
+    # Parameters for hits
+    parser.add_argument('--gap', type=int, required=False, default=0,
+                        help='distance between regions to call overlapping, default is 0')
+    parser.add_argument('--cds', type=str, required=False, default='product',
+                              help='qualifier containing gene information (default product). Also note that all CDS features MUST have a locus_tag')
+    parser.add_argument('--trna', type=str, required=False, default='product',
+                              help='qualifier containing gene information (default product). Also note that all tRNA features MUST have a locus_tag')
+    parser.add_argument('--rrna', type=str, required=False, default='product',
+                              help='qualifier containing gene information (default product). Also note that all rRNA features MUST have a locus_tag')
+    parser.add_argument('--imprecise', type=str, required=False, default='1',
+                        help='Binary value for imprecise (*) hit (can be 1, 0 or 0.5), default is 1')
+    parser.add_argument('--unconfident', type=str, required=False, default='0',
+                        help='Binary value for questionable (?) hit (can be 1, 0 or 0.5), default is 0')
+    # Output parameters
+    parser.add_argument('--out_prefix', type=str, required=True, help='Prefix for output file')
+
+    return parser.parse_args()
 
 def main():
 
@@ -441,33 +380,26 @@ def main():
     unique_results_files = list(OrderedDict.fromkeys(args.tables))
     list_of_isolates = []
 
-    # key1 = (start, end), key2 = isolate, value = +/*/?
-    #list_of_positions = collections.defaultdict(dict)
     list_of_positions = []
-    # key1 = (start, end), key2 = ref, value = +
-    #list_of_ref_positions = collections.defaultdict(dict)
-    # key = (start, end), value = orientation (F/R)
-    #position_orientation = {}
 
-    reference_fasta = args.reference_gbk.split('.g')[0]
+    reference_fasta = args.reference.split('.g')[0]
     # Create a fasta file of the reference for BLAST
-    print 'Creating fasta file and database of reference ...'
-    gbk_to_fasta(args.reference_gbk, reference_fasta)
+    print('Creating fasta file and database of reference ...')
+    gbk_to_fasta(args.reference, reference_fasta)
     # Make a BLAST database
     blast_db(reference_fasta)
     # Get the reference positions and orientations for this IS query
-    print '\nGetting query positions in reference ...'
-    list_of_positions, ref_name = get_ref_positions(reference_fasta, args.seq, list_of_positions)
+    print('\nGetting query positions in reference ...')
+    list_of_positions, ref_name = get_ref_positions(reference_fasta, args.query, list_of_positions)
 
     elapsed_time = time.time() - start_time
-    print 'Time taken: ' + str(elapsed_time)
-    #print list_of_positions
-    #print ref_name
-    # Loop through each table give to --tables
-    print 'Collating results files ...'
+    print('Time taken: ' + str(elapsed_time))
+
+    # Loop through each table given to the tables argument
+    print('Collating results files ...')
     for result_file in unique_results_files:
         # Get isolate name
-        isolate = result_file.split('_table.txt')[0]
+        isolate = os.path.split(result_file)[1].split('__')[0]
         list_of_isolates.append(isolate)
         # Skip the header
         header = 0
@@ -492,7 +424,7 @@ def main():
                         if pos.x == is_start and pos.y == is_end and pos.orientation == orientation:
                             # Then this position already exists
                             match = True
-                            # And we want to retreive the position to which it is exactly the same
+                            # And we want to retrieve the position to which it is exactly the same
                             matching_pos = pos
                             # Then we want to add the info about this new position to the list
                             if '?' in call:
@@ -513,12 +445,15 @@ def main():
                                 isolate_dict[isolate] = '*'
                             else:
                                 isolate_dict[isolate] = '+'
-                            new_pos = Position(is_start, is_end, orientation, isolate_dict, None, None)
+                            new_pos = Position(is_start, is_end)
+                            new_pos.orientation = orientation
+                            new_pos.isolate_dict = isolate_dict
                             list_of_positions.append(new_pos)
 
                         # If the list of positions isn't empty, then there are ranges to check against
                         else:
-                            old_position, new_range = check_ranges(list_of_positions, (is_start, is_end), args.gap, orientation)
+                            old_position, new_range = check_ranges(list_of_positions, (is_start, is_end), args.gap,
+                                                                   orientation)
                             # So the current range overlaps with a range we already have
                             if old_position != False:
                                 isolate_dict = old_position.isolate_dict
@@ -534,7 +469,9 @@ def main():
                                 # Remove the old position from the list
                                 list_of_positions.remove(old_position)
                                 # Create the new position and add it
-                                new_pos = Position(new_range[0], new_range[1], orientation, isolate_dict, None, None)
+                                new_pos = Position(new_range[0], new_range[1])
+                                new_pos.orientation = orientation
+                                new_pos.isolate_dict = isolate_dict
                                 list_of_positions.append(new_pos)
                             # Otherwise this range hasn't been seen before, so all values are False
                             else:
@@ -544,110 +481,40 @@ def main():
                                     isolate_dict[isolate] = '*'
                                 else:
                                     isolate_dict[isolate] = '+'
-                                new_pos = Position(is_start, is_end, orientation, isolate_dict, None, None)
+                                new_pos = Position(is_start, is_end)
+                                new_pos.orientation = orientation
+                                new_pos.isolate_dict = isolate_dict
                                 list_of_positions.append(new_pos)
 
     # do one last check for positions that should be merged
     list_of_positions = final_ranges_check(list_of_positions, args.gap)
 
     elapsed_time = time.time() - start_time
-    print 'Time taken: ' + str(elapsed_time)
+    print('Time taken: ' + str(elapsed_time))
 
     # Get the flanking genes for each position now they've all been merged
-    print 'Getting flanking genes for each position (this step is the longest and could take some time) ...'
-    # key = (start, end), valye = [left_gene, right_gene]
-    position_genes = {}
+    print('Getting flanking genes for each position (this step is the longest and could take some time) ...')
 
     # Get feature list
-    gb = SeqIO.read(args.reference_gbk, "genbank")
-    feature_list = []
-    feature_count = 0
-    feature_types = ["CDS", "tRNA", "rRNA"]
+    gb = SeqIO.read(args.reference, "genbank")
+    feature_list = get_features(gb)
 
-    for feature in gb.features:
-        if feature.type in feature_types:
-            feature_list.append([int(feature.location.start), int(feature.location.end), feature_count])
-            feature_count += 1
-        else:
-            feature_count += 1
-    # Sort the list just in case it's out of order (has caused issues in the past!!)
-    feature_list = sorted(feature_list, key=itemgetter(0))
     # Get flanking genes
     for pos in list_of_positions:
-        genes_before, genes_after =  get_flanking_genes(gb.features, feature_list, pos.x, pos.y, args.cds, args.trna, args.rrna, len(gb.seq))
-        pos.left_feature = genes_before
-        pos.right_feature = genes_after
-
+        pos.get_flanking_genes(gb, feature_list)
 
     elapsed_time = time.time() - start_time
-    print 'Time taken: ' + str(elapsed_time)
+    print('Time taken: ' + str(elapsed_time))
 
     # Order positions from smallest to largest for final table output
     list_of_positions.sort(key=lambda x: x.x)
-
-    # Write out table
-    print 'Writing output table to ' + args.output + ' ...'
-    with open(args.output, 'w') as out:
-        header = ['isolate']
-        for pos in list_of_positions:
-            if pos.orientation == 'F':
-                header.append(str(pos.x) + '-' + str(pos.y))
-            else:
-                header.append(str(pos.y) + '-' + str(pos.x))
-        out.write('\t'.join(header) + '\n')
-        # Add the values for the reference positions
-        row = [ref_name]
-        for pos in list_of_positions:
-            if ref_name in pos.isolate_dict.keys():
-                row.append(pos.isolate_dict[ref_name])
-            else:
-                row.append('-')
-        out.write('\t'.join(row) + '\n')
-
-        # Loop through each isolate
-        # and create each row
-        for isolate in list_of_isolates:
-            row = [isolate]
-            for pos in list_of_positions:
-                if isolate in pos.isolate_dict.keys():
-                    row.append(pos.isolate_dict[isolate])
-                else:
-                    row.append('-')
-            out.write('\t'.join(row) + '\n')
-        # Set up flanking genes
-        row_orientation = ['orientation']
-        row_l_locus = ['left ID']
-        row_r_locus = ['right ID']
-        row_l_dist = ['left distance']
-        row_r_dist = ['right distance']
-        row_l_strand = ['left strand']
-        row_r_strand = ['right strand']
-        row_l_prod = ['left info']
-        row_r_prod = ['right info']
-
-        # Print orientation and flanking genes for each position
-        for pos in list_of_positions:
-            row_orientation.append(pos.orientation)
-            row_l_locus.append(pos.left_feature[0])
-            row_r_locus.append(pos.right_feature[0])
-            row_l_dist.append(pos.left_feature[1])
-            row_r_dist.append(pos.right_feature[1])
-            row_l_strand.append(pos.left_feature[2][-1])
-            row_r_strand.append(pos.right_feature[2][-1])
-            row_l_prod.append(pos.left_feature[2])
-            row_r_prod.append(pos.right_feature[2])
-        out.write('\t'.join(row_orientation) + '\n')
-        out.write('\t'.join(row_l_locus) + '\n')
-        out.write('\t'.join(row_l_dist) + '\n')
-        out.write('\t'.join(row_l_strand) + '\n')
-        out.write('\t'.join(str(i) for i in row_l_prod) + '\n')
-        out.write('\t'.join(row_r_locus) + '\n')
-        out.write('\t'.join(row_r_dist) + '\n')
-        out.write('\t'.join(row_r_strand) + '\n')
-        out.write('\t'.join(str(i) for i in row_r_prod) + '\n')
+    write_output(list_of_positions, list_of_isolates, args.out_prefix, ref_name, args.imprecise, args.unconfident,
+                 args.cds, args.rrna, args.trna)
+    write_output(list_of_positions, list_of_isolates, args.out_prefix, ref_name, args.imprecise, args.unconfident,
+                 args.cds, args.rrna, args.trna, binary=True)
 
     elapsed_time = time.time() - start_time
-    print 'Table compilation finished in ' + str(elapsed_time)
+    print('Table compilation finished in ' + str(elapsed_time))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

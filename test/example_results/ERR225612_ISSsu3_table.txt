@@ -1,5 +1,0 @@
-region	orientation	x	y	gap	call	%ID	%Cov	left_gene	left_strand	left_distance	right_gene	right_strand	right_distance	functional_prediction
-region_1	F	575454	576218	765	Known	99.08	85.27	['transposase (pseudogene)']	1	210	['transposase']	1	357	
-region_2	F	592831	593605	775	Known	99.09	86.05	['MarR family regulatory protein']	-1	245	['putative transposase']	1	358	
-region_3	F	986694	987452	759	Known	99.08	84.60	['acetyltransferase (GNAT) family protein (pseudogene)']	-1	1172	['putative transposase']	1	348	
-region_4	F	1440580	1441322	743	Known	99.06	82.81	['pmi', 'mannose-6-phosphate isomerase']	1	216	['putative transposase']	1	337	
