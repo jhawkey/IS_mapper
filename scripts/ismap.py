@@ -12,11 +12,8 @@ from run_commands import run_command, CommandError, BedtoolsError, make_director
 from mapping_to_query import map_to_is_query
 from mapping_to_ref import map_to_ref_seq, create_bed_files
 from create_output import create_typing_output
-#try:
-from version import ismap_version
-#except:
-#    ismap_version = 'version unknown'
-#import pkg_resources  # part of setuptools
+# part of setuptools, get the version from setup.py
+import pkg_resources
 
 def parse_args():
     """
@@ -30,7 +27,7 @@ def parse_args():
     parser_table = parser_parent.add_argument_group('Parameters for output table')
     parser_output = parser_parent.add_argument_group('Reporting parameters')
 
-    #ismap_version = pkg_resources.require("ISMapper")[0].version
+    ismap_version = pkg_resources.require("ISMapper")[0].version
     parser_script.add_argument("--version", action='version', version='%(prog)s ' + ismap_version)
     # Inputs
     parser_script.add_argument('--reads', nargs='+', type=pathlib.Path, required=True,
@@ -48,7 +45,7 @@ def parse_args():
     parser_script.add_argument('--help_all', required=False, action=None, help='Display extended help')
 
     # List of arguments to show in quick help
-    quick_help_args = ('--reads', '--queries', '--reference', '--output_dir', '--log', '--help_all')
+    quick_help_args = ('--version', '--reads', '--queries', '--reference', '--output_dir', '--log', '--help_all')
 
     # Parameters for defining hits
     parser_hits.add_argument('--min_clip', type=int, required=False, default=10,
