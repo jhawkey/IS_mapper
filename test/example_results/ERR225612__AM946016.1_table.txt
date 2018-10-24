@@ -1,0 +1,5 @@
+region	orientation	x	y	gap	call	percent_ID	percent_cov	left_gene	left_description	left_strand	left_distance	right_gene	right_description	right_strand	right_distance	gene_interruption
+region_1	F	575454	576331	877	known	99.202	100.0	SSU0539	transposase (pseudogene)	1	210	SSU0542	transposase	1	470	False
+region_2	F	592831	593706	875	known	99.197	99.0	SSU0565	MarR family regulatory protein	-1	245	SSU0567	putative transposase	1	459	False
+region_3	F	986694	987569	875	known	99.2	100.0	SSU0965	acetyltransferase (GNAT) family protein (pseudogene)	-1	1172	SSU0967	putative transposase	1	465	False
+region_4	F	1440580	1441456	876	known	99.201	100.0	SSU1420	mannose-6-phosphate isomerase	1	216	SSU1423	putative transposase	1	471	False

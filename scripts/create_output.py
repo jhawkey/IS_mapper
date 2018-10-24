@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import os, logging
 import operator
 from Bio import SeqIO

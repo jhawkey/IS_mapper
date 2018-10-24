@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import logging
 import sys, os
@@ -12,6 +12,10 @@ from run_commands import run_command, CommandError, BedtoolsError, make_director
 from mapping_to_query import map_to_is_query
 from mapping_to_ref import map_to_ref_seq, create_bed_files
 from create_output import create_typing_output
+try:
+    from version import ismap_version
+except:
+    ismap_version = 'version unknown'
 #import pkg_resources  # part of setuptools
 
 def parse_args():
@@ -27,7 +31,7 @@ def parse_args():
     parser_output = parser_parent.add_argument_group('Reporting parameters')
 
     #ismap_version = pkg_resources.require("ISMapper")[0].version
-    #parser_script.add_argument("--version", action='version', version='%(prog)s ' + ismap_version)
+    parser_script.add_argument("--version", action='version', version='%(prog)s ' + ismap_version)
     # Inputs
     parser_script.add_argument('--reads', nargs='+', type=pathlib.Path, required=True,
                                help='Paired end reads for analysing (can be gzipped)')

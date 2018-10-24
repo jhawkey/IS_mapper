@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="f362a202-b55d-4e14-bd4f-3ac14f1bafb9" name="Default" comment="read grouping now matches R1_001 R2_001">
+    <list default="true" id="f362a202-b55d-4e14-bd4f-3ac14f1bafb9" name="Default" comment="added version.py code back">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/version.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/version.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/compiled_table.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/compiled_table.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/create_output.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/create_output.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/ismap.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/ismap.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/setup.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -28,7 +31,7 @@
         <counts>
           <entry key="Markdown" value="2" />
           <entry key="PLAIN_TEXT" value="6" />
-          <entry key="Python" value="59" />
+          <entry key="Python" value="64" />
           <entry key="Scratch" value="2" />
         </counts>
       </usages-collector>
@@ -38,7 +41,7 @@
           <entry key="in" value="1" />
           <entry key="log" value="1" />
           <entry key="md" value="2" />
-          <entry key="py" value="60" />
+          <entry key="py" value="65" />
           <entry key="txt" value="4" />
         </counts>
       </usages-collector>
@@ -46,16 +49,16 @@
         <counts>
           <entry key="Python Console" value="1603" />
           <entry key="md" value="8166" />
-          <entry key="py" value="35476" />
+          <entry key="py" value="35481" />
           <entry key="regexp" value="7" />
-          <entry key="txt" value="2586" />
+          <entry key="txt" value="2613" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="Markdown" value="8166" />
-          <entry key="PLAIN_TEXT" value="2135" />
-          <entry key="Python" value="37057" />
+          <entry key="PLAIN_TEXT" value="2162" />
+          <entry key="Python" value="37062" />
           <entry key="RegExp" value="7" />
           <entry key="Scratch" value="473" />
         </counts>
@@ -68,13 +71,13 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/setup.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="270">
-              <caret line="18" column="1" lean-forward="true" selection-start-line="18" selection-start-column="1" selection-end-line="18" selection-end-column="1" />
+            <state>
+              <caret column="22" selection-start-column="22" selection-end-column="22" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/scripts/version.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="90">
@@ -87,8 +90,8 @@
         <entry file="file://$PROJECT_DIR$/README.md">
           <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
             <state split_layout="SPLIT">
-              <first_editor relative-caret-position="2400">
-                <caret line="160" column="62" selection-start-line="160" selection-start-column="62" selection-end-line="160" selection-end-column="62" />
+              <first_editor relative-caret-position="1149">
+                <caret line="88" column="87" selection-start-line="88" selection-start-column="87" selection-end-line="88" selection-end-column="87" />
               </first_editor>
               <second_editor />
             </state>
@@ -98,8 +101,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/scripts/ismap.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="885">
-              <caret line="70" column="79" selection-start-line="70" selection-start-column="79" selection-end-line="70" selection-end-column="79" />
+            <state>
+              <caret column="22" selection-start-column="22" selection-end-column="22" />
               <folding>
                 <element signature="e#23#37#0" expanded="true" />
               </folding>
@@ -108,45 +111,27 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/scripts/read_grouping.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="195">
-              <caret line="14" column="60" selection-start-line="14" selection-start-column="60" selection-end-line="14" selection-end-column="60" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/scripts/create_output.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="855">
-              <caret line="360" column="43" selection-start-line="360" selection-start-column="43" selection-end-line="360" selection-end-column="43" />
-              <folding>
-                <element signature="e#245#747#0" />
-                <element signature="e#774#9881#0" />
-                <element signature="e#9922#10387#0" />
-                <element signature="e#10477#10705#0" />
-                <element signature="e#10790#11453#0" />
-                <element signature="e#11507#12403#0" />
-                <element signature="e#12459#12804#0" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/scripts/compiled_table.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="4590">
-              <caret line="499" column="35" selection-start-line="499" selection-start-column="35" selection-end-line="499" selection-end-column="35" />
+            <state>
+              <caret column="22" selection-start-column="22" selection-end-column="22" />
               <folding>
-                <element signature="e#256#382#0" />
-                <element signature="e#409#614#0" />
-                <element signature="e#654#807#0" />
-                <element signature="e#873#2508#0" />
-                <element signature="e#2577#6777#0" />
-                <element signature="e#6824#8607#0" />
+                <element signature="e#23#32#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/scripts/create_output.py">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/scripts/mapping_to_query.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="15">
+              <caret line="1" column="4" selection-start-line="1" selection-start-column="4" selection-end-line="2" selection-end-column="4" />
             </state>
           </provider>
         </entry>
@@ -202,15 +187,15 @@
         <option value="$PROJECT_DIR$/scripts/mapping_to_ref.py" />
         <option value="$PROJECT_DIR$/scripts/compiled_table_v2.py" />
         <option value="$PROJECT_DIR$/scripts/ismap_v2.py" />
-        <option value="$PROJECT_DIR$/setup.py" />
         <option value="$PROJECT_DIR$/scripts/mapping_to_query.py" />
         <option value="$PROJECT_DIR$/scripts/ismap_v2_unittests.py" />
-        <option value="$PROJECT_DIR$/scripts/compiled_table.py" />
-        <option value="$PROJECT_DIR$/scripts/create_output.py" />
         <option value="$PROJECT_DIR$/scripts/read_grouping.py" />
-        <option value="$PROJECT_DIR$/scripts/ismap.py" />
         <option value="$PROJECT_DIR$/README.md" />
         <option value="$PROJECT_DIR$/scripts/version.py" />
+        <option value="$PROJECT_DIR$/scripts/ismap.py" />
+        <option value="$PROJECT_DIR$/setup.py" />
+        <option value="$PROJECT_DIR$/scripts/compiled_table.py" />
+        <option value="$PROJECT_DIR$/scripts/create_output.py" />
       </list>
     </option>
   </component>
@@ -592,13 +577,6 @@
       <option name="presentableId" value="Default" />
       <updated>1506037850600</updated>
     </task>
-    <task id="LOCAL-00006" summary="began unit tests for create_typing_out">
-      <created>1536646008449</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1536646008449</updated>
-    </task>
     <task id="LOCAL-00007" summary="fixed regex to check for samtools version">
       <created>1536646028163</created>
       <option name="number" value="00007" />
@@ -935,7 +913,14 @@
       <option name="project" value="LOCAL" />
       <updated>1540245373834</updated>
     </task>
-    <option name="localTasksCounter" value="55" />
+    <task id="LOCAL-00055" summary="added version.py code back">
+      <created>1540416387565</created>
+      <option name="number" value="00055" />
+      <option name="presentableId" value="LOCAL-00055" />
+      <option name="project" value="LOCAL" />
+      <updated>1540416387566</updated>
+    </task>
+    <option name="localTasksCounter" value="56" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -983,7 +968,7 @@
     <frame x="0" y="23" width="2560" height="1417" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.10634108" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.10634108" />
       <window_info id="Structure" order="1" weight="0.24970461" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -1033,7 +1018,6 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="updated arguments and their order" />
     <MESSAGE value="added options to remove temp and bam files when run has successfully completed" />
     <MESSAGE value="checked temp and bam files deleted, fixed issues with BLAST" />
     <MESSAGE value="updated log settings" />
@@ -1058,14 +1042,15 @@
     <MESSAGE value="catch for when there is no blast hit for the IS" />
     <MESSAGE value="changed cov and per id for no hit to zero" />
     <MESSAGE value="read grouping now matches R1_001 R2_001" />
-    <option name="LAST_COMMIT_MESSAGE" value="read grouping now matches R1_001 R2_001" />
+    <MESSAGE value="added version.py code back" />
+    <option name="LAST_COMMIT_MESSAGE" value="added version.py code back" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/scripts/ismap.py</url>
-          <line>175</line>
+          <line>179</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
       </breakpoints>
@@ -1189,13 +1174,6 @@
     <entry file="file://$PROJECT_DIR$/scripts/__init__.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/mapping_to_query.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="15">
-          <caret line="1" column="4" selection-start-line="1" selection-start-column="4" selection-end-line="2" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/run_commands.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="345">
@@ -1228,57 +1206,6 @@
     <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/README.md">
-      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
-        <state split_layout="SPLIT">
-          <first_editor relative-caret-position="2400">
-            <caret line="160" column="62" selection-start-line="160" selection-start-column="62" selection-end-line="160" selection-end-column="62" />
-          </first_editor>
-          <second_editor />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/ismap.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="885">
-          <caret line="70" column="79" selection-start-line="70" selection-start-column="79" selection-end-line="70" selection-end-column="79" />
-          <folding>
-            <element signature="e#23#37#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/create_output.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="855">
-          <caret line="360" column="43" selection-start-line="360" selection-start-column="43" selection-end-line="360" selection-end-column="43" />
-          <folding>
-            <element signature="e#245#747#0" />
-            <element signature="e#774#9881#0" />
-            <element signature="e#9922#10387#0" />
-            <element signature="e#10477#10705#0" />
-            <element signature="e#10790#11453#0" />
-            <element signature="e#11507#12403#0" />
-            <element signature="e#12459#12804#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/compiled_table.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4590">
-          <caret line="499" column="35" selection-start-line="499" selection-start-column="35" selection-end-line="499" selection-end-column="35" />
-          <folding>
-            <element signature="e#256#382#0" />
-            <element signature="e#409#614#0" />
-            <element signature="e#654#807#0" />
-            <element signature="e#873#2508#0" />
-            <element signature="e#2577#6777#0" />
-            <element signature="e#6824#8607#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/read_grouping.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="195">
@@ -1286,10 +1213,30 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/README.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor relative-caret-position="1149">
+            <caret line="88" column="87" selection-start-line="88" selection-start-column="87" selection-end-line="88" selection-end-column="87" />
+          </first_editor>
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/ismap.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="22" selection-start-column="22" selection-end-column="22" />
+          <folding>
+            <element signature="e#23#37#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/setup.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="270">
-          <caret line="18" column="1" lean-forward="true" selection-start-line="18" selection-start-column="1" selection-end-line="18" selection-end-column="1" />
+        <state>
+          <caret column="22" selection-start-column="22" selection-end-column="22" />
         </state>
       </provider>
     </entry>
@@ -1299,6 +1246,26 @@
           <caret line="6" column="60" selection-start-line="6" selection-start-column="60" selection-end-line="6" selection-end-column="60" />
         </state>
       </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/compiled_table.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="22" selection-start-column="22" selection-end-column="22" />
+          <folding>
+            <element signature="e#23#32#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/mapping_to_query.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="15">
+          <caret line="1" column="4" selection-start-line="1" selection-start-column="4" selection-end-line="2" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/create_output.py">
+      <provider selected="true" editor-type-id="text-editor" />
     </entry>
   </component>
 </project>
