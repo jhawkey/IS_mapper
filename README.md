@@ -1,6 +1,10 @@
 # ISMapper
 
+
 ISMapper searches for IS positions in sequence data using paired end Illumina short reads, an IS query/queries of interest and a reference genome. ISMapper reports the IS positions it has found in each isolate, relative to the provided reference genome.
+
+**A note on version 2:** ISMapper was recently updated. The code has been re-written in Python 3, and re-structured to enable easier debugging. Users can now provide multiple reference genomes (either as indepedent files or a multi-entry genbank file) to ISMapper.
+During the re-structure, the 'assembly improvement' mode was removed. However, this mode can still be found in version 1 if required.
 
 For a more in depth description of how the program works, see the section [Method](#method) below.
 
