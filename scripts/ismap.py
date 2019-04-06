@@ -56,9 +56,9 @@ def parse_args():
                                  help='Minimum depth for mapped region to be kept in bed file (default 6)')
     parser_hits.add_argument('--novel_gap_size', type=int, required=False, default=15,
                              help='Distance in base pairs between left and right flanks to be called a novel hit (default 15)')
-    parser_hits.add_argument('--min_range', type=str, required=False, default=0.9,
+    parser_hits.add_argument('--min_range', type=float, required=False, default=0.9,
                                  help='Minimum percent size of the gap to be called a known hit (default 0.9, or 90 percent)')
-    parser_hits.add_argument('--max_range', type=str, required=False, default=1.1,
+    parser_hits.add_argument('--max_range', type=float, required=False, default=1.1,
                                  help='Maximum percent size of the gap to be called a known hit (default 1.1, or 110 percent)')
     parser_hits.add_argument('--merging', type=str, required=False, default='100',
                                  help='Value for merging left and right hits in bed files together to simply calculation of closest and intersecting regions (default 100).')
