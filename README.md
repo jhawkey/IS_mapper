@@ -17,6 +17,8 @@ Read more about ISMapper here:
 
 * [Requirements](#requirements)
 * [Installation](#installation)
+    * [Installation from conda](#installation-from-conda)
+    * [Installation with pip](#installation-with-pip)
     * [Running a test case](#running-a-test-case)
 * [Usage](#usage)
     * [Basic usage](#basic-usage)
@@ -25,8 +27,6 @@ Read more about ISMapper here:
 * [Outputs](#outputs)
     * [Single isolate output](#single-isolate-output)
     * [Compiled output](#compiled-output)
-        * [compiled_table.py usage](#compiled_tablepy-usage)
-        * [compiled_table.py outputs](#compiled_tablepy-outputs)
 * [Method](#method)
     
 # Requirements
@@ -38,6 +38,20 @@ Read more about ISMapper here:
 * [BLAST+](ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/) v2.2.28 or later
 
 # Installation
+Two install methods are described below - the easiest method is to install with conda.
+
+## Installation from conda
+To install from conda, first you will need to install [conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html?highlight=conda#).
+
+The conda install requires the channels `bioconda` and `conda-forge`. You can install ISMapper as its own environment using `conda create`: 
+```
+conda create -n ismapper-bioconda -c conda-forge -c bioconda ismapper
+```
+
+To use ISMapper, type
+```conda activate ismapper-bioconda```
+
+## Installation with pip
 Install Python and its dependencies first.
 
 Download ISMapper from GitHub:
