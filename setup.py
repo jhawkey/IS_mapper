@@ -4,7 +4,7 @@ import setuptools
 
 setuptools.setup(
     name="ISMapper",
-    version="2.0",
+    version="2.0.2",
     author="Jane Hawkey",
     description="Detection of insertion sequence locations from short read sequence data",
     url="https://github.com/jhawkey/IS_mapper",
