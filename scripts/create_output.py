@@ -3,7 +3,6 @@ import operator
 from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
-from Bio.Alphabet import generic_dna
 from run_commands import run_command
 
 class RemovedHit(object):
@@ -336,7 +335,7 @@ def check_seq_between(genbank_seq, insertion, start, end, name, temp):
     # Get sequence between left and right ends
     seq_between = genbank_seq[start:end]
     # Turn the sequence into a fasta file
-    seq_between = SeqRecord(Seq(str(seq_between), generic_dna), id=name)
+    seq_between = SeqRecord(Seq(str(seq_between)), id=name)
     out_seq_between = os.path.join(temp, name + '.fasta')
     out_insertion = os.path.join(temp, name + 'ISseq.fasta')
     SeqIO.write(seq_between, out_seq_between, 'fasta')

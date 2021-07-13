@@ -3,7 +3,6 @@ import re
 import shlex
 from Bio import SeqIO
 from Bio.Seq import Seq
-from Bio.Alphabet import generic_dna
 import logging
 from subprocess import Popen, PIPE
 from run_commands import run_command, CommandError, make_directories
@@ -141,7 +140,7 @@ def extract_clipped_reads(sam_file, min_size, max_size, out_left_file, out_right
             if map_regions[0][-1] == 'S':
                 num_soft_clipped = int(map_regions[0][:-1])
                 if min_size <= num_soft_clipped <= max_size:
-                    soft_clipped_seq = Seq(entries[9][:num_soft_clipped], generic_dna)
+                    soft_clipped_seq = Seq(entries[9][:num_soft_clipped])
                     qual_scores = entries[10][:num_soft_clipped]
                     if reverse_complement:
                         out_left.write('@' + read_name + '\n' + str(soft_clipped_seq.reverse_complement()) + '\n+\n' + qual_scores[::-1] + '\n')
@@ -150,7 +149,7 @@ def extract_clipped_reads(sam_file, min_size, max_size, out_left_file, out_right
             if map_regions[-1][-1] == 'S':
                 num_soft_clipped = int(map_regions[-1][:-1])
                 if min_size <= num_soft_clipped <= max_size:
-                    soft_clipped_seq = Seq(entries[9][-num_soft_clipped:], generic_dna)
+                    soft_clipped_seq = Seq(entries[9][-num_soft_clipped:])
                     qual_scores = entries[10][-num_soft_clipped:]
                     if reverse_complement:
                         out_right.write('@' + read_name + '\n' + str(soft_clipped_seq.reverse_complement()) + '\n+\n' + qual_scores[::-1] + '\n')
